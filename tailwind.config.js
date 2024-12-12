@@ -1,8 +1,16 @@
 /** @type {import('tailwindcss').Config} */
+const { nextui } = require("@nextui-org/react");
 module.exports = {
-  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
+  content: [
+    "./node_modules/@nextui-org/react/**/*.{js,ts,jsx,tsx}", // Add NextUI paths
+    "./src/**/*.{js,ts,jsx,tsx}", // Your app's files
+  ],
   theme: {
-    extend: {},
+      extend: {
+          fontFamily: {
+              sans: ['Open Sans', 'Arial', 'sans-serif'], // Replace default sans-serif
+          },
+      },
   },
-  plugins: [],
+  plugins: [nextui()],
 };

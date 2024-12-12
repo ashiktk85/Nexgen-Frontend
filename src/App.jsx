@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 
+import RegisterOtp from './pages/RegisterOtp'
 
 function App() {
 
