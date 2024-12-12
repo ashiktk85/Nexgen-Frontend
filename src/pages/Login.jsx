@@ -1,10 +1,13 @@
 import React from 'react';
 import GrapeAnimation from '../components/GrapeAnimation';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 
 const LoginPage = () => {
   return (
     <div className="flex flex-col lg:flex-row h-screen">
+      {/* Right Section */}
+      
       {/* Left Section */}
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
         <div className="w-full max-w-md">
@@ -90,13 +93,13 @@ const LoginPage = () => {
                 />
                 <span className="ml-2 text-sm text-gray-700">Remember me</span>
               </label>
-              <a
-                href="#"
+              <Link
+                to="/forgot-password"
                 className="text-sm text-blue-600 hover:underline"
                 aria-label="Forgot Password"
               >
                 Forgot Password?
-              </a>
+              </Link>
             </div>
 
             {/* Login Button */}
