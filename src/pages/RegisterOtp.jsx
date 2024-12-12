@@ -1,11 +1,15 @@
 import React, { useRef, useState, useEffect } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
 import { InputOtp } from "@nextui-org/react";
+import { Link, useLocation } from "react-router-dom";
 
 const RegisterOtp = () => {
   const OTP_LENGTH = 6; 
   const [otp, setOtp] = useState(new Array(OTP_LENGTH).fill(""));
   const inputRefs = useRef([]);
+  const location = useLocation()
+
+  const email = location.state?.email;
 
   useEffect(() => {
     if (inputRefs.current[0]) {
@@ -62,7 +66,7 @@ const RegisterOtp = () => {
             Verify your email
           </h2>
           <p className="text-gray-500 mb-6 text-center lg:text-left">
-            We've sent a code to your email. Please enter it below to verify
+            We've sent a code to <span className="font-semibold">{email}</span> . Please enter it below to verify
             your account.
           </p>
 
@@ -103,9 +107,9 @@ const RegisterOtp = () => {
           </div>
           <p className="text-center text-sm text-gray-600 mt-6">
             Back to{" "}
-            <a href="#" className="text-blue-600 hover:underline">
-              login
-            </a>
+            <Link to="/" className="text-blue-600 hover:underline">
+              Login
+            </Link>
           </p>
         </div>
       </div>

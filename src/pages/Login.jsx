@@ -7,32 +7,7 @@ const LoginPage = () => {
   return (
     <div className="flex flex-col lg:flex-row h-screen">
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full bg-blue-600 flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
-    <div className="max-w-md">
-    
-      {/* <img
-        src="https://undraw.co/api/illustrations/random?color=ffffff&theme=teamwork"
-        alt="Mobile Technician Illustration"
-        className="mb-6 max-h-64 w-full object-contain"
-        loading="lazy"
-      /> */}
-      <GrapeAnimation className='sm:hidden' />
-    
-      <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
-        Find Jobs Tailored for Mobile Technicians
-      </h2>
       
-      <p className="text-base lg:text-lg text-gray-200 mb-4">
-        Discover the best opportunities and connect with employers who value your skills.
-      </p>
-    
-      {/* <div className="flex justify-center gap-2">
-        <span className="h-2 w-2 bg-white rounded-full"></span>
-        <span className="h-2 w-2 bg-white opacity-50 rounded-full"></span>
-        <span className="h-2 w-2 bg-white opacity-50 rounded-full"></span>
-      </div> */}
-    </div>
-    </div>
       {/* Left Section */}
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
         <div className="w-full max-w-md">

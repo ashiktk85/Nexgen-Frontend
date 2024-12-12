@@ -9,7 +9,7 @@ const ForgotPassword = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-            navigate('/otp-forgot-password', {
+            navigate('/register-otp', {
                 state: {
                     email: email
                 }
