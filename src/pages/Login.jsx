@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { toast } from "sonner"
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate()
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
     if (x.type === "password") {
@@ -16,6 +19,43 @@ const LoginPage = () => {
       setShowPassword(false);
     }
   };
+
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string()
+        .trim()
+        .email("Invalid email address")
+        .required("Email is required"),
+      password: Yup.string()
+        .trim()
+        .min(8, "Password must be at least 8 characters")
+        .required("Password is required"),
+    }),
+    onSubmit: async (values) => {
+      try {
+        toast.success("Login successful");
+        // const loginResult = await dispatch(login(values)).unwrap();
+        // if (loginResult) {
+        //   if (userInfo?.isBlocked) {
+        //     toast.error(
+        //       "Currently, you are restricted from accessing the site."
+        //     );
+        //     return;
+        //   }
+        //   toast.success("Login successful");
+        //   setTimeout(() => {
+        //     navigate("/");
+        //   }, 1500);
+        // }
+      } catch (err) {
+        toast.error(err.message || "An error occurred");
+      }
+    },
+  });
 
   return (
     <div className="flex flex-col lg:flex-row h-screen">
@@ -61,7 +101,7 @@ const LoginPage = () => {
           </div>
 
           {/* Email and Password Form */}
-          <form>
+          <form onSubmit={formik.handleSubmit}>
             <div className="mb-4">
               <label
                 htmlFor="email"
@@ -74,9 +114,17 @@ const LoginPage = () => {
                 id="email"
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Enter your email"
-                required
                 aria-required="true"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                name="email"
               />
+              {formik.touched.email && formik.errors.email ? (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.email}
+                </div>
+              ) : null}
             </div>
             <div className="mb-4">
               <label
@@ -91,9 +139,18 @@ const LoginPage = () => {
                   id="password"
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="Enter your password"
-                  required
                   aria-required="true"
+                  value={formik.values.firstName}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                name="firstName"
                 />
+                {formik.touched.firstName && formik.errors.firstName ? (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.firstName}
+                </div>
+              ) : null}
+
                 <button
                   type="button"
                   className="absolute inset-y-0 right-4 flex items-center text-gray-500"

@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import User from './Routes/User'
-
+import { Toaster } from 'sonner'
 
 function App() {
 
@@ -12,6 +12,7 @@ function App() {
           
       </Routes>
     </Router>
+    <Toaster position="top-right" expand={true} closeButton richColors duration={5000} />
     </>
   )
 }
