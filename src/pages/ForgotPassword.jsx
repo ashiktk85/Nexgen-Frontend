@@ -1,11 +1,10 @@
 import React,{ useState } from 'react';
 import GrapeAnimation from '../components/GrapeAnimation';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('')
-    const navigate = useNavigate()
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -19,7 +18,7 @@ const ForgotPassword = () => {
   return (
     <div className="flex flex-col lg:flex-row h-screen">
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full bg-blue-600 flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
+      <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
         <div className="max-w-md">
             <GrapeAnimation className='sm:hidden' />
             
@@ -36,7 +35,7 @@ const ForgotPassword = () => {
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <h1 className="text-2xl font-bold text-blue-700 mb-8 text-center lg:text-left">Nexgen</h1>
+          <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">Nexgen</h1>
 
           {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
@@ -68,7 +67,7 @@ const ForgotPassword = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+              className="w-full py-2 px-4 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700"
               onClick={handleSubmit}
             >
               Submit

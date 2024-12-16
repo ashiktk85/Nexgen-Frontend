@@ -10,6 +10,9 @@ module.exports = {
           fontFamily: {
               sans: ['Open Sans', 'Arial', 'sans-serif'], // Replace default sans-serif
           },
+          colors: {
+            primary: "#0950a0", // Add a custom primary color
+          },
       },
   },
   plugins: [nextui()],

@@ -1,12 +1,11 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-
+  const navigate = useNavigate()
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
     if (x.type === "password") {
@@ -21,12 +20,12 @@ const LoginPage = () => {
   return (
     <div className="flex flex-col lg:flex-row h-screen">
       {/* Right Section */}
-      
+
       {/* Left Section */}
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <h1 className="text-2xl font-bold text-blue-700 mb-8 text-center lg:text-left">
+          <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
             Nexgen
           </h1>
 
@@ -118,19 +117,19 @@ const LoginPage = () => {
                 />
                 <span className="ml-2 text-sm text-gray-700">Remember me</span>
               </label>
-              <Link
-                to="/forgot-password"
-                className="text-sm text-blue-600 hover:underline"
+              <p
+                onClick={() => navigate("/forgot-password")}
+                className="text-sm text-blue-600 hover:underline cursor-pointer"
                 aria-label="Forgot Password"
               >
                 Forgot Password?
-              </Link>
+              </p>
             </div>
 
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+              className="w-full py-2 px-4 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700"
             >
               Log in
             </button>
@@ -139,7 +138,10 @@ const LoginPage = () => {
           {/* Create Account */}
           <p className="text-center text-sm text-gray-600 mt-4">
             Don’t have an account?{" "}
-            <a href="#" className="text-blue-600 hover:underline">
+            <a
+              onClick={() => navigate("/sign-up")}
+              className="text-blue-600 hover:underline cursor-pointer"
+            >
               Create an account
             </a>
           </p>
@@ -147,10 +149,9 @@ const LoginPage = () => {
       </div>
 
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full bg-[#0950a0] flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
-  <div className="max-w-md">
-   
-    {/* <img
+      <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
+        <div className="max-w-md">
+          {/* <img
       src="https://undraw.co/api/illustrations/random?color=ffffff&theme=teamwork"
       alt="Mobile Technician Illustration"
       className="mb-6 max-h-64 w-full object-contain"
