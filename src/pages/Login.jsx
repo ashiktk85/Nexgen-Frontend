@@ -140,17 +140,16 @@ const LoginPage = () => {
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="Enter your password"
                   aria-required="true"
-                  value={formik.values.firstName}
+                  value={formik.values.password}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                name="firstName"
+                name="password"
                 />
-                {formik.touched.firstName && formik.errors.firstName ? (
+                {formik.touched.password && formik.errors.password ? (
                 <div className="text-red-500 text-sm">
-                  {formik.errors.firstName}
+                  {formik.errors.password}
                 </div>
               ) : null}
-
                 <button
                   type="button"
                   className="absolute inset-y-0 right-4 flex items-center text-gray-500"
