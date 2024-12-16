@@ -1,12 +1,6 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-
-import LoginPage from './pages/Login'
-import ForgotPassword from './pages/ForgotPassword'
-import RegisterOtp from './pages/RegisterOtp'
-
+import User from './Routes/User'
+import { Toaster } from 'sonner'
 
 function App() {
 
@@ -14,11 +8,11 @@ function App() {
     <>
     <Router>
       <Routes>
-          <Route path='/' element={<LoginPage />} />
-          <Route path='/forgot-password' element={<ForgotPassword />} />
-          <Route path='/register-otp' element={<RegisterOtp />} />
+          <Route path='/*' element={<User />} />
+          
       </Routes>
     </Router>
+    <Toaster position="top-right" expand={true} closeButton richColors duration={5000} />
     </>
   )
 }
