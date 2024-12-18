@@ -43,7 +43,7 @@ const RegisterOtp = () => {
   return (
     <div className="flex flex-col lg:flex-row h-screen">
       {/* Left Section */}
-      <div className="lg:w-1/2 w-full bg-[#0950a0] flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
+      <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
         <div className="max-w-md">
           <GrapeAnimation className="sm:hidden" />
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
@@ -59,7 +59,7 @@ const RegisterOtp = () => {
       {/* Right Section */}
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10 font-sans">
         <div className="w-full max-w-md">
-          <h1 className="text-2xl font-bold text-blue-700 mb-8 text-center lg:text-left">
+          <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
             Nexgen
           </h1>
           <h2 className="text-3xl font-bold mb-4 text-center lg:text-left">
@@ -90,7 +90,7 @@ const RegisterOtp = () => {
             ))}
           </div>
           <button
-            className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg mt-6 transition-colors ${
+            className={`w-full bg-primary hover:bg-blue-700 text-white py-2 rounded-lg mt-6 transition-colors ${
               otp.some((digit) => digit === "")
                 ? "opacity-50 cursor-not-allowed"
                 : ""
