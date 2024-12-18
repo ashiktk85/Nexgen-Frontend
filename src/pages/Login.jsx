@@ -1,12 +1,14 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { toast } from "sonner"
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
     if (x.type === "password") {
@@ -18,15 +20,52 @@ const LoginPage = () => {
     }
   };
 
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string()
+        .trim()
+        .email("Invalid email address")
+        .required("Email is required"),
+      password: Yup.string()
+        .trim()
+        .min(8, "Password must be at least 8 characters")
+        .required("Password is required"),
+    }),
+    onSubmit: async (values) => {
+      try {
+        toast.success("Login successful");
+        // const loginResult = await dispatch(login(values)).unwrap();
+        // if (loginResult) {
+        //   if (userInfo?.isBlocked) {
+        //     toast.error(
+        //       "Currently, you are restricted from accessing the site."
+        //     );
+        //     return;
+        //   }
+        //   toast.success("Login successful");
+        //   setTimeout(() => {
+        //     navigate("/");
+        //   }, 1500);
+        // }
+      } catch (err) {
+        toast.error(err.message || "An error occurred");
+      }
+    },
+  });
+
   return (
     <div className="flex flex-col lg:flex-row h-screen">
       {/* Right Section */}
-      
+
       {/* Left Section */}
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <h1 className="text-2xl font-bold text-blue-700 mb-8 text-center lg:text-left">
+          <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
             Nexgen
           </h1>
 
@@ -62,7 +101,7 @@ const LoginPage = () => {
           </div>
 
           {/* Email and Password Form */}
-          <form>
+          <form onSubmit={formik.handleSubmit}>
             <div className="mb-4">
               <label
                 htmlFor="email"
@@ -75,9 +114,17 @@ const LoginPage = () => {
                 id="email"
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Enter your email"
-                required
                 aria-required="true"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                name="email"
               />
+              {formik.touched.email && formik.errors.email ? (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.email}
+                </div>
+              ) : null}
             </div>
             <div className="mb-4">
               <label
@@ -92,9 +139,17 @@ const LoginPage = () => {
                   id="password"
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="Enter your password"
-                  required
                   aria-required="true"
+                  value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                name="password"
                 />
+                {formik.touched.password && formik.errors.password ? (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.password}
+                </div>
+              ) : null}
                 <button
                   type="button"
                   className="absolute inset-y-0 right-4 flex items-center text-gray-500"
@@ -118,19 +173,19 @@ const LoginPage = () => {
                 />
                 <span className="ml-2 text-sm text-gray-700">Remember me</span>
               </label>
-              <Link
-                to="/forgot-password"
-                className="text-sm text-blue-600 hover:underline"
+              <p
+                onClick={() => navigate("/forgot-password")}
+                className="text-sm text-blue-600 hover:underline cursor-pointer"
                 aria-label="Forgot Password"
               >
                 Forgot Password?
-              </Link>
+              </p>
             </div>
 
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+              className="w-full py-2 px-4 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700"
             >
               Log in
             </button>
@@ -139,7 +194,10 @@ const LoginPage = () => {
           {/* Create Account */}
           <p className="text-center text-sm text-gray-600 mt-4">
             Don’t have an account?{" "}
-            <a href="#" className="text-blue-600 hover:underline">
+            <a
+              onClick={() => navigate("/sign-up")}
+              className="text-blue-600 hover:underline cursor-pointer"
+            >
               Create an account
             </a>
           </p>
@@ -147,10 +205,9 @@ const LoginPage = () => {
       </div>
 
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full bg-[#0950a0] flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
-  <div className="max-w-md">
-   
-    {/* <img
+      <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
+        <div className="max-w-md">
+          {/* <img
       src="https://undraw.co/api/illustrations/random?color=ffffff&theme=teamwork"
       alt="Mobile Technician Illustration"
       className="mb-6 max-h-64 w-full object-contain"
