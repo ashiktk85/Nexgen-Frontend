@@ -7,6 +7,8 @@ import { CiStar } from "react-icons/ci";
 import Navbar from "../components/User/Navbar";
 import candidate from "../assets/Candidate.png";
 import employer from "../assets/Employer.png";
+import banner1 from "../assets/banner-home1.webp";
+import banner2 from "../assets/banner-home2.webp";
 import { FaLocationDot } from "react-icons/fa6";
 import { FaRegClock } from "react-icons/fa";
 
@@ -40,52 +42,34 @@ export default function Home() {
       id: 1,
       name: "Tech Company",
       rating: 4.5,
-      logo: { candidate },
+      logo: employer,
       location: "San Francisco, CA",
     },
     {
       id: 2,
       name: "Design Studio",
       rating: 4.7,
-      logo: "/placeholder.svg?height=40&width=40",
+      logo: employer,
       location: "New York, NY",
     },
     {
       id: 3,
       name: "Creative Agency",
       rating: 4.3,
-      logo: "/placeholder.svg?height=40&width=40",
+      logo: employer,
       location: "London, UK",
     },
     {
       id: 4,
       name: "Digital Agency",
       rating: 4.6,
-      logo: "/placeholder.svg?height=40&width=40",
+      logo: employer,
       location: "Berlin, DE",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* <header className="border-b">
-        <div className="container flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">Nexgen</span>
-          </Link>
-          <nav className="flex items-center space-x-4">
-            <Link href="/jobs" className="text-sm font-medium">
-              Jobs
-            </Link>
-            <Link href="/companies" className="text-sm font-medium">
-              Companies
-            </Link>
-            <Button variant="default" size="sm">
-              Sign In
-            </Button>
-          </nav>
-        </div>
-      </header> */}
+    <div className="min-h-screen bg-background overflow-hidden">
       <Navbar />
 
       <main className="w-full py-8">
@@ -106,7 +90,9 @@ export default function Home() {
                   <h3 className="text-md font-semibold mb-2 text-gray-500">
                     Find your perfect job
                   </h3>
-                  <Button variant="contained">Browse Jobs</Button>
+                  <Link to="">
+                    <Button variant="contained">Browse Jobs</Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -122,7 +108,9 @@ export default function Home() {
                   <h3 className="text-md font-semibold mb-2 text-gray-500">
                     Find your perfect job
                   </h3>
-                  <Button variant="contained">Post Jobs</Button>
+                  <Link to="">
+                    <Button variant="contained">Post Jobs</Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -155,9 +143,11 @@ export default function Home() {
                     </p>
                   </div>
                   <div className="flex justify-between">
-                    <Button variant="contained" size="sm" className="">
-                      Apply Now
-                    </Button>
+                    <Link to="">
+                      <Button variant="contained" size="sm" className="">
+                        Apply Now
+                      </Button>
+                    </Link>
                     <div className=" flex items-center gap-2">
                       <FaRegClock className="w-4 h-4 fill-gray-500" />
                       <p className="text-sm text-muted-foreground text-gray-500">
@@ -171,8 +161,12 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="relative py-20 mb-12">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80" />
+        <section className="relative py-28 mb-12">
+          {/* <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80" /> */}
+          <img
+            src={banner1}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
           <div className="relative text-center text-white">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Connecting Talent With Opportunity, Seamlessly.
@@ -199,16 +193,31 @@ export default function Home() {
                       <span className="text-sm ml-1">{company.rating}</span>
                     </div>
                   </div>
-                  <h3 className="font-semibold mb-2">{company.name}</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="font-semibold ">{company.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">
                     {company.location}
                   </p>
-                  <Button variant="outline" size="sm" className="w-full mt-4">
+                  <Link to="">
+                  <Button variant="contained" size="sm" className="w-full mt-4">
                     View Jobs
                   </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </section>
+
+        <section className="relative py-28 mb-12">
+          {/* <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80" /> */}
+          <img
+            src={banner2}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="relative text-center text-white">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Connecting Talent With Opportunity, Seamlessly.
+            </h2>
           </div>
         </section>
       </main>
