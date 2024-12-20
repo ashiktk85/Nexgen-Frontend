@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import User from './Routes/User'
 import { Toaster } from 'sonner'
-import ProfilePage from './pages/Profile'
 
 function App() {
 
@@ -10,7 +9,6 @@ function App() {
     <Router>
       <Routes>
           <Route path='/*' element={<User />} />
-          <Route path='/profile' element={<ProfilePage />} />
           
       </Routes>
     </Router>
