@@ -8,11 +8,14 @@ import Profile from "../pages/Profile";
 import JobApplication from "../pages/JobApplication";
 import Home from "../pages/Home";
 import ApplicationSubmitted from "../pages/ApplicationSubmitted";
+import Home2 from "../pages/Home2";
+
 
 function User() {
   return (
     <Routes>
        <Route path="/" element={<Home />} />
+       <Route path="/home" element={<Home2 />} />
       <Route path="/sign-up" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/otp-verification" element={<RegisterOtp />} />

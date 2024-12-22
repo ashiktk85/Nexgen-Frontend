@@ -1,80 +1,38 @@
 import React from "react";
-import { Button, TextField } from "@mui/material";
-import { FiLogIn, FiMapPin } from "react-icons/fi";
-import { MdOutlineAddBox } from "react-icons/md";
+import { TextField, InputAdornment, IconButton, Button } from "@mui/material";
+import { Search, Home, Work, Person } from "@mui/icons-material";
 
 const Navbar = () => {
   return (
-    <nav className="w-full">
-      {/* Top Section */}
-      <div className="flex items-center justify-between px-4 py-2 bg-white shadow-md">
+    <nav className="bg-white shadow-md p-4 flex justify-between items-center px-10">
+      {/* Left Section: Logo and Search Bar */}
+      <div className="flex items-center space-x-4">
         {/* Logo */}
-        <div className="text-[#0950a0] font-bold text-lg flex items-center">
-           {/* Placeholder Logo */}
-          Nexgen 
-        </div>
-
-        {/* Search Input */}
-        <div className="flex flex-1 mx-4">
-          <TextField
-            variant="outlined"
-            placeholder="SEARCH JOB"
-            size="small"
-            className="w-1/2 mr-2"
-          />
-          <TextField
-            variant="outlined"
-            placeholder="Search Location"
-            size="small"
-            className="w-1/2 mr-2"
-          />
-          <Button variant="contained" color="primary">
-            Search
-          </Button>
-        </div>
-
-        {/* Buttons */}
-        <div className="flex space-x-2">
-          <Button
-            variant="outlined"
-            startIcon={<FiLogIn />}
-            className="text-black"
-          >
-            Login
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<MdOutlineAddBox />}
-            className="text-black"
-          >
-            Register
-          </Button>
-          <Button variant="contained" color="error">
-            FREE JOB POST
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<FiMapPin />}
-            className="bg-gray-800 text-white hover:bg-gray-700"
-          >
-            KERALA
-          </Button>
-        </div>
+        <div className="text-2xl font-bold text-primary">Nexgen</div>
+        {/* Search Bar */}
+        
+        
       </div>
 
-      {/* Bottom Section */}
-      <div className="bg-primary text-white py-2">
-        <ul className="flex space-x-6 justify-center text-sm font-semibold">
-          <li className="cursor-pointer hover:underline">Home</li>
-          <li className="cursor-pointer hover:underline">Find Jobs</li>
-          <li className="cursor-pointer hover:underline">Job By Categories</li>
-          <li className="cursor-pointer hover:underline">Job Id Search</li>
-          <li className="cursor-pointer hover:underline">
-            Jobs By District ▼
-          </li>
-          <li className="cursor-pointer hover:underline">Services</li>
-          <li className="cursor-pointer hover:underline">Contact Us</li>
-        </ul>
+      {/* Right Section: Navigation Links */}
+      <div className="flex items-center space-x-6">
+        {/* Home */}
+        <div className="flex items-center space-x-1 cursor-pointer text-gray-600 hover:text-blue-500">
+          <Home fontSize="small" />
+          <span className="hidden md:inline">Home</span>
+        </div>
+
+        {/* Browse Jobs */}
+        <div className="flex items-center space-x-1 cursor-pointer text-gray-600 hover:text-blue-500">
+          <Work fontSize="small" />
+          <span className="hidden md:inline">Browse Jobs</span>
+        </div>
+
+        {/* Login/Sign Up */}
+        <div className="flex items-center space-x-1 cursor-pointer text-gray-600 hover:text-blue-500">
+          <Person fontSize="small" />
+          <span className="hidden md:inline">Login/Sign Up</span>
+        </div>
       </div>
     </nav>
   );
