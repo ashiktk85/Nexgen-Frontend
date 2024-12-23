@@ -32,6 +32,7 @@ import {
   FileUpload as FileUploadIcon,
   InsertDriveFile as FileIcon
 } from '@mui/icons-material'
+import Navbar from '../components/User/Navbar'
 
 // Styled components
 const StyledTabs = styled(Tabs)(({ theme }) => ({
@@ -116,20 +117,7 @@ export default function ProfilePage() {
   return (
     <Box sx={{ bgcolor: '#FFFFFF', minHeight: '100vh' }}>
       {/* Navigation */}
-      <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Container maxWidth="xl">
-          <Toolbar disableGutters sx={{ minHeight: '64px' }}>
-            <Typography variant="h6" sx={{ flexGrow: 1, color: 'primary.main', fontWeight: 600 }}>
-              Nexgen
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 4 }}>
-              <Button color="inherit">Jobs</Button>
-              <Button color="inherit">Companies</Button>
-            </Box>
-            <Button color="inherit">Employers</Button>
-          </Toolbar>
-        </Container>
-      </AppBar>
+      <Navbar />
 
       {/* Main Content */}
       <Container maxWidth="xl" sx={{ py: 2 }}>

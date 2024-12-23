@@ -9,6 +9,8 @@ import JobApplication from "../pages/JobApplication";
 import Home from "../pages/Home";
 import ApplicationSubmitted from "../pages/ApplicationSubmitted";
 import Home2 from "../pages/Home2";
+import AllJobsPage from "../pages/AllJobs";
+import JobDetailPage from "../pages/JobDetails";
 
 
 function User() {
@@ -23,6 +25,8 @@ function User() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/job-application" element={<JobApplication />} />
       <Route path="/application-submitted" element={<ApplicationSubmitted />} />
+      <Route path="/all-jobs" element={<AllJobsPage />} />
+      <Route path="/job-details" element={<JobDetailPage />} />
     </Routes>
   );
 }
