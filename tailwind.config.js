@@ -8,7 +8,7 @@ module.exports = {
   theme: {
       extend: {
           fontFamily: {
-              sans: ['Open Sans', 'Arial', 'sans-serif'], // Replace default sans-serif
+              sans: ['Roboto', 'sans-serif'], // Replace default sans-serif
           },
           colors: {
             primary: "#0950a0", 
