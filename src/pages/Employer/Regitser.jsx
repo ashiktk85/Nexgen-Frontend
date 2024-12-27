@@ -369,7 +369,7 @@ const Register = () => {
           <p className="text-center text-sm text-gray-600 mt-4">
             Already have an account?{" "}
             <a
-              onClick={() => navigate("/employer-login")}
+              onClick={() => navigate("/employer/employer-login")}
               className="text-blue-600 hover:underline cursor-pointer"
             >
               Log in
