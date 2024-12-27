@@ -104,10 +104,10 @@ const Register = () => {
   });
 
   return (
-    <div className="flex flex-col lg:flex-row h-ful">
+    <div className="flex flex-col lg:flex-row h-screen">
       {/* Left Section */}
-      <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
-        <div className="max-w-md">
+      <div className="hidden sm:hidden lg:flex lg:w-1/2 w-full bg-primary flex-col justify-center items-center text-center text-white p-6 lg:p-10 ">
+        <div className="max-w-md ">
           {/* <img
       src="https://undraw.co/api/illustrations/random?color=ffffff&theme=teamwork"
       alt="Mobile Technician Illustration"
@@ -131,9 +131,13 @@ const Register = () => {
     </div> */}
         </div>
       </div>
+      {/* Footer for Small Screens */}
+        <div className="block sm:block lg:hidden bg-primary text-white text-center p-4">
+            Connecting Talent with Opportunity—Post Jobs, Build Futures.
+        </div>
 
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
+      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10 ">
         <div className="w-full max-w-md">
           {/* Logo */}
           <h1 className="text-2xl font-bold text-primary mb-3 text-center lg:text-left">
@@ -142,14 +146,14 @@ const Register = () => {
 
           {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
-           Register as an Employee
+           Register as an Employer
           </h2>
           <p className="text-gray-500 mb-2 text-center lg:text-left">
             Join Us Today! Create Your Account to Get Started:
           </p>
 
           {/* Social Login Buttons */}
-          <div className="flex flex-col lg:flex-row gap-4 mb-6">
+          {/* <div className="flex flex-col lg:flex-row gap-4 mb-6">
             <button
               className=" font-poppins py-2 px-4 border border-gray-300 rounded-md flex items-center justify-center gap-2 text-gray-700 w-full font-semibold"
               aria-label="Log in with Google"
@@ -161,15 +165,15 @@ const Register = () => {
               />
               Google
             </button>
-          </div>
+          </div> */}
 
           {/* Divider */}
-          <div className="relative my-4">
+          {/* <div className="relative my-4">
             <span className="absolute bg-white px-4 -top-2 left-1/2 transform -translate-x-1/2 text-gray-500 text-sm">
               or continue with email
             </span>
             <hr className="border-gray-300" />
-          </div>
+          </div> */}
 
           {/* Email and Password Form */}
           <form onSubmit={formik.handleSubmit}>
@@ -373,6 +377,7 @@ const Register = () => {
           </p>
         </div>
       </div>
+      
     </div>
   );
 };
