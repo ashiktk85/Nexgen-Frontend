@@ -17,7 +17,7 @@ const LoginPage = () => {
     } else {
       x.type = "password";
       setShowPassword(false);
-    }
+    } 
   };
 
   const formik = useFormik({
