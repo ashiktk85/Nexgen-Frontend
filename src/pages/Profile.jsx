@@ -725,6 +725,85 @@ export default function ProfilePage() {
           </Button>
         </DialogActions>
       </Dialog>
+      {/* Add Skill Dialog */}
+<Dialog 
+  open={isAddSkillDialogOpen} 
+  onClose={() => setIsAddSkillDialogOpen(false)}
+  maxWidth="sm"
+  aria-labelledby="add-skill-dialog-title"
+  disableRestoreFocus
+  PaperProps={{
+    sx: {
+      borderRadius: 2,
+      width: '100%'
+    }
+  }}
+>
+  <DialogTitle 
+    id="add-skill-dialog-title"
+    onClose={() => setIsAddSkillDialogOpen(false)}
+  >
+    Add New Skill
+  </DialogTitle>
+  <DialogContent>
+    <Box 
+      component="form"
+      noValidate
+      autoComplete="off"
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        width: '100%',
+        maxWidth: '400px',
+        mx: 'auto',
+        py: 2
+      }}
+    >
+      <Box>
+        <Typography 
+          component="label" 
+          htmlFor="new-skill"
+          variant="caption" 
+          color="text.secondary" 
+          sx={{ mb: 1, display: 'block' }}
+        >
+          Skill Name
+        </Typography>
+        <TextField
+          id="new-skill"
+          fullWidth
+          placeholder="Enter skill name"
+          value={newSkill}
+          onChange={(e) => setNewSkill(e.target.value)}
+          size="small"
+          inputProps={{
+            'aria-label': 'New Skill'
+          }}
+        />
+      </Box>
+    </Box>
+  </DialogContent>
+  <DialogActions sx={{ 
+    p: 3, 
+    borderTop: '1px solid',
+    borderColor: 'divider'
+  }}>
+    <Button 
+      onClick={() => setIsAddSkillDialogOpen(false)} 
+      color="inherit"
+      sx={{ textTransform: 'none' }}
+    >
+      Cancel
+    </Button>
+    <Button 
+      onClick={handleAddSkill} 
+      variant="contained"
+      sx={{ textTransform: 'none' }}
+    >
+      Add Skill
+    </Button>
+  </DialogActions>
+</Dialog>
     </Box>
   )
 }
