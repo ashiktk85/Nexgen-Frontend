@@ -12,7 +12,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
+  DialogTitle as MuiDialogTitle,
   Divider,
   Grid2,
   IconButton,
@@ -21,7 +21,11 @@ import {
   TextField,
   Toolbar,
   Typography,
-  styled
+  Chip,
+  Alert,
+  styled,
+  useTheme,
+  useMediaQuery
 } from '@mui/material'
 import {
   BookmarkBorder as BookmarkIcon,
@@ -30,7 +34,9 @@ import {
   Add as AddIcon,
   ChevronRight as ChevronRightIcon,
   FileUpload as FileUploadIcon,
-  InsertDriveFile as FileIcon
+  InsertDriveFile as FileIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon
 } from '@mui/icons-material'
 import Navbar from '../components/User/Navbar'
 
@@ -50,6 +56,14 @@ const StyledTabs = styled(Tabs)(({ theme }) => ({
       color: theme.palette.primary.main,
     },
   },
+  '& .MuiTabs-flexContainer': {
+    [theme.breakpoints.down('sm')]: {
+      overflowX: 'auto',
+      '&::-webkit-scrollbar': {
+        display: 'none'
+      },
+    }
+  }
 }))
 
 const StyledButton = styled(Button)(({ theme }) => ({
@@ -66,27 +80,56 @@ const StyledCard = styled(Card)({
   borderRadius: '8px',
 })
 
+// Custom DialogTitle component to handle close button properly
+const DialogTitle = ({ children, onClose, ...other }) => {
+  return (
+    <MuiDialogTitle {...other}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        mb: 1
+      }}>
+        <Typography variant="h6">{children}</Typography>
+        {onClose && (
+          <IconButton
+            aria-label="close"
+            onClick={onClose}
+            size="small"
+            tabIndex={-1}  // Prevent focus trap issues
+          >
+            <CloseIcon />
+          </IconButton>
+        )}
+      </Box>
+    </MuiDialogTitle>
+  )
+}
+
 export default function ProfilePage() {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [activeTab, setActiveTab] = useState(0)
   const [profileImage, setProfileImage] = useState('/placeholder.svg')
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isAddSkillDialogOpen, setIsAddSkillDialogOpen] = useState(false)
+  const [newSkill, setNewSkill] = useState('')
+  const [skills, setSkills] = useState(['UI/UX Design', 'Figma', 'Adobe XD', 'Prototyping'])
+  const [resumes, setResumes] = useState([
+    { id: 1, name: 'philip Resume.pdf', dateAdded: '2024-01-15' }
+  ])
   const [profileData, setProfileData] = useState({
     fullName: 'Philip Maya',
     jobTitle: 'UI/UX Designer',
     location: 'Porto, Portugal',
-    employmentStatus: 'Not Employed'
+    employmentStatus: 'Not Employed',
+    bio: 'I am a passionate UI/UX designer with 5+ years of experience creating user-centered digital experiences. Skilled in user research, wireframing, and prototyping. Always eager to tackle complex problems and turn them into elegant solutions.'
   })
   const fileInputRef = useRef(null)
+  const resumeInputRef = useRef(null)
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setProfileImage(e.target.result)
-      }
-      reader.readAsDataURL(file)
-    }
+  const handleDialogClose = () => {
+    setIsEditDialogOpen(false)
   }
 
   const activities = [
@@ -106,6 +149,70 @@ export default function ProfilePage() {
     }
   ]
 
+  const savedJobs = [
+    {
+      id: 1,
+      company: "Google",
+      title: "Senior UX Designer",
+      location: "Remote",
+      time: "Saved 2 Days Ago"
+    },
+    {
+      id: 2,
+      company: "Apple",
+      title: "Product Designer",
+      location: "California, USA (Hybrid)",
+      time: "Saved 3 Days Ago"
+    }
+  ]
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setProfileImage(e.target.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleResumeUpload = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        alert('Please upload only PDF files')
+        return
+      }
+      if (resumes.length >= 5) {
+        alert('Maximum 5 resumes allowed')
+        return
+      }
+      const newResume = {
+        id: Date.now(),
+        name: file.name,
+        dateAdded: new Date().toISOString().split('T')[0]
+      }
+      setResumes([...resumes, newResume])
+    }
+  }
+
+  const handleRemoveResume = (id) => {
+    setResumes(resumes.filter(resume => resume.id !== id))
+  }
+
+  const handleAddSkill = () => {
+    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+      setSkills([...skills, newSkill.trim()])
+      setNewSkill('')
+      setIsAddSkillDialogOpen(false)
+    }
+  }
+
+  const handleRemoveSkill = (skillToRemove) => {
+    setSkills(skills.filter(skill => skill !== skillToRemove))
+  }
+
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue)
   }
@@ -116,10 +223,8 @@ export default function ProfilePage() {
 
   return (
     <Box sx={{ bgcolor: '#FFFFFF', minHeight: '100vh' }}>
-      {/* Navigation */}
       <Navbar />
 
-      {/* Main Content */}
       <Container maxWidth="xl" sx={{ py: 2 }}>
         <StyledCard sx={{ mx: 1 }}>
           <CardContent sx={{ p: { xs: 1, sm: 2 } }}>
@@ -164,17 +269,29 @@ export default function ProfilePage() {
                   </Typography>
                 </Box>
               </Box>
-              <IconButton>
-                <MoreIcon />
-              </IconButton>
             </Box>
 
             {/* Tabs */}
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <StyledTabs value={activeTab} onChange={handleTabChange}>
+            <Box sx={{ 
+              borderBottom: 1, 
+              borderColor: 'divider',
+              width: '100%',
+              overflowX: 'auto',
+              '&::-webkit-scrollbar': {
+                display: 'none'
+              }
+            }}>
+              <StyledTabs 
+                value={activeTab} 
+                onChange={handleTabChange}
+                variant="scrollable"
+                scrollButtons={false}
+                aria-label="profile tabs"
+              >
                 <Tab label="About" />
                 <Tab label="Resume" />
                 <Tab label="My Activities" />
+                <Tab label="Saved Jobs" />
                 <Tab label="Skills" />
               </StyledTabs>
             </Box>
@@ -193,36 +310,39 @@ export default function ProfilePage() {
                   <Typography color="text.secondary" variant="body2" sx={{ mb: 2 }}>
                     Updating your information will offer you the most relevant content
                   </Typography>
-                  <Grid2 container spacing={2}>
-                    <Grid2 item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box>
+                        <Typography color="text.secondary" variant="caption" display="block">
+                          Bio
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 0.5 }}>
+                          {profileData.bio}
+                        </Typography>
+                      </Box>
+                    <Box>
                       <Typography color="text.secondary" variant="caption" display="block">
                         Employment Status
                       </Typography>
                       <Typography variant="body2">{profileData.employmentStatus}</Typography>
-                    </Grid2>
-                    <Grid2 item xs={6}>
+                    </Box>
+                    <Box>
                       <Typography color="text.secondary" variant="caption" display="block">
                         Full Name
                       </Typography>
                       <Typography variant="body2">{profileData.fullName}</Typography>
-                    </Grid2>
-                    <Grid2 item xs={6}>
+                    </Box>
+                    <Box>
                       <Typography color="text.secondary" variant="caption" display="block">
                         Job Title
                       </Typography>
                       <Typography variant="body2">{profileData.jobTitle}</Typography>
-                    </Grid2>
-                    <Grid2 item xs={6}>
+                    </Box>
+                    <Box>
                       <Typography color="text.secondary" variant="caption" display="block">
                         Location
                       </Typography>
                       <Typography variant="body2">{profileData.location}</Typography>
-                    </Grid2>
-                  </Grid2>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                    <StyledButton endIcon={<ChevronRightIcon />}>
-                      Show All Info
-                    </StyledButton>
+                    </Box>
                   </Box>
                 </Box>
               )}
@@ -233,25 +353,43 @@ export default function ProfilePage() {
                   <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
                     Resume
                   </Typography>
-                  <StyledCard sx={{ mb: 2 }}>
-                    <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, '&:last-child': { pb: 2 } }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <FileIcon color="action" />
-                        <Box>
-                          <Typography variant="body2">philip Resume.Pdf</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Date Added
-                          </Typography>
+                  {resumes.map((resume) => (
+                    <StyledCard sx={{ mb: 2 }} key={resume.id}>
+                      <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, '&:last-child': { pb: 2 } }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <FileIcon color="action" />
+                          <Box>
+                            <Typography variant="body2">{resume.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Added on {resume.dateAdded}
+                            </Typography>
+                          </Box>
                         </Box>
-                      </Box>
-                      <IconButton size="small">
-                        <MoreIcon />
-                      </IconButton>
-                    </CardContent>
-                  </StyledCard>
-                  <StyledButton startIcon={<AddIcon />}>
-                    Add more
-                  </StyledButton>
+                        <IconButton 
+                          size="small" 
+                          onClick={() => handleRemoveResume(resume.id)}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </CardContent>
+                    </StyledCard>
+                  ))}
+                  {resumes.length < 5 && (
+                    <StyledButton 
+                      startIcon={<AddIcon />}
+                      onClick={() => resumeInputRef.current?.click()}
+                    >
+                      Add Resume (PDF only, max 5)
+                    </StyledButton>
+                  )}
+                  <input
+                    type="file"
+                    hidden
+                    ref={resumeInputRef}
+                    onChange={handleResumeUpload}
+                    accept=".pdf"
+                  />
                 </Box>
               )}
 
@@ -261,68 +399,152 @@ export default function ProfilePage() {
                   <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
                     My Activities
                   </Typography>
-                  <Grid2 container spacing={2}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     {activities.map((activity) => (
-                      <Grid2 item xs={6} key={activity.id}>
-                        <StyledCard>
-                          <CardContent sx={{ p: 2 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Avatar sx={{ width: 24, height: 24 }}>M</Avatar>
-                                <Typography variant="body2" color="text.secondary">
-                                  {activity.company}
-                                </Typography>
-                              </Box>
-                              <Box>
-                                <IconButton size="small">
-                                  <BookmarkIcon sx={{ fontSize: 20 }} />
-                                </IconButton>
-                                <IconButton size="small">
-                                  <MoreIcon sx={{ fontSize: 20 }} />
-                                </IconButton>
-                              </Box>
-                            </Box>
-                            <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 500 }}>
-                              {activity.title}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {activity.location}
-                            </Typography>
-                            <Box sx={{ mt: 2 }}>
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  px: 1.5,
-                                  py: 0.5,
-                                  borderRadius: 5,
-                                  bgcolor: '#EEF4FF',
-                                  color: '#246BFD',
-                                  border: '1px solid rgba(36, 107, 253, 0.2)'
-                                }}
-                              >
-                                {activity.time}
+                      <StyledCard key={activity.id}>
+                        <CardContent sx={{ p: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Avatar sx={{ width: 24, height: 24 }}>M</Avatar>
+                              <Typography variant="body2" color="text.secondary">
+                                {activity.company}
                               </Typography>
                             </Box>
-                          </CardContent>
-                        </StyledCard>
-                      </Grid2>
+                            <Box>
+                              <IconButton size="small">
+                                <BookmarkIcon sx={{ fontSize: 20 }} />
+                              </IconButton>
+                              <IconButton size="small">
+                                <MoreIcon sx={{ fontSize: 20 }} />
+                              </IconButton>
+                            </Box>
+                          </Box>
+                          <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 500 }}>
+                            {activity.title}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {activity.location}
+                          </Typography>
+                          <Box sx={{ mt: 2 }}>
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                px: 1.5,
+                                py: 0.5,
+                                borderRadius: 5,
+                                bgcolor: '#EEF4FF',
+                                color: '#246BFD',
+                                border: '1px solid rgba(36, 107, 253, 0.2)'
+                              }}
+                            >
+                              {activity.time}
+                            </Typography>
+                          </Box>
+                        </CardContent>
+                      </StyledCard>
                     ))}
-                  </Grid2>
+                  </Box>
+                </Box>
+              )}
+
+              {/* Saved Jobs Tab */}
+              {activeTab === 3 && (
+                <Box>
+                  <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+                    Saved Jobs
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {savedJobs.map((job) => (
+                      <StyledCard key={job.id}>
+                        <CardContent sx={{ p: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Avatar sx={{ width: 24, height: 24 }}>{job.company[0]}</Avatar>
+                              <Typography variant="body2" color="text.secondary">
+                                {job.company}
+                              </Typography>
+                            </Box>
+                            <Box>
+                              <IconButton size="small">
+                                <BookmarkIcon sx={{ fontSize: 20 }} />
+                              </IconButton>
+                              <IconButton size="small">
+                                <MoreIcon sx={{ fontSize: 20 }} />
+                              </IconButton>
+                            </Box>
+                          </Box>
+                          <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 500 }}>
+                            {job.title}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {job.location}
+                          </Typography>
+                          <Box sx={{ mt: 2 }}>
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                px: 1.5,
+                                py: 0.5,
+                                borderRadius: 5,
+                                bgcolor: '#EEF4FF',
+                                color: '#246BFD',
+                                border: '1px solid rgba(36, 107, 253, 0.2)'
+                              }}
+                            >
+                              {job.time}
+                            </Typography>
+                          </Box>
+                        </CardContent>
+                      </StyledCard>
+                    ))}
+                  </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                     <StyledButton endIcon={<ChevronRightIcon />}>
-                      Show All Info
+                      Show All Saved Jobs
                     </StyledButton>
                   </Box>
                 </Box>
               )}
 
               {/* Skills Tab */}
-              {activeTab === 3 && (
+              {activeTab === 4 && (
                 <Box>
-                  <Typography variant="h6" color="text.secondary">
-                    Skills
-                  </Typography>
-                  {/* Add skills content */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    mb: 2,
+                    flexDirection: isMobile ? 'column' : 'row',
+                    gap: isMobile ? 1 : 0
+                  }}>
+                    <Typography variant="h6" color="text.secondary">
+                      Skills
+                    </Typography>
+                    <StyledButton 
+                      startIcon={<AddIcon />}
+                      onClick={() => setIsAddSkillDialogOpen(true)}
+                    >
+                      Add Skill
+                    </StyledButton>
+                  </Box>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {skills.map((skill) => (
+                      <Chip
+                        key={skill}
+                        label={skill}
+                        onDelete={() => handleRemoveSkill(skill)}
+                        sx={{
+                          bgcolor: '#EEF4FF',
+                          color: '#246BFD',
+                          '& .MuiChip-deleteIcon': {
+                            color: '#246BFD',
+                            '&:hover': {
+                              color: '#1756D8'
+                            }
+                          }
+                        }}
+                      />
+                    ))}
+                  </Box>
                 </Box>
               )}
             </Box>
@@ -333,54 +555,174 @@ export default function ProfilePage() {
       {/* Edit Profile Dialog */}
       <Dialog 
         open={isEditDialogOpen} 
-        onClose={() => setIsEditDialogOpen(false)}
+        onClose={handleDialogClose}
+        maxWidth="md"
+        aria-labelledby="edit-profile-dialog-title"
+        disableRestoreFocus // Prevents focus restore issues
         PaperProps={{
           sx: {
             borderRadius: 2,
-            maxWidth: '500px'
+            width: '100%'
           }
         }}
       >
-        <DialogTitle>Edit Profile</DialogTitle>
+        <DialogTitle 
+          id="edit-profile-dialog-title"
+          onClose={handleDialogClose}
+        >
+          Edit Profile
+        </DialogTitle>
         <DialogContent>
-          <Grid2 container spacing={2} sx={{ mt: 1 }}>
-            <Grid2 item xs={12}>
+          <Box 
+            component="form" // Make it a semantic form
+            noValidate // Prevent native validation
+            autoComplete="off"
+            sx={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              gap: 3,
+              width: '100%',
+              maxWidth: '600px',
+              mx: 'auto',
+              py: 2
+            }}
+          >
+            <Box>
+              <Typography 
+                component="label" 
+                htmlFor="employment-status"
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ mb: 1, display: 'block' }}
+              >
+                Employment Status
+              </Typography>
               <TextField
+                id="employment-status"
                 fullWidth
-                label="Full Name"
-                value={profileData.fullName}
-                onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
-              />
-            </Grid2>
-            <Grid2 item xs={12}>
-              <TextField
-                fullWidth
-                label="Job Title"
-                value={profileData.jobTitle}
-                onChange={(e) => setProfileData({ ...profileData, jobTitle: e.target.value })}
-              />
-            </Grid2>
-            <Grid2 item xs={12}>
-              <TextField
-                fullWidth
-                label="Location"
-                value={profileData.location}
-                onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-              />
-            </Grid2>
-            <Grid2 item xs={12}>
-              <TextField
-                fullWidth
-                label="Employment Status"
+                placeholder="Enter your employment status"
                 value={profileData.employmentStatus}
                 onChange={(e) => setProfileData({ ...profileData, employmentStatus: e.target.value })}
+                size="small"
+                inputProps={{
+                  'aria-label': 'Employment Status'
+                }}
               />
-            </Grid2>
-          </Grid2>
+            </Box>
+
+            <Box>
+              <Typography 
+                component="label" 
+                htmlFor="full-name"
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ mb: 1, display: 'block' }}
+              >
+                Full Name
+              </Typography>
+              <TextField
+                id="full-name"
+                fullWidth
+                placeholder="Enter your full name"
+                value={profileData.fullName}
+                onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
+                size="small"
+                inputProps={{
+                  'aria-label': 'Full Name'
+                }}
+              />
+            </Box>
+
+            <Box>
+              <Typography 
+                component="label" 
+                htmlFor="job-title"
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ mb: 1, display: 'block' }}
+              >
+                Job Title
+              </Typography>
+              <TextField
+                id="job-title"
+                fullWidth
+                placeholder="Enter your job title"
+                value={profileData.jobTitle}
+                onChange={(e) => setProfileData({ ...profileData, jobTitle: e.target.value })}
+                size="small"
+                inputProps={{
+                  'aria-label': 'Job Title'
+                }}
+              />
+            </Box>
+
+            <Box>
+              <Typography 
+                component="label" 
+                htmlFor="location"
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ mb: 1, display: 'block' }}
+              >
+                Location
+              </Typography>
+              <TextField
+                id="location"
+                fullWidth
+                placeholder="Enter your location"
+                value={profileData.location}
+                onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
+                size="small"
+                inputProps={{
+                  'aria-label': 'Location'
+                }}
+              />
+            </Box>
+
+            <Box>
+              <Typography 
+                component="label" 
+                htmlFor="bio"
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ mb: 1, display: 'block' }}
+              >
+                Bio
+              </Typography>
+              <TextField
+                id="bio"
+                fullWidth
+                multiline
+                rows={4}
+                placeholder="Write something about yourself"
+                value={profileData.bio}
+                onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                inputProps={{
+                  'aria-label': 'Bio'
+                }}
+              />
+            </Box>
+          </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 2.5 }}>
-          <Button onClick={() => setIsEditDialogOpen(false)} color="inherit">Cancel</Button>
-          <Button onClick={() => setIsEditDialogOpen(false)} variant="contained">Save</Button>
+        <DialogActions sx={{ 
+          p: 3, 
+          borderTop: '1px solid',
+          borderColor: 'divider'
+        }}>
+          <Button 
+            onClick={handleDialogClose} 
+            color="inherit"
+            sx={{ textTransform: 'none' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleDialogClose} 
+            variant="contained"
+            sx={{ textTransform: 'none' }}
+          >
+            Save Changes
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
