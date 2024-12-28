@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import GrapeAnimation from "../components/GrapeAnimation";
+import GrapeAnimation from "../../components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner"
 
-const LoginPage = () => {
+const EmployerLogin = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const showPasswordFunction = () => {
@@ -17,7 +17,7 @@ const LoginPage = () => {
     } else {
       x.type = "password";
       setShowPassword(false);
-    } 
+    }
   };
 
   const formik = useFormik({
@@ -74,31 +74,10 @@ const LoginPage = () => {
             Log in to your Account
           </h2>
           <p className="text-gray-500 mb-6 text-center lg:text-left">
-            Welcome back! Select a method to log in:
+            Welcome back!
           </p>
 
-          {/* Social Login Buttons */}
-          <div className="flex flex-col lg:flex-row gap-4 mb-6">
-            <button
-              className=" font-poppins py-2 px-4 border border-gray-300 rounded-md flex items-center justify-center gap-2 text-gray-700 w-full font-semibold"
-              aria-label="Log in with Google"
-            >
-              <img
-                src="https://img.icons8.com/color/24/google-logo.png"
-                alt="Google"
-                loading="lazy"
-              />
-              Google
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="relative my-4">
-            <span className="absolute bg-white px-4 -top-2 left-1/2 transform -translate-x-1/2 text-gray-500 text-sm">
-              or continue with email
-            </span>
-            <hr className="border-gray-300" />
-          </div>
+          
 
           {/* Email and Password Form */}
           <form onSubmit={formik.handleSubmit}>
@@ -195,7 +174,7 @@ const LoginPage = () => {
           <p className="text-center text-sm text-gray-600 mt-4">
             Don’t have an account?{" "}
             <a
-              onClick={() => navigate("/sign-up")}
+              onClick={() => navigate("/employer/register")}
               className="text-blue-600 hover:underline cursor-pointer"
             >
               Create an account
@@ -216,12 +195,12 @@ const LoginPage = () => {
           <GrapeAnimation className="sm:hidden" />
 
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
-            Find Jobs Tailored for Mobile Technicians
+          Connecting Talent with Opportunity—Post Jobs, Build Futures.
+
           </h2>
 
           <p className="text-base lg:text-lg text-gray-200 mb-4">
-            Discover the best opportunities and connect with employers who value
-            your skills.
+          Empowering Careers, One Opportunity at a Time.
           </p>
 
           {/* <div className="flex justify-center gap-2">
@@ -235,4 +214,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default EmployerLogin;
