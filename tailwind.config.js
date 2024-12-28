@@ -9,6 +9,7 @@ module.exports = {
       extend: {
           fontFamily: {
               sans: ['Roboto', 'sans-serif'], // Replace default sans-serif
+              inter: ['Inter', 'sans-serif'],
           },
           colors: {
             primary: "#0950a0", 
