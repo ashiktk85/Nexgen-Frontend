@@ -14,18 +14,19 @@ function valuetext(value) {
 function CreateJob() {
   const formik = useFormik({
     initialValues: {
-      name: "",
+      jobTitle: "",
       email: "",
       phone: "",
       countryCode: "+91",
-      resume: null,
-      additionalDoc: null,
-      coverLetter: "",
+      location: "",
+      experienceRequired: [0, 3],
+      description: "",
+      requirements: "",
     },
     validate: (values) => {
       let errors = {};
-      if (!values.name) {
-        errors.name = "Name is required";
+      if (!values.jobTitle) {
+        errors.jobTitle = "Job title is required";
       }
       if (!values.email) {
         errors.email = "Email is required";
@@ -34,9 +35,20 @@ function CreateJob() {
       }
       if (!values.phone) {
         errors.phone = "Phone number is required";
+      } else if (!/^\d{10}$/.test(values.phone)) {
+        errors.phone = "Phone number must be exactly 10 digits long and contain only numbers";
       }
-      if (!values.resume) {
-        errors.resume = "Resume is required";
+      if (!values.location) {
+        errors.location = "Location is required";
+      }
+      if (!values.experienceRequired) {
+        errors.experienceRequired = "Experience is required";
+      }
+      if (!values.description) {
+        errors.description = "Description is required";
+      }
+      if (!values.requirements) {
+        errors.requirements = "Requirements is required";
       }
       return errors;
     },
@@ -44,10 +56,9 @@ function CreateJob() {
       console.log("Form Data", values);
     },
   });
-  const [value, setValue] = React.useState([20, 37]);
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
+    formik.setFieldValue("experienceRequired", newValue);
   };
 
   return (
@@ -79,16 +90,16 @@ function CreateJob() {
                     Job Title*
                   </label>
                   <input
-                    id="name"
-                    name="name"
+                    id="jobTitle"
+                    name="jobTitle"
                     type="text"
-                    value={formik.values.name}
+                    value={formik.values.jobTitle}
                     onChange={formik.handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
-                  {formik.errors.name && (
+                  {formik.errors.jobTitle && (
                     <span className="text-red-500 text-sm">
-                      {formik.errors.name}
+                      {formik.errors.jobTitle}
                     </span>
                   )}
                 </div>
@@ -144,7 +155,7 @@ function CreateJob() {
                         );
                       }}
                       getOptionLabel={(option) =>
-                        `${option.dial_code} (${option.name})`
+                        `${option.dial_code} `
                       }
                       renderOption={(props, option) => (
                         <Box
@@ -173,7 +184,7 @@ function CreateJob() {
                     <input
                       id="phone"
                       name="phone"
-                      type="tel"
+                      type="number"
                       value={formik.values.phone}
                       onChange={formik.handleChange}
                       className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -188,92 +199,26 @@ function CreateJob() {
               </div>
             </div>
 
-            {/* Resume Upload */}
-            {/* <div className="space-y-2">
-              <label
-                htmlFor="resume"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Upload Resume*
-              </label>
-              <label
-                htmlFor="resume"
-                className="rounded-lg border border-dashed border-gray-300 p-4 cursor-pointer flex items-center justify-center gap-2"
-              >
-                <FaUpload className="h-5 w-5 text-gray-400" />
-                <span className="text-sm text-gray-600">Browse file</span>
-              </label>
-              <input
-                type="file"
-                id="resume"
-                name="resume"
-                accept=".pdf,.doc,.docx"
-                onChange={handleResumeUpload}
-                className="hidden"
-              />
-              {formik.values.resume && (
-                <div className="mt-2 text-sm text-gray-600">
-                  Uploaded file: <strong>{formik.values.resume.name}</strong>
-                </div>
-              )}
-              {formik.errors.resume && (
-                <span className="text-red-500 text-sm">
-                  {formik.errors.resume}
-                </span>
-              )}
-            </div> */}
-
-            {/* Additional file Upload */}
-            {/* <div className="space-y-2">
-              <label
-                className="block text-sm font-medium text-gray-700"
-                htmlFor="aadditionalFile"
-              >
-                Additional file (optional)
-              </label>
-              <label
-                htmlFor="aadditionalFile"
-                className="rounded-lg border border-dashed border-gray-300 p-4 cursor-pointer flex items-center justify-center gap-2"
-              >
-                <FaUpload className="h-5 w-5 text-gray-400" />
-                <span className="text-sm text-gray-600">Browse file</span>
-              </label> */}
-            {/* <input
-                type="file"
-                id="additionalFile"
-                name="additionalFile"
-                accept=".pdf,.doc,.docx"
-                onChange={handleAdditionalDocs}
-                className="hidden"
-              /> */}
-            {/* {formik.values.additionalDoc && (
-                <div className="mt-2 text-sm text-gray-600">
-                  Uploaded file:{" "}
-                  <strong>{formik.values.additionalDoc.name}</strong>
-                </div>
-              )}
-              {formik.errors.resume && (
-                <span className="text-red-500 text-sm">
-                  {formik.errors.resume}
-                </span>
-              )}
-            </div> */}
-
             {/* Job Location */}
             <div className="space-y-2">
               <label
-                htmlFor="coverLetter"
+                htmlFor="location"
                 className="block text-sm font-medium text-gray-700"
               >
                 Job Location
               </label>
               <input
-                id="coverLetter"
-                name="coverLetter"
-                value={formik.values.coverLetter}
+                id="location"
+                name="location"
+                value={formik.values.location}
                 onChange={formik.handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
+              {formik.errors.location && (
+                <span className="text-red-500 text-sm">
+                  {formik.errors.location}
+                </span>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -286,14 +231,24 @@ function CreateJob() {
               <Box sx={{ width: 300 }}>
                 <Slider
                   getAriaLabel={() => "Temperature range"}
-                  value={value}
+                  value={formik.values.experienceRequired}
                   onChange={handleChange}
                   valueLabelDisplay="auto"
                   getAriaValueText={valuetext}
-                  min={0} 
+                  min={0}
                   max={10}
                 />
+                <label className="block text-sm text-gray-700">
+                  Exp. from {formik.values.experienceRequired[0]} to{" "}
+                  {formik.values.experienceRequired[1]}
+                  {formik.values.experienceRequired[1] === 10 ? "+" : ""}
+                </label>
               </Box>
+              {formik.errors.experienceRequired && (
+                <span className="text-red-500 text-sm">
+                  {formik.errors.experienceRequired}
+                </span>
+              )}
             </div>
 
             {/* Job Description */}
@@ -305,12 +260,17 @@ function CreateJob() {
                 Job Description
               </label>
               <textarea
-                id="coverLetter"
-                name="coverLetter"
-                value={formik.values.coverLetter}
+                id="description"
+                name="description"
+                value={formik.values.description}
                 onChange={formik.handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 min-h-[150px]"
               />
+              {formik.errors.description && (
+                <span className="text-red-500 text-sm">
+                  {formik.errors.description}
+                </span>
+              )}
             </div>
 
             {/* Job requirements */}
@@ -322,18 +282,23 @@ function CreateJob() {
                 Requirements
               </label>
               <textarea
-                id="coverLetter"
-                name="coverLetter"
-                value={formik.values.coverLetter}
+                id="requirements"
+                name="requirements"
+                value={formik.values.requirements}
                 onChange={formik.handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 min-h-[150px]"
               />
+              {formik.errors.requirements && (
+                <span className="text-red-500 text-sm">
+                  {formik.errors.requirements}
+                </span>
+              )}
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="w-full bg-primary text-white py-3 px-4 rounded-md hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Submit Application
             </button>
