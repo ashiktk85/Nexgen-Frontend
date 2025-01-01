@@ -48,12 +48,12 @@ const JobApplication = () => {
     }
   };
 
-const handleAdditionalDocs = (event)=>{
-  const file = event.target.files[0];
-  if(file){
-    formik.setFieldValue("additionalDoc", file);
-  }
-}
+  const handleAdditionalDocs = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      formik.setFieldValue("additionalDoc", file);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
