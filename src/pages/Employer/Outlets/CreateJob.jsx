@@ -7,10 +7,6 @@ import Countries_Dataset from "../../../data/Countries_Dataset.json";
 import { useFormik } from "formik";
 import Slider from "@mui/material/Slider";
 
-function valuetext(value) {
-  return `${value}°C`;
-}
-
 function CreateJob() {
   const formik = useFormik({
     initialValues: {
@@ -234,7 +230,6 @@ function CreateJob() {
                   value={formik.values.experienceRequired}
                   onChange={handleChange}
                   valueLabelDisplay="auto"
-                  getAriaValueText={valuetext}
                   min={0}
                   max={10}
                 />
