@@ -1,7 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { IoIosLogOut } from "react-icons/io";
 
 const Sidebar = ({ open, setOpen }) => {
+  const location = useLocation()
   return (
     <div
       className={`${
@@ -24,11 +26,35 @@ const Sidebar = ({ open, setOpen }) => {
       </div>
       <nav className="mt-4">
         <span className='text-sm text-gray-500 py-2 px-4'>Navigation</span>
-        <Link to="/admin" className="block py-2 px-4 hover:bg-[#E6F4FF]">Dashboard</Link>
-        <Link to="/admin/users" className="block py-2 px-4 hover:bg-[#E6F4FF]">Users</Link>
-        <Link to="/admin/employees" className="block py-2 px-4 hover:bg-[#E6F4FF]">Employees</Link>
-        <Link to="/admin/jobs" className="block py-2 px-4 hover:bg-[#E6F4FF]">Jobs</Link>
-        <button className="block w-full text-left py-2 px-4 hover:bg-[#E6F4FF]">Logout</button>
+        <Link to="/admin" className={`block py-2 px-4 hover:scale-105 transition-transform duration-200 
+        ${location.pathname === '/admin' ? 'font-extrabold text-blue-900': ''}`
+        }
+        >
+          Dashboard
+          </Link>
+        <Link to="/admin/users" className={`block py-2 px-4 hover:scale-105 transition-transform duration-200 
+        ${location.pathname === '/admin/users' ? 'font-extrabold text-blue-900': ''}`
+        }
+        >
+          Users
+        </Link>
+    
+        <Link to="/admin/employees" className={`block py-2 px-4 hover:scale-105 transition-transform duration-200 
+        ${location.pathname === '/admin/employees' ? 'font-extrabold text-blue-900': ''}`
+        }
+        >
+          Employees
+          </Link>
+        <Link to="/admin/jobs" className={`block py-2 px-4 hover:scale-105 transition-transform duration-200 
+        ${location.pathname === '/admin/jobs' ? 'font-extrabold text-blue-900': ''}`
+        }
+        >
+          Jobs
+          </Link>
+        <button className="w-full rounded-md text-left py-2 px-4 hover:bg-gradient-to-t from-slate-200 to-slate-100 flex items-center space-x-2">
+         <span>Logout</span>
+         <IoIosLogOut/>
+          </button>
       </nav>
     </div>
   );
