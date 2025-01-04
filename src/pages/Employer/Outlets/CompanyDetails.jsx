@@ -1,4 +1,3 @@
-
 import {
   Box,
   Container,
@@ -25,17 +24,24 @@ export default function CompanyDetails() {
   return (
     <Container maxWidth="lg" className="py-8">
       {/* Header Section */}
-      <Box className="flex items-center justify-between mb-12 border-b border-gray-200 pb-4">
-        <Box className="flex items-center gap-4">
-          <div className="w-16 h-16 border rounded-full">
-            <img src="/src/assets/Company-logo.png" alt="" />
+      <Box className="flex flex-row items-start justify-between mb-3 pb-4">
+        <Box className="flex items-center justify-left gap-4 mb-4">
+          <div className="w-20 h-20 border rounded-full">
+            <img
+              src="/src/assets/Company-logo.png"
+              alt="Company logo"
+              className="object-cover w-full h-full"
+            />
           </div>
           <Box>
             <Typography variant="h4" className="font-semibold">
               NAVA Company
             </Typography>
             <Typography variant="body2" className="text-gray-600">
-              Software Development • 101-250 employees
+              Software Development
+            </Typography>
+            <Typography variant="body2" className="text-gray-400">
+              Kochi • 1.02K followers • 101-250 employees
             </Typography>
           </Box>
         </Box>
@@ -89,24 +95,61 @@ export default function CompanyDetails() {
               title: "UX/UI Designer",
               location: "Seattle, WA",
               type: "Full-time",
+              time: "1d",
             },
             {
               title: "Product Designer",
               location: "Remote",
               type: "Full-time",
+              time: "3d",
             },
           ].map((job) => (
             <Grid item xs={12} sm={6} key={job.title}>
               <Box className="border border-gray-200 rounded-lg p-6 hover:border-blue-500 transition-colors">
                 <Typography
                   variant="h6"
-                  className="text-gray-400 pb-3 font-semibold"
+                  className="text-black-400 pb-3 font-semibold"
                 >
                   {job.title}
                 </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                <Typography variant="body2" className="text-gray-600 pb-3">
                   {job.location} • {job.type}
                 </Typography>
+                <Box className="flex flex-row justify-between items-center">
+                  <Box className="flex flex-row gap-4">
+                    {/* Easy Apply Button */}
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      className="mb-5"
+                      color="primary"
+                      sx={{
+                        borderRadius: "16px",
+                      }}
+                    >
+                      Easy Apply
+                    </Button>
+
+                    {/* Custom Gray Background Button */}
+                    <Button
+                      variant="text"
+                      size="small"
+                      sx={{
+                        backgroundColor: "rgba(192, 192, 192, 0.49)",
+                        padding: "0px 15px ",
+                        borderRadius: "16px",
+                        "&:hover": {
+                          backgroundColor: "rgba(214, 214, 214, 0.85)", // Darker gray on hover
+                        },
+                      }}
+                    >
+                      Multiple Candidate
+                    </Button>
+                  </Box>
+                  <Box className="flex ">
+                    <Typography className="text-right">{job.time}</Typography>
+                  </Box>
+                </Box>
               </Box>
             </Grid>
           ))}
@@ -115,20 +158,24 @@ export default function CompanyDetails() {
 
       {/* People Section */}
       <Box className="mb-16 border-b border-gray-200 pb-8" ref={peopleRef}>
-        <Box className="flex items-center justify-between mb-6">
+        <Box className="flex items-center justify-between mb-4">
           <Typography variant="h5" className="text-gray-400 pb-3 font-semibold">
             People
           </Typography>
+
           <Button color="primary" variant="text">
             Show More People
           </Button>
         </Box>
-        <Box className="flex">
+        <Typography variant="h7" className="text-black-400  font-semibold">
+          46 employees work here
+        </Typography>
+        <Box className="flex mt-4">
           {[...Array(6)].map((_, i) => (
             <Avatar
               key={i}
-              src={`/placeholder.svg?height=40&width=40`}
-              className="w-10 h-10 -ml-4"
+              src={`/src/assets/Candidate.png?height=40&width=40`}
+              className="w-10 h-10 -ml-4 bg-blue-500"
               sx={{
                 border: "2px solid white",
               }}
