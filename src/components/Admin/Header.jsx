@@ -14,7 +14,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
         </button>
         <div className="text-xl font-semibold text-gray-700">Welcome, Admin</div>
         <div className="flex items-center">
-          <span className="text-gray-700 mr-2">John Doe</span>
+          <span className="text-blue-800 font-semibold mr-2">John Doe</span>
           <img
             className="h-8 w-8 rounded-full"
             src="https://via.placeholder.com/150"
