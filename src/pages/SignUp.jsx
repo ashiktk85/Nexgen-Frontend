@@ -5,11 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
+import useRequest from "../hooks/useRequest";
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+
+  const { data, loading, error, sendRequest } = useRequest();
 
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
@@ -37,10 +40,9 @@ const SignupPage = () => {
     initialValues: {
       firstName: "",
       lastName: "",
-      phoneNumber: "",
+      phone: "",
       email: "",
       password: "",
-      confirmPassword: "",
     },
     validationSchema: Yup.object({
       firstName: Yup.string()
@@ -55,8 +57,8 @@ const SignupPage = () => {
         .max(50, "Last name must not exceed 50 characters")
         .required("Last name is required"),
 
-      phoneNumber: Yup.string()
-      .min(10, "Phone number must be at least 10 characters")
+      phone: Yup.string()
+        .min(10, "Phone number must be at least 10 characters")
         .matches(/^\+?[1-9]\d{1,14}$/, "Phone number is not valid") // Matches E.164 phone number format
         .required("Phone number is required"),
 
@@ -83,20 +85,42 @@ const SignupPage = () => {
     }),
     onSubmit: async (values) => {
       try {
-        toast.success("Login successful");
-        // const loginResult = await dispatch(login(values)).unwrap();
-        // if (loginResult) {
-        //   if (userInfo?.isBlocked) {
-        //     toast.error(
-        //       "Currently, you are restricted from accessing the site."
-        //     );
-        //     return;
-        //   }
-        //   toast.success("Login successful");
-        //   setTimeout(() => {
-        //     navigate("/");
-        //   }, 1500);
-        // }
+        console.log(values);
+        const data = {
+          name: values.firstName,
+          email: values.email,
+          phone: values.phone,
+          password: values.password,
+        };
+        console.log("data", data);
+        
+
+        sendRequest({
+          url: "/signup",
+          method: "POST",
+          data: data,
+          onSuccess: (data) => {
+            console.log("Fetched data:", data);
+            localStorage.setItem('token', data.response.token)
+    
+            // Toast on success
+            toast.info(data.response.message);
+    
+            // Navigate to another page
+            setTimeout(() => {
+              navigate("/otp-verification");
+            }, 1500);
+          },
+          onError: (err) => {
+            console.error("Error fetching data:", err);
+    
+            // Toast on error
+            toast.error(err.message || "An error occurred during sign-up");
+          },
+        });
+
+        if (loading) return <p>Loading...</p>;
+        if (error) return <p>Error: {error}</p>;
       } catch (err) {
         toast.error(err.message || "An error occurred");
       }
@@ -239,14 +263,14 @@ const SignupPage = () => {
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
                 placeholder="Enter your phone number"
                 aria-required="true"
-                value={formik.values.phoneNumber}
+                value={formik.values.phone}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                name="phoneNumber"
+                name="phone"
               />
-              {formik.touched.phoneNumber && formik.errors.phoneNumber ? (
+              {formik.touched.phone && formik.errors.phone ? (
                 <div className="text-red-500 text-[13px]">
-                  {formik.errors.phoneNumber}
+                  {formik.errors.phone}
                 </div>
               ) : null}
             </div>
