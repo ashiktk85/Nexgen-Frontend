@@ -2,23 +2,27 @@ import React, { useRef, useState, useEffect } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
 import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation } from "react-router-dom";
+import { toast } from "sonner";
+import useRequest from "../hooks/useRequest";
 
 const RegisterOtp = () => {
-  const OTP_LENGTH = 6; 
+  const OTP_LENGTH = 6;
   const [otp, setOtp] = useState(new Array(OTP_LENGTH).fill(""));
   const inputRefs = useRef([]);
-  const location = useLocation()
+  const location = useLocation();
 
   const email = location.state?.email;
+  const { data, loading, error, sendRequest } = useRequest();
+
 
   useEffect(() => {
     if (inputRefs.current[0]) {
-      inputRefs.current[0].focus(); 
+      inputRefs.current[0].focus();
     }
   }, []);
 
   const handleChange = (element, index) => {
-    const value = element.value.replace(/[^0-9]/g, ""); 
+    const value = element.value.replace(/[^0-9]/g, "");
     setOtp([...otp.map((d, idx) => (idx === index ? value : d))]);
 
     if (value !== "" && index < OTP_LENGTH - 1) {
@@ -38,6 +42,48 @@ const RegisterOtp = () => {
     const otpArray = pastedData.slice(0, OTP_LENGTH).split("");
     setOtp([...otpArray, ...new Array(OTP_LENGTH - otpArray.length).fill("")]);
     inputRefs.current[Math.min(otpArray.length, OTP_LENGTH - 1)].focus();
+    console.log(otp);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      const joinedOtp = otp.join("");
+      const data = {
+        token: token,
+        otp: joinedOtp,
+      };
+      console.log(data);
+      
+      sendRequest({
+        url: "/verifyOtp",
+        method: "POST",
+        data: data,
+        onSuccess: (data) => {
+          console.log("Fetched data:", data);
+
+          // Toast on success
+          toast.success(data.message);
+
+          // Navigate to another page
+          setTimeout(() => {
+            navigate("/login");
+          }, 1500);
+        },
+        onError: (err) => {
+          console.error("Error fetching data:", err);
+
+          // Toast on error
+          toast.error(err.response.data.message || "An error occurred during otp verification");
+        },
+      });
+
+      if (loading) return <p>Loading...</p>;
+      if (error) return <p>Error: {error}</p>;
+    } catch (err) {
+      toast.error(err.message || "An error occurred");
+    }
   };
 
   return (
@@ -66,39 +112,42 @@ const RegisterOtp = () => {
             Verify your email
           </h2>
           <p className="text-gray-500 mb-6 text-center lg:text-left">
-            We've sent a code to <span className="font-semibold">{email}</span> . Please enter it below to verify
-            your account.
+            We've sent a code to <span className="font-semibold">{email}</span>{" "}
+            . Please enter it below to verify your account.
           </p>
+          <form onSubmit={handleSubmit}>
+            <div className="flex justify-center gap-3">
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  maxLength={1}
+                  ref={(el) => (inputRefs.current[index] = el)}
+                  value={digit}
+                  onChange={(e) => handleChange(e.target, index)}
+                  onKeyDown={(e) => handleKeyDown(e, index)}
+                  onPaste={handlePaste}
+                  className={`w-14 h-14 text-center text-2xl font-semibold border ${
+                    document.activeElement === inputRefs.current[index]
+                      ? "border-blue-500"
+                      : "border-gray-300"
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all`}
+                />
+              ))}
+            </div>
+            <button
+              className={`w-full bg-primary hover:bg-blue-700 text-white py-2 rounded-lg mt-6 transition-colors ${
+                otp.some((digit) => digit === "")
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
+              disabled={otp.some((digit) => digit === "")}
+              type="submit"
+            >
+              Verify Email
+            </button>
+          </form>
 
-          <div className="flex justify-center gap-3">
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                type="text"
-                maxLength={1}
-                ref={(el) => (inputRefs.current[index] = el)}
-                value={digit}
-                onChange={(e) => handleChange(e.target, index)}
-                onKeyDown={(e) => handleKeyDown(e, index)}
-                onPaste={handlePaste}
-                className={`w-14 h-14 text-center text-2xl font-semibold border ${
-                  document.activeElement === inputRefs.current[index]
-                    ? "border-blue-500"
-                    : "border-gray-300"
-                } rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all`}
-              />
-            ))}
-          </div>
-          <button
-            className={`w-full bg-primary hover:bg-blue-700 text-white py-2 rounded-lg mt-6 transition-colors ${
-              otp.some((digit) => digit === "")
-                ? "opacity-50 cursor-not-allowed"
-                : ""
-            }`}
-            disabled={otp.some((digit) => digit === "")}
-          >
-            Verify Email
-          </button>
           <div className="text-center mt-4 flex justify-center gap-3">
             <p className="text-gray-600">Didn't receive the code?</p>
             <button className="text-blue-600 hover:text-blue-700 text-sm hover:underline">
@@ -107,7 +156,7 @@ const RegisterOtp = () => {
           </div>
           <p className="text-center text-sm text-gray-600 mt-6">
             Back to{" "}
-            <Link to="/" className="text-blue-600 hover:underline">
+            <Link to="/login" className="text-blue-600 hover:underline">
               Login
             </Link>
           </p>
