@@ -64,7 +64,7 @@ const RegisterOtp = () => {
           console.log("Fetched data:", data);
 
           // Toast on success
-          toast.success(data.response.message);
+          toast.success(data.message);
 
           // Navigate to another page
           setTimeout(() => {
@@ -156,7 +156,7 @@ const RegisterOtp = () => {
           </div>
           <p className="text-center text-sm text-gray-600 mt-6">
             Back to{" "}
-            <Link to="/" className="text-blue-600 hover:underline">
+            <Link to="/login" className="text-blue-600 hover:underline">
               Login
             </Link>
           </p>

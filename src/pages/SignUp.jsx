@@ -98,7 +98,7 @@ const SignupPage = () => {
         sendRequest({
           url: "/signup",
           method: "POST",
-          data: data,
+          data: values,
           onSuccess: (data) => {
             console.log("Fetched data:", data);
             localStorage.setItem('token', data.response.token)
@@ -115,7 +115,7 @@ const SignupPage = () => {
             console.error("Error fetching data:", err);
     
             // Toast on error
-            toast.error(err.message || "An error occurred during sign-up");
+            toast.error(err.response.data.message || "An error occurred during sign-up");
           },
         });
 
