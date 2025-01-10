@@ -4,11 +4,16 @@ import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { toast } from "sonner"
+import { toast } from "sonner";
+import useRequest from "../hooks/useRequest";
+import { useDispatch } from "react-redux";
+import { userLoginAction } from "@/redux/actions/userAction";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const { data, loading, error, sendRequest } = useRequest();
+  const dispatch = useDispatch()
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
     if (x.type === "password") {
@@ -17,7 +22,7 @@ const LoginPage = () => {
     } else {
       x.type = "password";
       setShowPassword(false);
-    } 
+    }
   };
 
   const formik = useFormik({
@@ -37,21 +42,20 @@ const LoginPage = () => {
     }),
     onSubmit: async (values) => {
       try {
-        toast.success("Login successful");
-        // const loginResult = await dispatch(login(values)).unwrap();
-        // if (loginResult) {
-        //   if (userInfo?.isBlocked) {
-        //     toast.error(
-        //       "Currently, you are restricted from accessing the site."
-        //     );
-        //     return;
-        //   }
-        //   toast.success("Login successful");
-        //   setTimeout(() => {
-        //     navigate("/");
-        //   }, 1500);
-        // }
+        console.log("values:", values);
+        const response = await dispatch(userLoginAction(values)).unwrap()
+        console.log('Response after loging in user login component: ', response)
+        localStorage.setItem('token', response.userData.token)
+        if(response.success){
+          toast.success('Login successful!')
+        }
+        setTimeout(() => {
+          navigate('/home')
+        }, 1500)
+        if (loading) return <p>Loading...</p>;
+        if (error) return <p>Error: {error}</p>;
       } catch (err) {
+        console.log('Error in user login component after login: ', err)
         toast.error(err.message || "An error occurred");
       }
     },
@@ -141,15 +145,15 @@ const LoginPage = () => {
                   placeholder="Enter your password"
                   aria-required="true"
                   value={formik.values.password}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                name="password"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  name="password"
                 />
                 {formik.touched.password && formik.errors.password ? (
-                <div className="text-red-500 text-sm">
-                  {formik.errors.password}
-                </div>
-              ) : null}
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.password}
+                  </div>
+                ) : null}
                 <button
                   type="button"
                   className="absolute inset-y-0 right-4 flex items-center text-gray-500"
