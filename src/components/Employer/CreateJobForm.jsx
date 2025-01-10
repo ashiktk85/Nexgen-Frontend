@@ -1,283 +1,349 @@
-import React from "react";
-import { FaBuilding, FaPhone, FaUpload } from "react-icons/fa";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
-import Countries_Dataset from "../../data/Countries_Dataset.json";
+import React, { useState, useEffect } from "react";
+import { TextField, Autocomplete, Box, Slider, Chip } from "@mui/material";
+import { Country, State, City } from "country-state-city";
 import { useFormik } from "formik";
-import Slider from "@mui/material/Slider";
+import Countries_Dataset from "@/data/Countries_Dataset.json";
 
-function CreateJobForm({ formSubmittionURL, selectedData = null }) {
+const jobData = {
+  jobs: [
+    {
+      title: "Mobile Service",
+      requirements: [
+        "Normal Works - Android Only",
+        "Normal Work - Android & iPhone",
+        "Chip-Level Work - Android Only",
+        "Chip-Level Work - Android & iPhone",
+        "Normal Glass Separating",
+        "Edge Glass Separating",
+        "Normal Software",
+        "Advanced Software & Programming"
+      ]
+    },
+    {
+      title: "Mobile Service Faculty",
+      requirements: [
+        "Good Communication Skill",
+        "Normal Works - Android Only",
+        "Normal Work - Android & iPhone",
+        "Chip-Level Work - Android Only",
+        "Chip-Level Work - Android & iPhone",
+        "Normal Glass Separating",
+        "Edge Glass Separating",
+        "Normal Software",
+        "Advanced Software & Programming"
+      ]
+    },
+    {
+      title: "Mobile Service Manager",
+      requirements: [
+        "Good Communication Skill",
+        "Normal Works - Android Only",
+        "Normal Work - Android & iPhone",
+        "Chip-Level Work - Android Only",
+        "Chip-Level Work - Android & iPhone",
+        "Normal Glass Separating",
+        "Edge Glass Separating",
+        "Normal Software",
+        "Advanced Software & Programming",
+        "Technical Knowledge of Mobile",
+        "Problem Solving Skill",
+        "Financial Management Skill",
+        "Leadership & Team Management Skill"
+      ]
+    },
+    {
+      title: "Sales Executive",
+      requirements: [
+        "Communication Skills",
+        "Customer Handling and Satisfaction Skill",
+        "Problem-Solving Skill",
+        "Teamwork and Collaboration",
+        "Time Management",
+        "Attention to Detail",
+        "Adaptability to New Technologies",
+        "Patience and Professionalism"
+      ]
+    },
+    {
+      title: "Sales & Mobile Service",
+      requirements: [
+        "Communication Skills",
+        "Customer Handling and Satisfaction Skill",
+        "Problem-Solving Skill",
+        "Teamwork and Collaboration",
+        "Time Management",
+        "Attention to Detail",
+        "Adaptability to New Technologies",
+        "Patience and Professionalism",
+        "Normal Works - Android Only",
+        "Normal Work - Android & iPhone",
+        "Chip-Level Work - Android Only",
+        "Chip-Level Work - Android & iPhone",
+        "Normal Glass Separating",
+        "Edge Glass Separating",
+        "Normal Software",
+        "Advanced Software & Programming"
+      ]
+    },
+    {
+      title: "Junior/Training",
+      requirements: [
+        "Normal Works - Android Only",
+        "Normal Work - Android & iPhone",
+        "Chip-Level Work - Android Only",
+        "Chip-Level Work - Android & iPhone",
+        "Normal Glass Separating",
+        "Edge Glass Separating",
+        "Normal Software",
+        "Advanced Software & Programming",
+        "Driving Licence"
+      ]
+    }
+  ]
+};
+
+function CreateJobForm({ selectedData = null }) {
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedRequirements, setSelectedRequirements] = useState([]);
+  const [availableRequirements, setAvailableRequirements] = useState([]);
+
   const formik = useFormik({
     initialValues: {
       jobTitle: selectedData?.title || "",
       email: selectedData?.email || "",
       phone: selectedData?.phone || "",
       countryCode: selectedData?.countryCode || "+91",
-      location: selectedData?.location || "",
+      country: selectedData?.country || "",
+      state: selectedData?.state || "",
+      city: selectedData?.city || "",
       experienceRequired: selectedData?.experienceRequired || [0, 3],
       description: selectedData?.description || "",
-      requirements: selectedData?.requirements || "",
-    },
-    validate: (values) => {
-      let errors = {};
-      if (!values.jobTitle) {
-        errors.jobTitle = "Job title is required";
-      }
-      if (!values.email) {
-        errors.email = "Email is required";
-      } else if (!/\S+@\S+\.\S+/.test(values.email)) {
-        errors.email = "Invalid email format";
-      }
-      if (!values.phone) {
-        errors.phone = "Phone number is required";
-      } else if (!/^\d{10}$/.test(values.phone)) {
-        errors.phone =
-          "Phone number must be exactly 10 digits long and contain only numbers";
-      }
-      if (!values.location) {
-        errors.location = "Location is required";
-      }
-      if (!values.experienceRequired) {
-        errors.experienceRequired = "Experience is required";
-      }
-      if (!values.description) {
-        errors.description = "Description is required";
-      }
-      if (!values.requirements) {
-        errors.requirements = "Requirements is required";
-      }
-      return errors;
+      requirements: selectedData?.requirements || [],
     },
     onSubmit: (values) => {
-      console.log("Form Data", values);
+      console.log("Form Data", {
+        ...values,
+        selectedRequirements,
+      });
     },
   });
 
-  const handleChange = (event, newValue) => {
-    formik.setFieldValue("experienceRequired", newValue);
+  useEffect(() => {
+    const allCountries = Country.getAllCountries();
+    setCountries(allCountries);
+  }, []);
+
+  useEffect(() => {
+    if (formik.values.country) {
+      const allStates = State.getStatesOfCountry(formik.values.country);
+      setStates(allStates);
+    }
+  }, [formik.values.country]);
+
+  useEffect(() => {
+    if (formik.values.state) {
+      const allCities = City.getCitiesOfState(
+        formik.values.country,
+        formik.values.state
+      );
+      setCities(allCities);
+    }
+  }, [formik.values.state, formik.values.country]);
+
+  const handleJobTitleChange = (event, newValue) => {
+    formik.setFieldValue("jobTitle", newValue?.title || "");
+    if (newValue) {
+      const jobRequirements = jobData.jobs.find(
+        (job) => job.title === newValue.title
+      )?.requirements || [];
+      setAvailableRequirements(jobRequirements);
+      setSelectedRequirements([]); // Reset selected requirements
+    } else {
+      setAvailableRequirements([]);
+      setSelectedRequirements([]);
+    }
+  };
+
+  const handleRequirementToggle = (requirement) => {
+    setSelectedRequirements((prev) =>
+      prev.includes(requirement)
+        ? prev.filter((r) => r !== requirement)
+        : [...prev, requirement]
+    );
   };
 
   return (
-    <form onSubmit={formik.handleSubmit} className="space-y-6">
-      {/* Personal Information */}
+    <form onSubmit={formik.handleSubmit} className="space-y-6 p-6">
       <div className="space-y-4">
-        <h2 className="font-semibold">Job Information</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {/* Name */}
-          <div className="space-y-2">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Job Title*
-            </label>
-            <input
-              id="jobTitle"
-              name="jobTitle"
-              type="text"
-              value={formik.values.jobTitle}
-              onChange={formik.handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
-            {formik.errors.jobTitle && (
-              <span className="text-red-500 text-sm">
-                {formik.errors.jobTitle}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-1 w-1/2">
-          {/* Email */}
-          <div className="space-y-2">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Contact Email*
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
-            {formik.errors.email && (
-              <span className="text-red-500 text-sm">
-                {formik.errors.email}
-              </span>
-            )}
-          </div>
-
-          {/* Phone */}
-          <div className="space-y-2">
-            <label
-              htmlFor="phone"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Contact Phone
-            </label>
-            <div className="flex">
-              <Autocomplete
-                id="country-code"
-                options={Countries_Dataset}
-                autoHighlight
-                value={
-                  Countries_Dataset.find(
-                    (option) => option.dial_code === formik.values.countryCode
-                  ) || null
-                }
-                onChange={(event, newValue) => {
-                  formik.setFieldValue(
-                    "countryCode",
-                    newValue ? newValue.dial_code : "+91"
-                  );
-                }}
-                getOptionLabel={(option) => `${option.dial_code} `}
-                renderOption={(props, option) => (
-                  <Box
-                    component="li"
-                    sx={{ "& > img": { mr: 2, flexShrink: 0 } }}
-                    {...props}
-                  >
-                    <img
-                      loading="lazy"
-                      width="20"
-                      src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-                      alt={option.name}
-                    />
-                    {option.name} ({option.dial_code})
-                  </Box>
-                )}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Country Code"
-                    variant="outlined"
-                  />
-                )}
-                sx={{ width: 150 }}
+        <h2 className="text-xl font-semibold">Job Information</h2>
+        
+        {/* Job Title Dropdown */}
+        <div className="w-full">
+          <Autocomplete
+            options={jobData.jobs}
+            getOptionLabel={(option) => option.title}
+            onChange={handleJobTitleChange}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Job Title"
+                variant="outlined"
+                fullWidth
               />
-              <input
-                id="phone"
-                name="phone"
-                type="number"
-                value={formik.values.phone}
-                onChange={formik.handleChange}
-                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-            </div>
-            {formik.errors.phone && (
-              <span className="text-red-500 text-sm">
-                {formik.errors.phone}
-              </span>
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Job Location */}
-      <div className="space-y-2">
-        <label
-          htmlFor="location"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Job Location
-        </label>
-        <input
-          id="location"
-          name="location"
-          value={formik.values.location}
-          onChange={formik.handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        />
-        {formik.errors.location && (
-          <span className="text-red-500 text-sm">{formik.errors.location}</span>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <label
-          htmlFor="coverLetter"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Experience Required*
-        </label>
-        <Box sx={{ width: 300 }}>
-          <Slider
-            getAriaLabel={() => "Temperature range"}
-            value={formik.values.experienceRequired}
-            onChange={handleChange}
-            valueLabelDisplay="auto"
-            min={0}
-            max={10}
           />
-          <label className="block text-sm text-gray-700">
-            Exp. from {formik.values.experienceRequired[0]} to{" "}
-            {formik.values.experienceRequired[1]}
-            {formik.values.experienceRequired[1] === 10 ? "+" : ""}
+        </div>
+
+        {/* Requirements Selection */}
+        {availableRequirements.length > 0 && (
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Select Requirements
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {availableRequirements.map((requirement) => (
+                <Chip
+                  key={requirement}
+                  label={requirement}
+                  onClick={() => handleRequirementToggle(requirement)}
+                  color={selectedRequirements.includes(requirement) ? "primary" : "default"}
+                  className="cursor-pointer"
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Contact Information */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <TextField
+            fullWidth
+            label="Contact Email"
+            name="email"
+            type="email"
+            value={formik.values.email}
+            onChange={formik.handleChange}
+          />
+          
+         
+        </div>
+        <div className="flex gap-2 w-3/4">
+            <Autocomplete
+              options={Countries_Dataset}
+              getOptionLabel={(option) => option.dial_code}
+              value={Countries_Dataset.find(
+                (option) => option.dial_code === formik.values.countryCode
+              )}
+              onChange={(event, newValue) => {
+                formik.setFieldValue(
+                  "countryCode",
+                  newValue ? newValue.dial_code : "+91"
+                );
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="Code" />
+              )}
+              sx={{ width: 120 }}
+            />
+            <TextField
+              fullWidth
+              label="Phone"
+              name="phone"
+              type="tel"
+              value={formik.values.phone}
+              onChange={formik.handleChange}
+            />
+          </div>
+
+        {/* Location Selection */}
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Autocomplete
+            options={countries}
+            getOptionLabel={(option) => option.name}
+            value={countries.find((country) => country.isoCode === formik.values.country)}
+            onChange={(event, newValue) => {
+              formik.setFieldValue("country", newValue ? newValue.isoCode : "");
+              formik.setFieldValue("state", "");
+              formik.setFieldValue("city", "");
+            }}
+            renderInput={(params) => (
+              <TextField {...params} label="Country" />
+            )}
+          />
+
+          {formik.values.country && (
+            <Autocomplete
+              options={states}
+              getOptionLabel={(option) => option.name}
+              value={states.find((state) => state.isoCode === formik.values.state)}
+              onChange={(event, newValue) => {
+                formik.setFieldValue("state", newValue ? newValue.isoCode : "");
+                formik.setFieldValue("city", "");
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="State" />
+              )}
+            />
+          )}
+
+          {formik.values.state && (
+            <Autocomplete
+              options={cities}
+              getOptionLabel={(option) => option.name}
+              value={cities.find((city) => city.name === formik.values.city)}
+              onChange={(event, newValue) => {
+                formik.setFieldValue("city", newValue ? newValue.name : "");
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="City" />
+              )}
+            />
+          )}
+        </div>
+
+        {/* Experience Required */}
+        <div className="w-full max-w-md">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Experience Required
           </label>
-        </Box>
-        {formik.errors.experienceRequired && (
-          <span className="text-red-500 text-sm">
-            {formik.errors.experienceRequired}
-          </span>
-        )}
+          <Box sx={{ px: 2 }}>
+            <Slider
+              value={formik.values.experienceRequired}
+              onChange={(event, newValue) => {
+                formik.setFieldValue("experienceRequired", newValue);
+              }}
+              valueLabelDisplay="auto"
+              min={0}
+              max={10}
+              marks
+            />
+            <div className="text-sm text-gray-600">
+              {formik.values.experienceRequired[0]} - {formik.values.experienceRequired[1]}{formik.values.experienceRequired[1] === 10 ? "+" : ""} years
+            </div>
+          </Box>
+        </div>
+
+        {/* Description and Additional Requirements */}
+        <div className="space-y-4">
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Job Description"
+            name="description"
+            value={formik.values.description}
+            onChange={formik.handleChange}
+          />
+        </div>
       </div>
 
-      {/* Job Description */}
-      <div className="space-y-2">
-        <label
-          htmlFor="coverLetter"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Job Description
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          value={formik.values.description}
-          onChange={formik.handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 min-h-[150px]"
-        />
-        {formik.errors.description && (
-          <span className="text-red-500 text-sm">
-            {formik.errors.description}
-          </span>
-        )}
-      </div>
-
-      {/* Job requirements */}
-      <div className="space-y-2">
-        <label
-          htmlFor="coverLetter"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Requirements
-        </label>
-        <textarea
-          id="requirements"
-          name="requirements"
-          value={formik.values.requirements}
-          onChange={formik.handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 min-h-[150px]"
-        />
-        {formik.errors.requirements && (
-          <span className="text-red-500 text-sm">
-            {formik.errors.requirements}
-          </span>
-        )}
-      </div>
-
-      {/* Submit Button */}
       <button
         type="submit"
-        className="w-full bg-primary text-white py-3 px-4 rounded-md hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition-colors"
       >
-        Submit Application
+        Save Job
       </button>
     </form>
   );
