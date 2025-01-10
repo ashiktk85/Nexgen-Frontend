@@ -227,7 +227,9 @@ function CreateJobForm({ selectedData = null }) {
             onChange={formik.handleChange}
           />
           
-          <div className="flex gap-2">
+         
+        </div>
+        <div className="flex gap-2 w-3/4">
             <Autocomplete
               options={Countries_Dataset}
               getOptionLabel={(option) => option.dial_code}
@@ -254,7 +256,6 @@ function CreateJobForm({ selectedData = null }) {
               onChange={formik.handleChange}
             />
           </div>
-        </div>
 
         {/* Location Selection */}
         <div className="grid gap-4 sm:grid-cols-3">
