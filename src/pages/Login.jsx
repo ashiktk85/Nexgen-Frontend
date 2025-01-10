@@ -6,11 +6,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
 import useRequest from "../hooks/useRequest";
+import { useDispatch } from "react-redux";
+import { userLoginAction } from "@/redux/actions/userAction";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const { data, loading, error, sendRequest } = useRequest();
+  const dispatch = useDispatch()
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
     if (x.type === "password") {
@@ -39,38 +42,20 @@ const LoginPage = () => {
     }),
     onSubmit: async (values) => {
       try {
-        console.log(values);
-        console.log("values", values);
-
-        sendRequest({
-          url: "/login",
-          method: "POST",
-          data: values,
-          onSuccess: (data) => {
-            console.log("Fetched data:", data);
-            localStorage.setItem("token", data.response.token);
-
-            // Toast on success
-            toast.success(data.response.message);
-
-            // Navigate to another page
-            setTimeout(() => {
-              navigate("/otp-verification");
-            }, 1500);
-          },
-          onError: (err) => {
-            console.error("Error fetching data:", err);
-
-            // Toast on error
-            toast.error(
-              err.response.data.message || "An error occurred during sign-up"
-            );
-          },
-        });
-
+        console.log("values:", values);
+        const response = await dispatch(userLoginAction(values)).unwrap()
+        console.log('Response after loging in user login component: ', response)
+        localStorage.setItem('token', response.userData.token)
+        if(response.success){
+          toast.success('Login successful!')
+        }
+        setTimeout(() => {
+          navigate('/home')
+        }, 1500)
         if (loading) return <p>Loading...</p>;
         if (error) return <p>Error: {error}</p>;
       } catch (err) {
+        console.log('Error in user login component after login: ', err)
         toast.error(err.message || "An error occurred");
       }
     },

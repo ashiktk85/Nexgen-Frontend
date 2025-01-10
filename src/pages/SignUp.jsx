@@ -86,15 +86,7 @@ const SignupPage = () => {
     onSubmit: async (values) => {
       try {
         console.log(values);
-        const data = {
-          name: values.firstName,
-          email: values.email,
-          phone: values.phone,
-          password: values.password,
-        };
-        console.log("data", data);
-        
-
+      
         sendRequest({
           url: "/signup",
           method: "POST",
