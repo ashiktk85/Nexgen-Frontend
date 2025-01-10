@@ -1,7 +1,6 @@
 import { createAsyncThunk, isRejectedWithValue } from "@reduxjs/toolkit";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 
-
 export const userLoginAction = createAsyncThunk('user/login',
     async ({email, password}, {isRejectedWithValue}) => {
         try {
@@ -11,7 +10,7 @@ export const userLoginAction = createAsyncThunk('user/login',
                 return {
                     success: true,
                     message: 'User login successfully',
-                    userData: response.data.userData
+                    userData: response.data.userData,
                 }
             }
         } catch (error) {
