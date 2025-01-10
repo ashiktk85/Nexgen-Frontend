@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
 import { InputOtp } from "@nextui-org/react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import useRequest from "../hooks/useRequest";
 
@@ -10,6 +10,7 @@ const RegisterOtp = () => {
   const [otp, setOtp] = useState(new Array(OTP_LENGTH).fill(""));
   const inputRefs = useRef([]);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const email = location.state?.email;
   const { data, loading, error, sendRequest } = useRequest();
@@ -62,6 +63,7 @@ const RegisterOtp = () => {
         data: data,
         onSuccess: (data) => {
           console.log("Fetched data:", data);
+          localStorage.removeItem('token');
 
           // Toast on success
           toast.success(data.message);
