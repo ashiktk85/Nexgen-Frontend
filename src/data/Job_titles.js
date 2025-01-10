@@ -1,8 +1,8 @@
-{
-    "jobs": [
+export const jobData = {
+    jobs: [
       {
-        "title": "Mobile Service",
-        "requirements": [
+        title: "Mobile Service",
+        requirements: [
           "Normal Works - Android Only",
           "Normal Work - Android & iPhone",
           "Chip-Level Work - Android Only",
@@ -14,8 +14,8 @@
         ]
       },
       {
-        "title": "Mobile Service Faculty",
-        "requirements": [
+        title: "Mobile Service Faculty",
+        requirements: [
           "Good Communication Skill",
           "Normal Works - Android Only",
           "Normal Work - Android & iPhone",
@@ -28,8 +28,8 @@
         ]
       },
       {
-        "title": "Mobile Service Manager",
-        "requirements": [
+        title: "Mobile Service Manager",
+        requirements: [
           "Good Communication Skill",
           "Normal Works - Android Only",
           "Normal Work - Android & iPhone",
@@ -46,8 +46,8 @@
         ]
       },
       {
-        "title": "Sales Executive",
-        "requirements": [
+        title: "Sales Executive",
+        requirements: [
           "Communication Skills",
           "Customer Handling and Satisfaction Skill",
           "Problem-Solving Skill",
@@ -59,8 +59,8 @@
         ]
       },
       {
-        "title": "Sales & Mobile Service",
-        "requirements": [
+        title: "Sales & Mobile Service",
+        requirements: [
           "Communication Skills",
           "Customer Handling and Satisfaction Skill",
           "Problem-Solving Skill",
@@ -80,8 +80,8 @@
         ]
       },
       {
-        "title": "Junior/Training",
-        "requirements": [
+        title: "Junior/Training",
+        requirements: [
           "Normal Works - Android Only",
           "Normal Work - Android & iPhone",
           "Chip-Level Work - Android Only",
@@ -94,5 +94,5 @@
         ]
       }
     ]
-  }
+  };
   
