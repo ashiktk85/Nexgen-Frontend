@@ -95,6 +95,7 @@ function CreateJobForm({ selectedData = null }) {
       : [...selectedRequirements, requirement];
 
     setSelectedRequirements(newRequirements);
+    console.log('Selected requirements at handleToggle requirements: ', newRequirements)
     formik.setFieldValue("requirements", newRequirements);
     
   };
@@ -161,7 +162,7 @@ function CreateJobForm({ selectedData = null }) {
               />
             ))}
           </div>
-          {formik.touched.requirements && formik.errors.requirements && (
+          {formik.touched.requirements && formik.errors.requirements && selectedRequirements.length === 0 && (
             <div className="text-red-600 text-sm mt-1">
               {formik.errors.requirements}
             </div>
