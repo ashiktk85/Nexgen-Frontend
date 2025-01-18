@@ -3,24 +3,24 @@ import { TextField, Autocomplete, Box, Slider, Chip } from "@mui/material";
 import { Country, State, City } from "country-state-city";
 import { useFormik } from "formik";
 import { jobData } from "@/data/Job_titles";
-import  validateJobForm  from "@/Validations/CreateJob-validation";
+import validateJobForm from "@/Validations/CreateJob-validation";
 import { employerJobCreation } from "@/apiServices/userApi";
 
-
 function CreateJobForm({ selectedData = null }) {
-
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedRequirements, setSelectedRequirements] = useState(selectedData?.requirements || []);
   const [availableRequirements, setAvailableRequirements] = useState([]);
 
-  const formik = useFormik({ 
+  const formik = useFormik({
     initialValues: {
       jobTitle: selectedData?.title || "",
       email: selectedData?.email || "",
-      phone: selectedData?. phone || "",
+      phone: selectedData?.phone || "",
       countryCode: "+91",
       country: "IN",
+      salaryFrom: selectedData?.salaryFrom || 0,
+      salaryTo: selectedData?.salaryTo || 0,
       state: selectedData?.state || null,
       city: selectedData?.city || null,
       experienceRequired: selectedData?.experienceRequired || [0, 3],
@@ -35,7 +35,6 @@ function CreateJobForm({ selectedData = null }) {
     },
   });
 
-  // Initialize available requirements if there's a selected job title
   useEffect(() => {
     if (formik.values.jobTitle) {
       const jobRequirements =
@@ -43,7 +42,6 @@ function CreateJobForm({ selectedData = null }) {
       setAvailableRequirements(jobRequirements);
     }
   }, [formik.values.jobTitle]);
-
 
   useEffect(() => {
     if (formik.values.country) {
@@ -53,8 +51,6 @@ function CreateJobForm({ selectedData = null }) {
       setStates([]);
     }
   }, [formik.values.country]);
-
-
 
   useEffect(() => {
     if (formik.values.state && formik.values.country) {
@@ -68,12 +64,9 @@ function CreateJobForm({ selectedData = null }) {
     }
   }, [formik.values.state, formik.values.country]);
 
-
-
   const handleJobTitleChange = (event, newValue) => {
-    const jobTitle = newValue?.title || ''
+    const jobTitle = newValue?.title || '';
     formik.setFieldValue("jobTitle", jobTitle);
-
 
     if (newValue) {
       const jobRequirements =
@@ -86,20 +79,15 @@ function CreateJobForm({ selectedData = null }) {
     }
   };
 
-
-
-
   const handleRequirementToggle = (requirement) => {
     const newRequirements = selectedRequirements.includes(requirement)
       ? selectedRequirements.filter((r) => r !== requirement)
       : [...selectedRequirements, requirement];
 
     setSelectedRequirements(newRequirements);
-    console.log('Selected requirements at handleToggle requirements: ', newRequirements)
+    console.log('Selected requirements at handleToggle requirements: ', newRequirements);
     formik.setFieldValue("requirements", newRequirements);
-    
   };
-
 
   // Find the selected job object
   const selectedJob = jobData.jobs.find((job) => job.title === formik.values.jobTitle) || null;
@@ -113,9 +101,6 @@ function CreateJobForm({ selectedData = null }) {
   const selectedCity = cities.find(
     (city) => city.name === formik.values.city
   ) || null;
-
-
-
 
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-6 p-6">
@@ -186,14 +171,15 @@ function CreateJobForm({ selectedData = null }) {
 
         <div className="flex gap-2 w-3/4">
           <TextField
-            sx={{width: 80}}
+            sx={{ width: 80 }}
             label="Country Code"
             value={formik.values.countryCode}
-            InputProps={{ readOnly: true,
+            InputProps={{
+              readOnly: true,
               style: {
                 pointerEvents: "none",
               },
-             }}
+            }}
           />
           <TextField
             fullWidth
@@ -214,11 +200,12 @@ function CreateJobForm({ selectedData = null }) {
             fullWidth
             label="Country"
             value="India"
-            InputProps={{ readOnly: true,
+            InputProps={{
+              readOnly: true,
               style: {
                 pointerEvents: "none",
               },
-             }}
+            }}
           />
 
           <Autocomplete
@@ -256,6 +243,38 @@ function CreateJobForm({ selectedData = null }) {
                 helperText={formik.touched.city && formik.errors.city}
               />
             )}
+          />
+        </div>
+
+        {/* Salary Range */}
+        <div className="flex gap-5">
+          <TextField
+            fullWidth
+            label="Salary From"
+            name="salaryFrom"
+            type="number"
+            value={formik.values.salaryFrom}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.salaryFrom && Boolean(formik.errors.salaryFrom)}
+            helperText={formik.touched.salaryFrom && formik.errors.salaryFrom}
+            InputProps={{
+              startAdornment: <span className="text-gray-500 mr-1">₹</span>,
+            }}
+          />
+          <TextField
+            fullWidth
+            label="Salary To"
+            name="salaryTo"
+            type="number"
+            value={formik.values.salaryTo}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.salaryTo && Boolean(formik.errors.salaryTo)}
+            helperText={formik.touched.salaryTo && formik.errors.salaryTo}
+            InputProps={{
+              startAdornment: <span className="text-gray-500 mr-1">₹</span>,
+            }}
           />
         </div>
 
@@ -302,7 +321,7 @@ function CreateJobForm({ selectedData = null }) {
       <button
         type="submit"
         disabled={formik.isSubmitting}
-        className="bg-blue-500 text-white py-2 px-4 rounded"
+        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:bg-blue-300"
       >
         Submit
       </button>

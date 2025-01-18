@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Search,
   People,
@@ -8,9 +8,25 @@ import {
 } from "@mui/icons-material";
 import Navbar from "../components/User/Navbar";
 import JobCard from "../components/User/JobCard";
+import axios from "axios";
+import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 
 export default function JobPortalLanding() {
-  const jobs = Array(8).fill({});
+  const [jobs , setJobs] = useState([])
+  const fetchJobs = async() => {
+    try {
+      const {data} = await employerAxiosInstnce.get('/getAllJobs')
+      console.log(data.jobPosts);
+      setJobs(data.jobPosts)
+      
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  useEffect(() => {
+    fetchJobs()
+  },[])
+  // const jobs = Array(8).fill({});
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -47,8 +63,8 @@ export default function JobPortalLanding() {
             Jobs Recommended for You
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 lg:px-10 mt-6">
-            {jobs.map((_, index) => (
-              <JobCard key={index} />
+            {jobs.map((jobs, index) => (
+              <JobCard key={index} title={jobs?.jobTitle} location={jobs?.city} salary={jobs?.salaryRange} date={jobs?.createdAt} id = {jobs?._id}/>
             ))}
           </div>
           <div className="mt-8 text-center">

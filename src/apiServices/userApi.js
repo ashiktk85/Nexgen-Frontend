@@ -1,3 +1,4 @@
+import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance"
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance"
 
 
@@ -7,9 +8,9 @@ const generateId = () => {
 
 export const employerJobCreation = async (data) => {
     try {
-        const jobData = {...data, employerId: generateId()}
-
-        const respose = await userAxiosInstance.post('/employer/createOrUpdateJob', jobData)
+        
+        const id = generateId()
+        const respose = await employerAxiosInstnce.post(`/createOrUpdateJob/:${id}`, data)
         console.log('Respose after job creation: ', respose)
     } catch (error) {
         console.error('Error in createJob at api services: ', error)

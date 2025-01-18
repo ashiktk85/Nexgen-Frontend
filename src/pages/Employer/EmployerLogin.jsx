@@ -38,7 +38,7 @@ const EmployerLogin = () => {
     onSubmit: async (values) => {
       try {
         toast.success("Login successful");
-        // const loginResult = await dispatch(login(values)).unwrap();
+        const loginResult = await dispatch(login(values)).unwrap();
         // if (loginResult) {
         //   if (userInfo?.isBlocked) {
         //     toast.error(

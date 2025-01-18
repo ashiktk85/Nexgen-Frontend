@@ -1,7 +1,8 @@
 import React from "react";
 import { MdPlace } from "react-icons/md";
 import { FaIndianRupeeSign } from "react-icons/fa6";
-const JobCard = () => {
+// import moment from "moment/moment";
+const JobCard = ({title  ,location , salary , date }) => {
   return (
     <article className="w-80   mx-auto bg-white shadow-md rounded-lg p-6 space-y-4" aria-label="Job listing card for UI/UX Designer">
       {/* Header Section */}
@@ -11,8 +12,8 @@ const JobCard = () => {
           <span className="text-white font-bold text-lg">F</span>
         </figure>
         <div>
-          <h1 className="text-lg font-semibold text-gray-800">UI/UX Designer</h1>
-          <p className="text-sm text-gray-500">Framer</p>
+          <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
+          <p className="text-sm text-gray-500">Frmer</p>
         </div>
       </header>
 
@@ -23,11 +24,11 @@ const JobCard = () => {
         </h2>
         <div className="flex items-center space-x-2 text-gray-600 text-sm">
           <span className="material-icons" aria-hidden="true"><MdPlace /></span>
-          <p>Amsterdam</p>
+          <p>{location}</p>
         </div>
         <div className="flex items-center space-x-2 text-gray-600 text-sm">
           <span className="material-icons" aria-hidden="true"><FaIndianRupeeSign /></span>
-          <p>15-25k</p>
+          <p>{salary.join(' - ')}</p>
         </div>
        
       </section>
@@ -37,9 +38,10 @@ const JobCard = () => {
 
       {/* Footer Section */}
       <footer className="flex justify-between items-center text-sm text-gray-500">
-        <time dateTime="2024-06-14">14 June 2024</time>
+        <time dateTime="2024-06-14">
+        {/* {moment(date).format("MMM Do YY")}   */}
+        </time>
         <button
-          href="#"
           className="bg-primary text-white text-sm font-medium px-4 py-2 rounded hover:bg-blue-700 transition"
           aria-label="View job details for UI/UX Designer"
         >

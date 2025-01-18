@@ -5,11 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { employerRegisterAction } from "@/redux/actions/EmplyerAction";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
@@ -84,6 +87,12 @@ const Register = () => {
     onSubmit: async (values) => {
       try {
         toast.success("Login successful");
+        const  register =  dispatch(employerRegisterAction(values))
+        console.log("register" , register);
+        
+        if(register) {
+          navigate('/employer/otp')
+        }
         // const loginResult = await dispatch(login(values)).unwrap();
         // if (loginResult) {
         //   if (userInfo?.isBlocked) {
