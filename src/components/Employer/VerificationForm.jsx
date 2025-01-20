@@ -93,7 +93,7 @@ export default function VerificationForm() {
     },
     validationSchema,
     onSubmit: (values) => {
-      console.log(values);
+      console.log("result", values);
       // Handle form submission
     },
   });
@@ -146,13 +146,13 @@ export default function VerificationForm() {
           </p>
 
           {/* Email and Password Form */}
-          <div className="max-w-2xl mx-auto p-4">
+          <div className="max-w-2xl mx-auto p-4 overflow-auto">
             <Card>
               <CardHeader>
                 <CardTitle>Verification Details</CardTitle>
-                <div className="flex justify-between items-center mt-4">
+                <div className=" flex justify-between items-center mt-4">
                   {steps.map((step) => (
-                    <div key={step.id} className="flex items-center">
+                    <div key={step.id} className="flex  items-center ">
                       <div
                         className={`rounded-full h-8 w-8 flex items-center justify-center border-2 
                     ${
@@ -179,9 +179,7 @@ export default function VerificationForm() {
                       >
                         {step.title}
                       </div>
-                      {step.id !== steps.length && (
-                        <div className="h-px w-12 sm:w-24 mx-2 bg-muted" />
-                      )}
+                      
                     </div>
                   ))}
                 </div>
@@ -194,6 +192,7 @@ export default function VerificationForm() {
                       <div>
                         <label>Full Name</label>
                         <Input
+                          className=" md:ml-2 mt-1 block px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                           placeholder="Enter your full name"
                           name="name"
                           value={formik.values.name}
@@ -201,12 +200,13 @@ export default function VerificationForm() {
                           onBlur={formik.handleBlur}
                         />
                         {formik.touched.name && formik.errors.name && (
-                          <div>{formik.errors.name}</div>
+                          <div className="text-red-500 text-sm">{formik.errors.name}</div>
                         )}
                       </div>
                       <div>
                         <label>Address</label>
-                        <TextField
+                        <Input
+                          className="md:ml-2 mt-1 block px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                           placeholder="Enter your complete address"
                           name="address"
                           value={formik.values.address}
@@ -214,7 +214,7 @@ export default function VerificationForm() {
                           onBlur={formik.handleBlur}
                         />
                         {formik.touched.address && formik.errors.address && (
-                          <div>{formik.errors.address}</div>
+                          <div className="text-red-500 text-sm">{formik.errors.address}</div>
                         )}
                       </div>
                     </>
@@ -236,10 +236,10 @@ export default function VerificationForm() {
                           }}
                         />
                         {preview.aadharFront && (
-                          <img src={preview.aadharFront} alt="Preview" />
+                          <img className="mt-2" src={preview.aadharFront} alt="Preview" />
                         )}
                         {formik.errors.aadharFront && (
-                          <div>{formik.errors.aadharFront}</div>
+                          <div className="text-red-500 text-sm">{formik.errors.aadharFront}</div>
                         )}
                       </div>
                       <div>
@@ -256,10 +256,10 @@ export default function VerificationForm() {
                           }}
                         />
                         {preview.aadharBack && (
-                          <img src={preview.aadharBack} alt="Preview" />
+                          <img className="mt-2" src={preview.aadharBack} alt="Preview" />
                         )}
                         {formik.errors.aadharBack && (
-                          <div>{formik.errors.aadharBack}</div>
+                          <div className="text-red-500 text-sm">{formik.errors.aadharBack}</div>
                         )}
                       </div>
                     </>
@@ -280,10 +280,10 @@ export default function VerificationForm() {
                         }}
                       />
                       {preview.shopCertificate && (
-                        <img src={preview.shopCertificate} alt="Preview" />
+                        <img className="mt-2" src={preview.shopCertificate} alt="Preview" />
                       )}
                       {formik.errors.shopCertificate && (
-                        <div>{formik.errors.shopCertificate}</div>
+                        <div className="text-red-500 text-sm">{formik.errors.shopCertificate}</div>
                       )}
                     </div>
                   )}
@@ -317,7 +317,7 @@ export default function VerificationForm() {
           </div>
 
           {/* Create Account */}
-          <p className="text-center text-sm text-gray-600 mt-4">
+          {/* <p className="text-center text-sm text-gray-600 mt-4">
             Don’t have an account?{" "}
             <a
               onClick={() => navigate("/employer/register")}
@@ -325,7 +325,7 @@ export default function VerificationForm() {
             >
               Create an account
             </a>
-          </p>
+          </p> */}
         </div>
       </div>
 
