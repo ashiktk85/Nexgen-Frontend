@@ -69,7 +69,7 @@ function User() {
       <Route path="/job-application" element={<JobApplication />} />
       <Route path="/application-submitted" element={<ApplicationSubmitted />} />
       <Route path="/all-jobs" element={<AllJobsPage />} />
-      <Route path="/job-details" element={<JobDetailPage />} />
+      <Route path="/job-details/:id" element={<JobDetailPage />} />
       <Route path="/table" element={<ListingTable
           users={usersData}
           columns={columns}

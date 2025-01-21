@@ -10,8 +10,9 @@ export const employerJobCreation = async (data) => {
     try {
         
         const id = generateId()
-        const respose = await employerAxiosInstnce.post(`/createOrUpdateJob/:${id}`, data)
+        const respose = await employerAxiosInstnce.post(`/createJobPost/${id}`, data)
         console.log('Respose after job creation: ', respose)
+        return respose.data.status
     } catch (error) {
         console.error('Error in createJob at api services: ', error)
     }

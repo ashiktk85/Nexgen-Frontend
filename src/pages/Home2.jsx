@@ -10,12 +10,13 @@ import Navbar from "../components/User/Navbar";
 import JobCard from "../components/User/JobCard";
 import axios from "axios";
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 
 export default function JobPortalLanding() {
   const [jobs , setJobs] = useState([])
   const fetchJobs = async() => {
     try {
-      const {data} = await employerAxiosInstnce.get('/getAllJobs')
+      const {data} = await userAxiosInstance.get('/getJobPosts')
       console.log(data.jobPosts);
       setJobs(data.jobPosts)
       
@@ -64,7 +65,7 @@ export default function JobPortalLanding() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 lg:px-10 mt-6">
             {jobs.map((jobs, index) => (
-              <JobCard key={index} title={jobs?.jobTitle} location={jobs?.city} salary={jobs?.salaryRange} date={jobs?.createdAt} id = {jobs?._id}/>
+              <JobCard key={index} title={jobs?.jobTitle} location={jobs?.city} salary={jobs?.salaryRange} date={jobs?.createdAt} id = {jobs?._id} />
             ))}
           </div>
           <div className="mt-8 text-center">

@@ -1,8 +1,13 @@
 import React from "react";
 import { MdPlace } from "react-icons/md";
 import { FaIndianRupeeSign } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 // import moment from "moment/moment";
-const JobCard = ({title  ,location , salary , date }) => {
+const JobCard = ({title  ,location , salary , date , id }) => {
+  const navigate = useNavigate()
+  const jobDetailNavigation = () => {
+    navigate(`/job-details/:${id}`)
+  }
   return (
     <article className="w-80   mx-auto bg-white shadow-md rounded-lg p-6 space-y-4" aria-label="Job listing card for UI/UX Designer">
       {/* Header Section */}
@@ -44,6 +49,7 @@ const JobCard = ({title  ,location , salary , date }) => {
         <button
           className="bg-primary text-white text-sm font-medium px-4 py-2 rounded hover:bg-blue-700 transition"
           aria-label="View job details for UI/UX Designer"
+          onClick={jobDetailNavigation}
         >
           Job Details
         </button>

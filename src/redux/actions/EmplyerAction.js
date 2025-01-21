@@ -8,6 +8,7 @@ export const employerRegisterAction = createAsyncThunk('employer/register',
         try {
             console.log(values , "val");
             localStorage.setItem("otp-email" , values.email)
+            
             const response = await employerAxiosInstnce.post('/signup', values)
             console.log(response.data);
             return true;

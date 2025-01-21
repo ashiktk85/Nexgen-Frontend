@@ -1,11 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '../components/User/Navbar';
 import { CiShare2 } from "react-icons/ci";
 import { CiBookmarkCheck } from "react-icons/ci";
 import JobCard from '../components/User/JobCard';
+import { useParams } from 'react-router-dom';
+import userAxiosInstance from '@/config/axiosConfig/userAxiosInstance';
 
 
 const JobDeatils = () => {
+  const { id} = useParams()
+  useEffect(() => {
+   const fetchData = async() => {
+    try {
+      const res = await userAxiosInstance.get('/')
+    } catch (error) {
+      
+    }
+   }
+
+   fetchData()
+  },[id])
   return (
 <div className="flex flex-col min-h-screen">
       {/* Navbar */}
@@ -77,9 +91,9 @@ const JobDeatils = () => {
         <aside className='w-full lg:w-1/4 space-y-4'>
           <h2 className='text-xl font-semibold'>Related Jobs</h2>
           <div className='space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto overflow-x-hidden pr-2'>
-            {Array.from({length: 3}).map((_, index) => (
-              <JobCard key={index} />
-            ))}
+            {/* {Array.from({length: 3}).map((_, index) => (
+              // <JobCard key={index} />
+            ))} */}
           </div>
         </aside>
       </main>

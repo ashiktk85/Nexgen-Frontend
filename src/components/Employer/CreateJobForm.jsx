@@ -5,8 +5,12 @@ import { useFormik } from "formik";
 import { jobData } from "@/data/Job_titles";
 import validateJobForm from "@/Validations/CreateJob-validation";
 import { employerJobCreation } from "@/apiServices/userApi";
+import { toast } from "sonner";
+import { useNavbar } from "@nextui-org/react";
+import { useNavigate } from "react-router-dom";
 
 function CreateJobForm({ selectedData = null }) {
+  const navigate = useNavigate()
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedRequirements, setSelectedRequirements] = useState(selectedData?.requirements || []);
@@ -31,7 +35,11 @@ function CreateJobForm({ selectedData = null }) {
     onSubmit: async (values) => {
       console.log("Form submitted with values:", values);
       console.log("Selected Requirements:", selectedRequirements);
-      await employerJobCreation(values);
+      const status = await employerJobCreation(values);
+      if(status) {
+        toast.success("Job created")
+        navigate('/employer/job_list')
+      }
     },
   });
 

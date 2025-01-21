@@ -38,27 +38,20 @@ const Register = () => {
 
   const formik = useFormik({
     initialValues: {
-      firstName: "",
-      lastName: "",
-      phoneNumber: "",
+      name: "",
+      phone: "",
       email: "",
       password: "",
       confirmPassword: "",
     },
     validationSchema: Yup.object({
-      firstName: Yup.string()
+      name: Yup.string()
         .trim()
         .min(2, "First name must be at least 2 characters")
         .max(50, "First name must not exceed 50 characters")
-        .required("First name is required"),
+        .required(" name is required"),
 
-      lastName: Yup.string()
-        .trim()
-        .min(2, "Last name must be at least 2 characters")
-        .max(50, "Last name must not exceed 50 characters")
-        .required("Last name is required"),
-
-      phoneNumber: Yup.string()
+      phone: Yup.string()
       .min(10, "Phone number must be at least 10 characters")
         .matches(/^\+?[1-9]\d{1,14}$/, "Phone number is not valid") 
         .required("Phone number is required"),
@@ -187,12 +180,12 @@ const Register = () => {
           {/* Email and Password Form */}
           <form onSubmit={formik.handleSubmit}>
             <div className="md:flex gap-5  ">
-              <div className="mb-3 md:w-1/2 ">
+              <div className="mb-3 md:w-full ">
                 <label
                   htmlFor="first_name"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  First name
+                  Company/Employer Name
                 </label>
                 <input
                   type="text"
@@ -200,39 +193,14 @@ const Register = () => {
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
                   placeholder="Enter your first name"
                   aria-required="true"
-                  value={formik.values.firstName}
+                  value={formik.values.name}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   name="firstName"
                 />
-                {formik.touched.firstName && formik.errors.firstName ? (
+                {formik.touched.name && formik.errors.name ? (
                   <div className="text-red-500 text-[13px]">
-                    {formik.errors.firstName}
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="mb-3 md:w-1/2">
-                <label
-                  htmlFor="first_name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Last name
-                </label>
-                <input
-                  type="text"
-                  id="last-name"
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
-                  placeholder="Enter your last name"
-                  aria-required="true"
-                  value={formik.values.lastName}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  name="lastName"
-                />
-                {formik.touched.lastName && formik.errors.lastName ? (
-                  <div className="text-red-500 text-[13px]">
-                    {formik.errors.lastName}
+                    {formik.errors.name}
                   </div>
                 ) : null}
               </div>
@@ -247,18 +215,18 @@ const Register = () => {
               </label>
               <input
                 type="phone-number"
-                id="phone-number"
+                id="phone"
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
                 placeholder="Enter your phone number"
                 aria-required="true"
-                value={formik.values.phoneNumber}
+                value={formik.values.phone}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                name="phoneNumber"
+                name="phone"
               />
-              {formik.touched.phoneNumber && formik.errors.phoneNumber ? (
+              {formik.touched.phone && formik.errors.phone ? (
                 <div className="text-red-500 text-[13px]">
-                  {formik.errors.phoneNumber}
+                  {formik.errors.phone}
                 </div>
               ) : null}
             </div>
