@@ -53,7 +53,7 @@ const RegisterOtp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const email = localStorage.getItem("otp-email");
+      const email = localStorage.getItem("employer-email");
       const joinedOtp = otp.join("");
       const data = {
         otp : joinedOtp,
@@ -62,12 +62,13 @@ const RegisterOtp = () => {
       
       console.log(data);
       
-      const res = await employerAxiosInstnce.post('/verifyOtp' , data)
+      const res = await employerAxiosInstnce.post('/verify-otp' , data)
       console.log(res);
       if(res) {
+        localStorage.removeItem("employer-email")
         toast.success("Otp verification successfull")
         setTimeout(() => {
-            navigate('/employer/login')
+            navigate('/employer/employer-login')
         }, 1500);
       }
       

@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 
 const initialState = {
-  seekerInfo:{},
+  employer:{},
   error: null
 }
 
@@ -21,8 +21,8 @@ const employerSlice = createSlice({
         builder
         .addCase(employerLogin.fulfilled, (state, action) => {
             if(action.payload){
-                state.seekerInfo = action.payload?.userData || {}
-                console.log('employer data in store: ', state.seekerInfo)
+                state.employer = action.payload?.userData || {}
+                console.log('employer data in store: ', state.employer)
             }
         })
         .addCase(employerLogin.rejected, (state, action) => {
