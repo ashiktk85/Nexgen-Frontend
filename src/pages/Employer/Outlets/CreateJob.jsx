@@ -2,8 +2,12 @@ import React from "react";
 import { FaBuilding } from "react-icons/fa";
 import { useFormik } from "formik";
 import CreateJobForm from "@/components/Employer/CreateJobForm";
+import { useSelector } from "react-redux";
 
 function CreateJob() {
+ 
+  
+  
   return (
     <div className="my-6 px-2">
       <main className="container mx-auto px-4 py-8">

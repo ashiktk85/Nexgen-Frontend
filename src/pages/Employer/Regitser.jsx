@@ -6,7 +6,6 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
-import { employerRegisterAction } from "@/redux/actions/EmplyerAction";
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 
 const Register = () => {

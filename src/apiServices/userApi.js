@@ -2,14 +2,10 @@ import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance"
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance"
 
 
-const generateId = () => {
-    return Math.floor(Math.random() * 1000).toString()
-}
 
-export const employerJobCreation = async (data) => {
+
+export const employerJobCreation = async (data , id) => {
     try {
-        
-        const id = generateId()
         const respose = await employerAxiosInstnce.post(`/createJobPost/${id}`, data)
         console.log('Respose after job creation: ', respose)
         return respose.data.status

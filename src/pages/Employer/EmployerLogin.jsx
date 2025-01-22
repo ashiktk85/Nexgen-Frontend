@@ -40,20 +40,14 @@ const EmployerLogin = () => {
     }),
     onSubmit: async (values) => {
       try {
-        toast.success("Login successful");
+       
         const loginResult = await dispatch(employerLogin(values)).unwrap();
-        // if (loginResult) {
-        //   if (userInfo?.isBlocked) {
-        //     toast.error(
-        //       "Currently, you are restricted from accessing the site."
-        //     );
-        //     return;
-        //   }
-        //   toast.success("Login successful");
-        //   setTimeout(() => {
-        //     navigate("/");
-        //   }, 1500);
-        // }
+        if(loginResult.status === 200) {
+          toast.success("Login successfull")
+          setTimeout(() => {
+            navigate('/employer')
+          }, 1000);
+        }
       } catch (err) {
         toast.error(err.message || "An error occurred");
       }

@@ -8,8 +8,10 @@ import { employerJobCreation } from "@/apiServices/userApi";
 import { toast } from "sonner";
 import { useNavbar } from "@nextui-org/react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function CreateJobForm({ selectedData = null }) {
+  const Employer = useSelector((state) => state.employer.employer)
   const navigate = useNavigate()
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
@@ -35,7 +37,7 @@ function CreateJobForm({ selectedData = null }) {
     onSubmit: async (values) => {
       console.log("Form submitted with values:", values);
       console.log("Selected Requirements:", selectedRequirements);
-      const status = await employerJobCreation(values);
+      const status = await employerJobCreation(values , Employer?.employerId);
       if(status) {
         toast.success("Job created")
         navigate('/employer/job_list')

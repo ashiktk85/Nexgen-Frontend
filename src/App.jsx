@@ -18,7 +18,7 @@ function App() {
           </Routes>
         </Router>
         <Toaster
-          position="top-right"
+          position="top-center"
           expand={true}
           closeButton
           richColors

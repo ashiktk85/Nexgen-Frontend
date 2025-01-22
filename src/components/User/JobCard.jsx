@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const JobCard = ({title  ,location , salary , date , id }) => {
   const navigate = useNavigate()
   const jobDetailNavigation = () => {
-    navigate(`/job-details/:${id}`)
+    navigate(`/job-details/${id}`)
   }
   return (
     <article className="w-80   mx-auto bg-white shadow-md rounded-lg p-6 space-y-4" aria-label="Job listing card for UI/UX Designer">
