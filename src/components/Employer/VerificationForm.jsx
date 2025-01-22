@@ -128,23 +128,24 @@ export default function VerificationForm() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen">
+    <div className="flex h-screen">
       {/* Left Section */}
-      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
-        <div className="w-full max-w-md">
+      <div className=" w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
+        <div className="w-full ">
           {/* Logo */}
+          <div className="max-w-2xl mx-auto p-4 overflow-auto">
           <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
             Nexgen
           </h1>
 
           {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
-            Log in to your Account
+            Verify your Account
           </h2>
           <p className="text-gray-500 mb-6 text-center lg:text-left">
             Welcome back!
           </p>
-
+          </div>
           {/* Email and Password Form */}
           <div className="max-w-2xl mx-auto p-4 overflow-auto">
             <Card>
@@ -225,6 +226,7 @@ export default function VerificationForm() {
                       <div>
                         <label>Aadhar Card Front</label>
                         <input
+                          className="md:ml-2"
                           type="file"
                           accept={ACCEPTED_IMAGE_TYPES.join(",")}
                           onChange={(event) => {
@@ -245,6 +247,7 @@ export default function VerificationForm() {
                       <div>
                         <label>Aadhar Card Back</label>
                         <input
+                          className="md:ml-2"
                           type="file"
                           accept={ACCEPTED_IMAGE_TYPES.join(",")}
                           onChange={(event) => {
@@ -269,6 +272,7 @@ export default function VerificationForm() {
                     <div>
                       <label>Shop Certificate</label>
                       <input
+                        className="md:ml-2"
                         type="file"
                         accept={ACCEPTED_IMAGE_TYPES.join(",")}
                         onChange={(event) => {
@@ -330,14 +334,9 @@ export default function VerificationForm() {
       </div>
 
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
+      {/* <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
         <div className="max-w-md">
-          {/* <img
-      src="https://undraw.co/api/illustrations/random?color=ffffff&theme=teamwork"
-      alt="Mobile Technician Illustration"
-      className="mb-6 max-h-64 w-full object-contain"
-      loading="lazy"
-    /> */}
+         
           <GrapeAnimation className="sm:hidden" />
 
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
@@ -348,13 +347,9 @@ export default function VerificationForm() {
             Empowering Careers, One Opportunity at a Time.
           </p>
 
-          {/* <div className="flex justify-center gap-2">
-      <span className="h-2 w-2 bg-white rounded-full"></span>
-      <span className="h-2 w-2 bg-white opacity-50 rounded-full"></span>
-      <span className="h-2 w-2 bg-white opacity-50 rounded-full"></span>
-    </div> */}
+          
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
