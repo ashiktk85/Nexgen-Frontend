@@ -22,7 +22,7 @@ const userSlice = createSlice({
         .addCase(userLoginAction.fulfilled, (state, action) => {
             if(action.payload){
                 state.seekerInfo = action.payload?.userData || {}
-                console.log('User data in store: ', state.seekerInfo)
+              
             }
         })
         .addCase(userLoginAction.rejected, (state, action) => {

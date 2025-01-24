@@ -1,10 +1,13 @@
 import React, { useRef, useState, useEffect } from "react";
-import GrapeAnimation from "../components/GrapeAnimation";
+
 import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import useRequest from "../hooks/useRequest";
-import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
+
+import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import GrapeAnimation from "@/components/GrapeAnimation";
+import useRequest from "@/hooks/useRequest";
+import { JoinFull } from "@mui/icons-material";
 
 const RegisterOtp = () => {
   const OTP_LENGTH = 6;
@@ -50,29 +53,32 @@ const RegisterOtp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const email = localStorage.getItem("email");
+      const email = localStorage.getItem("employer-email");
       const joinedOtp = otp.join("");
-      const payload = {
-        email,
-        otp: joinedOtp,
-      };
-     
-      const {data} = await userAxiosInstance.post('/verify-otp' , payload)
+      const data = {
+        otp : joinedOtp,
+        email
+      }
       
-    console.log(data);
-    if(data.status) {
-      localStorage.removeItem('email')
-      toast.success('Registration successful')
-      navigate('/login')
-    }
-    
+      console.log(data);
+      
+      const res = await employerAxiosInstnce.post('/verify-otp' , data)
+      console.log(res);
+      if(res) {
+        localStorage.removeItem("employer-email")
+        toast.success("Otp verification successfull")
+        setTimeout(() => {
+            navigate('/employer/employer-login')
+        }, 1500);
+      }
+      
 
       if (loading) return <p>Loading...</p>;
       if (error) return <p>Error: {error}</p>;
     } catch (err) {
-      console.log(err.resposne.data.message);
+      console.log(err , "dhinuuu");
       
-      toast.error(err.resposne.data.message || "An error occurred");
+      toast.error(err.response.data.message || "An error occurred");
     }
   };
 
@@ -140,7 +146,8 @@ const RegisterOtp = () => {
 
           <div className="text-center mt-4 flex justify-center gap-3">
             <p className="text-gray-600">Didn't receive the code?</p>
-            <button className="text-blue-600 hover:text-blue-700 text-sm hover:underline">
+            <button className="text-blue-600 hover:text-blue-700 text-sm hover:underline"
+            >
               Resend Code
             </button>
           </div>

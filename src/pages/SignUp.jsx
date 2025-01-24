@@ -6,6 +6,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
 import useRequest from "../hooks/useRequest";
+import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -86,35 +87,24 @@ const SignupPage = () => {
     onSubmit: async (values) => {
       try {
         console.log(values);
-      
-        sendRequest({
-          url: "/signup",
-          method: "POST",
-          data: values,
-          onSuccess: (data) => {
-            console.log("Fetched data:", data);
-            localStorage.setItem('token', data.response.token)
-    
-            // Toast on success
-            toast.info(data.response.message);
-    
-            // Navigate to another page
-            setTimeout(() => {
-              navigate("/otp-verification");
-            }, 1500);
-          },
-          onError: (err) => {
-            console.error("Error fetching data:", err);
-    
-            // Toast on error
-            toast.error(err.response.data.message || "An error occurred during sign-up");
-          },
-        });
-
+        const payload = {
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          phone: values.phone,
+          password : values.password
+        }
+        
+        const {data} = await userAxiosInstance.post('/signup' , payload)
+        if(data) {
+          localStorage.setItem("email", values.email)
+          navigate('/otp-verification')
+        }
+        
         if (loading) return <p>Loading...</p>;
         if (error) return <p>Error: {error}</p>;
       } catch (err) {
-        toast.error(err.message || "An error occurred");
+        toast.warning(err.response.data.message || "An error occured")
       }
     },
   });
@@ -382,7 +372,7 @@ const SignupPage = () => {
           <p className="text-center text-sm text-gray-600 mt-4">
             Already have an account?{" "}
             <a
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/login")}
               className="text-blue-600 hover:underline cursor-pointer"
             >
               Log in

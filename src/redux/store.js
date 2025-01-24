@@ -1,5 +1,6 @@
-import { configureStore } from '@reduxjs/toolkit'
-import userReducer from './slices/userSlice'
+import { configureStore } from '@reduxjs/toolkit';
+import userReducer from './slices/userSlice';
+import employerReducer from './slices/employer';
 import {
     persistStore,
     persistReducer,
@@ -8,29 +9,40 @@ import {
     PAUSE,
     PERSIST,
     PURGE,
-    REGISTER,
-  } from 'redux-persist'
+    REGISTER
+} from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 
-const persistConfig = {
-    key: 'root',
+
+const userPersistConfig = {
+    key: 'user',
     version: 1,
     storage
-  }; 
+};
 
-  const persistedReducer = persistReducer(persistConfig, userReducer);
+const employerPersistConfig = {
+    key: 'employer',
+    version: 1,
+    storage
+};
+
+
+const persistedUserReducer = persistReducer(userPersistConfig, userReducer);
+const persistedEmployerReducer = persistReducer(employerPersistConfig, employerReducer);
+
 
 const store = configureStore({
     reducer: {
-        user: persistedReducer
+        user: persistedUserReducer,
+        employer: persistedEmployerReducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
-          serializableCheck: {
-            ignoreActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-          },
+            serializableCheck: {
+                ignoreActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
+            },
         }),
-})
+});
 
 const persistor = persistStore(store);
 
