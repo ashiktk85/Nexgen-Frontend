@@ -66,7 +66,7 @@ function User() {
       <Route path="/otp-verification" element={<RegisterOtp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/job-application" element={<JobApplication />} />
+      <Route path="/job-application/:id" element={<JobApplication />} />
       <Route path="/application-submitted" element={<ApplicationSubmitted />} />
       <Route path="/all-jobs" element={<AllJobsPage />} />
       <Route path="/job-details/:id" element={<JobDetailPage />} />

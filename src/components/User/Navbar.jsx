@@ -14,7 +14,9 @@ const Navbar = () => {
       {/* Left Section: Logo and Search Bar */}
       <div className="flex items-center space-x-4">
         {/* Logo */}
-        <div className="text-2xl font-bold text-primary">Nexgen</div>
+        <div className="text-2xl font-bold text-primary cursor-pointer"
+        onClick={() => navigate('/')}
+        >Nexgen</div>
         {/* Search Bar */}
 
 

@@ -26,6 +26,16 @@ const JobDetails = () => {
     fetchData();
   }, [id, navigate]);
 
+  const handleApplyJob =  () => {
+    navigate(`/job-application/${id}` , {
+      state : {
+        companyName : company?.name,
+        phone : job?.phone,
+        companyLocation : `${job?.state}, ${job?.city}`
+      }
+    })
+  }
+
   if (!job || !company) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
 
   return (
@@ -49,7 +59,9 @@ const JobDetails = () => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <button className="px-4 py-2 bg-primary text-white rounded-md text-center text-sm font-semibold font-sans hover:bg-primary-dark transition-colors">
+                <button className="px-4 py-2 bg-primary text-white rounded-md text-center text-sm font-semibold font-sans hover:bg-primary-dark transition-colors"
+                onClick={handleApplyJob}
+                >
                   Apply Now
                 </button>
                 <div className="flex gap-4">
