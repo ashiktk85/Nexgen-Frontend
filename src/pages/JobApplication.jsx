@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { FaBuilding, FaPhone, FaUpload } from "react-icons/fa";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
@@ -6,14 +7,40 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Countries_Dataset from "../data/Countries_Dataset.json";
 import { useFormik } from "formik";
 import Navbar from "../components/User/Navbar";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
+import { toast } from "sonner";
+
+// Comprehensive list of Kerala districts
+const IndianStatesDistricts = {
+  "Kerala": [
+    "Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod",
+    "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad",
+    "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"
+  ]
+};
 
 const JobApplication = () => {
+  const dispatch = useDispatch();
+  const { id: jobId } = useParams();
+  const location = useLocation();
+  const { companyName, phone, companyLocation } = location.state || {};
+  const navigate = useNavigate()
+
+  // Retrieve user data from Redux store
+  const userData = useSelector((state) => state.user.seekerInfo || {});
+
+  const [selectedState, setSelectedState] = useState("Kerala");
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
+
   const formik = useFormik({
     initialValues: {
-      name: "",
-      email: "",
-      phone: "",
+      name: userData.firstName + " " + userData?.lastName || "",
+      email: userData.email || "",
+      phone: userData.phone || "",
       countryCode: "+91",
+      state: "Kerala",
+      district: "",
       resume: null,
       additionalDoc: null,
       coverLetter: "",
@@ -36,8 +63,38 @@ const JobApplication = () => {
       }
       return errors;
     },
-    onSubmit: (values) => {
-      console.log("Form Data", values);
+    onSubmit: async (values) => {
+      try {
+        console.log("Form Data", values);
+        const payload = {
+          job_id: jobId,
+          user_id: userData?.userId,
+          name: values.name,
+          email: values?.email,
+          location: values?.district,
+          phone: values?.phone,
+          resume: values?.resume,
+          coverLetter: values?.coverLetter,
+        }
+        const { data } = await userAxiosInstance.post(`/submit-application`, payload,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
+  
+
+        if(data.status) {
+          toast.success("Application submitted")
+          navigate('/application-submitted')
+        }
+        console.log("response from server" , data);
+      } catch (error) {
+        toast.warning(error?.response.data.message || "something went wrong")
+      }
+    
+      
     },
   });
 
@@ -60,19 +117,17 @@ const JobApplication = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-2xl space-y-8">
-          {/* Job Header */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <FaBuilding className="h-5 w-5 text-gray-400" />
-              <span className="text-sm text-gray-600">Nexgen Company</span>
+              <span className="text-sm text-gray-600">{companyName}</span>
             </div>
             <h1 className="text-2xl font-bold">Product Designer</h1>
-            <p className="text-sm text-gray-600">Porto, Portugal</p>
+            <p className="text-sm text-gray-600">{companyLocation}</p>
           </div>
 
-          {/* Form */}
           <form onSubmit={formik.handleSubmit} className="space-y-6">
-            {/* Personal Information */}
+            {/* Personal Information Fields */}
             <div className="space-y-4">
               <h2 className="font-semibold">Personal Information</h2>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -192,6 +247,46 @@ const JobApplication = () => {
               </div>
             </div>
 
+            {/* State and District Selection */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {/* State Selection (Disabled and set to Kerala) */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  State*
+                </label>
+                <TextField
+                  id="state"
+                  variant="outlined"
+                  fullWidth
+                  value="Kerala"
+                  disabled
+                />
+              </div>
+
+              {/* District Selection */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  District*
+                </label>
+                <Autocomplete
+                  id="district-select"
+                  options={IndianStatesDistricts["Kerala"]}
+                  value={selectedDistrict}
+                  onChange={(event, newValue) => {
+                    setSelectedDistrict(newValue);
+                    formik.setFieldValue("district", newValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      placeholder="Select District"
+                    />
+                  )}
+                />
+              </div>
+            </div>
+
             {/* Resume Upload */}
             <div className="space-y-2">
               <label
@@ -231,12 +326,12 @@ const JobApplication = () => {
             <div className="space-y-2">
               <label
                 className="block text-sm font-medium text-gray-700"
-                htmlFor="aadditionalFile"
+                htmlFor="additionalFile"
               >
                 Additional file (optional)
               </label>
               <label
-                htmlFor="aadditionalFile"
+                htmlFor="additionalFile"
                 className="rounded-lg border border-dashed border-gray-300 p-4 cursor-pointer flex items-center justify-center gap-2"
               >
                 <FaUpload className="h-5 w-5 text-gray-400" />
@@ -256,11 +351,7 @@ const JobApplication = () => {
                   <strong>{formik.values.additionalDoc.name}</strong>
                 </div>
               )}
-              {formik.errors.resume && (
-                <span className="text-red-500 text-sm">
-                  {formik.errors.resume}
-                </span>
-              )}
+
             </div>
 
             {/* Cover Letter */}
