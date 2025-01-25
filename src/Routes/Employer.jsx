@@ -13,7 +13,7 @@ import RegisterOtp from '@/pages/Employer/OtpVerification'
 function Employer() {
     return (
         <Routes>
-            <Route path='/employer-login' element={<EmployerLogin />} />
+            <Route path='/employer-login' element={<Employer Login />} />
             <Route path='/register' element={<Register />} />
             <Route path='/profile' element={<Profile />} />
             <Route path='/otp' element={<RegisterOtp />} />
@@ -23,6 +23,7 @@ function Employer() {
                 <Route path='job_list' element={<JobList />} />
                 <Route path='applicants' element={<Applicants />} />
                 <Route path='company_details' element={<CompanyDetails />} />
+                
             </Route>
         </Routes>
     )
