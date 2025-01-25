@@ -80,7 +80,7 @@ const StyledCard = styled(Card)({
   borderRadius: '8px',
 })
 
-// Custom DialogTitle component to handle close button properly
+
 const DialogTitle = ({ children, onClose, ...other }) => {
   return (
     <MuiDialogTitle {...other}>
