@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Switch from "@mui/material/Switch";
 import JobCard from "@/components/Employer/JobCard";
+import { useSelector } from "react-redux";
+import { toast } from "sonner";
+import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 
 const dummyColumns = (handleActiveToggle) => [
   { key: "title", label: "Title" },
@@ -29,27 +32,37 @@ const dummyColumns = (handleActiveToggle) => [
 ];
 
 function JobList() {
-  // Dummy data for testing
-  const jobList = [
-    { id: 1, title: "Software Engineer", location: "New York", active: true },
-    { id: 2, title: "Product Manager", location: "San Francisco", active: false },
-    { id: 3, title: "Designer", location: "Austin", active: true },
-    { id: 4, title: "Data Scientist", location: "Seattle", active: false },
-    { id: 5, title: "QA Engineer", location: "Chicago", active: true },
-    { id: 6, title: "DevOps Engineer", location: "Denver", active: false },
-  ];
+  const employer = useSelector((state) => state.employer.employer)
+  const [jobs, setJobs] = useState([])
+
+  useEffect(() => {
+    const fetchData = async() => {
+      try {
+        const res = await employerAxiosInstnce.get(`/job-list/${employer?.employerId}`)
+     
+        console.log(res);
+        
+        setJobs(res.data)
+      } catch (error) {
+        toast.warning(error?.response?.data?.message || "An error occured")
+      }
+    }
+
+    fetchData()
+  },[employer?.employerId])
 
   return (
     <div className="my-6 px-10">
       <h1 className="text-2xl font-bold mb-4">Job List</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 ">
         
-        <JobCard  />
-        <JobCard  />
-        <JobCard  />
-        <JobCard  />
-        <JobCard  />
-        <JobCard  />
+        {
+          jobs.map((job ,index) => (
+            <JobCard key = {index} title={job?.jobTitle} location={job?.city}
+            postedDate={job?.createdAt} isActive={job?.isBlocked} applicantsCount={job?.applicationsCount}
+            />
+          ))
+        }
       </div>
     </div>
   );

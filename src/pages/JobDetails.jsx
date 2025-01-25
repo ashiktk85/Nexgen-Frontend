@@ -4,17 +4,19 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import userAxiosInstance from '@/config/axiosConfig/userAxiosInstance';
 import Navbar from '../components/User/Navbar';
+import { useSelector } from 'react-redux';
 
 const JobDetails = () => {
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [company, setCompany] = useState(null);
   const { id } = useParams();
+  const user = useSelector((state) => state.user.seekerInfo)
 
   useEffect(() => {
-    const fetchData = async() => {
+    const fetchData = async () => {
       try {
-        const { data } = await userAxiosInstance.get(`/job-details/${id}`);
+        const { data } = await userAxiosInstance.get(`/job-details/${id}`, { params: { userId: user.userId } });
         setJob(data.jobDetails);
         setCompany(data.employerDetails);
       } catch (error) {
@@ -26,12 +28,12 @@ const JobDetails = () => {
     fetchData();
   }, [id, navigate]);
 
-  const handleApplyJob =  () => {
-    navigate(`/job-application/${id}` , {
-      state : {
-        companyName : company?.name,
-        phone : job?.phone,
-        companyLocation : `${job?.state}, ${job?.city}`
+  const handleApplyJob = () => {
+    navigate(`/job-application/${id}`, {
+      state: {
+        companyName: company?.name,
+        phone: job?.phone,
+        companyLocation: `${job?.state}, ${job?.city}`
       }
     })
   }
@@ -59,16 +61,22 @@ const JobDetails = () => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <button className="px-4 py-2 bg-primary text-white rounded-md text-center text-sm font-semibold font-sans hover:bg-primary-dark transition-colors"
-                onClick={handleApplyJob}
+                <button
+                  className={`px-4 py-2 text-white rounded-md text-center text-sm font-semibold font-sans transition-colors ${job.applied
+                      ? 'bg-gray-500 cursor-not-allowed'
+                      : 'bg-primary hover:bg-primary-dark'
+                    }`}
+                  onClick={!job.applied ? handleApplyJob : null}
+                  disabled={job.applied}
                 >
-                  Apply Now
+                  {job.applied ? 'Applied' : 'Apply Now'}
                 </button>
                 <div className="flex gap-4">
                   <CiBookmarkCheck className="text-2xl text-gray-700 cursor-pointer hover:text-primary transition-colors" />
                   <CiShare2 className="text-2xl text-gray-700 cursor-pointer hover:text-primary transition-colors" />
                 </div>
               </div>
+
             </div>
           </div>
 
@@ -100,7 +108,7 @@ const JobDetails = () => {
             </div>
           </div>
         </section>
-        
+
         <aside className="w-full lg:w-1/4 space-y-4">
           <h2 className="text-xl font-semibold">Related Jobs</h2>
           <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto overflow-x-hidden pr-2">

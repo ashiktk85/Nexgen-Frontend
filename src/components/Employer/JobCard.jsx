@@ -1,22 +1,24 @@
-import React from "react"
-import { Card, Typography, Button, Tag, Space } from "antd"
-import { EditOutlined, EyeInvisibleOutlined, DeleteOutlined } from "@ant-design/icons"
+import React from "react";
+import { Card, Typography, Button, Tag, Space } from "antd";
+import { EditOutlined, EyeInvisibleOutlined, DeleteOutlined, TeamOutlined } from "@ant-design/icons";
+import moment from 'moment'
 
-const { Text, Title } = Typography
+const { Text, Title } = Typography;
 
 export default function JobCard({
   title,
-  company,
   location,
   postedDate,
   isActive,
+  applicantsCount,
   onEdit,
   onUnlist,
   onDelete,
+  onViewApplicants,
 }) {
   return (
     <Card
-      className="w-80 shadow-md hover:shadow-lg transition-shadow duration-300"
+      className="w-80 shadow-md hover:shadow-lg transition-shadow duration-300 relative"
       actions={[
         <Button type="text" icon={<EditOutlined />} onClick={onEdit} key="edit">
           Edit
@@ -30,17 +32,32 @@ export default function JobCard({
       ]}
     >
       <Space direction="vertical" size="small" className="w-full">
+        <div className="flex justify-between items-center">
+          {/* Company Name */}
+          {/* <Text type="secondary">{company}</Text> */}
+          {/* Posted on Date */}
+          <Text type="secondary" className="text-xs">
+          Posted on: {moment(postedDate).format("MMMM Do, YYYY")}
+          </Text>
+        </div>
+
         <Title level={4} className="mb-0">
           {title}
         </Title>
-        <Text type="secondary">{company}</Text>
         <Text>{location}</Text>
         <Space className="w-full justify-between">
-          <Text type="secondary">Posted: {postedDate}</Text>
-          <Tag color={isActive ? "green" : "red"}>{isActive ? "Active" : "Inactive"}</Tag>
+          <Text type="secondary">Location: {location}</Text>
+          <Tag color={isActive ? "red" : "green"} >{isActive ? "Inactive" : "Active"}</Tag>
         </Space>
+        <Button
+          type="default"
+          icon={<TeamOutlined />}
+          onClick={onViewApplicants}
+          className="flex items-center"
+        >
+          Applicants ( { applicantsCount } )
+        </Button>
       </Space>
     </Card>
-  )
+  );
 }
-
