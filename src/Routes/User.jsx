@@ -12,6 +12,7 @@ import Home2 from "../pages/Home2";
 import AllJobsPage from "../pages/AllJobs";
 import JobDetailPage from "../pages/JobDetails";
 import ListingTable from "../components/common/table";
+import Home3 from "@/pages/Home3";
 
 
 const usersData = [
@@ -61,6 +62,7 @@ function User() {
     <Routes>
        <Route path="/" element={<Home />} />
        <Route path="/home" element={<Home2 />} />
+       <Route path="/home3" element={<Home3 />} />
       <Route path="/sign-up" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/otp-verification" element={<RegisterOtp />} />
