@@ -56,7 +56,7 @@ const LoginPage = () => {
         if (error) return <p>Error: {error}</p>;
       } catch (err) {
         console.log('Error in user login component after login: ', err)
-        toast.error(err.message || "An error occurred");
+        toast.error(err.response?.data?.message || "An error occurred");
       }
     },
   });

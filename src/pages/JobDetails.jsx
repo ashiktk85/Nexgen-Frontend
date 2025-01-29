@@ -56,15 +56,22 @@ const JobDetails = () => {
                   <p className="text-sm">Location: <span className="font-semibold">{job.city}, {job.state}</span></p>
                   <p className="text-sm">Email: <span className="font-semibold">{job.email}</span></p>
                   <p className="text-sm">Phone: <span className="font-semibold">{job.countryCode} {job.phone}</span></p>
-                  <p className="text-sm">Salary: <span className="font-semibold">₹{job.salary[0]} - ₹{job.salary[1]}</span></p>
+                  <p className="text-sm">
+                    Salary:{" "}
+                    <span className="font-semibold">
+                      {job.salary[0] === 0 && job.salary[1] === 0
+                        ? "Not Provided"
+                        : `₹${job.salary[0]} - ₹${job.salary[1]}`}
+                    </span>
+                  </p>
                   <p className="text-sm">Experience: <span className="font-semibold">{job.experience[0]}-{job.experience[1]} years</span></p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <button
                   className={`px-4 py-2 text-white rounded-md text-center text-sm font-semibold font-sans transition-colors ${job.applied
-                      ? 'bg-gray-500 cursor-not-allowed'
-                      : 'bg-primary hover:bg-primary-dark'
+                    ? 'bg-gray-500 cursor-not-allowed'
+                    : 'bg-primary hover:bg-primary-dark'
                     }`}
                   onClick={!job.applied ? handleApplyJob : null}
                   disabled={job.applied}

@@ -6,7 +6,7 @@ import {
   Star,
   CheckCircleOutline,
 } from "@mui/icons-material";
-import Navbar from "../components/User/Navbar";
+import NavbarHome from "../components/User/NavbarHome";
 import JobCard from "../components/User/JobCard";
 import axios from "axios";
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
@@ -33,7 +33,7 @@ export default function Home3() {
 
   return (
     <div className="relative z-0 flex flex-col min-h-screen">
-      <Navbar />
+      <NavbarHome/>
 
       <main className="flex-grow">
         {/* Hero Section */}

@@ -4,6 +4,7 @@ import JobCard from "@/components/Employer/JobCard";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import { useParams } from "react-router-dom";
 
 const dummyColumns = (handleActiveToggle) => [
   { key: "title", label: "Title" },
@@ -32,6 +33,7 @@ const dummyColumns = (handleActiveToggle) => [
 ];
 
 function JobList() {
+ 
   const employer = useSelector((state) => state.employer.employer)
   const [jobs, setJobs] = useState([])
 
@@ -59,7 +61,7 @@ function JobList() {
         {
           jobs.map((job ,index) => (
             <JobCard key = {index} title={job?.jobTitle} location={job?.city}
-            postedDate={job?.createdAt} isActive={job?.isBlocked} applicantsCount={job?.applicationsCount}
+            postedDate={job?.createdAt} isActive={job?.isBlocked} applicantsCount={job?.applicationsCount} jobId = {job?._id}
             />
           ))
         }
