@@ -7,8 +7,8 @@ import { CiStar } from "react-icons/ci";
 import Navbar from "../components/User/Navbar";
 import candidate from "../assets/Candidate.png";
 import employer from "../assets/Employer.png";
-import banner1 from "../assets/banner-home1.webp";
-import banner2 from "../assets/banner-home2.webp";
+// import banner1 from "../assets/banner-home1.webp";
+// import banner2 from "../assets/banner-home2.webp";
 import { FaLocationDot } from "react-icons/fa6";
 import { FaRegClock } from "react-icons/fa";
 
@@ -73,6 +73,7 @@ export default function Home() {
       <Navbar />
 
       <main className="w-full py-8">
+
         <section className="mb-12 px-10">
           <h2 className="text-2xl font-bold text-center mb-8">
             Start Your Job Journey
