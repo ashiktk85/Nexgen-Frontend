@@ -14,7 +14,7 @@ const NavbarHome = () => {
       <div className="flex items-center space-x-4 ">
         {/* Logo */}
         <div
-          className="md:text-3xl lg:text-5xl  font-bold text-primary cursor-pointer"
+          className="md:text-3xl lg:text-5xl  font-bold text-white cursor-pointer"
           onClick={() => navigate("/")}
         >
           Nexgen
@@ -23,7 +23,7 @@ const NavbarHome = () => {
       </div>
 
       {/* Right Section: Navigation Links */}
-      <div className="flex flex-col items-end lg:gap-4 space-x-6 md:text-sm lg:text-lg font-bold">
+      <div className="flex  items-end lg:gap-4 space-x-6 md:text-sm lg:text-lg font-bold">
         {/* Home */}
         <div className="flex items-center space-x-1 cursor-pointer text-white hover:text-blue-300">
           {/* <Home fontSize="small" /> */}
