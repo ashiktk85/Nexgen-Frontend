@@ -10,12 +10,12 @@ export const userLoginAction = createAsyncThunk('user/login',
                 return {
                     success: true,
                     message: 'User login successfully',
-                    userData: response.data.userData,
+                    userData: response.data.cred,
                 }
             }
         } catch (error) {
             console.error('Error in userLoginAction thunk: ', error)
-            return isRejectedWithValue(error.response?.data?.message || 'Login failed')
+           throw new Error(error.response?.data?.message || 'Login failed')
         }
     }
 )

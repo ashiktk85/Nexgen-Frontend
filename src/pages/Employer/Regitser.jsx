@@ -5,11 +5,31 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const keralaDistricts = [
+    "Alappuzha",
+    "Ernakulam",
+    "Idukki",
+    "Kannur",
+    "Kasaragod",
+    "Kollam",
+    "Kottayam",
+    "Kozhikode",
+    "Malappuram",
+    "Palakkad",
+    "Pathanamthitta",
+    "Thiruvananthapuram",
+    "Thrissur",
+    "Wayanad"
+  ];
 
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
@@ -35,29 +55,23 @@ const Register = () => {
 
   const formik = useFormik({
     initialValues: {
-      firstName: "",
-      lastName: "",
-      phoneNumber: "",
+      name: "",
+      phone: "",
       email: "",
       password: "",
       confirmPassword: "",
+      district: ""
     },
     validationSchema: Yup.object({
-      firstName: Yup.string()
+      name: Yup.string()
         .trim()
         .min(2, "First name must be at least 2 characters")
         .max(50, "First name must not exceed 50 characters")
-        .required("First name is required"),
+        .required(" name is required"),
 
-      lastName: Yup.string()
-        .trim()
-        .min(2, "Last name must be at least 2 characters")
-        .max(50, "Last name must not exceed 50 characters")
-        .required("Last name is required"),
-
-      phoneNumber: Yup.string()
-      .min(10, "Phone number must be at least 10 characters")
-        .matches(/^\+?[1-9]\d{1,14}$/, "Phone number is not valid") 
+      phone: Yup.string()
+        .min(10, "Phone number must be at least 10 characters")
+        .matches(/^\+?[1-9]\d{1,14}$/, "Phone number is not valid")
         .required("Phone number is required"),
 
       email: Yup.string()
@@ -80,23 +94,28 @@ const Register = () => {
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password"), null], "Passwords must match")
         .required("Confirm password is required"),
+        
+      district: Yup.string()
+        .required("District is required")
     }),
     onSubmit: async (values) => {
       try {
-        toast.success("Login successful");
-        // const loginResult = await dispatch(login(values)).unwrap();
-        // if (loginResult) {
-        //   if (userInfo?.isBlocked) {
-        //     toast.error(
-        //       "Currently, you are restricted from accessing the site."
-        //     );
-        //     return;
-        //   }
-        //   toast.success("Login successful");
-        //   setTimeout(() => {
-        //     navigate("/");
-        //   }, 1500);
-        // }
+        const paylaod = {
+          name: values.name,
+          location: values.district,
+          email: values.email,
+          password: values.password,
+          phone: values.phone,
+        }
+        console.log(values);
+        const {data} = await employerAxiosInstnce.post('/signup' ,paylaod)
+        console.log(data);
+        if(data) {
+          localStorage.setItem("employer-email" , values?.email)
+          navigate('/employer/otp')
+        }
+        
+        
       } catch (err) {
         toast.error(err.message || "An error occurred");
       }
@@ -108,125 +127,91 @@ const Register = () => {
       {/* Left Section */}
       <div className="hidden sm:hidden lg:flex lg:w-1/2 w-full bg-primary flex-col justify-center items-center text-center text-white p-6 lg:p-10 ">
         <div className="max-w-md ">
-          {/* <img
-      src="https://undraw.co/api/illustrations/random?color=ffffff&theme=teamwork"
-      alt="Mobile Technician Illustration"
-      className="mb-6 max-h-64 w-full object-contain"
-      loading="lazy"
-    /> */}
           <GrapeAnimation className="sm:hidden" />
 
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
-          Connecting Talent with Opportunity—Post Jobs, Build Futures.
+            Connecting Talent with Opportunity—Post Jobs, Build Futures.
           </h2>
 
           <p className="text-base lg:text-lg text-gray-200 mb-4">
-          Empowering Careers, One Opportunity at a Time.
+            Empowering Careers, One Opportunity at a Time.
           </p>
-
-          {/* <div className="flex justify-center gap-2">
-      <span className="h-2 w-2 bg-white rounded-full"></span>
-      <span className="h-2 w-2 bg-white opacity-50 rounded-full"></span>
-      <span className="h-2 w-2 bg-white opacity-50 rounded-full"></span>
-    </div> */}
         </div>
       </div>
       {/* Footer for Small Screens */}
-        <div className="block sm:block lg:hidden bg-primary text-white text-center p-4">
-            Connecting Talent with Opportunity—Post Jobs, Build Futures.
-        </div>
+      <div className="block sm:block lg:hidden bg-primary text-white text-center p-4">
+        Connecting Talent with Opportunity—Post Jobs, Build Futures.
+      </div>
 
       {/* Right Section */}
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10 ">
         <div className="w-full max-w-md">
-          {/* Logo */}
           <h1 className="text-2xl font-bold text-primary mb-3 text-center lg:text-left">
             Nexgen
           </h1>
 
-          {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
-           Register as an Employer
+            Register as an Employer
           </h2>
           <p className="text-gray-500 mb-2 text-center lg:text-left">
             Join Us Today! Create Your Account to Get Started:
           </p>
 
-          {/* Social Login Buttons */}
-          {/* <div className="flex flex-col lg:flex-row gap-4 mb-6">
-            <button
-              className=" font-poppins py-2 px-4 border border-gray-300 rounded-md flex items-center justify-center gap-2 text-gray-700 w-full font-semibold"
-              aria-label="Log in with Google"
-            >
-              <img
-                src="https://img.icons8.com/color/24/google-logo.png"
-                alt="Google"
-                loading="lazy"
-              />
-              Google
-            </button>
-          </div> */}
-
-          {/* Divider */}
-          {/* <div className="relative my-4">
-            <span className="absolute bg-white px-4 -top-2 left-1/2 transform -translate-x-1/2 text-gray-500 text-sm">
-              or continue with email
-            </span>
-            <hr className="border-gray-300" />
-          </div> */}
-
-          {/* Email and Password Form */}
           <form onSubmit={formik.handleSubmit}>
             <div className="md:flex gap-5  ">
-              <div className="mb-3 md:w-1/2 ">
+              <div className="mb-3 md:w-full ">
                 <label
-                  htmlFor="first_name"
+                  htmlFor="name"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  First name
+                  Company/Employer Name
                 </label>
                 <input
                   type="text"
-                  id="first-name"
+                  id="name"
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
-                  placeholder="Enter your first name"
+                  placeholder="Enter your company name"
                   aria-required="true"
-                  value={formik.values.firstName}
+                  value={formik.values.name}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  name="firstName"
+                  name="name"
                 />
-                {formik.touched.firstName && formik.errors.firstName ? (
+                {formik.touched.name && formik.errors.name ? (
                   <div className="text-red-500 text-[13px]">
-                    {formik.errors.firstName}
+                    {formik.errors.name}
                   </div>
                 ) : null}
               </div>
+            </div>
 
-              <div className="mb-3 md:w-1/2">
-                <label
-                  htmlFor="first_name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Last name
-                </label>
-                <input
-                  type="text"
-                  id="last-name"
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
-                  placeholder="Enter your last name"
-                  aria-required="true"
-                  value={formik.values.lastName}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  name="lastName"
-                />
-                {formik.touched.lastName && formik.errors.lastName ? (
-                  <div className="text-red-500 text-[13px]">
-                    {formik.errors.lastName}
-                  </div>
-                ) : null}
-              </div>
+            <div className="mb-3">
+              <label
+                htmlFor="district"
+                className="block text-sm font-medium text-gray-700"
+              >
+                District
+              </label>
+              <select
+                id="district"
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
+                value={formik.values.district}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                name="district"
+              >
+                <option value="">Select a district</option>
+                {keralaDistricts.map((district) => (
+                  <option key={district} value={district}>
+                    {district}
+                  </option>
+                ))}
+              </select>
+              {formik.touched.district && formik.errors.district ? (
+                <div className="text-red-500 text-[13px]">
+                  {formik.errors.district}
+                </div>
+              ) : null}
             </div>
 
             <div className="mb-3">
@@ -238,18 +223,18 @@ const Register = () => {
               </label>
               <input
                 type="phone-number"
-                id="phone-number"
+                id="phone"
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
                 placeholder="Enter your phone number"
                 aria-required="true"
-                value={formik.values.phoneNumber}
+                value={formik.values.phone}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                name="phoneNumber"
+                name="phone"
               />
-              {formik.touched.phoneNumber && formik.errors.phoneNumber ? (
+              {formik.touched.phone && formik.errors.phone ? (
                 <div className="text-red-500 text-[13px]">
-                  {formik.errors.phoneNumber}
+                  {formik.errors.phone}
                 </div>
               ) : null}
             </div>
@@ -356,7 +341,6 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Login Button */}
             <button
               type="submit"
               className="w-full py-2 px-4 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700 mt-2"
@@ -365,7 +349,6 @@ const Register = () => {
             </button>
           </form>
 
-          {/* Create Account */}
           <p className="text-center text-sm text-gray-600 mt-4">
             Already have an account?{" "}
             <a
@@ -377,7 +360,6 @@ const Register = () => {
           </p>
         </div>
       </div>
-      
     </div>
   );
 };
