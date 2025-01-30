@@ -1,13 +1,10 @@
 import React, { useRef, useState, useEffect } from "react";
-
 import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 import GrapeAnimation from "@/components/GrapeAnimation";
 import useRequest from "@/hooks/useRequest";
-import { JoinFull } from "@mui/icons-material";
 
 const RegisterOtp = () => {
   const OTP_LENGTH = 6;

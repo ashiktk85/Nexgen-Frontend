@@ -56,6 +56,7 @@ const RegisterOtp = () => {
         email,
         otp: joinedOtp,
       };
+      console.log(payload);
      
       const {data} = await userAxiosInstance.post('/verify-otp' , payload)
       

@@ -49,7 +49,7 @@ const Navbar = (  ) => {
           </div>
           <div
             className="flex items-center space-x-1 cursor-pointer text-primary hover:text-blue-300"
-            onClick={() => navigate("/jobs")}
+            onClick={() => navigate("/all-jobs")}
           >
             <span>Browse Jobs</span>
           </div>

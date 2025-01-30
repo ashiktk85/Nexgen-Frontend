@@ -2,6 +2,7 @@ import React from "react";
 import { Card, Typography, Button, Tag, Space } from "antd";
 import { EditOutlined, EyeInvisibleOutlined, DeleteOutlined, TeamOutlined } from "@ant-design/icons";
 import moment from 'moment'
+import { useNavigate } from "react-router-dom";
 
 const { Text, Title } = Typography;
 
@@ -14,8 +15,9 @@ export default function JobCard({
   onEdit,
   onUnlist,
   onDelete,
-  onViewApplicants,
+  jobId
 }) {
+  const navigate = useNavigate()
   return (
     <Card
       className="w-80 shadow-md hover:shadow-lg transition-shadow duration-300 relative"
@@ -52,7 +54,7 @@ export default function JobCard({
         <Button
           type="default"
           icon={<TeamOutlined />}
-          onClick={onViewApplicants}
+          onClick={() => navigate(`/employer/applicants/${jobId}`)}
           className="flex items-center"
         >
           Applicants ( { applicantsCount } )

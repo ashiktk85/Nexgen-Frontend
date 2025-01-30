@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ListingTable from "../../../components/common/table";
 import {
   Dialog,
@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/dialog";
 import CreateJobForm from "@/components/Employer/CreateJobForm";
 import Switch from "@mui/material/Switch";
+import { useParams } from "react-router-dom";
+import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
+import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 
 const initialDummyUsers = [
   {
@@ -121,11 +124,27 @@ const dummyColumns = (handleActiveToggle) => [
   },
 ];
 
-function JobList() {
-  const [users, setUsers] = useState(initialDummyUsers); // State for users
+function Applicants() {
+  const{ jobId } = useParams()
+  const [users, setUsers] = useState(); // State for users
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+
+  useEffect(() => {
+    const fetchApplications = async() => {
+      try {
+        const {data} = await employerAxiosInstnce.get(`/job-applications/${jobId}`)
+        console.log(data, "ress");
+        
+        setUsers(data)
+      } catch (error) {
+        console.log(error);
+        
+      }
+    }
+    fetchApplications()
+  },[jobId])
 
   const handleEdit = (id) => {
     const user = users.find((user) => user.id === id);
@@ -218,4 +237,4 @@ function JobList() {
   );
 }
 
-export default JobList;
+export default Applicants;

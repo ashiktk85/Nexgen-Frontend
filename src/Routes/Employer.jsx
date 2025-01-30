@@ -14,7 +14,7 @@ import VerificationForm from '@/components/Employer/VerificationForm'
 function Employer() {
     return (
         <Routes>
-            <Route path='/employer-login' element={<Employer Login />} />
+            <Route path='/employer-login' element={<EmployerLogin />} />
             <Route path='/register' element={<Register />} />
             <Route path='/profile' element={<Profile />} />
             <Route path='/otp' element={<RegisterOtp />} />
@@ -23,7 +23,7 @@ function Employer() {
                 <Route path='dashboard' element={<Dashboard />} />
                 <Route path='create_job' element={<CreateJob />} />
                 <Route path='job_list' element={<JobList />} />
-                <Route path='applicants' element={<Applicants />} />
+                <Route path='applicants/:jobId' element={<Applicants />} />
                 <Route path='company_details' element={<CompanyDetails />} />
                 
                 

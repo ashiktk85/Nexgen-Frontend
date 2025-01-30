@@ -45,7 +45,7 @@ const SignupPage = () => {
       email: "",
       password: "",
     },
-    validationSchema: Yup.object({
+    validationSchema: Yup.object({  
       firstName: Yup.string()
         .trim()
         .min(2, "First name must be at least 2 characters")

@@ -6,13 +6,14 @@ import {
   Star,
   CheckCircleOutline,
 } from "@mui/icons-material";
-import Navbar from "../components/User/Navbar";
+import NavbarHome from "../components/User/NavbarHome";
 import JobCard from "../components/User/JobCard";
 import axios from "axios";
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { Button, Input } from "@mui/material";
 import ImageSiderComponent from "@/components/common/image-sliderComponent";
+import Navbar from "@/components/User/Navbar";
 
 // import {banner1} from "../../public/Images/banner1"
 
@@ -53,7 +54,7 @@ export default function Home3() {
 
   return (
     <div className="relative z-0 flex flex-col min-h-screen">
-      <Navbar />
+      <Navbar/>
 
       <main className="flex-grow">
         {/* h-[100vh] */}

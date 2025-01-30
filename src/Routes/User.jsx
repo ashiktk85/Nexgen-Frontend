@@ -61,7 +61,7 @@ function User() {
   return (
     <Routes>
        <Route path="/" element={<Home />} />
-       <Route path="/home" element={<Home2 />} />
+       <Route path="/home" element={<Home3 />} />
        <Route path="/home3" element={<Home3 />} />
       <Route path="/sign-up" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
