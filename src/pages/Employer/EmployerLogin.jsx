@@ -47,6 +47,8 @@ const EmployerLogin = () => {
           setTimeout(() => {
             navigate('/employer')
           }, 1000);
+        } else {
+          toast.error()
         }
       } catch (err) {
         toast.error(err.message || "An error occurred");
