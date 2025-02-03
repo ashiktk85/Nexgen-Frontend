@@ -15,6 +15,8 @@ const AllJobsPage = () => {
 
   const [jobs, setJobs] = useState([]);
 
+  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
