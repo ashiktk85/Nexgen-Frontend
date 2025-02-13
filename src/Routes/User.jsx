@@ -61,17 +61,17 @@ const handleToggleActive = (id) => {
 function User() {
   return (
     <Routes>
-       <Route path="/" element={<Home3 />} />
+       {/* <Route path="/" element={<Home3 />} /> */}
        {/* <Route path="/home" element={<Home3 />} /> */}
        {/* <Route path="/home3" element={<Home3 />} /> */}
       <Route path="/sign-up" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/otp-verification" element={<RegisterOtp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/profile" element={<Profile />} />
+      
       <Route path="/job-application/:id" element={<JobApplication />} />
       <Route path="/application-submitted" element={<ApplicationSubmitted />} />
-      <Route path="/all-jobs" element={<AllJobsPage />} />
+      
       <Route path="/job-details/:id" element={<JobDetailPage />} />
       <Route path="/table" element={<ListingTable
           users={usersData}
@@ -85,6 +85,8 @@ function User() {
 
       <Route path="/" element={<HomeLayout/>} >
           <Route path="/" element={<Home/>} />
+          <Route path="/all-jobs" element={<AllJobsPage />} />
+          <Route path="/profile" element={<Profile />} />
       </Route>
     </Routes>
   );

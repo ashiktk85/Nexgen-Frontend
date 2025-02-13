@@ -7,13 +7,14 @@ import {
   CheckCircleOutline,
 } from "@mui/icons-material";
 // import NavbarHome from "../components/User/NavbarHome";
-import JobCard from "@/components/Employer/JobCard"; 
+import JobCard from "@/components/Employer/JobCard";
 import axios from "axios";
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { Button, Input } from "@mui/material";
 import ImageSiderComponent from "@/components/common/image-sliderComponent";
 import Navbar from "@/components/User/Navbar";
+import { Link } from "react-router-dom";
 
 // import {banner1} from "../../public/Images/banner1"
 
@@ -58,7 +59,6 @@ export default function Home() {
         {/* h-[100vh] */}
         <div className="">
           {/* <ImageSiderComponent images={images} /> */}
-          
 
           <div className=" bg-blue-900 text-white  px-20 py-28 flex items-center">
             <div className="flex flex-col items-center container mx-auto  space-y-10 text-center">
@@ -73,7 +73,7 @@ export default function Home() {
               </p>
 
               {/* <div className="md:space-y-4 lg:space-y-8 mb-0 "> */}
-                {/* <h1 className="leading-tight text-white font-bold text-3xl  lg:text-6xl font-serif">
+              {/* <h1 className="leading-tight text-white font-bold text-3xl  lg:text-6xl font-serif">
                 Find Your
                 <br />
                 Dream Job Today
@@ -85,7 +85,7 @@ export default function Home() {
                 and secure your dream job today!
               </p> */}
 
-                {/* <div className="flex max-w-md gap-2 rounded-lg bg-white mb-8">
+              {/* <div className="flex max-w-md gap-2 rounded-lg bg-white mb-8">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                     <Input
@@ -102,16 +102,21 @@ export default function Home() {
                   </Button>
                 </div> */}
 
-                <div className="flex items-start gap-8">
+              <div className="flex items-start gap-8">
+                <Link to="/sign-up">
                   <div className="rounded-xl bg-blue-500 p-5 px-9 transform transition-transform hover:scale-105 hover:cursor-pointer">
                     <div className="text-sm">Register as</div>
                     <div className="lg:text-2xl font-semibold">Job Seeker</div>
                   </div>
+                </Link>
+
+                <Link to="employer/register">
                   <div className="rounded-xl bg-blue-500 p-5 px-9 transform transition-transform hover:scale-105 hover:cursor-pointer">
                     <div className="text-sm">Register as</div>
                     <div className="lg:text-2xl font-semibold">Employer</div>
                   </div>
-                  {/* <div className="space-y-2">
+                </Link>
+                {/* <div className="space-y-2">
                     <h3 className="lg:text-xl font-semibold">
                       Unlocking your potential
                     </h3>
@@ -122,7 +127,7 @@ export default function Home() {
                       Browse All Jobs →
                     </a>
                   </div> */}
-                </div>
+              </div>
               {/* </div> */}
 
               {/* Search Form */}
@@ -478,6 +483,6 @@ export default function Home() {
           <button className="text-blue-600 hover:underline">Privacy</button>
         </div>
       </footer>
-     </>
+    </>
   );
 }
