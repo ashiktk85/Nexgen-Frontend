@@ -50,7 +50,7 @@ const LoginPage = () => {
           toast.success('Login successful!')
         }
         setTimeout(() => {
-          navigate('/home')
+          navigate('/')
         }, 1500)
         if (loading) return <p>Loading...</p>;
         if (error) return <p>Error: {error}</p>;

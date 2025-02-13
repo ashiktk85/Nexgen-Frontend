@@ -36,7 +36,7 @@ const AllJobsPage = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="container mx-auto px-4 py-8 ">
         <div className="flex flex-col md:flex-row gap-8 mt-14">
