@@ -19,6 +19,7 @@ const JobDetails = () => {
         const { data } = await userAxiosInstance.get(`/job-details/${id}`, { params: { userId: user.userId } });
         setJob(data.jobDetails);
         setCompany(data.employerDetails);
+        console.log(data)
       } catch (error) {
         toast.warning(error.response.data.message || "An error occurred");
         navigate('/home');
@@ -31,6 +32,7 @@ const JobDetails = () => {
   const handleApplyJob = () => {
     navigate(`/job-application/${id}`, {
       state: {
+        jobTitle: job?.name,
         companyName: company?.name,
         phone: job?.phone,
         companyLocation: `${job?.state}, ${job?.city}`
@@ -53,6 +55,7 @@ const JobDetails = () => {
               <div className="space-y-2">
                 <h1 className="font-bold text-2xl lg:text-3xl">{job.name}</h1>
                 <div className="space-y-1">
+                  <p className="text-sm">Company: <span className="font-semibold">{company.name}</span></p>
                   <p className="text-sm">Location: <span className="font-semibold">{job.city}, {job.state}</span></p>
                   <p className="text-sm">Email: <span className="font-semibold">{job.email}</span></p>
                   <p className="text-sm">Phone: <span className="font-semibold">{job.countryCode} {job.phone}</span></p>
