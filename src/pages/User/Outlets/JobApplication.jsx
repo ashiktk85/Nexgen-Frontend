@@ -4,9 +4,9 @@ import { FaBuilding, FaPhone, FaUpload } from "react-icons/fa";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
-import Countries_Dataset from "../data/Countries_Dataset.json";
+import Countries_Dataset from "../../../data/Countries_Dataset.json";
 import { useFormik } from "formik";
-import Navbar from "../components/User/Navbar";
+// import Navbar from "../../../components/User/Navbar";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { toast } from "sonner";
@@ -24,7 +24,7 @@ const JobApplication = () => {
   const dispatch = useDispatch();
   const { id: jobId } = useParams();
   const location = useLocation();
-  const { companyName, phone, companyLocation } = location.state || {};
+  const { jobTitle, companyName, phone, companyLocation } = location.state || {};
   const navigate = useNavigate()
 
   // Retrieve user data from Redux store
@@ -122,7 +122,7 @@ const JobApplication = () => {
               <FaBuilding className="h-5 w-5 text-gray-400" />
               <span className="text-sm text-gray-600">{companyName}</span>
             </div>
-            <h1 className="text-2xl font-bold">Product Designer</h1>
+            <h1 className="text-2xl font-bold">{jobTitle}</h1>
             <p className="text-sm text-gray-600">{companyLocation}</p>
           </div>
 

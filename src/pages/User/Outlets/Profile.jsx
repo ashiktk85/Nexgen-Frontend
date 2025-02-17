@@ -38,7 +38,7 @@ import {
   Delete as DeleteIcon,
   Close as CloseIcon
 } from '@mui/icons-material'
-import Navbar from '../components/User/Navbar'
+import Navbar from '../../../components/User/Navbar'
 
 // Styled components
 const StyledTabs = styled(Tabs)(({ theme }) => ({
