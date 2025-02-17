@@ -1,13 +1,16 @@
 import React from "react";
 import { MdPlace } from "react-icons/md";
 import { FaIndianRupeeSign } from "react-icons/fa6";
+import { IoBriefcase } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 // import moment from "moment/moment";
-const JobCard = ({title  ,location , salary , date , id }) => {
+
+const JobCard = ( {job} ) => {
   const navigate = useNavigate()
   const jobDetailNavigation = () => {
-    navigate(`/job-details/${id}`)
+    navigate(`/job-details/${job._id}`)
   }
+  
   return (
     <article className="w-80   mx-auto bg-white shadow-md rounded-lg p-6 space-y-4" aria-label="Job listing card for UI/UX Designer">
       {/* Header Section */}
@@ -17,8 +20,8 @@ const JobCard = ({title  ,location , salary , date , id }) => {
           <span className="text-white font-bold text-lg">F</span>
         </figure>
         <div>
-          <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
-          <p className="text-sm text-gray-500">Frmer</p>
+          <h1 className="text-lg font-semibold text-gray-800">{job.jobTitle}</h1>
+          <p className="text-sm text-gray-500">Company Name</p>
         </div>
       </header>
 
@@ -29,11 +32,17 @@ const JobCard = ({title  ,location , salary , date , id }) => {
         </h2>
         <div className="flex items-center space-x-2 text-gray-600 text-sm">
           <span className="material-icons" aria-hidden="true"><MdPlace /></span>
-          <p>{location}</p>
+          <p>{`${job.city}, ${job.country}`}</p>
         </div>
         <div className="flex items-center space-x-2 text-gray-600 text-sm">
           <span className="material-icons" aria-hidden="true"><FaIndianRupeeSign /></span>
-          <p>{salary?.join(' - ')}</p>
+          {/* <p>{job.salaryRange}</p> */}
+          <p>{job.salaryRange?.join(' - ')}</p>
+        </div>
+        <div className="flex items-center space-x-2 text-gray-600 text-sm">
+          <span className="material-icons " aria-hidden="true"><IoBriefcase /></span>
+          {/* <p>{job.salaryRange}</p> */}
+          <p>{job.experienceRequired?.join(' - ')} yrs</p>
         </div>
        
       </section>

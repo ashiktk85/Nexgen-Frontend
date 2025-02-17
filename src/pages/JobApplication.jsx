@@ -113,8 +113,8 @@ const JobApplication = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
+    <div className="min-h-screen bg-gray-50 mt-14">
+      {/* <Navbar /> */}
       <main className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-2xl space-y-8">
           <div className="space-y-2">
