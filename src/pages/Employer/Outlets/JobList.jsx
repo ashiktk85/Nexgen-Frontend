@@ -3,68 +3,54 @@ import Switch from "@mui/material/Switch";
 import JobCard from "@/components/Employer/JobCard";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
-import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance"; // Fix typo
 import { useParams } from "react-router-dom";
 
-const dummyColumns = (handleActiveToggle) => [
-  { key: "title", label: "Title" },
-  { key: "location", label: "Location" },
-  {
-    key: "active",
-    label: "Active Status",
-    render: (active, row) => (
-      <>
-        <span
-          className={`px-2 py-1 rounded font-bold ${
-            active ? "text-green-500" : "text-red-500"
-          }`}
-        >
-          {active ? "Active" : "Inactive"}
-        </span>
-
-        <Switch
-          checked={active}
-          onChange={() => handleActiveToggle(row.id)} // Call the passed function with the row ID
-          inputProps={{ "aria-label": "Active Status" }}
-        />
-      </>
-    ),
-  },
-];
-
 function JobList() {
- 
-  const employer = useSelector((state) => state.employer.employer)
-  const [jobs, setJobs] = useState([])
+  const employer = useSelector((state) => state.employer);
+  const employerId = employer?._id;
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true); // Fix uppercase issue
 
   useEffect(() => {
-    const fetchData = async() => {
+    const fetchData = async () => {
+      if (!employerId) return;
       try {
-        const res = await employerAxiosInstnce.get(`/job-list/${employer?.employerId}`)
-     
-        console.log(res);
-        
-        setJobs(res.data)
+        setLoading(true);
+        console.log("Fetching jobs for employerId:", employerId);
+        const res = await employerAxiosInstance.get(`/job-list/${employerId}`);
+        console.log("API Response: ", res.data);
+        setJobs(res.data?.jobPosts || []); // Ensure correct data access
       } catch (error) {
-        toast.warning(error?.response?.data?.message || "An error occured")
+        console.error("Error fetching jobs:", error);
+        toast.warning(error?.response?.data?.message || "An error occurred");
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+    fetchData();
+  }, [employerId]); // ✅ Use employerId instead of employer?.employer?._id
 
-    fetchData()
-  },[employer?.employerId])
+  if (loading) {
+    return <div className="text-center py-10 text-lg">Loading jobs...</div>;
+  }
 
   return (
     <div className="my-6 px-10">
       <h1 className="text-2xl font-bold mb-4">Job List</h1>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 ">
-        
-        {
-          jobs.map((job ,index) => (
-            <JobCard key = {index} title={job?.jobTitle} location={job?.city}
-            postedDate={job?.createdAt} isActive={job?.isBlocked} applicantsCount={job?.applicationsCount} jobId = {job?._id}
-            />
-          ))
-        }
+        {jobs.map((job) => (
+          <JobCard
+            key={job._id} // ✅ Use job._id instead of index
+            title={job?.jobTitle}
+            location={job?.city}
+            postedDate={job?.createdAt}
+            isActive={!job?.isBlocked}
+            applicantsCount={job?.applicationsCount}
+            jobId={job?._id}
+          />
+        ))}
       </div>
     </div>
   );

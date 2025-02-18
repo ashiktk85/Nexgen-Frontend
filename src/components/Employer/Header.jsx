@@ -1,4 +1,4 @@
-import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import React from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
@@ -11,16 +11,15 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await employerAxiosInstnce.post("/logout");
-      console.log('logout response',response)
+      const response = await employerAxiosInstance.post("/logout");
       if (response.status === 200) {
         dispatch(logout());
-        toast.success("Logout!!");
-        navigate('/employer/employer-login')
+        toast.success("Logout successful!");
+        navigate('/employer/employer-login', { replace: true });
       }
     } catch (err) {
-      console.error('error',err)
-      toast.error("Failed to login")
+      console.error('logout error',err)
+      toast.error("Failed to logout. Please try again")
     }
   };
 
@@ -32,7 +31,7 @@ const Header = () => {
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 192.904 192.904"
-              className="w-5 cursor-pointer fill-current"
+              className="w-5 cursor-pointer fillCurrent"
             >
               <path d="m190.707 180.101-47.078-47.077c11.702-14.072 18.752-32.142 18.752-51.831C162.381 36.423 125.959 0 81.191 0 36.422 0 0 36.423 0 81.193c0 44.767 36.422 81.187 81.191 81.187 19.688 0 37.759-7.049 51.831-18.751l47.079 47.078a7.474 7.474 0 0 0 5.303 2.197 7.498 7.498 0 0 0 5.303-12.803zM15 81.193C15 44.694 44.693 15 81.191 15c36.497 0 66.189 29.694 66.189 66.193 0 36.496-29.692 66.187-66.189 66.187C44.693 147.38 15 117.689 15 81.193z"></path>
             </svg>
@@ -99,7 +98,7 @@ const Header = () => {
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 mr-3 fill-current"
+                      className="w-4 h-4 mr-3 fillCurrent"
                       viewBox="0 0 512 512"
                     >
                       <path
@@ -118,7 +117,7 @@ const Header = () => {
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
-                      className="w-4 h-4 mr-3 fill-current"
+                      className="w-4 h-4 mr-3 fillCurrent"
                       viewBox="0 0 24 24"
                     >
                       <path
@@ -138,7 +137,7 @@ const Header = () => {
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 mr-3 fill-current"
+                      className="w-4 h-4 mr-3 fillCurrent"
                       viewBox="0 0 24 24"
                     >
                       <path
@@ -162,10 +161,10 @@ const Header = () => {
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 mr-3 fill-current"
+                      className="w-4 h-4 mr-3 fillCurrent"
                       viewBox="0 0 510 510"
                     >
-                      <g fill-opacity=".9">
+                      <g fillOpacity=".9">
                         <path
                           d="M255 0C114.75 0 0 114.75 0 255s114.75 255 255 255 255-114.75 255-255S395.25 0 255 0zm0 459c-112.2 0-204-91.8-204-204S142.8 51 255 51s204 91.8 204 204-91.8 204-204 204z"
                           data-original="#000000"
@@ -184,7 +183,7 @@ const Header = () => {
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 mr-3 fill-current"
+                      className="w-4 h-4 mr-3 fillCurrent"
                       viewBox="0 0 6 6"
                     >
                       <path

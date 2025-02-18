@@ -1,12 +1,12 @@
 import axios from "axios";
 
-const employerAxiosInstnce = axios.create({
+const employerAxiosInstance = axios.create({
   baseURL: "http://localhost:3001/employer",
   withCredentials: true,
 });
 
 
-employerAxiosInstnce.interceptors.request.use(
+employerAxiosInstance.interceptors.request.use(
   (config) => {
     // Build the full URL
     const fullUrl = `${config.baseURL || ""}${config.url}`;
@@ -22,7 +22,7 @@ employerAxiosInstnce.interceptors.request.use(
 );
 
 
-employerAxiosInstnce.interceptors.response.use(
+employerAxiosInstance.interceptors.response.use(
   (response) => {
     console.log("response reached");
     return response;
@@ -33,4 +33,4 @@ employerAxiosInstnce.interceptors.response.use(
   }
 );
 
-export default employerAxiosInstnce;
+export default employerAxiosInstance;
