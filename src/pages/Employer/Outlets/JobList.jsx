@@ -36,6 +36,7 @@ function JobList() {
  
   const employer = useSelector((state) => state.employer.employer)
   const [jobs, setJobs] = useState([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const fetchData = async() => {
@@ -44,27 +45,34 @@ function JobList() {
      
         console.log(res);
         
-        setJobs(res.data)
+        setJobs(res.data.jobPosts)
+        setLoading(false)
       } catch (error) {
         toast.warning(error?.response?.data?.message || "An error occured")
+        setLoading(false)
       }
     }
-
+    setLoading(true)
     fetchData()
   },[employer?.employerId])
+
+  if(loading) return <p>Loading</p>
 
   return (
     <div className="my-6 px-10">
       <h1 className="text-2xl font-bold mb-4">Job List</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 ">
-        
-        {
-          jobs.map((job ,index) => (
-            <JobCard key = {index} title={job?.jobTitle} location={job?.city}
-            postedDate={job?.createdAt} isActive={job?.isBlocked} applicantsCount={job?.applicationsCount} jobId = {job?._id}
-            />
+      {jobs.length > 0 ? (
+        jobs.map((job ,index) => (
+            <JobCard key = {index} job={job} />
           ))
-        }
+        ) : (
+          <div className="w-full md:h-full h-28 flex items-center justify-center">
+            <h1 className="text-xl md:text-2xl font-bold">
+              No job available
+            </h1>
+          </div>
+        )}
       </div>
     </div>
   );

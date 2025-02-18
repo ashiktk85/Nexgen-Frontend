@@ -19,7 +19,7 @@ const HomeLayout = () => {
       <div className="flex items-start">
         <nav id="sidebar" className="lg:min-w-[250px] w-max max-lg:min-w-8">
           <div
-            className={`bg-white shadow-lg h-screen fixed top-0 left-0 overflow-auto z-[99] transition-all duration-500 ${
+            className={`bg-white shadow-lg h-screen fixed top-0 left-0 overflow-auto z-[10] transition-all duration-500 ${
               isSidebarOpen
                 ? "w-[250px] visible opacity-100"
                 : "lg:w-[250px] lg:visible lg:opacity-100 w-0 invisible opacity-0"

@@ -11,6 +11,8 @@ import Switch from "@mui/material/Switch";
 import { useParams } from "react-router-dom";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import { toast } from "sonner";
+import ApplicantModal from "@/components/Employer/ApplicantModal";
 
 const initialDummyUsers = [
   {
@@ -99,26 +101,27 @@ const initialDummyUsers = [
   },
 ];
 const dummyColumns = (handleActiveToggle) => [
-  { key: "title", label: "Title" },
+  { key: "name", label: "Name" },
+  { key: "email", label: "Email" },
   { key: "location", label: "Location" },
   {
-    key: "active",
-    label: "Active Status",
-    render: (active, row) => (
+    key: "status",
+    label: "Status",
+    render: (status, row) => (
       <>
         <span
-          className={`px-2 py-1 rounded font-bold ${
-            active ? "text-green-500" : "text-red-500"
+          className={` py-1 rounded font-bold ${
+            status === 'Hired' ? "text-green-500" : status === "Pending" ? "text-orange-400" : "text-red-500"
           }`}
         >
-          {active ? "Active" : "Inactive"}
+        { status }
         </span>
 
-        <Switch
-          checked={active}
+        {/* <Switch
+          checked={status}
           onChange={() => handleActiveToggle(row.id)} // Call the passed function with the row ID
           inputProps={{ "aria-label": "Active Status" }}
-        />
+        /> */}
       </>
     ),
   },
@@ -126,35 +129,33 @@ const dummyColumns = (handleActiveToggle) => [
 
 function Applicants() {
   const{ jobId } = useParams()
-  const [users, setUsers] = useState(); // State for users
+  const [users, setUsers] = useState([]); // State for users
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
-
+  const [loading, setLoading] = useState(false)
+  
   useEffect(() => {
     const fetchApplications = async() => {
+      setLoading(true)
       try {
         const {data} = await employerAxiosInstnce.get(`/job-applications/${jobId}`)
         console.log(data, "ress");
         
-        setUsers(data)
+        setUsers(data.jobApplications)
+        setLoading(false)
       } catch (error) {
         console.log(error);
-        
+        toast.error('Failed to load applicants')
+        setLoading(false)
       }
     }
     fetchApplications()
   },[jobId])
 
-  const handleEdit = (id) => {
+  const handleView = (id) => {
     const user = users.find((user) => user.id === id);
     setSelectedData(user);
     setIsDialogOpen(true);
-  };
-
-  const handleDelete = (id) => {
-    setUsers(users.filter((user) => user.id !== id));
-    setIsDeleteDialogOpen(false);
   };
 
   const handleActiveToggle = (id) => {
@@ -172,6 +173,8 @@ function Applicants() {
 
   const formSubmittionURL = "http:localhost:3000/api/edit_job";
 
+  if(loading) return <p>Loading</p>
+
   return (
     <div className="my-6 px-2">
       <h1>Job List</h1>
@@ -180,59 +183,21 @@ function Applicants() {
           users={users}
           columns={dummyColumns(handleActiveToggle)}
           rowsPerPage={5}
-          onEdit={handleEdit}
-          onDelete={(id) => {
-            const user = users.find((user) => user.id === id);
-            setSelectedData(user);
-            setIsDeleteDialogOpen(true);
-          }}
+          onView={handleView}
+          // onDelete={(id) => { 
+          //   const user = users.find((user) => user.id === id);
+          //   setSelectedData(user);
+          //   setIsDeleteDialogOpen(true);
+          // }}
         />
       </div>
 
       {/* Edit Modal */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="w-[1000px] h-3/4 overflow-scroll">
-          <DialogHeader>
-            <DialogTitle>Edit Job</DialogTitle>
-          </DialogHeader>
+      
+        <ApplicantModal isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} user={selectedData}/>
+      
 
-          <div className="space-y-4 py-4">
-            <CreateJobForm
-              formSubmittionURL={formSubmittionURL}
-              selectedData={selectedData}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Deletion confirmation modal */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="w-[1000px] overflow-scroll">
-          <DialogHeader>
-            <DialogTitle>Confirm Delete</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p>
-              Are you sure you want to delete this job? This action cannot be
-              undone.
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setIsDeleteDialogOpen(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(selectedData?.id)}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      
     </div>
   );
 }
