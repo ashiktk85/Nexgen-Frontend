@@ -41,7 +41,7 @@ const ListingTable = ({
         </td>
       ))}
       <td className="flex justify-end items-center p-4">
-        <button className="mr-4" title="Edit" onClick={() => onView(user.id)}>
+        <button className="mr-4" title="Edit" onClick={() => onView(user._id)}>
           {<FaEye />}
         </button>
         {/* <button title="Delete" onClick={() => onDelete(user.id)}>

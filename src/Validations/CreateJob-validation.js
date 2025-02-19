@@ -2,7 +2,6 @@ import * as Yup from 'yup';
 
 const validateJobForm = Yup.object({
   jobTitle: Yup.string()
-    .matches(/^[a-zA-Z\s]*$/, 'Must contain only letters')
     .min(2, 'Must contain at least 2 characters')
     .required('Job title is required'),
   email: Yup.string()
