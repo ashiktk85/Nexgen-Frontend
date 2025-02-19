@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Search,
   People,
@@ -8,9 +8,26 @@ import {
 } from "@mui/icons-material";
 import Navbar from "../components/User/Navbar";
 import JobCard from "../components/User/JobCard";
+import axios from "axios";
+import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
+// import {banner1} from "../../public/Images/banner1"
 
 export default function JobPortalLanding() {
-  const jobs = Array(8).fill({});
+  const [jobs, setJobs] = useState([]);
+  const fetchJobs = async () => {
+    try {
+      const { data } = await userAxiosInstance.get("/getJobPosts");
+      console.log(data.jobPosts);
+      setJobs(data.jobPosts);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+  // const jobs = Array(8).fill({});
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -20,23 +37,32 @@ export default function JobPortalLanding() {
         {/* Hero Section */}
         <div className="relative bg-gray-100 text-center h-[75vh] flex flex-col justify-center items-center overflow-hidden">
           {/* Main Content */}
-          <h1 className="text-4xl md:text-5xl font-bold text-blue-800 mb-4 z-10">
-            Find Your Dream Job or Perfect Candidate
-          </h1>
-          <div className="flex justify-center flex-wrap gap-4 mt-6 z-10">
-            <input
-              type="text"
-              placeholder="Title..."
-              className="px-4 py-2 border rounded-md w-64 focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <input
-              type="text"
-              placeholder="Place..."
-              className="px-4 py-2 border rounded-md w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button className="w-24 bg-primary rounded-sm text-white flex justify-center items-center">
-              <Search className="mr-2" /> Search
-            </button>
+
+          <img
+            src="../../public/Images/banner3.svg"
+            alt=""
+            className="object-cover w-full transition-transform duration-300 group-hover:scale-105"
+          />
+
+          <div className="absolute inset-0 h-[75vh] p-6 flex flex-col items-center justify-center  ">
+            <h1 className="text-4xl md:text-5xl font-bold text-blue-800 mb-10 z-10">
+              Find Your Dream Job or Perfect Candidate
+            </h1>
+            <div className="flex justify-center flex-wrap gap-4 z-10">
+              <input
+                type="text"
+                placeholder="Title..."
+                className="px-4 py-2 border rounded-md w-64 focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <input
+                type="text"
+                placeholder="Place..."
+                className="px-4 py-2 border rounded-md w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button className="w-24 bg-primary rounded-sm text-white flex justify-center items-center">
+                <Search className="mr-2" /> Search
+              </button>
+            </div>
           </div>
         </div>
 
@@ -47,8 +73,15 @@ export default function JobPortalLanding() {
             Jobs Recommended for You
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 lg:px-10 mt-6">
-            {jobs.map((_, index) => (
-              <JobCard key={index} />
+            {jobs.map((jobs, index) => (
+              <JobCard
+                key={index}
+                title={jobs?.jobTitle}
+                location={jobs?.city}
+                salary={jobs?.salaryRange}
+                date={jobs?.createdAt}
+                id={jobs?._id}
+              />
             ))}
           </div>
           <div className="mt-8 text-center">
@@ -211,3 +244,5 @@ export default function JobPortalLanding() {
     </div>
   );
 }
+
+

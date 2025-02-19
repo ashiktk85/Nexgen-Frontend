@@ -5,9 +5,12 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner"
+import { useDispatch } from "react-redux";
+import { employerLogin } from "@/redux/actions/EmplyerAction";
 
 const EmployerLogin = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const [showPassword, setShowPassword] = useState(false);
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
@@ -37,20 +40,16 @@ const EmployerLogin = () => {
     }),
     onSubmit: async (values) => {
       try {
-        toast.success("Login successful");
-        // const loginResult = await dispatch(login(values)).unwrap();
-        // if (loginResult) {
-        //   if (userInfo?.isBlocked) {
-        //     toast.error(
-        //       "Currently, you are restricted from accessing the site."
-        //     );
-        //     return;
-        //   }
-        //   toast.success("Login successful");
-        //   setTimeout(() => {
-        //     navigate("/");
-        //   }, 1500);
-        // }
+       
+        const loginResult = await dispatch(employerLogin(values)).unwrap();
+        if(loginResult.status === 200) {
+          toast.success("Login successfull")
+          setTimeout(() => {
+            navigate('/employer/dashboard')
+          }, 1000);
+        } else {
+          toast.error()
+        }
       } catch (err) {
         toast.error(err.message || "An error occurred");
       }

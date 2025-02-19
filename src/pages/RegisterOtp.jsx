@@ -4,6 +4,7 @@ import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import useRequest from "../hooks/useRequest";
+import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 
 const RegisterOtp = () => {
   const OTP_LENGTH = 6;
@@ -49,42 +50,30 @@ const RegisterOtp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
+      const email = localStorage.getItem("email");
       const joinedOtp = otp.join("");
-      const data = {
-        token: token,
+      const payload = {
+        email,
         otp: joinedOtp,
       };
-      console.log(data);
+      console.log(payload);
+     
+      const {data} = await userAxiosInstance.post('/verify-otp' , payload)
       
-      sendRequest({
-        url: "/verifyOtp",
-        method: "POST",
-        data: data,
-        onSuccess: (data) => {
-          console.log("Fetched data:", data);
-          localStorage.removeItem('token');
-
-          // Toast on success
-          toast.success(data.message);
-
-          // Navigate to another page
-          setTimeout(() => {
-            navigate("/login");
-          }, 1500);
-        },
-        onError: (err) => {
-          console.error("Error fetching data:", err);
-
-          // Toast on error
-          toast.error(err.response.data.message || "An error occurred during otp verification");
-        },
-      });
+    console.log(data);
+    if(data.status) {
+      localStorage.removeItem('email')
+      toast.success('Registration successful')
+      navigate('/login')
+    }
+    
 
       if (loading) return <p>Loading...</p>;
       if (error) return <p>Error: {error}</p>;
     } catch (err) {
-      toast.error(err.message || "An error occurred");
+      console.log(err.resposne.data.message);
+      
+      toast.error(err.resposne.data.message || "An error occurred");
     }
   };
 

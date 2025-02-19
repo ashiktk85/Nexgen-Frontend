@@ -19,7 +19,7 @@ const HomeLayout = () => {
       <div className="flex items-start">
         <nav id="sidebar" className="lg:min-w-[250px] w-max max-lg:min-w-8">
           <div
-            className={`bg-white shadow-lg h-screen fixed top-0 left-0 overflow-auto z-[99] transition-all duration-500 ${
+            className={`bg-white shadow-lg h-screen fixed top-0 left-0 overflow-auto z-[10] transition-all duration-500 ${
               isSidebarOpen
                 ? "w-[250px] visible opacity-100"
                 : "lg:w-[250px] lg:visible lg:opacity-100 w-0 invisible opacity-0"
@@ -27,12 +27,12 @@ const HomeLayout = () => {
           >
             {/* Logo and Close Button */}
             <div className="flex items-center gap-2 pt-6 pb-2 px-4 sticky top-0 bg-white min-h-[64px] z-[100]">
-              <a href="javascript:void(0)">
+    
                 <h1 className="text-3xl font-bold text-primary">Nexgen</h1>
                 <span className="text-sm text-gray-500">
                   Employer Dashboard
                 </span>
-              </a>
+             
               <button
                 onClick={() => setSidebarOpen(false)}
                 className="lg:hidden ml-auto"
@@ -122,7 +122,7 @@ const HomeLayout = () => {
                           <Link to={subItem?.url}>
                             <li key={subItem}>
                               <p
-                                href="javascript:void(0)"
+                                
                                 className="text-gray-800 text-sm block cursor-pointer hover:bg-gray-100 rounded-md px-3 py-2 transition-all duration-300"
                               >
                                 {subItem?.label}
@@ -150,7 +150,7 @@ const HomeLayout = () => {
                   ].map((setting) => (
                     <li key={setting.label}>
                       <a
-                        href="javascript:void(0)"
+                        
                         className="text-gray-800 text-sm flex items-center cursor-pointer hover:bg-gray-100 rounded-md px-3 py-2.5 transition-all duration-300"
                       >
                         <span>{setting.label}</span>
