@@ -129,39 +129,40 @@ const dummyColumns = (handleActiveToggle) => [
 
 function Applicants() {
   const{ jobId } = useParams()
-  const [users, setUsers] = useState([]); // State for users
+  const [applications, setApplications] = useState([]); // State for users
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [loading, setLoading] = useState(false)
   
-  useEffect(() => {
-    const fetchApplications = async() => {
-      setLoading(true)
-      try {
-        const {data} = await employerAxiosInstnce.get(`/job-applications/${jobId}`)
-        console.log(data, "ress");
-        
-        setUsers(data.jobApplications)
-        setLoading(false)
-      } catch (error) {
-        console.log(error);
-        toast.error('Failed to load applicants')
-        setLoading(false)
-      }
+  const fetchApplications = async() => {
+    setLoading(true)
+    try {
+      const {data} = await employerAxiosInstnce.get(`/job-applications/${jobId}`)
+      console.log(data, "ress");
+      
+      setApplications(data.jobApplications)
+      setLoading(false)
+    } catch (error) {
+      console.log(error);
+      toast.error('Failed to load applicants')
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchApplications()
   },[jobId])
 
   const handleView = (id) => {
-    const user = users.find((user) => user.id === id);
-    setSelectedData(user);
+    const application = applications.find((application) => application._id === id);
+    setSelectedData(application);
     setIsDialogOpen(true);
   };
 
   const handleActiveToggle = (id) => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === id ? { ...user, active: !user.active } : user
+    setApplications((prevApplications) =>
+      prevApplications.map((application) =>
+        application.id === id ? { ...application, active: !application.active } : application
       )
     );
   };
@@ -180,7 +181,7 @@ function Applicants() {
       <h1>Job List</h1>
       <div>
         <ListingTable
-          users={users}
+          users={applications}
           columns={dummyColumns(handleActiveToggle)}
           rowsPerPage={5}
           onView={handleView}
@@ -192,10 +193,10 @@ function Applicants() {
         />
       </div>
 
-      {/* Edit Modal */}
-      
-        <ApplicantModal isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} user={selectedData}/>
-      
+      {/* Detail Modal */}
+      { selectedData &&
+        <ApplicantModal isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} application={selectedData} setSelectedData={setSelectedData} fetchApplications={fetchApplications}/>
+}
 
       
     </div>
