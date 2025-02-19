@@ -7,15 +7,7 @@ import { useNavigate } from "react-router-dom";
 const { Text, Title } = Typography;
 
 export default function JobCard({
-  title,
-  location,
-  postedDate,
-  isActive,
-  applicantsCount,
-  onEdit,
-  onUnlist,
-  onDelete,
-  jobId
+  job, onEdit, onDelete, onUnlist
 }) {
   const navigate = useNavigate()
   return (
@@ -39,25 +31,25 @@ export default function JobCard({
           {/* <Text type="secondary">{company}</Text> */}
           {/* Posted on Date */}
           <Text type="secondary" className="text-xs">
-          Posted on: {moment(postedDate).format("MMMM Do, YYYY")}
+          Posted on: {moment(job?.createdAt).format("MMMM Do, YYYY")}
           </Text>
         </div>
 
         <Title level={4} className="mb-0">
-          {title}
+          {job?.jobTitle}
         </Title>
-        <Text>{location}</Text>
+        <Text type="secondary">Experience: {job?.experienceRequired?.join(' - ')} yrs</Text>
         <Space className="w-full justify-between">
-          <Text type="secondary">Location: {location}</Text>
-          <Tag color={isActive ? "red" : "green"} >{isActive ? "Inactive" : "Active"}</Tag>
+          <Text type="secondary">Location: {`${job?.city},${job?.country}`}</Text>
+          <Tag color={job?.isBlocked ? "red" : "green"} >{job?.isBlocked ? "Inactive" : "Active"}</Tag>
         </Space>
         <Button
           type="default"
           icon={<TeamOutlined />}
-          onClick={() => navigate(`/employer/applicants/${jobId}`)}
+          onClick={() => navigate(`/employer/applicants/${job?._id}`)}
           className="flex items-center"
         >
-          Applicants ( { applicantsCount } )
+          Applicants ( { job?.applications?.length } )
         </Button>
       </Space>
     </Card>

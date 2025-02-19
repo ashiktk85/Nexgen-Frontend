@@ -3,7 +3,7 @@ import { CiShare2, CiBookmarkCheck } from "react-icons/ci";
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import userAxiosInstance from '@/config/axiosConfig/userAxiosInstance';
-import Navbar from '../components/User/Navbar';
+import Navbar from '../../../components/User/Navbar';
 import { useSelector } from 'react-redux';
 
 const JobDetails = () => {
@@ -19,6 +19,7 @@ const JobDetails = () => {
         const { data } = await userAxiosInstance.get(`/job-details/${id}`, { params: { userId: user.userId } });
         setJob(data.jobDetails);
         setCompany(data.employerDetails);
+        console.log(data)
       } catch (error) {
         toast.warning(error.response.data.message || "An error occurred");
         navigate('/home');
@@ -31,6 +32,7 @@ const JobDetails = () => {
   const handleApplyJob = () => {
     navigate(`/job-application/${id}`, {
       state: {
+        jobTitle: job?.name,
         companyName: company?.name,
         phone: job?.phone,
         companyLocation: `${job?.state}, ${job?.city}`
@@ -41,10 +43,10 @@ const JobDetails = () => {
   if (!job || !company) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="flex-shrink-0">
+    <div className="flex flex-col min-h-screen mt-14">
+      {/* <header className="flex-shrink-0">
         <Navbar />
-      </header>
+      </header> */}
 
       <main className="flex flex-col lg:flex-row p-4 lg:p-6 flex-grow gap-4 lg:gap-8">
         <section className="w-full lg:w-3/4 space-y-6">
@@ -53,6 +55,7 @@ const JobDetails = () => {
               <div className="space-y-2">
                 <h1 className="font-bold text-2xl lg:text-3xl">{job.name}</h1>
                 <div className="space-y-1">
+                  <p className="text-sm">Company: <span className="font-semibold">{company.name}</span></p>
                   <p className="text-sm">Location: <span className="font-semibold">{job.city}, {job.state}</span></p>
                   <p className="text-sm">Email: <span className="font-semibold">{job.email}</span></p>
                   <p className="text-sm">Phone: <span className="font-semibold">{job.countryCode} {job.phone}</span></p>

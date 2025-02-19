@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa"
-import Navbar from "../components/User/Navbar";
+// import Navbar from "../components/User/Navbar";
 
 
 export default function ApplicationConfirmation() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <Navbar/>
+      {/* <Navbar/> */}
 
       {/* Main Content */}
       <main className="container max-w-2xl mx-auto py-12 px-4">
@@ -51,7 +51,7 @@ export default function ApplicationConfirmation() {
             type="button"
             class="text-white mt-6 bg-[#000080] hover:bg-[#001F3F] focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-10 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
-            <Link href="/jobs">Return to job search</Link>
+            <Link to="/all-jobs">Return to job search</Link>
           </button>
         </div>
       </main>

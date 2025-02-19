@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
-import JobCard from "../components/User/JobCard";
-import Navbar from "../components/User/Navbar";
+import JobCard from "../../../components/User/JobCard";
+import Navbar from "../../../components/User/Navbar";
 import { toast } from "sonner";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 
@@ -12,20 +12,21 @@ const AllJobsPage = () => {
   const [location, setLocation] = useState("");
   const [jobType, setJobType] = useState("");
   const [experienceLevel, setExperienceLevel] = useState("");
-
   const [jobs, setJobs] = useState([]);
-
-  
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true)
         const res = await userAxiosInstance.get("/getJobPosts");
+ 
+        console.log("response",res.data.jobPosts);
 
-        console.log("response",res);
-
-        setJobs(res.data);
+        setJobs(res.data.jobPosts);
+        setLoading(false)
       } catch (error) {
+        setLoading(false)
         console.error("error",error);
         toast.warning(error?.response?.data?.message || "An error occured");
       }
@@ -33,6 +34,8 @@ const AllJobsPage = () => {
 
     fetchData();
   }, []);
+
+  if(loading) return <p>Loading</p>
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -126,8 +129,9 @@ const AllJobsPage = () => {
             {/* Job Cards */}
             {jobs.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {jobs.map((job, index) => (
-                  <JobCard key={index} />
+                {jobs.map((job, index) => 
+                (
+                  <JobCard key={index} job={job} />
                 ))}
               </div>
             ) : (
