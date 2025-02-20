@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
-import useRequest from "../hooks/useRequest";
+import useRequest from "../hooks/useRequestUser";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 
 const SignupPage = () => {
