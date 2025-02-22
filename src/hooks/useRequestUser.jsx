@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import userAxiosInstance from "../config/axiosConfig/userAxiosInstance";
 
-const useRequest = () => {
+const useRequestUser = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -43,4 +43,4 @@ const useRequest = () => {
   return { data, loading, error, sendRequest };
 };
 
-export default useRequest;
+export default useRequestUser;
