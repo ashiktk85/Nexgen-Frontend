@@ -124,11 +124,19 @@ const Navbar = () => {
             className="cursor-pointer hover:text-blue-300"
             onClick={() => {
               toggleMobileMenu();
-              navigate("/jobs");
+              navigate("/all-jobs");
             }}
           >
             Browse Jobs
           </div>
+          {Object.keys(user).length > 0 && (
+            <div
+              className="flex items-center space-x-1 cursor-pointer hover:text-blue-300"
+              onClick={()=> navigate('/job-application-history')}
+            >
+              My Jobs
+            </div>
+          )}
           <div
             className="cursor-pointer hover:text-blue-300"
             onClick={() => {
