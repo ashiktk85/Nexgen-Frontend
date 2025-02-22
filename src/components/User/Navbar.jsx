@@ -28,15 +28,15 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       const response = await userAxiosInstance.post("/logout");
-      console.log('logout response',response)
+      console.log("logout response", response);
       if (response.status === 200) {
         dispatch(logout());
         toast.success("Logout!!");
-        navigate('/login')
+        navigate("/login");
       }
     } catch (err) {
-      console.error('error',err)
-      toast.error("Failed to login")
+      console.error("error", err);
+      toast.error("Failed to login");
     }
   };
 
@@ -73,6 +73,16 @@ const Navbar = () => {
           >
             <span>Browse Jobs</span>
           </div>
+
+          {Object.keys(user).length > 0 && (
+            <div
+              className="flex items-center space-x-1 cursor-pointer text-primary hover:text-blue-300"
+              onClick={()=> navigate('/job-application-history')}
+            >
+              My Jobs
+            </div>
+          )}
+
           <div
             className="flex items-center space-x-1 cursor-pointer text-primary hover:text-blue-300"
             onClick={() =>
