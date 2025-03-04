@@ -1,13 +1,10 @@
 import { Link } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa"
-// import Navbar from "../components/User/Navbar";
 
 
 export default function ApplicationConfirmation() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      {/* <Navbar/> */}
 
       {/* Main Content */}
       <main className="container max-w-2xl mx-auto py-12 px-4">

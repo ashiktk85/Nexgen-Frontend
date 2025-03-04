@@ -2,11 +2,11 @@ import * as Yup from 'yup';
 
 const validateJobForm = Yup.object({
   jobTitle: Yup.string()
-    .matches(/^[a-zA-Z\s]*$/, 'Must contain only letters')
+    .matches(/^[a-zA-Z\s&\-',"/,_]*$/, 'Must contain only letters and symbols')
     .min(2, 'Must contain at least 2 characters')
     .required('Job title is required'),
   email: Yup.string()
-    .email('Enter a valid email')
+    .email('Enter a valid email')      
     .required('Email is required'),
   phone: Yup.string()
     .matches(/^[0-9]{10}$/, 'Mobile number must be 10 digits')

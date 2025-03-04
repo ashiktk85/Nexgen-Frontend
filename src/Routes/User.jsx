@@ -14,6 +14,7 @@ import JobDetailPage from "../pages/User/Outlets/JobDetails";
 import ListingTable from "../components/common/table";
 // import Home3 from "@/pages/Home3";
 import HomeLayout from "@/pages/User/Layout/HomeLayout";
+import NotFound from "@/pages/User/NotFound";
 
 const usersData = [
   {
@@ -185,8 +186,8 @@ function User() {
         <Route path="/job-details/:id" element={<JobDetailPage />} />
         <Route path="/job-application/:id" element={<JobApplication />} />
         <Route path="/application-submitted" element={<ApplicationSubmitted />}/>
-
         <Route path="/profile" element={<Profile />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   );
