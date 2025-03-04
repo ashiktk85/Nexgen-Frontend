@@ -130,8 +130,8 @@ export default function CompanyDetails() {
                   <Box className="flex flex-col gap-1">
                
 
-                    {job.requirements.map((requ) => (
-                      <Stack direction="row" spacing={1}>
+                    {job.requirements.map((requ,index) => (
+                      <Stack direction="row" spacing={1} key={index}>
                         <Chip label={requ} />
                       </Stack>
                     ))}
