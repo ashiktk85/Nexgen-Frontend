@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import userAxiosInstance from "../config/axiosConfig/userAxiosInstance";
+import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance"; 
 
-const useRequest = () => {
+const useRequestEmployer = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -17,7 +17,7 @@ const useRequest = () => {
 
     try {
       console.log("Sending request to:", config.url);
-      const response = await userAxiosInstance({
+      const response = await employerAxiosInstnce({
         method: config.method || "GET",
         url: config.url,
         data: config.data || null,
@@ -43,4 +43,4 @@ const useRequest = () => {
   return { data, loading, error, sendRequest };
 };
 
-export default useRequest;
+export default useRequestEmployer;
