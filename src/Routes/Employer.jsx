@@ -10,26 +10,26 @@ import Applicants from '../pages/Employer/Outlets/Applicants'
 import CompanyDetails from '../pages/Employer/Outlets/CompanyDetails'
 import RegisterOtp from '@/pages/Employer/OtpVerification'
 import VerificationForm from '@/components/Employer/VerificationForm'
+import NotFound from '@/pages/Employer/NotFound'
 
 function Employer() {
     return (
-        <Routes>
-            <Route path='/employer-login' element={<EmployerLogin />} />
-            <Route path='/register' element={<Register />} />
-            <Route path='/profile' element={<Profile />} />
-            <Route path='/otp' element={<RegisterOtp />} />
-            <Route path='Verification' element={<VerificationForm />} />
-            <Route path='/' element={<HomeLayout />} >
-                <Route path='dashboard' element={<Dashboard />} />
-                <Route path='create_job' element={<CreateJob />} />
-                <Route path='job_list' element={<JobList />} />
-                <Route path='applicants/:jobId' element={<Applicants />} />
-                <Route path='company_details' element={<CompanyDetails />} />
-                
-                
-            </Route>
-        </Routes>
-    )
+      <Routes>
+        <Route path="/employer-login" element={<EmployerLogin />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/otp" element={<RegisterOtp />} />
+        <Route path="Verification" element={<VerificationForm />} />
+        <Route path="/" element={<HomeLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="create_job" element={<CreateJob />} />
+          <Route path="job_list" element={<JobList />} />
+          <Route path="applicants/:jobId" element={<Applicants />} />
+          <Route path="company_details" element={<CompanyDetails />} />
+          <Route path="*" element={<NotFound/>} />
+        </Route>
+      </Routes>
+    );
 }
 
 export default Employer

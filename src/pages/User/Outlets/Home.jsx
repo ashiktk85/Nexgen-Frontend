@@ -7,7 +7,7 @@ import {
   CheckCircleOutline,
 } from "@mui/icons-material";
 // import NavbarHome from "../components/User/NavbarHome";
-import JobCard from "@/components/Employer/JobCard";
+import JobCard from "@/components/User/JobCard";
 import axios from "axios";
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
@@ -127,7 +127,7 @@ export default function Home() {
                       Unlocking your potential
                     </h3>
                     <p className="text-base text-gray-600">
-                      Here to help with new oppertunities
+                      Here to help with new opportunities
                     </p>
                     <a href="#" className="text-primary hover:underline">
                       Browse All Jobs →
@@ -313,30 +313,27 @@ export default function Home() {
             </div>
           </div>
         </div> */}
-
-        {/* Job Cards Section */}
-        {/* Job Cards Section */}
         <div className="py-16 bg-gray-50">
-          <h2 className="text-2xl font-bold text-primary px-4 lg:px-10 text-center">
+          <h2 className="text-2xl font-bold text-primary text-center">
             Jobs Recommended for You
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 lg:px-10 mt-6">
-            {jobs.map((job, index) => (
-              <JobCard
-                key={index}
-                job={job}
-                // title={jobs?.jobTitle}
-                // location={jobs?.city}
-                // salary={jobs?.salaryRange}
-                // date={jobs?.createdAt}
-                // id={jobs?._id}
-              />
-            ))}
+          <div className="container mx-auto max-w-screen-xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-5">
+              {jobs?.map((job, index) => (
+                <div key={index} className="flex justify-center">
+                  <JobCard job={job} />
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Browse All Jobs Button */}
           <div className="mt-8 text-center">
-            <button className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-              Browse All Jobs
-            </button>
+            <Link to="/all-jobs">
+              <button className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
+                Browse All Jobs
+              </button>
+            </Link>
           </div>
         </div>
 
