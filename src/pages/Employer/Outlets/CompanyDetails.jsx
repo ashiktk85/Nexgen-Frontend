@@ -5,15 +5,37 @@ import {
   Button,
   Grid,
   Avatar,
+  Chip,
+  Stack,
 } from "@mui/material";
-import { useRef } from "react";
- 
+import { useEffect, useRef, useState } from "react";
+import JobCard from "@/components/Employer/JobCard";
+import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import { useSelector } from "react-redux";
+
 export default function CompanyDetails() {
   const aboutRef = useRef(null);
   const jobsRef = useRef(null);
   const peopleRef = useRef(null);
   const lifeRef = useRef(null);
+  const [jobs, setJobs] = useState([]);
+  const employer = useSelector((state) => state.employer.employer);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await employerAxiosInstnce.get(
+          `/job-list/${employer?.employerId}`
+        );
+
+        setJobs(data.jobPosts);
+      } catch (error) {
+        toast.warning(error?.response?.data?.message || "An error occured");
+      }
+    };
+    fetchData();
+  }, []);
+  //  console.log(jobs[0].requirements[0]);
   // Scroll to a section when navigation item is clicked
   const scrollToSection = (ref) => {
     if (ref && ref.current) {
@@ -35,13 +57,13 @@ export default function CompanyDetails() {
           </div>
           <Box>
             <Typography variant="h4" className="font-semibold">
-              NAVA Company
+              {employer.name.toUpperCase()}
             </Typography>
             <Typography variant="body2" className="text-gray-600">
               Software Development
             </Typography>
             <Typography variant="body2" className="text-gray-400">
-              Kochi • 1.02K followers • 101-250 employees
+              {employer.location} • 1.02K followers • 101-250 employees
             </Typography>
           </Box>
         </Box>
@@ -90,66 +112,34 @@ export default function CompanyDetails() {
           Jobs
         </Typography>
         <Grid container spacing={4}>
-          {[
-            {
-              title: "UX/UI Designer",
-              location: "Seattle, WA",
-              type: "Full-time",
-              time: "1d",
-            },
-            {
-              title: "Product Designer",
-              location: "Remote",
-              type: "Full-time",
-              time: "3d",
-            },
-          ].map((job) => (
-            <Grid item xs={12} sm={6} key={job.title}>
+      
+          {jobs.map((job) => (
+            <Grid item xs={12} sm={6} key={job._id}>
               <Box className="border border-gray-200 rounded-lg p-6 hover:border-blue-500 transition-colors">
                 <Typography
                   variant="h6"
                   className="text-black-400 pb-3 font-semibold"
                 >
-                  {job.title}
+                  {job.jobTitle}
                 </Typography>
                 <Typography variant="body2" className="text-gray-600 pb-3">
-                  {job.location} • {job.type}
+                  {job.city} • Jobtype
                 </Typography>
-                <Box className="flex flex-row justify-between items-center">
-                  <Box className="flex flex-row gap-4">
-                    {/* Easy Apply Button */}
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      className="mb-5"
-                      color="primary"
-                      sx={{
-                        borderRadius: "16px",
-                      }}
-                    >
-                      Easy Apply
-                    </Button>
 
-                    {/* Custom Gray Background Button */}
-                    <Button
-                      variant="text"
-                      size="small"
-                      sx={{
-                        backgroundColor: "rgba(192, 192, 192, 0.49)",
-                        padding: "0px 15px ",
-                        borderRadius: "16px",
-                        "&:hover": {
-                          backgroundColor: "rgba(214, 214, 214, 0.85)", // Darker gray on hover
-                        },
-                      }}
-                    >
-                      Multiple Candidate
-                    </Button>
+                <Box className="flex flex-row justify-between items-center">
+                  <Box className="flex flex-col gap-1">
+               
+
+                    {job.requirements.map((requ,index) => (
+                      <Stack direction="row" spacing={1} key={index}>
+                        <Chip label={requ} />
+                      </Stack>
+                    ))}
                   </Box>
                   <Box className="flex ">
                     <Typography className="text-right">{job.time}</Typography>
                   </Box>
-                </Box>
+                </Box>   
               </Box>
             </Grid>
           ))}

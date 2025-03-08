@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { employerLogin } from "../actions/EmplyerAction";
+import { employerLogin } from "../actions/EmployerAction";
 
 const initialState = {
     employer: {},
@@ -13,7 +13,10 @@ const employerSlice = createSlice({
         logout: (state) => {
             state.employer = {};
             state.error = null;
-        }
+        },
+        setEmployer: (state, action) => {
+            state.employer = action.payload;        
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -29,5 +32,5 @@ const employerSlice = createSlice({
     }
 });
 
-export const { logout } = employerSlice.actions;
+export const { logout, setEmployer } = employerSlice.actions;
 export default employerSlice.reducer;

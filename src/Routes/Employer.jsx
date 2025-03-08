@@ -10,6 +10,7 @@ import Applicants from '../pages/Employer/Outlets/Applicants'
 import CompanyDetails from '../pages/Employer/Outlets/CompanyDetails'
 import RegisterOtp from '@/pages/Employer/OtpVerification'
 import VerificationForm from '@/components/Employer/VerificationForm'
+import NotFound from '@/pages/Employer/NotFound'
 
 function Employer() {
     return (
