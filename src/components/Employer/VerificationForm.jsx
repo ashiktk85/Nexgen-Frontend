@@ -14,15 +14,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Upload, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { toast } from "sonner";
+import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const MAX_FILE_SIZE = 5000000; // 5MB
-const ACCEPTED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-];
+const ACCEPTED_PDF_TYPES = ["application/pdf"];
 
 const validationSchema = Yup.object({
   name: Yup.string()
@@ -41,7 +40,7 @@ const validationSchema = Yup.object({
     .test(
       "fileType",
       "Only .jpg, .jpeg, .png, and .webp formats are supported",
-      (value) => ACCEPTED_IMAGE_TYPES.includes(value?.type)
+      (value) => ACCEPTED_PDF_TYPES.includes(value?.type)
     ),
   aadharBack: Yup.mixed()
     .required("Aadhar back image is required")
@@ -53,7 +52,7 @@ const validationSchema = Yup.object({
     .test(
       "fileType",
       "Only .jpg, .jpeg, .png, and .webp formats are supported",
-      (value) => ACCEPTED_IMAGE_TYPES.includes(value?.type)
+      (value) => ACCEPTED_PDF_TYPES.includes(value?.type)
     ),
   shopCertificate: Yup.mixed()
     .required("Shop certificate is required")
@@ -65,7 +64,7 @@ const validationSchema = Yup.object({
     .test(
       "fileType",
       "Only .jpg, .jpeg, .png, and .webp formats are supported",
-      (value) => ACCEPTED_IMAGE_TYPES.includes(value?.type)
+      (value) => ACCEPTED_PDF_TYPES.includes(value?.type)
     ),
 });
 
@@ -76,6 +75,8 @@ const steps = [
 ];
 
 export default function VerificationForm() {
+  const Employer = useSelector((state) => state.employer.employer);
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState(1);
   const [preview, setPreview] = React.useState({
     aadharFront: null,
@@ -92,11 +93,52 @@ export default function VerificationForm() {
       shopCertificate: null,
     },
     validationSchema,
-    onSubmit: (values) => {
-      console.log("result", values);
-      // Handle form submission
+    onSubmit: async (values) => {
+      try {
+        if(!Employer){
+          toast.error('Please login')
+          navigate('/employer-login')
+        }
+        console.log("result", values);
+        const formData = new FormData();
+        formData.append('email', Employer?.email)
+        formData.append('name', values.name)
+        formData.append('address', values.address)
+        // Append multiple files
+        formData.append('pdf', new File([values.aadharFront], "aadharFront.pdf", { type: "application/pdf" }))
+        formData.append('pdf', new File([values.aadharBack], "aadharBack.pdf", { type: "application/pdf" }))
+        formData.append('pdf', new File([values.shopCertificate], "certificate.pdf", { type: "application/pdf" }))
+
+        console.log("formData", formData);
+        // Handle form submission
+
+        const res = await employerAxiosInstnce.post(
+          "/employer-verification",
+          formData,
+          {
+            headers:{
+              'Content-Type':'multipart/form-data'
+            }
+          }
+        );
+        console.log(res);
+        if (res) {
+          toast.success("Verification request sended");
+          setTimeout(() => {
+            navigate("/employer/company_details");
+          }, 1500);
+        }
+
+        // if (loading) return <p>Loading...</p>;
+        // if (error) return <p>Error: {error}</p>;
+      } catch (err) {
+        console.log(err, "dhinuuu");
+
+        toast.error(err.response?.data?.message || "An error occurred");
+      }
     },
   });
+  // const handleSubmit = formik.handleSubmit
 
   const handleFilePreview = (file, type) => {
     const reader = new FileReader();
@@ -134,17 +176,17 @@ export default function VerificationForm() {
         <div className="w-full ">
           {/* Logo */}
           <div className="max-w-2xl mx-auto p-4 overflow-auto">
-          <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
-            Nexgen
-          </h1>
+            <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
+              Nexgen
+            </h1>
 
-          {/* Welcome Text */}
-          <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
-            Verify your Account
-          </h2>
-          <p className="text-gray-500 mb-6 text-center lg:text-left">
-            Welcome back!
-          </p>
+            {/* Welcome Text */}
+            <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
+              Verify your Account
+            </h2>
+            <p className="text-gray-500 mb-6 text-center lg:text-left">
+              Welcome back!
+            </p>
           </div>
           {/* Email and Password Form */}
           <div className="max-w-2xl mx-auto p-4 overflow-auto">
@@ -180,7 +222,6 @@ export default function VerificationForm() {
                       >
                         {step.title}
                       </div>
-                      
                     </div>
                   ))}
                 </div>
@@ -201,7 +242,9 @@ export default function VerificationForm() {
                           onBlur={formik.handleBlur}
                         />
                         {formik.touched.name && formik.errors.name && (
-                          <div className="text-red-500 text-sm">{formik.errors.name}</div>
+                          <div className="text-red-500 text-sm">
+                            {formik.errors.name}
+                          </div>
                         )}
                       </div>
                       <div>
@@ -215,7 +258,9 @@ export default function VerificationForm() {
                           onBlur={formik.handleBlur}
                         />
                         {formik.touched.address && formik.errors.address && (
-                          <div className="text-red-500 text-sm">{formik.errors.address}</div>
+                          <div className="text-red-500 text-sm">
+                            {formik.errors.address}
+                          </div>
                         )}
                       </div>
                     </>
@@ -228,7 +273,7 @@ export default function VerificationForm() {
                         <input
                           className="md:ml-2"
                           type="file"
-                          accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                          accept={ACCEPTED_PDF_TYPES.join(",")}
                           onChange={(event) => {
                             const file = event.target.files?.[0];
                             if (file) {
@@ -238,10 +283,16 @@ export default function VerificationForm() {
                           }}
                         />
                         {preview.aadharFront && (
-                          <img className="mt-2" src={preview.aadharFront} alt="Preview" />
+                          <img
+                            className="mt-2"
+                            src={preview.aadharFront}
+                            alt="Preview"
+                          />
                         )}
                         {formik.errors.aadharFront && (
-                          <div className="text-red-500 text-sm">{formik.errors.aadharFront}</div>
+                          <div className="text-red-500 text-sm">
+                            {formik.errors.aadharFront}
+                          </div>
                         )}
                       </div>
                       <div>
@@ -249,7 +300,7 @@ export default function VerificationForm() {
                         <input
                           className="md:ml-2"
                           type="file"
-                          accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                          accept={ACCEPTED_PDF_TYPES.join(",")}
                           onChange={(event) => {
                             const file = event.target.files?.[0];
                             if (file) {
@@ -259,10 +310,16 @@ export default function VerificationForm() {
                           }}
                         />
                         {preview.aadharBack && (
-                          <img className="mt-2" src={preview.aadharBack} alt="Preview" />
+                          <img
+                            className="mt-2"
+                            src={preview.aadharBack}
+                            alt="Preview"
+                          />
                         )}
                         {formik.errors.aadharBack && (
-                          <div className="text-red-500 text-sm">{formik.errors.aadharBack}</div>
+                          <div className="text-red-500 text-sm">
+                            {formik.errors.aadharBack}
+                          </div>
                         )}
                       </div>
                     </>
@@ -274,7 +331,7 @@ export default function VerificationForm() {
                       <input
                         className="md:ml-2"
                         type="file"
-                        accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                        accept={ACCEPTED_PDF_TYPES.join(",")}
                         onChange={(event) => {
                           const file = event.target.files?.[0];
                           if (file) {
@@ -284,10 +341,16 @@ export default function VerificationForm() {
                         }}
                       />
                       {preview.shopCertificate && (
-                        <img className="mt-2" src={preview.shopCertificate} alt="Preview" />
+                        <img
+                          className="mt-2"
+                          src={preview.shopCertificate}
+                          alt="Preview"
+                        />
                       )}
                       {formik.errors.shopCertificate && (
-                        <div className="text-red-500 text-sm">{formik.errors.shopCertificate}</div>
+                        <div className="text-red-500 text-sm">
+                          {formik.errors.shopCertificate}
+                        </div>
                       )}
                     </div>
                   )}

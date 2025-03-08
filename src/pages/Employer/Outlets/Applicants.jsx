@@ -111,10 +111,14 @@ const dummyColumns = (handleActiveToggle) => [
       <>
         <span
           className={` py-1 rounded font-bold ${
-            status === 'Hired' ? "text-green-500" : status === "Pending" ? "text-orange-400" : "text-red-500"
+            status === "Hired"
+              ? "text-green-500"
+              : status === "Pending"
+              ? "text-orange-400"
+              : "text-red-500"
           }`}
         >
-        { status }
+          {status}
         </span>
 
         {/* <Switch
@@ -128,33 +132,37 @@ const dummyColumns = (handleActiveToggle) => [
 ];
 
 function Applicants() {
-  const{ jobId } = useParams()
+  const { jobId } = useParams();
   const [applications, setApplications] = useState([]); // State for users
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
-  const [loading, setLoading] = useState(false)
-  
-  const fetchApplications = async() => {
-    setLoading(true)
+  const [loading, setLoading] = useState(false);
+
+  const fetchApplications = async () => {
+    setLoading(true);
     try {
-      const {data} = await employerAxiosInstnce.get(`/job-applications/${jobId}`)
+      const { data } = await employerAxiosInstnce.get(
+        `/job-applications/${jobId}`
+      );
       console.log(data, "ress");
-      
-      setApplications(data.jobApplications)
-      setLoading(false)
+
+      setApplications(data.jobApplications);
+      setLoading(false);
     } catch (error) {
       console.log(error);
-      toast.error('Failed to load applicants')
-      setLoading(false)
+      toast.error("Failed to load applicants");
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchApplications()
-  },[jobId])
+    fetchApplications();
+  }, [jobId]);
 
   const handleView = (id) => {
-    const application = applications.find((application) => application._id === id);
+    const application = applications.find(
+      (application) => application._id === id
+    );
     setSelectedData(application);
     setIsDialogOpen(true);
   };
@@ -162,7 +170,9 @@ function Applicants() {
   const handleActiveToggle = (id) => {
     setApplications((prevApplications) =>
       prevApplications.map((application) =>
-        application.id === id ? { ...application, active: !application.active } : application
+        application.id === id
+          ? { ...application, active: !application.active }
+          : application
       )
     );
   };
@@ -174,7 +184,7 @@ function Applicants() {
 
   const formSubmittionURL = "http:localhost:3000/api/edit_job";
 
-  if(loading) return <p>Loading</p>
+  if (loading) return <p>Loading</p>;
 
   return (
     <div className="my-6 px-2">
@@ -185,7 +195,7 @@ function Applicants() {
           columns={dummyColumns(handleActiveToggle)}
           rowsPerPage={5}
           onView={handleView}
-          // onDelete={(id) => { 
+          // onDelete={(id) => {
           //   const user = users.find((user) => user.id === id);
           //   setSelectedData(user);
           //   setIsDeleteDialogOpen(true);
@@ -194,11 +204,15 @@ function Applicants() {
       </div>
 
       {/* Detail Modal */}
-      { selectedData &&
-        <ApplicantModal isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} application={selectedData} setSelectedData={setSelectedData} fetchApplications={fetchApplications}/>
-}
-
-      
+      {selectedData && (
+        <ApplicantModal
+          isDialogOpen={isDialogOpen}
+          setIsDialogOpen={setIsDialogOpen}
+          application={selectedData}
+          setSelectedData={setSelectedData}
+          fetchApplications={fetchApplications}
+        />
+      )}
     </div>
   );
 }

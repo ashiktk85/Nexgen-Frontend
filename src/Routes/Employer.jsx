@@ -18,7 +18,7 @@ function Employer() {
             <Route path='/register' element={<Register />} />
             <Route path='/profile' element={<Profile />} />
             <Route path='/otp' element={<RegisterOtp />} />
-            <Route path='Verification' element={<VerificationForm />} />
+            <Route path='verification' element={<VerificationForm />} />
             <Route path='/' element={<HomeLayout />} >
                 <Route path='dashboard' element={<Dashboard />} />
                 <Route path='create_job' element={<CreateJob />} />

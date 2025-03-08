@@ -7,7 +7,7 @@ import {
   Avatar,
 } from "@mui/material";
 import { useRef } from "react";
-
+ 
 export default function CompanyDetails() {
   const aboutRef = useRef(null);
   const jobsRef = useRef(null);
