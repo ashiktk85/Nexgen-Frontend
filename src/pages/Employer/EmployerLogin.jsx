@@ -6,7 +6,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner"
 import { useDispatch } from "react-redux";
-import { employerLogin } from "@/redux/actions/EmplyerAction";
+import { employerLogin } from "@/redux/actions/EmployerAction";
 
 const EmployerLogin = () => {
   const navigate = useNavigate();
@@ -70,13 +70,12 @@ const EmployerLogin = () => {
 
           {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
-            Log in to your Account
+            Employer Login
           </h2>
           <p className="text-gray-500 mb-6 text-center lg:text-left">
-            Welcome back!
+            Log in to access your dashboard and connect with top candidates.
+            Let's build your dream team!
           </p>
-
-          
 
           {/* Email and Password Form */}
           <form onSubmit={formik.handleSubmit}>
@@ -85,7 +84,7 @@ const EmployerLogin = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email
+                Employer Email
               </label>
               <input
                 type="email"
@@ -119,15 +118,15 @@ const EmployerLogin = () => {
                   placeholder="Enter your password"
                   aria-required="true"
                   value={formik.values.password}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                name="password"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  name="password"
                 />
                 {formik.touched.password && formik.errors.password ? (
-                <div className="text-red-500 text-sm">
-                  {formik.errors.password}
-                </div>
-              ) : null}
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.password}
+                  </div>
+                ) : null}
                 <button
                   type="button"
                   className="absolute inset-y-0 right-4 flex items-center text-gray-500"
@@ -176,7 +175,16 @@ const EmployerLogin = () => {
               onClick={() => navigate("/employer/register")}
               className="text-blue-600 hover:underline cursor-pointer"
             >
-              Create an account
+              Create an Employer Account
+            </a>
+          </p>
+          <p className="text-center text-sm text-gray-600 mt-4">
+            Login as User?{" "}
+            <a
+              onClick={() => navigate("/login")}
+              className="text-blue-600 hover:underline cursor-pointer"
+            >
+              User Login
             </a>
           </p>
         </div>
@@ -194,12 +202,11 @@ const EmployerLogin = () => {
           <GrapeAnimation className="sm:hidden" />
 
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
-          Connecting Talent with Opportunity—Post Jobs, Build Futures.
-
+            Connecting Talent with Opportunity—Post Jobs, Build Futures.
           </h2>
 
           <p className="text-base lg:text-lg text-gray-200 mb-4">
-          Empowering Careers, One Opportunity at a Time.
+            Empowering Careers, One Opportunity at a Time.
           </p>
 
           {/* <div className="flex justify-center gap-2">

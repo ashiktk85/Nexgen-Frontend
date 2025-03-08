@@ -5,7 +5,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
-import useRequest from "../hooks/useRequest";
+import useRequest from "../hooks/useRequestUser";
 import { useDispatch } from "react-redux";
 import { userLoginAction } from "@/redux/actions/userAction";
 
@@ -75,10 +75,11 @@ const LoginPage = () => {
 
           {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
-            Log in to your Account
+            Discover Your Dream Career
           </h2>
           <p className="text-gray-500 mb-6 text-center lg:text-left">
-            Welcome back! Select a method to log in:
+            Log in to browse personalized job matches and connect with top
+            companies. Your next adventure awaits!
           </p>
 
           {/* Social Login Buttons */}
@@ -202,7 +203,20 @@ const LoginPage = () => {
               onClick={() => navigate("/sign-up")}
               className="text-blue-600 hover:underline cursor-pointer"
             >
-              Create an account
+              Create a user account
+            </a>
+          </p>
+
+          <p className="text-center text-sm text-gray-600 mt-4">
+            OR{" "}
+          </p>
+          <p className="text-center text-sm text-gray-600 mt-4">
+            Are you a Recuitor?{" "}
+            <a
+              onClick={() => navigate("/employer/employer-login")}
+              className="text-blue-600 hover:underline cursor-pointer"
+            >
+              Login to hire candidates
             </a>
           </p>
         </div>

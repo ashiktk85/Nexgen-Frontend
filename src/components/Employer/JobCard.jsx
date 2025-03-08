@@ -1,65 +1,98 @@
+
 import React from "react";
-import { Card, Typography, Button, Tag, Space } from "antd";
-import { EditOutlined, EyeInvisibleOutlined, DeleteOutlined, TeamOutlined } from "@ant-design/icons";
-import moment from 'moment'
+import { MdPlace } from "react-icons/md";
+import { FaIndianRupeeSign } from "react-icons/fa6";
+import { IoBriefcase } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import { Button, Tag } from "antd";
+import {
+  EditOutlined,
+  EyeInvisibleOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
+import moment from "moment";
 
-const { Text, Title } = Typography;
+const JobCard = ({ job, onEdit, onDelete, onUnlist, layout }) => {
+  const navigate = useNavigate();
 
-export default function JobCard({
-  title,
-  location,
-  postedDate,
-  isActive,
-  applicantsCount,
-  onEdit,
-  onUnlist,
-  onDelete,
-  jobId
-}) {
-  const navigate = useNavigate()
+  // const jobDetailNavigation = () => {
+  //   navigate(`/job-details/${job._id}`);
+  // };
+
   return (
-    <Card
-      className="w-80 shadow-md hover:shadow-lg transition-shadow duration-300 relative"
-      actions={[
-        <Button type="text" icon={<EditOutlined />} onClick={onEdit} key="edit">
-          Edit
-        </Button>,
-        <Button type="text" icon={<EyeInvisibleOutlined />} onClick={onUnlist} key="unlist">
-          Unlist
-        </Button>,
-        <Button type="text" icon={<DeleteOutlined />} onClick={onDelete} key="delete" danger>
-          Delete
-        </Button>,
-      ]}
+    <article
+      className={`bg-white shadow-md rounded-lg p-5 space-y-4 transition-all ${
+        layout === "list" ? "w-full " : "w-80 mx-auto"
+      }`}
+      aria-label="Job listing card"
     >
-      <Space direction="vertical" size="small" className="w-full">
-        <div className="flex justify-between items-center">
-          {/* Company Name */}
-          {/* <Text type="secondary">{company}</Text> */}
-          {/* Posted on Date */}
-          <Text type="secondary" className="text-xs">
-          Posted on: {moment(postedDate).format("MMMM Do, YYYY")}
-          </Text>
+      <div className={`layout === "list` ? "flex items-center  gap-4" : ""}>
+        {/* <figure
+          className={`${
+            layout === "list" ? "w-12 h-12" : "w-10 h-10"
+          } bg-black rounded-full flex items-center justify-center`}
+          aria-hidden="true"
+        >
+          <span className="text-white font-bold text-lg">F</span>
+        </figure> */}
+        {/* Logo Section */}
+
+        {/* Job Info */}
+        <div className={`${layout === "list" ? "w-full flex justify-between gap-4" : ""}`}>
+          <h1 className="text-lg font-semibold text-gray-800">
+            {job.jobTitle}
+          </h1>
+          <p className="text-sm text-gray-500">
+            p: {moment(job?.createdAt).format("MMMM Do, YYYY")}
+          </p>
+
+          {/* Job Details */}
+          <div className="flex items-center space-x-2 text-gray-600 text-sm">
+            <IoBriefcase />
+            <p>
+              {[
+                job.experienceRequired[0],
+                job.experienceRequired[job.experienceRequired.length - 1],
+              ].join(" - ")}{" "}
+              yrs
+            </p>
+          </div>
+          <div className="flex items-center space-x-2 text-gray-600 text-sm">
+            <MdPlace />
+            <p>{`${job.city}, ${job.country}`}</p>
+          </div>
+          <div className="flex items-center space-x-2 text-gray-600 text-sm">
+            <FaIndianRupeeSign />
+            <p>{job.salaryRange?.join(" - ")}</p>
+          </div>
+
+          {/* Status Tag */}
+          <Tag className={`${layout === "list" ? "flex items-center h-5" :"" }`} color={job?.isBlocked ? "red" : "green"}>
+            {job?.isBlocked ? "Inactive" : "Active"}
+          </Tag>
         </div>
 
-        <Title level={4} className="mb-0">
-          {title}
-        </Title>
-        <Text>{location}</Text>
-        <Space className="w-full justify-between">
-          <Text type="secondary">Location: {location}</Text>
-          <Tag color={isActive ? "red" : "green"} >{isActive ? "Inactive" : "Active"}</Tag>
-        </Space>
-        <Button
-          type="default"
-          icon={<TeamOutlined />}
-          onClick={() => navigate(`/employer/applicants/${jobId}`)}
-          className="flex items-center"
-        >
-          Applicants ( { applicantsCount } )
+        {/* Actions */}
+      </div>
+      <footer className="flex space-x-1 justify-end">
+        <Button icon={<EditOutlined />} onClick={onEdit}>
+          Edit
         </Button>
-      </Space>
-    </Card>
+        <Button icon={<EyeInvisibleOutlined />} onClick={onUnlist}>
+          Unlist
+        </Button>
+        <Button icon={<DeleteOutlined />} onClick={onDelete} danger>
+          Delete
+        </Button>
+        {/* <Button
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={jobDetailNavigation}
+        >
+          Job Details
+        </Button> */}
+      </footer>
+    </article>
   );
-}
+};
+
+export default JobCard;

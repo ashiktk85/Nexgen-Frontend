@@ -3,16 +3,13 @@ import {
   MdOutlineKeyboardArrowRight,
   MdOutlineKeyboardArrowLeft,
 } from "react-icons/md";
-import { CiEdit } from "react-icons/ci";
-import { TfiTrash } from "react-icons/tfi";
-import { Switch } from "../ui/switch";
+import { FaEye } from "react-icons/fa";
 
 const ListingTable = ({
   users,
   columns,
   rowsPerPage = 5,
-  onEdit,
-  onDelete,
+  onView,
 }) => {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [itemsPerPage, setItemsPerPage] = useState(rowsPerPage);
@@ -44,12 +41,12 @@ const ListingTable = ({
         </td>
       ))}
       <td className="flex justify-end items-center p-4">
-        <button className="mr-4" title="Edit" onClick={() => onEdit(user.id)}>
-          {<CiEdit />}
+        <button className="mr-4" title="Edit" onClick={() => onView(user._id)}>
+          {<FaEye />}
         </button>
-        <button title="Delete" onClick={() => onDelete(user.id)}>
+        {/* <button title="Delete" onClick={() => onDelete(user.id)}>
           {<TfiTrash />}
-        </button>
+        </button> */}
       </td>
     </tr>
   );

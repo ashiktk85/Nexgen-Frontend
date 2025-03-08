@@ -3,7 +3,7 @@ import GrapeAnimation from "../components/GrapeAnimation";
 import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import useRequest from "../hooks/useRequest";
+import useRequest from "../hooks/useRequestUser";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 
 const RegisterOtp = () => {
