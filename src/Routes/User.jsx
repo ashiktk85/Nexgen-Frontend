@@ -14,6 +14,7 @@ import JobDetailPage from "../pages/User/Outlets/JobDetails";
 // import Home3 from "@/pages/Home3";
 import HomeLayout from "@/pages/User/Layout/HomeLayout";
 import JobApplicationHistory from "@/pages/User/Outlets/JobApplicationHistory";
+import NotFound from "@/pages/Employer/NotFound";
 
 function User() {
   return (

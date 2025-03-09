@@ -18,7 +18,7 @@ import { ChevronRight, ChevronLeft, Check } from "lucide-react";
 import { toast } from "sonner";
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const MAX_FILE_SIZE = 5000000; // 5MB
 const ACCEPTED_PDF_TYPES = ["application/pdf"];
@@ -95,19 +95,34 @@ export default function VerificationForm() {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        if(!Employer){
-          toast.error('Please login')
-          navigate('/employer-login')
+        if (!Employer) {
+          toast.error("Please login");
+          navigate("/employer-login");
         }
         console.log("result", values);
         const formData = new FormData();
-        formData.append('email', Employer?.email)
-        formData.append('name', values.name)
-        formData.append('address', values.address)
+        formData.append("email", Employer?.email);
+        formData.append("name", values.name);
+        formData.append("address", values.address);
         // Append multiple files
-        formData.append('pdf', new File([values.aadharFront], "aadharFront.pdf", { type: "application/pdf" }))
-        formData.append('pdf', new File([values.aadharBack], "aadharBack.pdf", { type: "application/pdf" }))
-        formData.append('pdf', new File([values.shopCertificate], "certificate.pdf", { type: "application/pdf" }))
+        formData.append(
+          "pdf",
+          new File([values.aadharFront], "aadharFront.pdf", {
+            type: "application/pdf",
+          })
+        );
+        formData.append(
+          "pdf",
+          new File([values.aadharBack], "aadharBack.pdf", {
+            type: "application/pdf",
+          })
+        );
+        formData.append(
+          "pdf",
+          new File([values.shopCertificate], "certificate.pdf", {
+            type: "application/pdf",
+          })
+        );
 
         console.log("formData", formData);
         // Handle form submission
@@ -116,9 +131,9 @@ export default function VerificationForm() {
           "/employer-verification",
           formData,
           {
-            headers:{
-              'Content-Type':'multipart/form-data'
-            }
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
           }
         );
         console.log(res);
@@ -381,6 +396,11 @@ export default function VerificationForm() {
                 </CardFooter>
               </form>
             </Card>
+            <div className="mt-6">
+              <Link to="/employer/company_details">
+                <Button variant="contained">Cancel</Button>
+              </Link>
+            </div>
           </div>
 
           {/* Create Account */}
