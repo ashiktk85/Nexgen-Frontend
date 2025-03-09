@@ -35,7 +35,7 @@ function User() {
         <Route path="/job-application-history" element={<JobApplicationHistory />}/>
 
         <Route path="/profile" element={<Profile />} />
-        <Route path="*" element={<NotFound />} />
+        {/* <Route path="*" element={<NotFound />} /> */}
       </Route>
     </Routes>
   );

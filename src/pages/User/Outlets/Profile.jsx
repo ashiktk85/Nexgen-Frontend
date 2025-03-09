@@ -1,256 +1,236 @@
-'use client'
-
-import { useState, useRef } from 'react'
+"use client";
+import { useState, useRef, useEffect } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  AppBar,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Container,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogTitle as MuiDialogTitle,
-  Divider,
-  Grid2,
-  IconButton,
-  Tab,
-  Tabs,
-  TextField,
-  Toolbar,
-  Typography,
-  Chip,
-  Alert,
-  styled,
-  useTheme,
-  useMediaQuery
-} from '@mui/material'
-import {
-  BookmarkBorder as BookmarkIcon,
-  MoreHoriz as MoreIcon,
-  Edit as EditIcon,
-  Add as AddIcon,
-  ChevronRight as ChevronRightIcon,
-  FileUpload as FileUploadIcon,
-  InsertDriveFile as FileIcon,
-  Delete as DeleteIcon,
-  Close as CloseIcon
-} from '@mui/icons-material'
-import Navbar from '../../../components/User/Navbar'
-
-// Styled components
-const StyledTabs = styled(Tabs)(({ theme }) => ({
-  '& .MuiTabs-indicator': {
-    backgroundColor: theme.palette.primary.main,
-    height: 2,
-  },
-  '& .MuiTab-root': {
-    textTransform: 'none',
-    minWidth: 0,
-    padding: '12px 24px',
-    marginRight: theme.spacing(3),
-    color: theme.palette.text.secondary,
-    '&.Mui-selected': {
-      color: theme.palette.primary.main,
-    },
-  },
-  '& .MuiTabs-flexContainer': {
-    [theme.breakpoints.down('sm')]: {
-      overflowX: 'auto',
-      '&::-webkit-scrollbar': {
-        display: 'none'
-      },
-    }
-  }
-}))
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  textTransform: 'none',
-  color: theme.palette.primary.main,
-  '&:hover': {
-    backgroundColor: 'transparent',
-  },
-}))
-
-const StyledCard = styled(Card)({
-  border: '1px solid #E0E0E0',
-  boxShadow: 'none',
-  borderRadius: '8px',
-})
-
-
-const DialogTitle = ({ children, onClose, ...other }) => {
-  return (
-    <MuiDialogTitle {...other}>
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        mb: 1
-      }}>
-        <Typography variant="h6">{children}</Typography>
-        {onClose && (
-          <IconButton
-            aria-label="close"
-            onClick={onClose}
-            size="small"
-            tabIndex={-1}  // Prevent focus trap issues
-          >
-            <CloseIcon />
-          </IconButton>
-        )}
-      </Box>
-    </MuiDialogTitle>
-  )
-}
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Edit, Plus, FileText, Trash2 } from "lucide-react";
+import { useMediaQuery } from "@/hooks/use-mobile";
+import userAxiosInstance from "../../../config/axiosConfig/userAxiosInstance";
+import { useSelector } from "react-redux";
 
 export default function ProfilePage() {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const [activeTab, setActiveTab] = useState(0)
-  const [profileImage, setProfileImage] = useState('/placeholder.svg')
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isAddSkillDialogOpen, setIsAddSkillDialogOpen] = useState(false)
-  const [newSkill, setNewSkill] = useState('')
-  const [skills, setSkills] = useState(['UI/UX Design', 'Figma', 'Adobe XD', 'Prototyping'])
-  const [resumes, setResumes] = useState([
-    { id: 1, name: 'philip Resume.pdf', dateAdded: '2024-01-15' }
-  ])
-  const [profileData, setProfileData] = useState({
-    fullName: 'Philip Maya',
-    jobTitle: 'UI/UX Designer',
-    location: 'Porto, Portugal',
-    employmentStatus: 'Not Employed',
-    bio: 'I am a passionate UI/UX designer with 5+ years of experience creating user-centered digital experiences. Skilled in user research, wireframing, and prototyping. Always eager to tackle complex problems and turn them into elegant solutions.'
-  })
-  const fileInputRef = useRef(null)
-  const resumeInputRef = useRef(null)
+  const isMobile = useMediaQuery("(max-width: 640px)");
+  const [activeTab, setActiveTab] = useState("about");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddSkillDialogOpen, setIsAddSkillDialogOpen] = useState(false);
+  const [newSkill, setNewSkill] = useState("");
+  const [skills, setSkills] = useState([]);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef(null);
+  const resumeInputRef = useRef(null);
 
-  const handleDialogClose = () => {
-    setIsEditDialogOpen(false)
-  }
+  const userId = useSelector((state) => state.user.seekerInfo.userId);
 
-  const activities = [
-    {
-      id: 1,
-      company: "Meta company",
-      title: "Product Designer",
-      location: "Porto, Portugal (On-Site)",
-      time: "Archived 5 Days Ago"
-    },
-    {
-      id: 2,
-      company: "Meta company",
-      title: "Product Designer",
-      location: "Porto, Portugal (On-Site)",
-      time: "Archived 5 Days Ago"
-    }
-  ]
+  // Fetch user data from API
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        // Replace with your actual API endpoint
+        const response = await userAxiosInstance.get(
+          `/user-profile/${userId}`
+        );
+        if (response.status !== 200) {
+          throw new Error("Failed to fetch user data");
+        }
+        const userData = await response.data.userData
+        setUser(userData);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const savedJobs = [
-    {
-      id: 1,
-      company: "Google",
-      title: "Senior UX Designer",
-      location: "Remote",
-      time: "Saved 2 Days Ago"
-    },
-    {
-      id: 2,
-      company: "Apple",
-      title: "Product Designer",
-      location: "California, USA (Hybrid)",
-      time: "Saved 3 Days Ago"
-    }
-  ]
+    fetchUserData();
+  }, []);
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0]
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setProfileImage(e.target.result)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
+      // Create a FormData object to send the file to the server
+      const formData = new FormData();
+      formData.append("profileImage", file);
 
-  const handleResumeUpload = (event) => {
-    const file = event.target.files[0]
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch("/api/user/profile-image", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload profile image");
+        }
+
+        const data = await response.json();
+        // Update the user state with the new profile URL
+        if (user) {
+          setUser({
+            ...user,
+            profileUrl: data.profileUrl,
+          });
+        }
+      } catch (error) {
+        console.error("Error uploading profile image:", error);
+      }
+    }
+  };
+
+  const handleResumeUpload = async (event) => {
+    const file = event.target.files?.[0];
     if (file) {
-      if (file.type !== 'application/pdf') {
-        alert('Please upload only PDF files')
-        return
+      if (file.type !== "application/pdf") {
+        alert("Please upload only PDF files");
+        return;
       }
-      if (resumes.length >= 5) {
-        alert('Maximum 5 resumes allowed')
-        return
+
+      if (user?.resume && user.resume.length >= 5) {
+        alert("Maximum 5 resumes allowed");
+        return;
       }
-      const newResume = {
-        id: Date.now(),
-        name: file.name,
-        dateAdded: new Date().toISOString().split('T')[0]
+
+      // Create a FormData object to send the file to the server
+      const formData = new FormData();
+      formData.append("resume", file);
+
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch("/api/user/resume", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload resume");
+        }
+
+        const data = await response.json();
+        // Update the user state with the new resume
+        if (user) {
+          setUser({
+            ...user,
+            resume: [...(user.resume || []), data.resumeUrl],
+          });
+        }
+      } catch (error) {
+        console.error("Error uploading resume:", error);
       }
-      setResumes([...resumes, newResume])
     }
-  }
+  };
 
-  const handleRemoveResume = (id) => {
-    setResumes(resumes.filter(resume => resume.id !== id))
-  }
+  const handleRemoveResume = async (resumeUrl) => {
+    try {
+      // Replace with your actual API endpoint
+      const response = await fetch("/api/user/resume", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ resumeUrl }),
+      });
 
-  const handleAddSkill = () => {
-    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-      setSkills([...skills, newSkill.trim()])
-      setNewSkill('')
-      setIsAddSkillDialogOpen(false)
+      if (!response.ok) {
+        throw new Error("Failed to delete resume");
+      }
+
+      // Update the user state by removing the deleted resume
+      if (user) {
+        setUser({
+          ...user,
+          resume: user.resume.filter((url) => url !== resumeUrl),
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting resume:", error);
     }
+  };
+
+  const handleUpdateProfile = async (updatedData) => {
+    try {
+      // Replace with your actual API endpoint
+      const response = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        Loading...
+      </div>
+    );
   }
 
-  const handleRemoveSkill = (skillToRemove) => {
-    setSkills(skills.filter(skill => skill !== skillToRemove))
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        Failed to load user data
+      </div>
+    );
   }
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue)
-  }
-
-  const handleEditProfile = () => {
-    setIsEditDialogOpen(true)
-  }
+  const fullName = `${user.firstName} ${user.lastName}`;
+  const getResumeFileName = (url) => {
+    // Extract filename from URL or path
+    const parts = url.split("/");
+    return parts[parts.length - 1];
+  };
 
   return (
-    <Box sx={{ bgcolor: '#FFFFFF', minHeight: '100vh' }}>
-      {/* <Navbar /> */}
-
-      <Container className='mt-14' maxWidth="xl" sx={{ py: 2 }}>
-        <StyledCard sx={{ mx: 1 }}>
-          <CardContent sx={{ p: { xs: 1, sm: 2 } }}>
+    <div className="bg-background min-h-screen">
+      <div className="container pt-14 py-4 px-4">
+        <Card className="border border-border rounded-lg shadow-none">
+          <CardContent className="p-4 sm:p-6">
             {/* Profile Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Box sx={{ position: 'relative' }}>
-                  <Avatar
-                    src={profileImage}
-                    sx={{ width: 80, height: 80 }}
-                  />
-                  <IconButton
-                    size="small"
-                    sx={{
-                      position: 'absolute',
-                      bottom: 0,
-                      right: 0,
-                      bgcolor: 'white',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      '&:hover': { bgcolor: 'white' }
-                    }}
+            <div className="flex justify-between mb-6">
+              <div className="flex gap-4">
+                <div className="relative">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage
+                      src={
+                        user.profileUrl || "/placeholder.svg?height=80&width=80"
+                      }
+                      alt={fullName}
+                    />
+                    <AvatarFallback>{user.firstName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-background"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
+                    <Edit className="h-3.5 w-3.5" />
+                    <span className="sr-only">Change profile picture</span>
+                  </Button>
                   <input
                     type="file"
                     hidden
@@ -258,130 +238,160 @@ export default function ProfilePage() {
                     onChange={handleImageUpload}
                     accept="image/*"
                   />
-                </Box>
-                <Box>
-                  <Typography variant="h6">{profileData.fullName}</Typography>
-                  <Typography color="text.secondary" variant="body2">
-                    {profileData.jobTitle}
-                  </Typography>
-                  <Typography color="text.secondary" variant="body2">
-                    {profileData.location}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold">{fullName}</h2>
+                  {user.experience && user.experience.length > 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      {user.experience[0].jobTitle}
+                    </p>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    {user.location || "No location set"}
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Tabs */}
-            <Box sx={{ 
-              borderBottom: 1, 
-              borderColor: 'divider',
-              width: '100%',
-              overflowX: 'auto',
-              '&::-webkit-scrollbar': {
-                display: 'none'
-              }
-            }}>
-              <StyledTabs 
-                value={activeTab} 
-                onChange={handleTabChange}
-                variant="scrollable"
-                scrollButtons={false}
-                aria-label="profile tabs"
-              >
-                <Tab label="About" />
-                <Tab label="Resume" />
-                <Tab label="My Activities" />
-                <Tab label="Saved Jobs" />
-                <Tab label="Skills" />
-              </StyledTabs>
-            </Box>
-
-            {/* Tab Content */}
-            <Box sx={{ py: 2 }}>
-              {/* About Tab */}
-              {activeTab === 0 && (
-                <Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="h6" color="text.secondary">About</Typography>
-                    <IconButton onClick={handleEditProfile}>
-                      <EditIcon />
-                    </IconButton>
-                  </Box>
-                  <Typography color="text.secondary" variant="body2" sx={{ mb: 2 }}>
-                    Updating your information will offer you the most relevant content
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Box>
-                        <Typography color="text.secondary" variant="caption" display="block">
-                          Bio
-                        </Typography>
-                        <Typography variant="body2" sx={{ mt: 0.5 }}>
-                          {profileData.bio}
-                        </Typography>
-                      </Box>
-                    <Box>
-                      <Typography color="text.secondary" variant="caption" display="block">
-                        Employment Status
-                      </Typography>
-                      <Typography variant="body2">{profileData.employmentStatus}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography color="text.secondary" variant="caption" display="block">
-                        Full Name
-                      </Typography>
-                      <Typography variant="body2">{profileData.fullName}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography color="text.secondary" variant="caption" display="block">
-                        Job Title
-                      </Typography>
-                      <Typography variant="body2">{profileData.jobTitle}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography color="text.secondary" variant="caption" display="block">
-                        Location
-                      </Typography>
-                      <Typography variant="body2">{profileData.location}</Typography>
-                    </Box>
-                  </Box>
-                </Box>
-              )}
-
-              {/* Resume Tab */}
-              {activeTab === 1 && (
-                <Box>
-                  <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+            <Tabs
+              defaultValue="about"
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <div className="border-b overflow-x-auto scrollbar-hide">
+                <TabsList className="bg-transparent h-auto p-0 w-full justify-start">
+                  <TabsTrigger
+                    value="about"
+                    className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
+                  >
+                    About
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="resume"
+                    className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
+                  >
                     Resume
-                  </Typography>
-                  {resumes.map((resume) => (
-                    <StyledCard sx={{ mb: 2 }} key={resume.id}>
-                      <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, '&:last-child': { pb: 2 } }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <FileIcon color="action" />
-                          <Box>
-                            <Typography variant="body2">{resume.name}</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              Added on {resume.dateAdded}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <IconButton 
-                          size="small" 
-                          onClick={() => handleRemoveResume(resume.id)}
-                          sx={{ color: 'error.main' }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </CardContent>
-                    </StyledCard>
-                  ))}
-                  {resumes.length < 5 && (
-                    <StyledButton 
-                      startIcon={<AddIcon />}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="education"
+                    className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
+                  >
+                    Education
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="experience"
+                    className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
+                  >
+                    Experience
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              {/* Tab Content */}
+              <div className="py-4">
+                <TabsContent value="about" className="mt-0">
+                  <div className="flex justify-between mb-4">
+                    <h3 className="text-lg font-medium text-muted-foreground">
+                      About
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsEditDialogOpen(true)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Updating your information will offer you the most relevant
+                    content
+                  </p>
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-xs text-muted-foreground block">
+                        Full Name
+                      </span>
+                      <p className="text-sm">{fullName}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground block">
+                        Email
+                      </span>
+                      <p className="text-sm">{user.email}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground block">
+                        Phone
+                      </span>
+                      <p className="text-sm">{user.phone}</p>
+                    </div>
+                    {user.DOB && (
+                      <div>
+                        <span className="text-xs text-muted-foreground block">
+                          Date of Birth
+                        </span>
+                        <p className="text-sm">
+                          {new Date(user.DOB).toLocaleDateString()}
+                        </p>
+                      </div>
+                    )}
+                    {user.location && (
+                      <div>
+                        <span className="text-xs text-muted-foreground block">
+                          Location
+                        </span>
+                        <p className="text-sm">{user.location}</p>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="resume" className="mt-0">
+                  <h3 className="text-lg font-medium text-muted-foreground mb-4">
+                    Resume
+                  </h3>
+                  {user.resume && user.resume.length > 0 ? (
+                    user.resume.map((resumeUrl, index) => (
+                      <Card
+                        key={index}
+                        className="mb-3 border border-border shadow-none"
+                      >
+                        <CardContent className="p-3 flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <FileText className="h-5 w-5 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm">
+                                {getResumeFileName(resumeUrl)}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleRemoveResume(resumeUrl)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No resumes uploaded yet.
+                    </p>
+                  )}
+                  {(!user.resume || user.resume.length < 5) && (
+                    <Button
+                      variant="ghost"
+                      className="text-primary p-0 h-auto"
                       onClick={() => resumeInputRef.current?.click()}
                     >
+                      <Plus className="h-4 w-4 mr-2" />
                       Add Resume (PDF only, max 5)
-                    </StyledButton>
+                    </Button>
                   )}
                   <input
                     type="file"
@@ -390,420 +400,164 @@ export default function ProfilePage() {
                     onChange={handleResumeUpload}
                     accept=".pdf"
                   />
-                </Box>
-              )}
+                </TabsContent>
 
-              {/* Activities Tab */}
-              {activeTab === 2 && (
-                <Box>
-                  <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-                    My Activities
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {activities.map((activity) => (
-                      <StyledCard key={activity.id}>
-                        <CardContent sx={{ p: 2 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Avatar sx={{ width: 24, height: 24 }}>M</Avatar>
-                              <Typography variant="body2" color="text.secondary">
-                                {activity.company}
-                              </Typography>
-                            </Box>
-                            <Box>
-                              <IconButton size="small">
-                                <BookmarkIcon sx={{ fontSize: 20 }} />
-                              </IconButton>
-                              <IconButton size="small">
-                                <MoreIcon sx={{ fontSize: 20 }} />
-                              </IconButton>
-                            </Box>
-                          </Box>
-                          <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 500 }}>
-                            {activity.title}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {activity.location}
-                          </Typography>
-                          <Box sx={{ mt: 2 }}>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                px: 1.5,
-                                py: 0.5,
-                                borderRadius: 5,
-                                bgcolor: '#EEF4FF',
-                                color: '#246BFD',
-                                border: '1px solid rgba(36, 107, 253, 0.2)'
-                              }}
-                            >
-                              {activity.time}
-                            </Typography>
-                          </Box>
-                        </CardContent>
-                      </StyledCard>
-                    ))}
-                  </Box>
-                </Box>
-              )}
+                <TabsContent value="education" className="mt-0">
+                  <h3 className="text-lg font-medium text-muted-foreground mb-4">
+                    Education
+                  </h3>
+                  {user.education && user.education.length > 0 ? (
+                    <div className="space-y-3">
+                      {user.education.map((edu, index) => (
+                        <Card
+                          key={index}
+                          className="border border-border shadow-none"
+                        >
+                          <CardContent className="p-4">
+                            <h4 className="text-base font-medium">
+                              {edu.qualification}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {edu.institute}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {edu.startYear} - {edu.endYear || "Present"}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No education history added yet.
+                    </p>
+                  )}
+                </TabsContent>
 
-              {/* Saved Jobs Tab */}
-              {activeTab === 3 && (
-                <Box>
-                  <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-                    Saved Jobs
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {savedJobs.map((job) => (
-                      <StyledCard key={job.id}>
-                        <CardContent sx={{ p: 2 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Avatar sx={{ width: 24, height: 24 }}>{job.company[0]}</Avatar>
-                              <Typography variant="body2" color="text.secondary">
-                                {job.company}
-                              </Typography>
-                            </Box>
-                            <Box>
-                              <IconButton size="small">
-                                <BookmarkIcon sx={{ fontSize: 20 }} />
-                              </IconButton>
-                              <IconButton size="small">
-                                <MoreIcon sx={{ fontSize: 20 }} />
-                              </IconButton>
-                            </Box>
-                          </Box>
-                          <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 500 }}>
-                            {job.title}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {job.location}
-                          </Typography>
-                          <Box sx={{ mt: 2 }}>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                px: 1.5,
-                                py: 0.5,
-                                borderRadius: 5,
-                                bgcolor: '#EEF4FF',
-                                color: '#246BFD',
-                                border: '1px solid rgba(36, 107, 253, 0.2)'
-                              }}
-                            >
-                              {job.time}
-                            </Typography>
-                          </Box>
-                        </CardContent>
-                      </StyledCard>
-                    ))}
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                    <StyledButton endIcon={<ChevronRightIcon />}>
-                      Show All Saved Jobs
-                    </StyledButton>
-                  </Box>
-                </Box>
-              )}
-
-              {/* Skills Tab */}
-              {activeTab === 4 && (
-                <Box>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    mb: 2,
-                    flexDirection: isMobile ? 'column' : 'row',
-                    gap: isMobile ? 1 : 0
-                  }}>
-                    <Typography variant="h6" color="text.secondary">
-                      Skills
-                    </Typography>
-                    <StyledButton 
-                      startIcon={<AddIcon />}
-                      onClick={() => setIsAddSkillDialogOpen(true)}
-                    >
-                      Add Skill
-                    </StyledButton>
-                  </Box>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {skills.map((skill) => (
-                      <Chip
-                        key={skill}
-                        label={skill}
-                        onDelete={() => handleRemoveSkill(skill)}
-                        sx={{
-                          bgcolor: '#EEF4FF',
-                          color: '#246BFD',
-                          '& .MuiChip-deleteIcon': {
-                            color: '#246BFD',
-                            '&:hover': {
-                              color: '#1756D8'
-                            }
-                          }
-                        }}
-                      />
-                    ))}
-                  </Box>
-                </Box>
-              )}
-            </Box>
+                <TabsContent value="experience" className="mt-0">
+                  <h3 className="text-lg font-medium text-muted-foreground mb-4">
+                    Experience
+                  </h3>
+                  {user.experience && user.experience.length > 0 ? (
+                    <div className="space-y-3">
+                      {user.experience.map((exp, index) => (
+                        <Card
+                          key={index}
+                          className="border border-border shadow-none"
+                        >
+                          <CardContent className="p-4">
+                            <h4 className="text-base font-medium">
+                              {exp.jobTitle}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {exp.company}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {exp.startYear} - {exp.endYear || "Present"}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No work experience added yet.
+                    </p>
+                  )}
+                </TabsContent>
+              </div>
+            </Tabs>
           </CardContent>
-        </StyledCard>
-      </Container>
+        </Card>
+      </div>
 
       {/* Edit Profile Dialog */}
-      <Dialog 
-        open={isEditDialogOpen} 
-        onClose={handleDialogClose}
-        maxWidth="md"
-        aria-labelledby="edit-profile-dialog-title"
-        disableRestoreFocus // Prevents focus restore issues
-        PaperProps={{
-          sx: {
-            borderRadius: 2,
-            width: '100%'
-          }
-        }}
-      >
-        <DialogTitle 
-          id="edit-profile-dialog-title"
-          onClose={handleDialogClose}
-        >
-          Edit Profile
-        </DialogTitle>
-        <DialogContent>
-          <Box 
-            component="form" // Make it a semantic form
-            noValidate // Prevent native validation
-            autoComplete="off"
-            sx={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              gap: 3,
-              width: '100%',
-              maxWidth: '600px',
-              mx: 'auto',
-              py: 2
-            }}
-          >
-            <Box>
-              <Typography 
-                component="label" 
-                htmlFor="employment-status"
-                variant="caption" 
-                color="text.secondary" 
-                sx={{ mb: 1, display: 'block' }}
-              >
-                Employment Status
-              </Typography>
-              <TextField
-                id="employment-status"
-                fullWidth
-                placeholder="Enter your employment status"
-                value={profileData.employmentStatus}
-                onChange={(e) => setProfileData({ ...profileData, employmentStatus: e.target.value })}
-                size="small"
-                inputProps={{
-                  'aria-label': 'Employment Status'
-                }}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>
+              Update your profile information below
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="first-name">First Name</Label>
+                <Input
+                  id="first-name"
+                  placeholder="Enter your first name"
+                  value={user.firstName}
+                  onChange={(e) =>
+                    setUser({ ...user, firstName: e.target.value })
+                  }
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="last-name">Last Name</Label>
+                <Input
+                  id="last-name"
+                  placeholder="Enter your last name"
+                  value={user.lastName}
+                  onChange={(e) =>
+                    setUser({ ...user, lastName: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                placeholder="Enter your email"
+                type="email"
+                value={user.email}
+                onChange={(e) => setUser({ ...user, email: e.target.value })}
               />
-            </Box>
-
-            <Box>
-              <Typography 
-                component="label" 
-                htmlFor="full-name"
-                variant="caption" 
-                color="text.secondary" 
-                sx={{ mb: 1, display: 'block' }}
-              >
-                Full Name
-              </Typography>
-              <TextField
-                id="full-name"
-                fullWidth
-                placeholder="Enter your full name"
-                value={profileData.fullName}
-                onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
-                size="small"
-                inputProps={{
-                  'aria-label': 'Full Name'
-                }}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                placeholder="Enter your phone number"
+                value={user.phone}
+                onChange={(e) => setUser({ ...user, phone: e.target.value })}
               />
-            </Box>
-
-            <Box>
-              <Typography 
-                component="label" 
-                htmlFor="job-title"
-                variant="caption" 
-                color="text.secondary" 
-                sx={{ mb: 1, display: 'block' }}
-              >
-                Job Title
-              </Typography>
-              <TextField
-                id="job-title"
-                fullWidth
-                placeholder="Enter your job title"
-                value={profileData.jobTitle}
-                onChange={(e) => setProfileData({ ...profileData, jobTitle: e.target.value })}
-                size="small"
-                inputProps={{
-                  'aria-label': 'Job Title'
-                }}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="dob">Date of Birth</Label>
+              <Input
+                id="dob"
+                type="date"
+                value={
+                  user.DOB ? new Date(user.DOB).toISOString().split("T")[0] : ""
+                }
+                onChange={(e) => setUser({ ...user, DOB: e.target.value })}
               />
-            </Box>
-
-            <Box>
-              <Typography 
-                component="label" 
-                htmlFor="location"
-                variant="caption" 
-                color="text.secondary" 
-                sx={{ mb: 1, display: 'block' }}
-              >
-                Location
-              </Typography>
-              <TextField
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="location">Location</Label>
+              <Input
                 id="location"
-                fullWidth
                 placeholder="Enter your location"
-                value={profileData.location}
-                onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-                size="small"
-                inputProps={{
-                  'aria-label': 'Location'
-                }}
+                value={user.location || ""}
+                onChange={(e) => setUser({ ...user, location: e.target.value })}
               />
-            </Box>
-
-            <Box>
-              <Typography 
-                component="label" 
-                htmlFor="bio"
-                variant="caption" 
-                color="text.secondary" 
-                sx={{ mb: 1, display: 'block' }}
-              >
-                Bio
-              </Typography>
-              <TextField
-                id="bio"
-                fullWidth
-                multiline
-                rows={4}
-                placeholder="Write something about yourself"
-                value={profileData.bio}
-                onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
-                inputProps={{
-                  'aria-label': 'Bio'
-                }}
-              />
-            </Box>
-          </Box>
+            </div>
+          </div>
+          <DialogFooter className="border-t pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={() => handleUpdateProfile(user)}>
+              Save Changes
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions sx={{ 
-          p: 3, 
-          borderTop: '1px solid',
-          borderColor: 'divider'
-        }}>
-          <Button 
-            onClick={handleDialogClose} 
-            color="inherit"
-            sx={{ textTransform: 'none' }}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleDialogClose} 
-            variant="contained"
-            sx={{ textTransform: 'none' }}
-          >
-            Save Changes
-          </Button>
-        </DialogActions>
       </Dialog>
-      {/* Add Skill Dialog */}
-<Dialog 
-  open={isAddSkillDialogOpen} 
-  onClose={() => setIsAddSkillDialogOpen(false)}
-  maxWidth="sm"
-  aria-labelledby="add-skill-dialog-title"
-  disableRestoreFocus
-  PaperProps={{
-    sx: {
-      borderRadius: 2,
-      width: '100%'
-    }
-  }}
->
-  <DialogTitle 
-    id="add-skill-dialog-title"
-    onClose={() => setIsAddSkillDialogOpen(false)}
-  >
-    Add New Skill
-  </DialogTitle>
-  <DialogContent>
-    <Box 
-      component="form"
-      noValidate
-      autoComplete="off"
-      sx={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        width: '100%',
-        maxWidth: '400px',
-        mx: 'auto',
-        py: 2
-      }}
-    >
-      <Box>
-        <Typography 
-          component="label" 
-          htmlFor="new-skill"
-          variant="caption" 
-          color="text.secondary" 
-          sx={{ mb: 1, display: 'block' }}
-        >
-          Skill Name
-        </Typography>
-        <TextField
-          id="new-skill"
-          fullWidth
-          placeholder="Enter skill name"
-          value={newSkill}
-          onChange={(e) => setNewSkill(e.target.value)}
-          size="small"
-          inputProps={{
-            'aria-label': 'New Skill'
-          }}
-        />
-      </Box>
-    </Box>
-  </DialogContent>
-  <DialogActions sx={{ 
-    p: 3, 
-    borderTop: '1px solid',
-    borderColor: 'divider'
-  }}>
-    <Button 
-      onClick={() => setIsAddSkillDialogOpen(false)} 
-      color="inherit"
-      sx={{ textTransform: 'none' }}
-    >
-      Cancel
-    </Button>
-    <Button 
-      onClick={handleAddSkill} 
-      variant="contained"
-      sx={{ textTransform: 'none' }}
-    >
-      Add Skill
-    </Button>
-  </DialogActions>
-</Dialog>
-    </Box>
-  )
+    </div>
+  );
 }
