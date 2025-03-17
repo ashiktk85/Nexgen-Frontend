@@ -8,7 +8,9 @@ const HomeLayout = () => {
       <div className="flex items-start">
         <section className="main-content w-full  px-10">
           <Header />
-          <Outlet/>
+          <div className="lg:ml-[250px]">
+            <Outlet />
+          </div>
         </section>
       </div>
     </div>
