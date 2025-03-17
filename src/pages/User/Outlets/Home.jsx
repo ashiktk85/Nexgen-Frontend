@@ -46,9 +46,11 @@ export default function Home() {
       const { data } = await userAxiosInstance.get("/getJobPosts");
       console.log(data.jobPosts);
       setJobs(data.jobPosts);
-      setLoading(false)
+
     } catch (error) {
       console.log(error);
+      
+    } finally {
       setLoading(false)
     }
   };
