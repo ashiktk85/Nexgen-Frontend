@@ -8,6 +8,7 @@ import HomeLayout from "@/pages/Admin/Layout/HomeLayout";
 import AdminLogin from "@/pages/Admin/AdminLogin";
 import AdminRegister from "@/pages/Admin/AdminRegister";
 import OtpVerification from "@/pages/Admin/OtpVerification";
+import EmployerVerification from "@/components/Admin/EmployerVerification";
 
 function Admin() {
   return (
@@ -20,6 +21,7 @@ function Admin() {
         <Route path="/users" element={<Users />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/jobs" element={<Jobs />} />
+        <Route path="/employer-verification" element={<EmployerVerification />} />
       </Route>
     </Routes>
   );

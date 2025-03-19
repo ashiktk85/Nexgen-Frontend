@@ -192,7 +192,7 @@ function ApplicantModal({
           </DialogContent>
         </Dialog>
 
-        {/* Deletion confirmation modal */}
+        {/* Status confirmation modal */}
         <Dialog
           open={isDecisionDialogOpen}
           onOpenChange={setIsDecisionDialogOpen}
