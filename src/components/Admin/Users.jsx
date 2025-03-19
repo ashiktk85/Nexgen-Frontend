@@ -1,7 +1,9 @@
 import {useEffect, useState} from 'react';
 import ListTable from '../common/ListTable';
+import ConfirmDialog from '../common/ConfirmDialog';
 import { Button } from 'antd';
 import { toast } from 'sonner';
+// import { Button } from '../ui/button';
 
 import { getAllUsersSerive, userChangeStatusService } from '@/apiServices/adminApi';
 
@@ -44,22 +46,11 @@ const Users = () => {
   ]
 
 
-  const handleNext = () => {
-    if(currentPage < totalPages){
-      setCurrentPage((prev) => prev + 1)
-    }
-  }
-
-  const handlePrev = () => {
-    if(currentPage > 1) {
-      setCurrentPage((prev) => prev - 1)
-    }
-  }
 
   const handleBlockUnblock = async (userId) => {
     try {
       const result = await userChangeStatusService(userId)
-      console.log('Response after changing status: ', result)
+
       if(result?.data?.response){
         const {message, response} = result.data
         toast.success(message)
@@ -83,29 +74,32 @@ const Users = () => {
               ? <span className='text-red-500'>blocked</span> 
               : <span className='text-green-500'>active</span>,
       action: (
-        <>
+        <ConfirmDialog
+        title={item.isBlocked ? "Unblock user" : "Block user"}
+        description={`Are you sure you want to ${item.isBlocked ? "unblock" : "block"} this user?`}
+        onConfirm={() => handleBlockUnblock(item._id)}
+        >
           <Button 
-          className='font-semibold'
-          onClick={() => handleBlockUnblock(item._id)}
-          >
+          className='font-semibold min-w-28'>
             {item.isBlocked ? 'Unblock' : 'Block'}
           </Button>
-        </>
+        </ConfirmDialog>
       )
   }))
 
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-4">Users</h1>
-      <ListTable
-      columns={columns}
-      data={tableData}
-      currentPage={currentPage}
-      totalPages={totalPages}
-      onNext={handleNext}
-      onPrev={handlePrev}
-      />
+    <div className='mt-6 px-6'>
+      <h1 className="text-start text-2xl font-bold mb-4 ">Users</h1>
+      <div className='mt-2'>
+        <ListTable
+        columns={columns}
+        data={tableData}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+        />
+      </div>
     </div>
   );
 };

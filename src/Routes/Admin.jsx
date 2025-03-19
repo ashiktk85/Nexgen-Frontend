@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Sidebar from '../components/Admin/SideBar';
 import Dashboard from '../components/Admin/Dashboard';
 import Users from '../components/Admin/Users';
-import Employees from '../components/Admin/Employees';
+import Employers from '../components/Admin/Employers';
 import Jobs from '../components/Admin/Jobs';
 import Header from '../components/Admin/Header';
 
@@ -21,7 +21,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/users" element={<Users />} />
-              <Route path="/employees" element={<Employees />} />
+              <Route path="/employers" element={<Employers />} />
               <Route path="/jobs" element={<Jobs />} />
             </Routes>
           </main>
