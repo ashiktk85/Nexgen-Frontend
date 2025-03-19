@@ -78,26 +78,16 @@ const Sidebar = ({ open, setOpen }) => {
         >
           Users
         </Link>
-
-        <Link
-          to="/admin/employees"
-          className={`block py-2 px-4 hover:scale-105 transition-transform duration-200 
-        ${
-          location.pathname === "/admin/employees"
-            ? "font-extrabold text-blue-900"
-            : ""
-        }`}
+    
+        <Link to="/admin/employers" className={`block py-2 px-4 hover:scale-105 transition-transform duration-200 
+        ${location.pathname === '/admin/employers' ? 'font-extrabold text-blue-900': ''}`
+        }
         >
-          Employees
-        </Link>
-        <Link
-          to="/admin/jobs"
-          className={`block py-2 px-4 hover:scale-105 transition-transform duration-200 
-        ${
-          location.pathname === "/admin/jobs"
-            ? "font-extrabold text-blue-900"
-            : ""
-        }`}
+          Employers
+          </Link>
+        <Link to="/admin/jobs" className={`block py-2 px-4 hover:scale-105 transition-transform duration-200 
+        ${location.pathname === '/admin/jobs' ? 'font-extrabold text-blue-900': ''}`
+        }
         >
           Jobs
         </Link>
