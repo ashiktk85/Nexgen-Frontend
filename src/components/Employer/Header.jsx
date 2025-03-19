@@ -97,7 +97,7 @@ const Header = () => {
                 className="w-9 h-9 rounded-full border-2 border-gray-300 cursor-pointer"
               />
               <div className="flex items-center gap-4 py-1 pl-1 text-gray-800">
-                {employerData.name
+                {employerData?.name && employerData.name
                   .toLowerCase()
                   .replace(/\b\w/g, (char) => char.toUpperCase())}
               </div>
