@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
   getAllEmployerVerification,
@@ -16,7 +17,8 @@ import {
 } from "@/apiServices/adminApi";
 
 const EmployerVerification = () => {
-  const [verificationAppli, setVerificationAppli] = useState([]);
+  // const [verificationAppli, setVerificationAppli] = useState([]);
+  const [tableData, setTableData] = useState([]);
 
   const [applicationStatus, setApplicationStatus] = useState("");
   const [applicationId, setApplicationId] = useState("");
@@ -26,18 +28,44 @@ const EmployerVerification = () => {
   const [totalPages, setTotalPages] = useState(1);
   const rowsPerPage = 5;
 
+  const handleTab = (value) => {
+    console.log("value", value);
+    let filtered = [];
+    setCurrentPage(1);
+
+    switch (value) {
+      case "requested":
+        filtered = fetchVerificationAppli(1, "Requested");
+        break;
+      case "rejected":
+        filtered = fetchVerificationAppli(1, "Rejected");
+        break;
+      case "verified":
+        filtered = fetchVerificationAppli(1, "Verified");
+        break;
+      case "notverified":
+        filtered = fetchVerificationAppli(1, "NotVerified");
+        break;
+      default:
+        filtered = fetchVerificationAppli(1, "Requested");
+    }
+    // setFilteredJobs(filtered)
+  };
+
   useEffect(() => {
-    fetchVerificationAppli(currentPage);
+    fetchVerificationAppli(currentPage, "requested");
   }, [currentPage]);
 
-  async function fetchVerificationAppli(page) {
+  async function fetchVerificationAppli(page, type) {
     try {
-      const result = await getAllEmployerVerification(page, rowsPerPage);
+      const result = await getAllEmployerVerification(page, rowsPerPage, type);
       console.log("Reeeesss", result);
       if (result?.data?.response) {
         const { EmployerApplications, totalPages } = result.data.response;
-        setVerificationAppli(EmployerApplications);
+        // setVerificationAppli(EmployerApplications);
+        settingTableData(type, EmployerApplications);
         setTotalPages(totalPages);
+        // settingTableData(type);
       }
     } catch (error) {
       console.log("Error in user listing component: ", error.message);
@@ -67,11 +95,11 @@ const EmployerVerification = () => {
 
   const handleViewDocs = () => {};
 
-  const handleAction = (applicationId, decision)=>{
+  const handleAction = (applicationId, decision) => {
     setIsDecisionDialogOpen(true);
-    setApplicationId(applicationId)
-    setApplicationStatus(decision)
-  }
+    setApplicationId(applicationId);
+    setApplicationStatus(decision);
+  };
 
   const handleVerificatonDecision = async (applicationId, decision) => {
     try {
@@ -84,7 +112,7 @@ const EmployerVerification = () => {
       if (result?.data?.response) {
         const { message, response } = result.data;
         toast.success(message);
-        setVerificationAppli((prev) =>
+        setTableData((prev) =>
           prev.filter((item) => item._id !== response._id)
         );
       }
@@ -94,63 +122,101 @@ const EmployerVerification = () => {
         error
       );
       toast.error("An unexpected error occured");
-    }finally{
-      setIsDecisionDialogOpen(false)
+    } finally {
+      setIsDecisionDialogOpen(false);
     }
   };
 
-  const tableData = verificationAppli.map((item) => ({
-    ...item,
-    ownerName: item.ownerName,
-    company: item.name,
-    //  status: item.isBlocked
-    //         ? <span className='text-red-500'>blocked</span>
-    //         : <span className='text-green-500'>active</span>,
-    documents: (
-      <>
-        <Button
-          className="font-semibold"
-          onClick={() => handleViewDocs(item._id)}
-        >
-          <FaRegEye />
-          View
-        </Button>
-      </>
-    ),
-    action: (
-      <>
-        <Button
-          color="primary"
-          variant="outlined"
-          className="font-semibold mr-1"
-          onClick={() => handleAction(item?._id, "Verified")}
-        >
-          Accept
-        </Button>
+  const settingTableData = (type, EmployerApplications) => {
+    let tableData;
+    if(type === 'Requested'){
+    tableData = EmployerApplications.map((item) => ({
+      ...item,
+      ownerName: item.ownerName,
+      company: item.name,
+      //  status: item.isBlocked
+      //         ? <span className='text-red-500'>blocked</span>
+      //         : <span className='text-green-500'>active</span>,
+      documents: (
+        <>
+          <Button
+            className="font-semibold"
+            onClick={() => handleViewDocs(item._id)}
+          >
+            <FaRegEye />
+            View
+          </Button>
+        </>
+      ),
+      action: (
+        <>
+          <Button
+            color="primary"
+            variant="outlined"
+            className="font-semibold mr-1"
+            onClick={() => handleAction(item?._id, "Verified")}
+          >
+            Accept
+          </Button>
 
-        <Button
-          danger
-          className="font-semibold"
-          onClick={() => handleAction(item?._id, "Rejected")}
-        >
-          Reject
-        </Button>
-      </>
-    ),
-  }));
+          <Button
+            danger
+            className="font-semibold"
+            onClick={() => handleAction(item?._id, "Rejected")}
+          >
+            Reject
+          </Button>
+        </>
+      ),
+    }));
+  }else{
+    tableData = EmployerApplications.map((item) => ({
+      ...item,
+      ownerName: item.ownerName,
+      company: item.name,
+      //  status: item.isBlocked
+      //         ? <span className='text-red-500'>blocked</span>
+      //         : <span className='text-green-500'>active</span>,
+      documents: (
+        <>
+          <Button
+            className="font-semibold"
+            onClick={() => handleViewDocs(item._id)}
+          >
+            <FaRegEye />
+            View
+          </Button>
+        </>
+      )
+    }));
+  }
+  setTableData(tableData);
+  };
 
   return (
     <>
       <div>
         <h1 className="text-2xl font-semibold mb-4">Verification Forms</h1>
-        <ListTable
-          columns={columns}
-          data={tableData}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onNext={handleNext}
-          onPrev={handlePrev}
-        />
+        <Tabs
+          defaultValue="requested"
+          onValueChange={handleTab}
+          className="w-full"
+        >
+          <TabsList className="mb-6">
+            <TabsTrigger value="requested">Requested</TabsTrigger>
+            <TabsTrigger value="rejected">Rejected</TabsTrigger>
+            <TabsTrigger value="verified">Verified</TabsTrigger>
+            <TabsTrigger value="notverified">Unverified</TabsTrigger>
+          </TabsList>
+          <ListTable
+            columns={columns}
+            data={tableData}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onNext={handleNext}
+            onPrev={handlePrev}
+          />
+        </Tabs>
       </div>
 
       <Dialog
@@ -169,8 +235,8 @@ const EmployerVerification = () => {
               </p>
             ) : (
               <p>
-                Are you sure you want to reject this application? This action cannot be
-                undone.
+                Are you sure you want to reject this application? This action
+                cannot be undone.
               </p>
             )}
             <div className="flex justify-end space-x-4">
@@ -181,7 +247,9 @@ const EmployerVerification = () => {
                 Cancel
               </button>
               <button
-                onClick={() => handleVerificatonDecision(applicationId, applicationStatus)}
+                onClick={() =>
+                  handleVerificatonDecision(applicationId, applicationStatus)
+                }
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 Confirm

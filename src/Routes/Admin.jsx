@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Dashboard from "../components/Admin/Dashboard";
 import Users from "../components/Admin/Users";
-import Employees from "../components/Admin/Employees";
+import Employers from "../components/Admin/Employers";
 import Jobs from "../components/Admin/Jobs";
 import HomeLayout from "@/pages/Admin/Layout/HomeLayout";
 import AdminLogin from "@/pages/Admin/AdminLogin";
@@ -19,7 +19,7 @@ function Admin() {
       <Route path="/" element={<HomeLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/users" element={<Users />} />
-        <Route path="/employees" element={<Employees />} />
+        <Route path="/employers" element={<Employers />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/employer-verification" element={<EmployerVerification />} />
       </Route>

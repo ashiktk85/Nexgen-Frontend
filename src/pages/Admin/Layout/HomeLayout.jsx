@@ -1,9 +1,5 @@
 import React from "react";
 import Sidebar from "@/components/Admin/SideBar";
-import Dashboard from "@/components/Admin/Dashboard";
-import Users from "@/components/Admin/Users";
-import Employees from "@/components/Admin/Employees";
-import Jobs from "@/components/Admin/Jobs";
 import Header from "@/components/Admin/Header";
 import { Outlet } from "react-router-dom";
 

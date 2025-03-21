@@ -36,10 +36,10 @@ export const userChangeStatusService = async (userId) => {
   }
 };
 
-export const getAllEmployerVerification = async (page, limit) => {
+export const getAllEmployerVerification = async (page, limit, type) => {
   try {
     const response = await adminAxiosInstance.get(
-      `/getAllApplication?page=${page}&limit=${limit}`
+      `/getAllApplication/${type}?page=${page}&limit=${limit}`
     );
     return response;
   } catch (error) {
@@ -102,3 +102,30 @@ export const employerListUnList = async (employerId) => {
     }
 }
 
+export const getAllJobs = async (page, limit) => {
+  try {
+      const response = await adminAxiosInstance.get(`/getJobs?page=${page}&limit=${limit}`)
+      return response
+  } catch (error) {
+      console.error('Error in get all jobs at admin Api service: ', error)
+      let errorMessage = "An unexpected error occurred";
+      if(error.response){
+          errorMessage = error.response.data.message || `Error ${error.response.status}: ${error.response.statusText}`
+      }
+      toast.error(errorMessage)
+  }
+}
+
+export const jobListUnList = async (jobId) => {
+  try {
+      const response = await adminAxiosInstance.put(`/changeJobStatus/${jobId}`)
+      return response
+  } catch (error) {
+      console.error('Error in job ListUnList at admin Api service: ', error)
+      let errorMessage = "An unexpected error occurred";
+      if(error.response){
+          errorMessage = error.response.data.message || `Error ${error.response.status}: ${error.response.statusText}`
+      }
+      toast.error(errorMessage)
+  }
+}
