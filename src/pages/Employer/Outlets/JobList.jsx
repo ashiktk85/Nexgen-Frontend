@@ -6,9 +6,6 @@ import { toast } from "sonner";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance"; // Fix typo
 import { useParams } from "react-router-dom";
 import { FaSearch, FaTh, FaList } from "react-icons/fa";
-import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
-
-
 
 function JobList() {
   const employer = useSelector((state) => state.employer.employer);
@@ -19,7 +16,7 @@ function JobList() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await employerAxiosInstnce.get(
+        const res = await employerAxiosInstance.get(
           `/job-list/${employer?.employerId}`
         );
 

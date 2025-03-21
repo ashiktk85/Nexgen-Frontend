@@ -34,7 +34,7 @@ const JobCard = ({ job, layout }) => {
       {/* Job Info */}
       <div className={`${layout === "list" ? "flex-1" : ""}`}>
         <h1 className="text-lg font-semibold text-gray-800">{job.jobTitle}</h1>
-        <p className="text-sm text-gray-500">Company Name</p>
+        <p className="text-sm text-gray-500">{job.companyName.toUpperCase()}</p>
 
         {/* Job Details */}
         <div className="flex items-center space-x-2 text-gray-600 text-sm">

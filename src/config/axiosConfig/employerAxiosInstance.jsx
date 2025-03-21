@@ -8,11 +8,7 @@ const employerAxiosInstance = axios.create({
 
 employerAxiosInstance.interceptors.request.use(
   (config) => {
-    // Build the full URL
     const fullUrl = `${config.baseURL || ""}${config.url}`;
-    console.log("Full URL:", fullUrl);
-
-    // You can add additional configurations or modifications here if needed
     return config;
   },
   (error) => {

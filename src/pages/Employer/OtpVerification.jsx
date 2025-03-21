@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import GrapeAnimation from "@/components/GrapeAnimation";
 import useRequest from "@/hooks/useRequestUser";
 
@@ -59,7 +59,7 @@ const RegisterOtp = () => {
       
       console.log(data);
       
-      const res = await employerAxiosInstnce.post('/verify-otp' , data)
+      const res = await employerAxiosInstance.post('/verify-otp' , data)
       console.log(res);
       if(res) {
         localStorage.removeItem("employer-email")

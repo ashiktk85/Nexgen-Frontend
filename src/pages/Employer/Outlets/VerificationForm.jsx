@@ -5,7 +5,7 @@ import * as Yup from "yup";
 // import { Input } from '@/components/ui/input';
 // import { Textarea } from '@/components/ui/textarea';
 import { Button, Input, TextField } from "@mui/material";
-import GrapeAnimation from "../GrapeAnimation";
+import GrapeAnimation from "../../../components/GrapeAnimation";
 
 import {
   Card,
