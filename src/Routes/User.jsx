@@ -8,6 +8,7 @@ import Profile from "../pages/User/Outlets/Profile";
 import JobApplication from "../pages/User/Outlets/JobApplication";
 import Home from "../pages/User/Outlets/Home";
 import ApplicationSubmitted from "../pages/User/Outlets/ApplicationSubmitted";
+import NotFound from "@/pages/Employer/NotFound";
 // import Home2 from "../pages/Home2";
 import AllJobsPage from "../pages/User/Outlets/AllJobs";
 import JobDetailPage from "../pages/User/Outlets/JobDetails";
@@ -27,7 +28,7 @@ function User() {
       <Route path="/otp-verification" element={<RegisterOtp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      <Route path="/" element={<HomeLayout />}>
+      <Route element={<HomeLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/all-jobs" element={<AllJobsPage />} />
         <Route path="/job-details/:id" element={<JobDetailPage />} />
