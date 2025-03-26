@@ -1,4 +1,4 @@
-import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -126,7 +126,7 @@ const Header = () => {
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
-                      className="w-4 h-4 mr-3 fill-current"
+                      className="w-4 h-4 mr-3 fillCurrent"
                       viewBox="0 0 24 24"
                     >
                       <path
@@ -146,7 +146,7 @@ const Header = () => {
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 mr-3 fill-current"
+                      className="w-4 h-4 mr-3 fillCurrent"
                       viewBox="0 0 24 24"
                     >
                       <path
@@ -170,7 +170,7 @@ const Header = () => {
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 mr-3 fill-current"
+                      className="w-4 h-4 mr-3 fillCurrent"
                       viewBox="0 0 510 510"
                     >
                       <g fillOpacity=".9">

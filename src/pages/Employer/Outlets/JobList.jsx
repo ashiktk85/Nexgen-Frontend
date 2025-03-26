@@ -3,6 +3,8 @@ import Switch from "@mui/material/Switch";
 import JobCard from "@/components/Employer/JobCard";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
+import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance"; // Fix typo
+import { useParams } from "react-router-dom";
 import { FaSearch, FaTh, FaList } from "react-icons/fa";
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 import { ImBriefcase } from "react-icons/im";
@@ -33,7 +35,7 @@ function JobList() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await employerAxiosInstnce.get(
+        const res = await employerAxiosInstance.get(
           `/job-list/${employer?.employerId}`
         );
 

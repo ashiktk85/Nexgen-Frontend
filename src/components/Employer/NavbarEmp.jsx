@@ -69,6 +69,11 @@ const NavbarEmp = () => {
                 label: "Company Details",
                 url: "/employer/company_details",
               },
+              {
+                id: "add_company",
+                label: "Add Company",
+                url: "/employer/addcompany",
+              },
               { id: "actions", label: "Actions", icon: "plus" },
             ].map((item) => (
               <li key={item.id}>
@@ -117,7 +122,6 @@ const NavbarEmp = () => {
         </div>
       </div>
 
-      
       <div className="flex-1 w-full ">
         <button
           onClick={() => setSidebarOpen((prev) => !prev)}

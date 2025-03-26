@@ -9,7 +9,7 @@ import {
 import Navbar from "../components/User/Navbar";
 import JobCard from "../components/User/JobCard";
 import axios from "axios";
-import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 // import {banner1} from "../../public/Images/banner1"
 

@@ -2,16 +2,24 @@ import {
   Box,
   Container,
   Typography,
-  Button,
   Grid,
   Avatar,
-  Chip,
   Stack,
+  IconButton,
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import AddCardIcon from "@mui/icons-material/AddCard";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import GppMaybeTwoToneIcon from "@mui/icons-material/GppMaybeTwoTone";
+
 import { useEffect, useRef, useState } from "react";
-import JobCard from "@/components/Employer/JobCard";
-import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
-import { useSelector } from "react-redux";
+import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
+import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import EditProfileModal from "@/components/Employer/EditProfileModal";
+
+import { updateEmployer } from "@/redux/actions/EmployerAction";
+import CompanyProfile from "@/components/Employer/CompanyProfile";
 
 export default function CompanyDetails() {
   const aboutRef = useRef(null);
@@ -19,127 +27,349 @@ export default function CompanyDetails() {
   const peopleRef = useRef(null);
   const lifeRef = useRef(null);
   const [jobs, setJobs] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [modalState, setModalState] = useState({
+    editProfile: false,
+    editCompany: false,
+  });
+  const [selectedComp, setSelectedComp] = useState(null);
   const employer = useSelector((state) => state.employer.employer);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchJobData = async () => {
       try {
-        const { data } = await employerAxiosInstnce.get(
+        const { data } = await employerAxiosInstance.get(
           `/job-list/${employer?.employerId}`
         );
-
         setJobs(data.jobPosts);
       } catch (error) {
-        toast.warning(error?.response?.data?.message || "An error occured");
+        console.error("An error occurred while fetching jobs", error);
       }
     };
-    fetchData();
+    fetchJobData();
   }, []);
-  //  console.log(jobs[0].requirements[0]);
-  // Scroll to a section when navigation item is clicked
-  const scrollToSection = (ref) => {
-    if (ref && ref.current) {
-      ref.current.scrollIntoView({ behavior: "smooth" });
+
+  
+  useEffect(() => {
+    const fetchCompanyData = async () => {
+      try {
+        const { data } = await employerAxiosInstance.get(`/company-list/${employer?.employerId}`);
+        setCompanies(data);
+        console.log(data);
+      } catch (error) {
+        console.error("An error occurred in fetching company", error);
+      }
     }
+    fetchCompanyData();
+  }, []);
+  
+  const openModal = (modalType) => {
+    setModalState((prev) => ({ ...prev, [modalType]: true }));
   };
+
+  // Close a specific modal
+  const closeModal = (modalType) => {
+    setModalState((prev) => ({ ...prev, [modalType]: false }));
+  };
+
+  // Handle save for profile edit
+
+const handleSaveProfile = async(updatedEmp)=>{
+  try {
+    const resultAction = await dispatch(updateEmployer(updatedEmp));
+     if (updateEmployer.fulfilled.match(resultAction)) {
+       console.log("Profile updated successfully:", resultAction.payload);
+       closeModal("editProfile"); // Close modal on success
+     } else {
+       console.error("Profile update failed:", resultAction.payload);
+     }
+  } catch (error) {
+console.error("Error updating profile:", error);
+  }
+}
+  
 
   return (
     <Container maxWidth="lg" className="py-8">
-      {/* Header Section */}
-      <Box className="flex flex-row items-start justify-between mb-3 pb-4">
-        <Box className="flex items-center justify-left gap-4 mb-4">
-          <div className="w-20 h-20 border rounded-full">
-            <img
-              src="/src/assets/Company-logo.png"
-              alt="Company logo"
-              className="object-cover w-full h-full"
-            />
-          </div>
-          <Box>
-            <Typography variant="h4" className="font-semibold">
-              {employer.name.toUpperCase()}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
-              Software Development
-            </Typography>
-            <Typography variant="body2" className="text-gray-400">
-              {employer.location} • 1.02K followers • 101-250 employees
-            </Typography>
+      {/* Employer Section */}
+      <Box className="bg-white shadow-lg rounded-lg p-6 mb-6 relative">
+        <Box className=" absolute flex relative items-center gap-4">
+          <Box className="flex-1">
+            <Box className="flex justify-between items-center pb-3">
+              <Typography variant="h5" className="font-semibold">
+                Employer
+              </Typography>
+
+              <IconButton onClick={() => openModal("editProfile")}>
+                <EditIcon />
+              </IconButton>
+            </Box>
+            <Box className="flex-1">
+              <Box className="flex gap-2 items-center">
+                <Typography variant="body1" className="text-gray-200">
+                  {employer.name?.toUpperCase()}
+                </Typography>
+                {employer.isVerified ? (
+                  <VerifiedUserIcon
+                    sx={{
+                      fontSize: 24, // Corrected font size
+                      color: "rgb(18, 171, 241)",
+                      borderRadius: "50%",
+                      padding: "4px", // Corrected padding
+                      boxShadow: "0 0 7px rgba(61, 184, 255, 0.8)", // Glow effect
+                      transition: "0.3s ease-in-out",
+                      "&:hover": {
+                        boxShadow: "0 0 10px rgba(61, 184, 255, 1)", // Stronger glow on hover
+                        transform: "scale(1.1)",
+                      },
+                    }}
+                  />
+                ) : (
+                  <Link to="/employer/verification">
+                    <GppMaybeTwoToneIcon
+                      sx={{
+                        fontSize: 24, // Corrected font size
+                        color: "rgb(105, 105, 105)",
+                        borderRadius: "50%",
+                        padding: "4px", // Corrected padding
+                        boxShadow: "0 0 7px rgba(75, 81, 85, 0.8)", // Glow effect
+                        transition: "0.3s ease-in-out",
+                        "&:hover": {
+                          boxShadow: "0 0 15px rgba(75, 81, 85, 1)", // Stronger glow on hover
+                          transform: "scale(1.1)",
+                        },
+                      }}
+                    />
+                  </Link>
+                )}
+              </Box>
+              {/* Email & Phone */}
+              <Typography variant="body2" className="text-gray-500">
+                Email: {employer.email}
+              </Typography>
+              <Typography variant="body2" className="text-gray-500">
+                Phone: {employer.phone}
+              </Typography>
+              {/* Location */}
+              <Typography variant="body2" className="text-gray-400">
+                Location: {employer.location}
+              </Typography>
+
+              {/* Company Verification & Status */}
+              <Typography variant="body2" className="text-gray-700">
+                {employer.isBlocked ? "❌ Blocked" : "✅ Active"}
+              </Typography>
+
+              {/* About Section */}
+              <Typography variant="body1" className="text-gray-700 pt-2">
+                {employer.about || "add About"}
+              </Typography>
+
+              {/* Social Links */}
+              <Stack direction="row" spacing={2} className="mt-3">
+                {employer.socialLinks?.linkedin && (
+                  <Link
+                    to={employer.socialLinks.linkedin}
+                    className="text-blue-600"
+                  >
+                    LinkedIn
+                  </Link>
+                )}
+                {employer.socialLinks?.twitter && (
+                  <Link
+                    to={employer.socialLinks.twitter}
+                    className="text-blue-600"
+                  >
+                    Twitter
+                  </Link>
+                )}
+                {employer.socialLinks?.facebook && (
+                  <Link
+                    to={employer.socialLinks.facebook}
+                    className="text-blue-600"
+                  >
+                    Facebook
+                  </Link>
+                )}
+              </Stack>
+            </Box>
           </Box>
         </Box>
-        <Button variant="outlined" color="primary">
-          View Website
-        </Button>
       </Box>
 
-      {/* Navigation */}
-      <Box className="flex gap-6 border-b border-gray-200 mb-8">
-        {[
-          { label: "About", ref: aboutRef },
-          { label: "Jobs", ref: jobsRef },
-          { label: "People", ref: peopleRef }, // Navigate to Jobs for "People"
-          { label: "Life", ref: lifeRef }, // Add "Life" functionality if needed
-        ].map((item) => (
-          <Button
-            key={item.label}
-            onClick={() => scrollToSection(item.ref)}
-            className="text-gray-600 min-w-0 px-4 py-2 rounded-none"
-            variant="text"
-          >
-            {item.label}
-          </Button>
-        ))}
-      </Box>
+      {/* Company Section */}
+      <Box className="bg-white shadow-lg rounded-lg p-6 mb-6 relative">
+        <Typography variant="h5" className="font-semibold">
+          {companies.length > 0 ? "Company Details" : "Add Your Company"}
+        </Typography>
+        {/* If Employer Has Companies, Show List */}
+        {companies.length > 0 ? (
+          // companies.map((company) => (
+          //   <Box
+          //     key={company._id}
+          //     className="flex items-start gap-6 mb-6 border-b pb-4"
+          //   >
+          //     {/* Company Logo */}
+          //     <Box className="relative inline-block group">
+          //       <Link
+          //         to={company.webSite || "#"}
+          //         className="text-blue-600 relative"
+          //       >
+          //         <Avatar
+          //           src={company.logo || "/src/assets/Company-logo.png"}
+          //           sx={{ width: 100, height: 100, border: "4px solid white" }}
+          //         />
+          //         <span className="whitespace-nowrap min-w-max absolute bottom-[-30px] left-1/2 -translate-x-1/2 bg-gray-900 text-gray-400 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-80 transition-opacity">
+          //           Visit Website
+          //         </span>
+          //       </Link>
+          //     </Box>
 
-      {/* About Section */}
-      <Box className="mb-16 border-b border-gray-200 pb-8" ref={aboutRef}>
-        <Typography variant="h5" className="text-gray-400 pb-3 font-semibold">
-          About
-        </Typography>
-        <Typography variant="body1" className="text-black-700 max-w-2xl mb-8">
-          NAVA strives to be a knowledge-intensive company centered on data flow
-          analysis, process analysis to tracking companies in sustainable
-          investing, and long-term thinking. We are driven by the excitement of
-          exploring technologies, finding solutions, and developing products
-          that change lives. We embrace our work with a sense of responsibility
-          and joy.
-        </Typography>
+          //     {/* Company Info */}
+          //     <Box className="flex-1">
+          //       <Box className="flex justify-between items-center pb-3">
+          //         <Typography variant="h6" className="text-gray-800">
+          //           {company.companyName}
+          //         </Typography>
+          //         <IconButton
+          //           onClick={() => {
+          //             setSelectedComp(company._id);
+          //             openModal("editCompany");
+          //           }}
+          //         >
+          //           <EditIcon />
+          //         </IconButton>
+          //       </Box>
+          //       <Typography variant="body2" className="text-gray-600">
+          //         <strong>Website:</strong> {company.webSite || "Not specified"}
+          //       </Typography>
+          //       <Typography variant="body2" className="text-gray-600">
+          //         <strong>Industry:</strong>{" "}
+          //         {company.industry || "Not specified"}
+          //       </Typography>
+
+          //       <Typography variant="body2" className="text-gray-400">
+          //         <strong>Location:</strong>{" "}
+          //         {company.location || "Not available"}
+          //       </Typography>
+          //       <Typography variant="body2" className="text-gray-400">
+          //         <strong>Description:</strong>{" "}
+          //         {company.about || "Not available"}
+          //       </Typography>
+          //       <Typography variant="body2" className="text-gray-400">
+          //         <strong>Address:</strong>{" "}
+          //         {company.address || "Not available"}
+          //       </Typography>
+
+          //       {/* <Stack direction="row" spacing={2} className="mt-2">
+          //         <Chip
+          //           label={`Verified: ${
+          //             company.isVerified ? "✅ Yes" : "❌ No"
+          //           }`}
+          //           color={company.isVerified ? "success" : "default"}
+          //         />
+          //         <Chip
+          //           label={`Status: ${
+          //             company.isBlocked ? "❌ Blocked" : "✅ Active"
+          //           }`}
+          //           color={company.isBlocked ? "error" : "primary"}
+          //         />
+          //       </Stack> */}
+
+          //       {/* About Section */}
+          //       {company.about && (
+          //         <Typography variant="body1" className="text-gray-700 pt-2">
+          //           {company.about}
+          //         </Typography>
+          //       )}
+
+          //       {/* Social Links */}
+          //       <Stack direction="row" spacing={2} className="mt-3">
+          //         {company.socialLinks?.linkedin && (
+          //           <Link
+          //             to={company.socialLinks.linkedin}
+          //             className="text-blue-600"
+          //           >
+          //             LinkedIn
+          //           </Link>
+          //         )}
+          //         {company.socialLinks?.twitter && (
+          //           <Link
+          //             to={company.socialLinks.twitter}
+          //             className="text-blue-600"
+          //           >
+          //             Twitter
+          //           </Link>
+          //         )}
+          //         {company.socialLinks?.facebook && (
+          //           <Link
+          //             to={company.socialLinks.facebook}
+          //             className="text-blue-600"
+          //           >
+          //             Facebook
+          //           </Link>
+          //         )}
+          //       </Stack>
+          //     </Box>
+          //   </Box>
+          // ))
+          <CompanyProfile
+            companies={companies}
+            openModal={openModal}
+            closeModal={closeModal}
+            modalState={modalState}
+            selectedComp={selectedComp}
+            setSelectedComp={setSelectedComp}
+          />
+        ) : (
+          // If No Company, Show "Add Company" Message
+          <Box className="text-center p-6">
+            <Typography variant="body1" className="text-gray-500">
+              You haven't added a company yet. Click below to add one.
+            </Typography>
+            <Link to="/employer/addCompany">
+              <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                Add Company
+              </button>
+            </Link>
+          </Box>
+        )}
       </Box>
 
       {/* Jobs Section */}
-      <Box className="mb-16 border-b border-gray-200 pb-8" ref={jobsRef}>
-        <Typography variant="h5" className="text-gray-400 pb-3 font-semibold">
-          Jobs
-        </Typography>
-        <Grid container spacing={4}>
-      
+      <Box className="bg-white shadow-lg rounded-lg p-6 mb-6" ref={jobsRef}>
+        <Box className="flex justify-between items-center">
+          <Typography variant="h5" className="font-semibold">
+            Jobs
+          </Typography>
+          <Box className="relative inline-block group">
+            <Link to="/employer/create_job" className="text-blue-600 relative">
+              <IconButton>
+                <AddCardIcon />
+              </IconButton>
+              <span className="whitespace-nowrap min-w-ma absolute bottom-[-30px] left-1/2 transform -transform-x-1/2 bg-gray-900 text-gray-400 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-80 transition-opacity">
+                create new job post
+              </span>
+            </Link>
+          </Box>
+        </Box>
+
+        <Grid container spacing={3}>
           {jobs.map((job) => (
             <Grid item xs={12} sm={6} key={job._id}>
-              <Box className="border border-gray-200 rounded-lg p-6 hover:border-blue-500 transition-colors">
-                <Typography
-                  variant="h6"
-                  className="text-black-400 pb-3 font-semibold"
-                >
+              <Box className="border border-gray-200 rounded-lg p-4 shadow-md">
+                <Typography variant="h6" className="font-semibold">
                   {job.jobTitle}
                 </Typography>
-                <Typography variant="body2" className="text-gray-600 pb-3">
+                <Typography variant="body2" className="text-gray-600">
                   {job.city} • Jobtype
                 </Typography>
-
-                <Box className="flex flex-row justify-between items-center">
-                  <Box className="flex flex-col gap-1">
-               
-
-                    {job.requirements.map((requ,index) => (
-                      <Stack direction="row" spacing={1} key={index}>
-                        <Chip label={requ} />
-                      </Stack>
-                    ))}
-                  </Box>
-                  <Box className="flex ">
-                    <Typography className="text-right">{job.time}</Typography>
-                  </Box>
-                </Box>   
+                {/* <Stack direction="row" spacing={1} className="mt-2">
+                  {job.requirements.map((requ, index) => (
+                    <Chip key={index} label={requ} />
+                  ))}
+                </Stack> */}
               </Box>
             </Grid>
           ))}
@@ -147,59 +377,35 @@ export default function CompanyDetails() {
       </Box>
 
       {/* People Section */}
-      <Box className="mb-16 border-b border-gray-200 pb-8" ref={peopleRef}>
-        <Box className="flex items-center justify-between mb-4">
-          <Typography variant="h5" className="text-gray-400 pb-3 font-semibold">
-            People
-          </Typography>
-
-          <Button color="primary" variant="text">
-            Show More People
-          </Button>
-        </Box>
-        <Typography variant="h7" className="text-black-400  font-semibold">
-          46 employees work here
+      {/* <Box className="bg-white shadow-lg rounded-lg p-6 mb-6" ref={peopleRef}>
+        <Typography variant="h5" className="font-semibold">
+          People
         </Typography>
         <Box className="flex mt-4">
           {[...Array(6)].map((_, i) => (
             <Avatar
               key={i}
-              src={`/src/assets/Candidate.png?height=40&width=40`}
-              className="w-10 h-10 -ml-4 bg-blue-500"
-              sx={{
-                border: "2px solid white",
-              }}
+              src="/src/assets/Candidate.png"
+              className="w-10 h-10 -ml-4"
             />
           ))}
         </Box>
-      </Box>
+      </Box> */}
 
       {/* Life Section */}
-      <Box>
-        <Box className="flex items-center justify-between mb-6" ref={lifeRef}>
-          <Typography variant="h5" className="text-gray-400 pb-3 font-semibold">
-            Life
-          </Typography>
-          <Button color="primary" variant="text">
-            Show More Photos
-          </Button>
-        </Box>
-        <Grid container spacing={2}>
-          {/* 0th Image - Takes up half the width */}
+      {/* <Box className="bg-white shadow-lg rounded-lg p-6" ref={lifeRef}>
+        <Typography variant="h5" className="font-semibold">
+          Life
+        </Typography>
+        <Grid container spacing={2} className="mt-4">
           <Grid item xs={12} sm={6}>
             <img
               src="/src/assets/companyLife.jpg"
               alt="Company life"
               className="rounded-lg w-full h-full object-cover"
-              style={{
-                height: "100%", // Ensures it covers the height
-                maxHeight: "300px", // Set a reasonable max height
-                display: "block",
-              }}
+              style={{ maxHeight: "300px" }}
             />
           </Grid>
-
-          {/* Remaining Images - Grid on the other half */}
           <Grid item xs={12} sm={6}>
             <Grid container spacing={2}>
               {[1, 2, 3].map((_, i) => (
@@ -207,18 +413,33 @@ export default function CompanyDetails() {
                   <img
                     src="/src/assets/companyLife.jpg"
                     alt={`Company life ${i}`}
-                    className="rounded-lg w-full h-full object-cover"
-                    style={{
-                      height: "100px", // Set a specific height for grid images
-                      objectFit: "cover",
-                    }}
+                    className="rounded-lg w-full object-cover"
+                    style={{ height: "100px" }}
                   />
                 </Grid>
               ))}
             </Grid>
           </Grid>
         </Grid>
-      </Box>
+      </Box> */}
+
+      {modalState.editProfile && (
+        <EditProfileModal
+          employer={employer}
+          open={modalState.editProfile}
+          close={() => closeModal("editProfile")}
+          onSave={handleSaveProfile}
+        />
+      )}
+
+      {/* {modalState.editCompany && (
+        <EditCompanyModal
+          company={selectedComp} // Pass the selected company for editing
+          open={modalState.editCompany}
+          close={() => closeModal("editCompany")}
+          onSave={handleSaveCompany}
+        />
+      )} */}
     </Container>
   );
 }
