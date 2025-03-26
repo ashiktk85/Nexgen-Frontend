@@ -14,7 +14,7 @@ const Header = () => {
   console.log(employerData);
   const handleLogout = async () => {
     try {
-      const response = await employerAxiosInstnce.post("/logout");
+      const response = await employerAxiosInstance.post("/logout");
       console.log("logout response", response);
       if (response.status === 200) {
         dispatch(logout());

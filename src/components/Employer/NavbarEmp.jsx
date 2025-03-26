@@ -59,11 +59,11 @@ const NavbarEmp = () => {
                   { label: "Jobs", url: "/employer/job_list" },
                 ],
               },
-              {
-                id: "applicants",
-                label: "Applicants",
-                url: "/employer/applicants",
-              },
+              // {
+              //   id: "applicants",
+              //   label: "Applicants",
+              //   url: "/employer/applicants",
+              // },
               {
                 id: "company_details",
                 label: "Company Details",
@@ -74,7 +74,7 @@ const NavbarEmp = () => {
                 label: "Add Company",
                 url: "/employer/addcompany",
               },
-              { id: "actions", label: "Actions", icon: "plus" },
+              // { id: "actions", label: "Actions", icon: "plus" },
             ].map((item) => (
               <li key={item.id}>
                 <button

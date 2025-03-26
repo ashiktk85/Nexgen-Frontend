@@ -141,7 +141,7 @@ function Applicants() {
   const fetchApplications = async () => {
     setLoading(true);
     try {
-      const { data } = await employerAxiosInstnce.get(
+      const { data } = await employerAxiosInstance.get(
         `/job-applications/${jobId}`
       );
       console.log(data, "ress");
