@@ -8,14 +8,13 @@ import Profile from "../pages/User/Outlets/Profile";
 import JobApplication from "../pages/User/Outlets/JobApplication";
 import Home from "../pages/User/Outlets/Home";
 import ApplicationSubmitted from "../pages/User/Outlets/ApplicationSubmitted";
-import NotFound from "@/pages/Employer/NotFound";
+import NotFound from "@/pages/User/NotFound";
 // import Home2 from "../pages/Home2";
 import AllJobsPage from "../pages/User/Outlets/AllJobs";
 import JobDetailPage from "../pages/User/Outlets/JobDetails";
 // import Home3 from "@/pages/Home3";
 import HomeLayout from "@/pages/User/Layout/HomeLayout";
 import JobApplicationHistory from "@/pages/User/Outlets/JobApplicationHistory";
-import NotFound from "@/pages/Employer/NotFound";
 
 function User() {
   return (

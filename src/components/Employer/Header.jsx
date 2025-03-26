@@ -7,24 +7,23 @@ import { logout } from "@/redux/slices/employer";
 import NavbarEmp from "./NavbarEmp";
 
 const Header = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const employerData = useSelector((state) => state.employer.employer); 
-  
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const employerData = useSelector((state) => state.employer.employer);
 
-  
   console.log(employerData);
   const handleLogout = async () => {
     try {
       const response = await employerAxiosInstance.post("/logout");
+      console.log("logout response", response);
       if (response.status === 200) {
         dispatch(logout());
-        toast.success("Logout successful!");
-        navigate('/employer/employer-login', { replace: true });
+        toast.success("Logout!!");
+        navigate("/employer/employer-login");
       }
     } catch (err) {
-      console.error('error',err)
-      toast.error("Failed to logout")
+      console.error("error", err);
+      toast.error("Failed to logout");
     }
   };
 
@@ -32,8 +31,8 @@ const Header = () => {
     <header className="z-50 bg-[#f7f6f9] top-0 pt-4">
       <div className="flex flex-wrap items-center px-6 py-2 bg-white shadow-md min-h-[56px] rounded-md w-full relative tracking-wide">
         <div className="flex items-center flex-wrap gap-x-8 gap-y-4 w-full">
-      <NavbarEmp />
-          <div className="flex items-center gap-4 py-1 outline-none border-none">
+          <NavbarEmp />
+          {/* <div className=" flex  items-center gap-4 py-1 outline-none border-none">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 192.904 192.904"
@@ -46,7 +45,7 @@ const Header = () => {
               placeholder="Search something..."
               className="w-full text-sm bg-transparent rounded outline-none"
             />
-          </div>
+          </div> */}
           <div className="flex items-center gap-8 ml-auto">
             <div className="flex items-center space-x-6">
               <svg

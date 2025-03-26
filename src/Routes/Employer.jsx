@@ -20,13 +20,13 @@ function Employer() {
       <Route path="/register" element={<Register />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/otp" element={<RegisterOtp />} />
+      <Route path="Verification" element={<VerificationForm />} />
       <Route path="/" element={<HomeLayout />}>
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="create_job" element={<CreateJob />} />
         <Route path="job_list" element={<JobList />} />
         <Route path="applicants/:jobId" element={<Applicants />} />
         <Route path="company_details" element={<CompanyDetails />} />
-        <Route path="verification" element={<VerificationForm />} />
         <Route path="addCompany" element={<AddorEditCompany />} />
         <Route path="addCompany/:companyId" element={<AddorEditCompany />} />
         <Route path="*" element={<NotFound />} />

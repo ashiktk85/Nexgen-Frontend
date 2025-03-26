@@ -132,22 +132,17 @@ function CreateJobForm({ selectedData = null }) {
 
   return (
     <>
-        <Box className="bg-white shadow-lg rounded-lg p-6 max-w-3xl mx-auto">
-    
-      {/* <Box className="bg-white shadow-lg rounded-lg p-6 max-w-3xl mx-auto"> */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <FaBuilding className="h-5 w-5 text-gray-400" />
-            <span className="text-sm text-gray-600">
-              {Employer.name.toUpperCase()}
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold">Create Job</h1>
-          <p className="text-sm text-gray-600">{Employer.location}</p>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <FaBuilding className="h-5 w-5 text-gray-400" />
+          <span className="text-sm text-gray-600">{Employer.name.toUpperCase()}</span>
         </div>
-        <form onSubmit={formik.handleSubmit} className="space-y-6 p-6">
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Job Information</h2>
+        <h1 className="text-2xl font-bold">Create Job</h1>
+        {/* <p className="text-sm text-gray-600">{Employer.location}</p> */}
+      </div>
+      <form onSubmit={formik.handleSubmit} className="space-y-6 p-6">
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Job Information</h2>
 
             {/* Job Title Dropdown */}
             <div className="w-full">
@@ -389,8 +384,6 @@ function CreateJobForm({ selectedData = null }) {
             Submit
           </button>
         </form>
-       
-      </Box>
     </>
   );
 }

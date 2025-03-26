@@ -1,19 +1,19 @@
 import React, { useState } from "react";
-import GrapeAnimation from "../components/GrapeAnimation";
+import GrapeAnimation from "@/components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
-import useRequestUser from "../hooks/useRequestUser";
-import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
+import useRequestEmployer from "@/hooks/useRequestEmployer";
+import AdminAxiosInstance from "@/config/axiosConfig/AdminAxiosInstance";
 
-const SignupPage = () => {
+const AdminRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
-  const { data, loading, error, sendRequest } = useRequestUser();
+  const { data, loading, error, sendRequest } = useRequestEmployer();
 
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
@@ -39,30 +39,11 @@ const SignupPage = () => {
 
   const formik = useFormik({
     initialValues: {
-      firstName: "",
-      lastName: "",
-      phone: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
     validationSchema: Yup.object({  
-      firstName: Yup.string()
-        .trim()
-        .min(2, "First name must be at least 2 characters")
-        .max(50, "First name must not exceed 50 characters")
-        .required("First name is required"),
-
-      lastName: Yup.string()
-        .trim()
-        .min(2, "Last name must be at least 2 characters")
-        .max(50, "Last name must not exceed 50 characters")
-        .required("Last name is required"),
-
-      phone: Yup.string()
-        .min(10, "Phone number must be at least 10 characters")
-        .matches(/^\+?[1-9]\d{1,14}$/, "Phone number is not valid") // Matches E.164 phone number format
-        .required("Phone number is required"),
-
       email: Yup.string()
         .trim()
         .email("Invalid email address")
@@ -88,17 +69,14 @@ const SignupPage = () => {
       try {
         console.log(values);
         const payload = {
-          firstName: values.firstName,
-          lastName: values.lastName,
           email: values.email,
-          phone: values.phone,
           password : values.password
         }
         
-        const {data} = await userAxiosInstance.post('/signup' , payload)
+        const {data} = await AdminAxiosInstance.post('/signup' , payload)
         if(data) {
-          localStorage.setItem("email", values.email)
-          navigate('/otp-verification')
+          localStorage.setItem("admin-email", values.email)
+          navigate('/admin/otp-verification')
         }
         
         if (loading) return <p>Loading...</p>;
@@ -110,7 +88,7 @@ const SignupPage = () => {
   });
 
   return (
-    <div className="flex flex-col lg:flex-row h-ful">
+    <div className="flex flex-col lg:flex-row h-screen">
       {/* Left Section */}
       <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
         <div className="max-w-md">
@@ -149,10 +127,10 @@ const SignupPage = () => {
 
           {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
-            Register to login
+            Register new Admin
           </h2>
           <p className="text-gray-500 mb-2 text-center lg:text-left">
-            Join Us Today! Create Your Account to Get Started:
+            Your Account to Get Started:
           </p>
 
           {/* Social Login Buttons */}
@@ -180,82 +158,8 @@ const SignupPage = () => {
 
           {/* Email and Password Form */}
           <form onSubmit={formik.handleSubmit}>
-            <div className="md:flex gap-5  ">
-              <div className="mb-3 md:w-1/2 ">
-                <label
-                  htmlFor="first_name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  First name
-                </label>
-                <input
-                  type="text"
-                  id="first-name"
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
-                  placeholder="Enter your first name"
-                  aria-required="true"
-                  value={formik.values.firstName}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  name="firstName"
-                />
-                {formik.touched.firstName && formik.errors.firstName ? (
-                  <div className="text-red-500 text-[13px]">
-                    {formik.errors.firstName}
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="mb-3 md:w-1/2">
-                <label
-                  htmlFor="first_name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Last name
-                </label>
-                <input
-                  type="text"
-                  id="last-name"
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
-                  placeholder="Enter your last name"
-                  aria-required="true"
-                  value={formik.values.lastName}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  name="lastName"
-                />
-                {formik.touched.lastName && formik.errors.lastName ? (
-                  <div className="text-red-500 text-[13px]">
-                    {formik.errors.lastName}
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <label
-                htmlFor="phone-number"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Phone Number
-              </label>
-              <input
-                type="phone-number"
-                id="phone-number"
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
-                placeholder="Enter your phone number"
-                aria-required="true"
-                value={formik.values.phone}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                name="phone"
-              />
-              {formik.touched.phone && formik.errors.phone ? (
-                <div className="text-red-500 text-[13px]">
-                  {formik.errors.phone}
-                </div>
-              ) : null}
-            </div>
+            
+              
 
             <div className="mb-3">
               <label
@@ -370,9 +274,9 @@ const SignupPage = () => {
 
           {/* Create Account */}
           <p className="text-center text-sm text-gray-600 mt-4">
-            Already have an account?{" "}
+            Back to login{" "}
             <a
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/admin/admin-login")}
               className="text-blue-600 hover:underline cursor-pointer"
             >
               Log in
@@ -384,4 +288,4 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage;
+export default AdminRegister;
