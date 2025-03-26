@@ -10,7 +10,7 @@ import CreateJobForm from "@/components/Employer/CreateJobForm";
 import Switch from "@mui/material/Switch";
 import { useParams } from "react-router-dom";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
-import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import { toast } from "sonner";
 import ApplicantModal from "@/components/Employer/ApplicantModal";
 
@@ -137,7 +137,7 @@ function Applicants() {
   const fetchApplications = async() => {
     setLoading(true)
     try {
-      const {data} = await employerAxiosInstnce.get(`/job-applications/${jobId}`)
+      const {data} = await employerAxiosInstance.get(`/job-applications/${jobId}`)
       console.log(data, "ress");
       
       setApplications(data.jobApplications)
