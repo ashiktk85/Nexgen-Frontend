@@ -31,6 +31,23 @@ export default function ProfilePage() {
   const fileInputRef = useRef(null);
   const resumeInputRef = useRef(null);
 
+  const [activeEducation, setActiveEducation] = useState(null);
+  const [activeExperience, setActiveExperience] = useState(null);
+  const [isAddEducationOpen, setIsAddEducationOpen] = useState(false);
+  const [isAddExperienceOpen, setIsAddExperienceOpen] = useState(false);
+  const [newEducation, setNewEducation] = useState({
+    qualification: "",
+    institute: "",
+    startYear: new Date().getFullYear(),
+    endYear: null,
+  });
+  const [newExperience, setNewExperience] = useState({
+    company: "",
+    jobTitle: "",
+    startYear: new Date().getFullYear(),
+    endYear: null,
+  });
+
   const userId = useSelector((state) => state.user.seekerInfo.userId);
 
   // Fetch user data from API
@@ -39,13 +56,11 @@ export default function ProfilePage() {
       try {
         setLoading(true);
         // Replace with your actual API endpoint
-        const response = await userAxiosInstance.get(
-          `/user-profile/${userId}`
-        );
+        const response = await userAxiosInstance.get(`/user-profile/${userId}`);
         if (response.status !== 200) {
           throw new Error("Failed to fetch user data");
         }
-        const userData = await response.data.userData
+        const userData = await response.data.userData;
         setUser(userData);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -160,25 +175,102 @@ export default function ProfilePage() {
 
   const handleUpdateProfile = async (updatedData) => {
     try {
-      // Replace with your actual API endpoint
-      const response = await fetch("/api/user/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedData),
-      });
+      const response = await userAxiosInstance.post(
+        `/update-profile/${userId}`,
+        updatedData
+      );
 
-      if (!response.ok) {
+      if (!response.data.success) {
         throw new Error("Failed to update profile");
       }
 
-      const updatedUser = await response.json();
+      const updatedUser = response.data.response;
+
       setUser(updatedUser);
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating profile:", error);
     }
+  };
+
+  const handleAddEducation = () => {
+    const updatedUser = { ...user };
+    updatedUser.education = [...(updatedUser.education || []), newEducation];
+    setUser(updatedUser);
+    setNewEducation({
+      qualification: "",
+      institute: "",
+      startYear: new Date().getFullYear(),
+      endYear: null,
+    });
+    setIsAddEducationOpen(false);
+  };
+
+  const handleAddExperience = () => {
+    const updatedUser = { ...user };
+    updatedUser.experience = [...(updatedUser.experience || []), newExperience];
+    setUser(updatedUser);
+    setNewExperience({
+      company: "",
+      jobTitle: "",
+      startYear: new Date().getFullYear(),
+      endYear: null,
+    });
+    setIsAddExperienceOpen(false);
+  };
+
+  const handleEditEducation = (index) => {
+    setActiveEducation(index);
+    setIsAddEducationOpen(true);
+    setNewEducation(user.education[index]);
+  };
+
+  const handleEditExperience = (index) => {
+    setActiveExperience(index);
+    setIsAddExperienceOpen(true);
+    setNewExperience(user.experience[index]);
+  };
+
+  const handleUpdateEducation = () => {
+    const updatedUser = { ...user };
+    updatedUser.education[activeEducation] = newEducation;
+    setUser(updatedUser);
+    setNewEducation({
+      qualification: "",
+      institute: "",
+      startYear: new Date().getFullYear(),
+      endYear: null,
+    });
+    setActiveEducation(null);
+    setIsAddEducationOpen(false);
+  };
+
+  const handleUpdateExperience = () => {
+    const updatedUser = { ...user };
+    updatedUser.experience[activeExperience] = newExperience;
+    setUser(updatedUser);
+    setNewExperience({
+      company: "",
+      jobTitle: "",
+      startYear: new Date().getFullYear(),
+      endYear: null,
+    });
+    setActiveExperience(null);
+    setIsAddExperienceOpen(false);
+  };
+
+  const handleDeleteEducation = (index) => {
+    const updatedUser = { ...user };
+    updatedUser.education = updatedUser.education.filter((_, i) => i !== index);
+    setUser(updatedUser);
+  };
+
+  const handleDeleteExperience = (index) => {
+    const updatedUser = { ...user };
+    updatedUser.experience = updatedUser.experience.filter(
+      (_, i) => i !== index
+    );
+    setUser(updatedUser);
   };
 
   if (loading) {
@@ -403,9 +495,28 @@ export default function ProfilePage() {
                 </TabsContent>
 
                 <TabsContent value="education" className="mt-0">
-                  <h3 className="text-lg font-medium text-muted-foreground mb-4">
-                    Education
-                  </h3>
+                  <div className="flex justify-between mb-4">
+                    <h3 className="text-lg font-medium text-muted-foreground">
+                      Education
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setActiveEducation(null);
+                        setNewEducation({
+                          qualification: "",
+                          institute: "",
+                          startYear: new Date().getFullYear(),
+                          endYear: null,
+                        });
+                        setIsAddEducationOpen(true);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Education
+                    </Button>
+                  </div>
                   {user.education && user.education.length > 0 ? (
                     <div className="space-y-3">
                       {user.education.map((edu, index) => (
@@ -414,15 +525,36 @@ export default function ProfilePage() {
                           className="border border-border shadow-none"
                         >
                           <CardContent className="p-4">
-                            <h4 className="text-base font-medium">
-                              {edu.qualification}
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                              {edu.institute}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {edu.startYear} - {edu.endYear || "Present"}
-                            </p>
+                            <div className="flex justify-between">
+                              <div>
+                                <h4 className="text-base font-medium">
+                                  {edu.qualification}
+                                </h4>
+                                <p className="text-sm text-muted-foreground">
+                                  {edu.institute}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {edu.startYear} - {edu.endYear || "Present"}
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleEditEducation(index)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  onClick={() => handleDeleteEducation(index)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
                       ))}
@@ -435,9 +567,28 @@ export default function ProfilePage() {
                 </TabsContent>
 
                 <TabsContent value="experience" className="mt-0">
-                  <h3 className="text-lg font-medium text-muted-foreground mb-4">
-                    Experience
-                  </h3>
+                  <div className="flex justify-between mb-4">
+                    <h3 className="text-lg font-medium text-muted-foreground">
+                      Experience
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setActiveExperience(null);
+                        setNewExperience({
+                          company: "",
+                          jobTitle: "",
+                          startYear: new Date().getFullYear(),
+                          endYear: null,
+                        });
+                        setIsAddExperienceOpen(true);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Experience
+                    </Button>
+                  </div>
                   {user.experience && user.experience.length > 0 ? (
                     <div className="space-y-3">
                       {user.experience.map((exp, index) => (
@@ -446,15 +597,36 @@ export default function ProfilePage() {
                           className="border border-border shadow-none"
                         >
                           <CardContent className="p-4">
-                            <h4 className="text-base font-medium">
-                              {exp.jobTitle}
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                              {exp.company}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {exp.startYear} - {exp.endYear || "Present"}
-                            </p>
+                            <div className="flex justify-between">
+                              <div>
+                                <h4 className="text-base font-medium">
+                                  {exp.jobTitle}
+                                </h4>
+                                <p className="text-sm text-muted-foreground">
+                                  {exp.company}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {exp.startYear} - {exp.endYear || "Present"}
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleEditExperience(index)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  onClick={() => handleDeleteExperience(index)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
                       ))}
@@ -554,6 +726,222 @@ export default function ProfilePage() {
             </Button>
             <Button onClick={() => handleUpdateProfile(user)}>
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Education Dialog */}
+      <Dialog open={isAddEducationOpen} onOpenChange={setIsAddEducationOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {activeEducation !== null ? "Edit Education" : "Add Education"}
+            </DialogTitle>
+            <DialogDescription>
+              {activeEducation !== null
+                ? "Update your education details"
+                : "Add your education details"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="qualification">Qualification/Degree</Label>
+              <Input
+                id="qualification"
+                placeholder="e.g. Bachelor of Science in Computer Science"
+                value={newEducation.qualification}
+                onChange={(e) =>
+                  setNewEducation({
+                    ...newEducation,
+                    qualification: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="institute">Institute/School</Label>
+              <Input
+                id="institute"
+                placeholder="e.g. University of California"
+                value={newEducation.institute}
+                onChange={(e) =>
+                  setNewEducation({
+                    ...newEducation,
+                    institute: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="startYear">Start Year</Label>
+                <Input
+                  id="startYear"
+                  type="number"
+                  placeholder="e.g. 2018"
+                  value={newEducation.startYear}
+                  onChange={(e) =>
+                    setNewEducation({
+                      ...newEducation,
+                      startYear: Number.parseInt(e.target.value),
+                    })
+                  }
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="endYear">
+                  End Year (or leave blank if current)
+                </Label>
+                <Input
+                  id="endYear"
+                  type="number"
+                  placeholder="e.g. 2022"
+                  value={newEducation.endYear || ""}
+                  onChange={(e) =>
+                    setNewEducation({
+                      ...newEducation,
+                      endYear: e.target.value
+                        ? Number.parseInt(e.target.value)
+                        : null,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="border-t pt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddEducationOpen(false);
+                setActiveEducation(null);
+                setNewEducation({
+                  qualification: "",
+                  institute: "",
+                  startYear: new Date().getFullYear(),
+                  endYear: null,
+                });
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={
+                activeEducation !== null
+                  ? handleUpdateEducation
+                  : handleAddEducation
+              }
+            >
+              {activeEducation !== null ? "Update" : "Add"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Experience Dialog */}
+      <Dialog open={isAddExperienceOpen} onOpenChange={setIsAddExperienceOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {activeExperience !== null ? "Edit Experience" : "Add Experience"}
+            </DialogTitle>
+            <DialogDescription>
+              {activeExperience !== null
+                ? "Update your work experience"
+                : "Add your work experience"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="jobTitle">Job Title</Label>
+              <Input
+                id="jobTitle"
+                placeholder="e.g. Software Engineer"
+                value={newExperience.jobTitle}
+                onChange={(e) =>
+                  setNewExperience({
+                    ...newExperience,
+                    jobTitle: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="company">Company</Label>
+              <Input
+                id="company"
+                placeholder="e.g. Google"
+                value={newExperience.company}
+                onChange={(e) =>
+                  setNewExperience({
+                    ...newExperience,
+                    company: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="expStartYear">Start Year</Label>
+                <Input
+                  id="expStartYear"
+                  type="number"
+                  placeholder="e.g. 2020"
+                  value={newExperience.startYear}
+                  onChange={(e) =>
+                    setNewExperience({
+                      ...newExperience,
+                      startYear: Number.parseInt(e.target.value),
+                    })
+                  }
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="expEndYear">
+                  End Year (or leave blank if current)
+                </Label>
+                <Input
+                  id="expEndYear"
+                  type="number"
+                  placeholder="e.g. 2023"
+                  value={newExperience.endYear || ""}
+                  onChange={(e) =>
+                    setNewExperience({
+                      ...newExperience,
+                      endYear: e.target.value
+                        ? Number.parseInt(e.target.value)
+                        : null,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="border-t pt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddExperienceOpen(false);
+                setActiveExperience(null);
+                setNewExperience({
+                  company: "",
+                  jobTitle: "",
+                  startYear: new Date().getFullYear(),
+                  endYear: null,
+                });
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={
+                activeExperience !== null
+                  ? handleUpdateExperience
+                  : handleAddExperience
+              }
+            >
+              {activeExperience !== null ? "Update" : "Add"}
             </Button>
           </DialogFooter>
         </DialogContent>
