@@ -132,8 +132,8 @@ setFilteredJobs(data.jobPosts);
                 >
                   <option value="">Select Location</option>
                   {Array.from(new Set(jobs.map((job) => job.city))).map(
-                    (city) => (
-                      <option value={city}>{city}</option>
+                    (city, index) => (
+                      <option key={index} value={city}>{city}</option>
                     )
                   )}
                 </select>
