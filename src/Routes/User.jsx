@@ -8,7 +8,7 @@ import Profile from "../pages/User/Outlets/Profile";
 import JobApplication from "../pages/User/Outlets/JobApplication";
 import Home from "../pages/User/Outlets/Home";
 import ApplicationSubmitted from "../pages/User/Outlets/ApplicationSubmitted";
-import NotFound from "@/pages/Employer/NotFound";
+import NotFound from "@/pages/User/NotFound";
 // import Home2 from "../pages/Home2";
 import AllJobsPage from "../pages/User/Outlets/AllJobs";
 import JobDetailPage from "../pages/User/Outlets/JobDetails";
@@ -36,7 +36,11 @@ function User() {
         <Route path="/job-application-history" element={<JobApplicationHistory />}/>
 
         <Route path="/profile" element={<Profile />} />
+<<<<<<< HEAD
         {/* <Route path="*" element={<NotFound />} /> */}
+=======
+        <Route path="*" element={<NotFound/>} />
+>>>>>>> 7cf2dcef24f97508f7d2a29fbc7056ef26a019c1
       </Route>
     </Routes>
   );

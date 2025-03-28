@@ -11,8 +11,8 @@ import { FaPhone } from "react-icons/fa";
 import { IoMail } from "react-icons/io5";
 import { FaLocationDot } from "react-icons/fa6";
 import { Button } from "@mui/material";
-import useRequestEmployer from "@/hooks/useRequestEmployer";
 import { toast } from "sonner";
+import useRequestUser from "@/hooks/useRequestUser";
 
 function ApplicantModal({
   isDialogOpen,
@@ -23,7 +23,7 @@ function ApplicantModal({
 }) {
   const [applicationStatus, setApplicationStatus] = useState("");
   const [isDecisionDialogOpen, setIsDecisionDialogOpen] = useState(false);
-  const { data, loading, error, sendRequest } = useRequestEmployer();
+  const { data, loading, error, sendRequest } = useRequestUser();
 
   const handleDecision = async (applicationId) => {
     if (applicationStatus) {
@@ -192,7 +192,7 @@ function ApplicantModal({
           </DialogContent>
         </Dialog>
 
-        {/* Deletion confirmation modal */}
+        {/* Status confirmation modal */}
         <Dialog
           open={isDecisionDialogOpen}
           onOpenChange={setIsDecisionDialogOpen}

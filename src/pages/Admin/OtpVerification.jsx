@@ -2,11 +2,11 @@ import React, { useRef, useState, useEffect } from "react";
 import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
+import AdminAxiosInstance from "@/config/axiosConfig/AdminAxiosInstance";
 import GrapeAnimation from "@/components/GrapeAnimation";
 import useRequest from "@/hooks/useRequestUser";
 
-const RegisterOtp = () => {
+const OtpVerification = () => {
   const OTP_LENGTH = 6;
   const [otp, setOtp] = useState(new Array(OTP_LENGTH).fill(""));
   const inputRefs = useRef([]);
@@ -50,7 +50,7 @@ const RegisterOtp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const email = localStorage.getItem("employer-email");
+      const email = localStorage.getItem("admin-email");
       const joinedOtp = otp.join("");
       const data = {
         otp : joinedOtp,
@@ -59,13 +59,13 @@ const RegisterOtp = () => {
       
       console.log(data);
       
-      const res = await employerAxiosInstance.post('/verify-otp' , data)
+      const res = await AdminAxiosInstance.post('/verify-otp' , data)
       console.log(res);
       if(res) {
-        localStorage.removeItem("employer-email")
+        localStorage.removeItem("admin-email")
         toast.success("Otp verification successfull")
         setTimeout(() => {
-            navigate('/employer/employer-login')
+            navigate('/admin/admin-login')
         }, 1500);
       }
       
@@ -160,4 +160,4 @@ const RegisterOtp = () => {
   );
 };
 
-export default RegisterOtp;
+export default OtpVerification;

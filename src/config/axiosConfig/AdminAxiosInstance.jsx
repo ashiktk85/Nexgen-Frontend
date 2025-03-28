@@ -1,14 +1,18 @@
 import axios from "axios";
 
-const employerAxiosInstance = axios.create({
-  baseURL: "http://localhost:3001/employer",
+const AdminAxiosInstance = axios.create({
+  baseURL: "http://localhost:3001/admin",
   withCredentials: true,
 });
 
 
-employerAxiosInstance.interceptors.request.use(
+AdminAxiosInstance.interceptors.request.use(
   (config) => {
+    // Build the full URL
     const fullUrl = `${config.baseURL || ""}${config.url}`;
+    console.log("Full URL:", fullUrl);
+
+    // You can add additional configurations or modifications here if needed
     return config;
   },
   (error) => {
@@ -18,7 +22,7 @@ employerAxiosInstance.interceptors.request.use(
 );
 
 
-employerAxiosInstance.interceptors.response.use(
+AdminAxiosInstance.interceptors.response.use(
   (response) => {
     console.log("response reached");
     return response;
@@ -29,4 +33,4 @@ employerAxiosInstance.interceptors.response.use(
   }
 );
 
-export default employerAxiosInstance;
+export default AdminAxiosInstance;

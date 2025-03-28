@@ -4,9 +4,8 @@ import { userLoginAction } from "../actions/userAction";
 
 const initialState = {
   seekerInfo:{},
-  error: null
+  error: null,
 }
-
 
 const userSlice = createSlice({
     name: "user",
