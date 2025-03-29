@@ -54,6 +54,7 @@ const AllJobsPage = () => {
     try {
       setLoading(true);
       const {data} = await userAxiosInstance.get("/getJobPosts");
+      console.log(data)
       setJobs(data.jobPosts);
 setFilteredJobs(data.jobPosts);
       setLoading(false);

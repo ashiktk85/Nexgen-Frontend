@@ -27,7 +27,7 @@ export default function JobApplicationHistory() {
         filtered = allJobs;
         break;
       case "hired":
-        filtered = allJobs.filter((job)=>job.applicationStatus === "Hired");
+        filtered = allJobs.filter((job)=>job.applicationStatus === "Shortlisted");
         break;
       case "in-progress":
         filtered = allJobs.filter((job)=>job.applicationStatus === "Pending");
@@ -70,7 +70,7 @@ export default function JobApplicationHistory() {
       <Tabs defaultValue="recent" onValueChange={ handleTab } className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="recent">Recent Apply</TabsTrigger>
-          <TabsTrigger value="hired">Hired</TabsTrigger>
+          <TabsTrigger value="Shortlisted">Shortlisted</TabsTrigger>
           <TabsTrigger value="in-progress">In Progress</TabsTrigger>
           <TabsTrigger value="rejected">Rejected</TabsTrigger>
         </TabsList>
@@ -108,7 +108,7 @@ export default function JobApplicationHistory() {
                         width={16}
                         height={16}
                       /> */}
-                      <span className={(job.applicationStatus === 'Hired')?"text-sm text-green-600":(job.applicationStatus === 'Pending')? "text-sm text-yellow-300": "text-sm text-red-500"}>{job.applicationStatus}</span>
+                      <span className={(job.applicationStatus === 'Shortlisted')?"text-sm text-green-600":(job.applicationStatus === 'Pending')? "text-sm text-yellow-300": "text-sm text-red-500"}>{job.applicationStatus}</span>
                     </div>
                   </div>
                 ) : (

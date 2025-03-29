@@ -42,11 +42,14 @@ const JobCard = ({ job, onEdit, onDelete, onUnlist, layout }) => {
             layout === "list" ? "w-full flex justify-between gap-4" : ""
           }`}
         >
-          <h1 className="text-lg font-semibold text-gray-800">
-            {job.jobTitle}
-          </h1>
+          <div className={`${layout === "list"?"flex-col gap-2":"flex gap-2"}`}>
+            <h1 className="text-lg font-semibold text-gray-800">
+              {job.jobTitle}
+            </h1>
+            {job?.isBlocked && <Tag className="h-6">Blocked by admin</Tag>}
+          </div>
           <p className="text-sm text-gray-500">
-            p: {moment(job?.createdAt).format("MMMM Do, YYYY")}
+            Post on: {moment(job?.createdAt).format("MMMM Do, YYYY")}
           </p>
 
           {/* Job Details */}
@@ -82,7 +85,7 @@ const JobCard = ({ job, onEdit, onDelete, onUnlist, layout }) => {
             onClick={() => navigate(`/employer/applicants/${job?._id}`)}
             className="flex items-center mt-1"
           >
-            Applicants ( {job?.applications?.length} )
+            Applicants ( {job?.applicantsCount} )
           </Button>
           {/* Actions */}
         </div>
