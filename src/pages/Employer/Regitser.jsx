@@ -6,7 +6,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
-import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
+import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -108,7 +108,7 @@ const Register = () => {
           phone: values.phone,
         }
         console.log(values);
-        const {data} = await employerAxiosInstnce.post('/signup' ,paylaod)
+        const {data} = await employerAxiosInstance.post('/signup' ,paylaod)
         console.log(data);
         if(data) {
           localStorage.setItem("employer-email" , values?.email)

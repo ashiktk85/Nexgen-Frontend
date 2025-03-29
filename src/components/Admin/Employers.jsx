@@ -3,46 +3,45 @@ import ListTable from "../common/ListTable";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { Button } from "antd";
 
-import { getAllJobs, jobListUnList } from "@/apiServices/adminApi";
+import { getAllEmployers, employerListUnList } from "@/apiServices/adminApi";
 import { toast } from "sonner";
 
-const Jobs = () => {
-  const [jobs, setJobs] = useState([]);
+const Employers = () => {
+  const [employers, setEmployers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const rowsPerPage = 5;
 
   useEffect(() => {
-    fetchJobs(currentPage);
+    fetchEmployers(currentPage);
   }, [currentPage]);
 
-  async function fetchJobs(page) {
+  async function fetchEmployers(page) {
     try {
-      const result = await getAllJobs(page, rowsPerPage);
+      const result = await getAllEmployers(page, rowsPerPage);
 
       if (result?.data?.response) {
-        const { jobs, totalPages } = result.data.response;
-        setJobs(jobs);
+        const { employers, totalPages } = result.data.response;
+        setEmployers(employers);
         setTotalPages(totalPages);
-        console.log('jobs', jobs)
       }
     } catch (error) {
-      console.log("Error in jobs listing component: ", error.message);
+      console.log("Error in employers listing component: ", error.message);
       toast.error("An unexpected error occured");
     }
   }
 
-  const handleListUnlist = async (jobId) => {
+  const handleBlockUnblock = async (employerId) => {
     try {
-      const result = await jobListUnList(jobId);
-      console.log("response after job change status: ", result);
+      const result = await employerListUnList(employerId);
+      console.log("response after employer change status: ", result);
       if (result?.data?.response) {
         // const updated = result.data.response;
         const {message, response} = result.data
         toast.success(message)
-        setJobs((prev) =>
+        setEmployers((prev) =>
           prev.map((item) =>
-            item._id === jobId
+            item._id === employerId
               ? { ...item, isBlocked: response.isBlocked }
               : item
           )
@@ -51,7 +50,7 @@ const Jobs = () => {
       }
     } catch (error) {
       console.log(
-        "Error in handleListUnlist at job listing component: ",
+        "Error in handleBlockUnblock at employer listing component: ",
         error.message
       );
       toast.error("An unexpected error occured");
@@ -59,32 +58,32 @@ const Jobs = () => {
   };
 
   const columns = [
-    { key: "jobTitle", label: "Job Title" },
-    { key: "employerName", label: "Employer" },
-    { key: "createdAt", label: "Posted on" },
-    { key: "status", label: "Open/Close" },
-    { key: "isBlocked", label: "Status" },
+    { key: "name", label: "Name" },
+    { key: "email", label: "Email" },
+    { key: "phone", label: "Mobile" },
+    { key: "location", label: "Location" },
+    { key: "status", label: "Status" },
     { key: "action", label: "" },
   ];
 
-  const tableData = jobs.map((item) => ({
+  const tableData = employers.map((item) => ({
     ...item,
-    isBlocked: item.isBlocked ? (
-      <span className="text-red-500">Unlisted</span>
+    status: item.isBlocked ? (
+      <span className="text-red-500">blocked</span>
     ) : (
-      <span className="text-green-500">Listed</span>
+      <span className="text-green-500">active</span>
     ),
 
     action: (
       <ConfirmDialog
-        title={item.isBlocked ? "List job" : "Unlist job"}
+        title={item.isBlocked ? "Unblock employer" : "Block employer"}
         description={`Are you sure you want to ${
-          item.isBlocked ? "list" : "unlist"
-        } this job?`}
-        onConfirm={() => handleListUnlist(item._id)}
+          item.isBlocked ? "unblock" : "block"
+        } this employer?`}
+        onConfirm={() => handleBlockUnblock(item._id)}
       >
         <Button className="font-semibold w-28">
-          {item.isBlocked ? "List" : "Unlist"}
+          {item.isBlocked ? "Unblock" : "Block"}
         </Button>
       </ConfirmDialog>
     ),
@@ -92,7 +91,7 @@ const Jobs = () => {
 
   return (
     <div className="mt-6 px-6">
-      <h1 className="text-start text-2xl font-bold mb-4">Jobs</h1>
+      <h1 className="text-start text-2xl font-bold mb-4">Employers</h1>
       <div className="mt-2">
         <ListTable
           columns={columns}
@@ -106,4 +105,4 @@ const Jobs = () => {
   );
 };
 
-export default Jobs;
+export default Employers;

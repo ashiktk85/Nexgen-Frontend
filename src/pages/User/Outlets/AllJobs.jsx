@@ -17,6 +17,7 @@ const AllJobsPage = () => {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
 
+  const [searchedJobs, setSearchedJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const searchBoxRef = useRef(null);
   
@@ -76,12 +77,12 @@ setFilteredJobs(data.jobPosts);
         job.city.toLowerCase().includes(searchLocation.toLowerCase())
       );
     }
-    setFilteredJobs(searchedJobs);
+    setSearchedJobs(searchedJobs);
     setShowSearchBox(false);
   };
 
   const filterJobs = () => {
-    let updatedJobs = [...filteredJobs];
+    let updatedJobs = [...searchedJobs];
 
     if (searchTerm) {
       updatedJobs = updatedJobs.filter(
@@ -109,6 +110,10 @@ setFilteredJobs(data.jobPosts);
 
     setFilteredJobs(updatedJobs);
   };
+  const clearAll = () => {
+    
+    setFilteredJobs(jobs);
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen py-10">
@@ -132,8 +137,8 @@ setFilteredJobs(data.jobPosts);
                 >
                   <option value="">Select Location</option>
                   {Array.from(new Set(jobs.map((job) => job.city))).map(
-                    (city) => (
-                      <option value={city}>{city}</option>
+                    (city, index) => (
+                      <option key={index} value={city}>{city}</option>
                     )
                   )}
                 </select>
@@ -183,6 +188,7 @@ setFilteredJobs(data.jobPosts);
                 </select>
               </div>
             </div>
+            <button onClick={clearAll}>Clear All</button>
           </div>
 
           {/* Search Section */}
