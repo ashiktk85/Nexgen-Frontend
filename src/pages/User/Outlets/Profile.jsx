@@ -1,6 +1,8 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +20,103 @@ import { Label } from "@/components/ui/label";
 import { Edit, Plus, FileText, Trash2, Check, X } from "lucide-react";
 import userAxiosInstance from "../../../config/axiosConfig/userAxiosInstance";
 import { toast } from "sonner";
+
+// Validation schemas
+const ProfileSchema = Yup.object().shape({
+  firstName: Yup.string()
+    .min(2, "First name must be at least 2 characters")
+    .max(50, "First name must be less than 50 characters")
+    .required("First name is required"),
+  lastName: Yup.string()
+    .min(2, "Last name must be at least 2 characters")
+    .max(50, "Last name must be less than 50 characters")
+    .required("Last name is required"),
+  email: Yup.string()
+    .email("Invalid email format")
+    .required("Email is required"),
+  phone: Yup.string()
+    .matches(/^[0-9]{10,15}$/, "Phone number must be between 10-15 digits")
+    .required("Phone number is required"),
+  about: Yup.string().max(500, "About must be less than 500 characters"),
+  DOB: Yup.date().nullable(),
+  location: Yup.string().max(100, "Location must be less than 100 characters"),
+});
+
+const EducationSchema = Yup.object().shape({
+  qualification: Yup.string()
+    .min(2, "Qualification must be at least 2 characters")
+    .max(100, "Qualification must be less than 100 characters")
+    .required("Qualification is required"),
+  institute: Yup.string()
+    .min(2, "Institute name must be at least 2 characters")
+    .max(100, "Institute name must be less than 100 characters")
+    .required("Institute name is required"),
+  startYear: Yup.number()
+    .min(1900, "Start year must be after 1900")
+    .max(new Date().getFullYear(), "Start year cannot be in the future")
+    .required("Start year is required"),
+  endYear: Yup.number()
+    .nullable()
+    .min(
+      Yup.ref("startYear"),
+      "End year must be greater than or equal to start year"
+    )
+    .max(
+      new Date().getFullYear() + 10,
+      "End year cannot be too far in the future"
+    ),
+});
+
+const ExperienceSchema = Yup.object().shape({
+  jobTitle: Yup.string()
+    .min(2, "Job title must be at least 2 characters")
+    .max(100, "Job title must be less than 100 characters")
+    .required("Job title is required"),
+  company: Yup.string()
+    .min(2, "Company name must be at least 2 characters")
+    .max(100, "Company name must be less than 100 characters")
+    .required("Company name is required"),
+  startYear: Yup.number()
+    .min(1900, "Start year must be after 1900")
+    .max(new Date().getFullYear(), "Start year cannot be in the future")
+    .required("Start year is required"),
+  endYear: Yup.number()
+    .nullable()
+    .min(
+      Yup.ref("startYear"),
+      "End year must be greater than or equal to start year"
+    )
+    .max(
+      new Date().getFullYear() + 10,
+      "End year cannot be too far in the future"
+    ),
+});
+
+// Custom form input component with error handling
+const FormInput = ({ label, name, type = "text", placeholder, ...props }) => (
+  <div className="grid gap-2">
+    <Label htmlFor={name}>{label}</Label>
+    <Field name={name}>
+      {({ field, meta }) => (
+        <div>
+          <Input
+            id={name}
+            type={type}
+            placeholder={placeholder}
+            {...field}
+            {...props}
+            className={meta.touched && meta.error ? "border-destructive" : ""}
+          />
+          <ErrorMessage
+            name={name}
+            component="div"
+            className="text-destructive text-xs mt-1"
+          />
+        </div>
+      )}
+    </Field>
+  </div>
+);
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("about");
@@ -56,6 +155,7 @@ export default function ProfilePage() {
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
+      toast.error("Failed to load user data");
     } finally {
       setLoading(false);
     }
@@ -68,13 +168,26 @@ export default function ProfilePage() {
   // Profile image handling
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setSelectedImageFile(file);
-      // Create the preview URL here and store it in state
-      const previewUrl = URL.createObjectURL(file);
-      setPreviewImageUrl(previewUrl);
-      setIsImageConfirmationOpen(true);
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Please upload a valid image file (JPEG, PNG, GIF, WEBP)");
+      return;
     }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB");
+      return;
+    }
+
+    setSelectedImageFile(file);
+    // Create the preview URL here and store it in state
+    const previewUrl = URL.createObjectURL(file);
+    setPreviewImageUrl(previewUrl);
+    setIsImageConfirmationOpen(true);
   };
 
   const confirmImageUpload = async () => {
@@ -93,12 +206,12 @@ export default function ProfilePage() {
       );
 
       if (response.data.success) {
-        toast.success("Image uploaded successfully");
-
+        toast.success("Profile image updated successfully");
         await fetchUserData();
       }
     } catch (error) {
       console.error("Error uploading profile image:", error);
+      toast.error("Failed to update profile image");
     } finally {
       // Clean up the object URL to avoid memory leaks
       if (previewImageUrl) {
@@ -126,12 +239,18 @@ export default function ProfilePage() {
     if (!file) return;
 
     if (file.type !== "application/pdf") {
-      alert("Please upload only PDF files");
+      toast.error("Please upload only PDF files");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Resume size should be less than 10MB");
       return;
     }
 
     if (user?.resume && user.resume.length >= 5) {
-      alert("Maximum 5 resumes allowed");
+      toast.error("Maximum 5 resumes allowed");
       return;
     }
 
@@ -160,6 +279,7 @@ export default function ProfilePage() {
       }
     } catch (error) {
       console.error("Error uploading resume:", error);
+      toast.error("Failed to upload resume");
     } finally {
       setIsResumeConfirmationOpen(false);
       setSelectedResumeFile(null);
@@ -173,27 +293,33 @@ export default function ProfilePage() {
       });
 
       if (response.data.success) {
+        toast.success("Resume removed successfully");
         await fetchUserData();
       }
     } catch (error) {
       console.error("Error deleting resume:", error);
+      toast.error("Failed to remove resume");
     }
   };
 
   // Profile update handling
-  const handleUpdateProfile = async () => {
+  const handleUpdateProfile = async (values, { setSubmitting, resetForm }) => {
     try {
       const response = await userAxiosInstance.post(
         `/update-profile/${userId}`,
-        tempUser
+        values
       );
 
       if (response.data.success) {
-        setUser(response.data.response || tempUser);
+        toast.success("Profile updated successfully");
+        setUser(response.data.response || values);
         setIsEditDialogOpen(false);
       }
     } catch (error) {
       console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -214,16 +340,13 @@ export default function ProfilePage() {
     setIsEducationDialogOpen(true);
   };
 
-  const saveEducation = async () => {
+  const saveEducation = async (values, { setSubmitting, resetForm }) => {
     const updatedUser = { ...user };
 
     if (educationIndex !== null) {
-      updatedUser.education[educationIndex] = currentEducation;
+      updatedUser.education[educationIndex] = values;
     } else {
-      updatedUser.education = [
-        ...(updatedUser.education || []),
-        currentEducation,
-      ];
+      updatedUser.education = [...(updatedUser.education || []), values];
     }
 
     try {
@@ -233,14 +356,22 @@ export default function ProfilePage() {
       );
 
       if (response.data.success) {
+        toast.success(
+          educationIndex !== null
+            ? "Education updated successfully"
+            : "Education added successfully"
+        );
         setUser(response.data.response || updatedUser);
+        setIsEducationDialogOpen(false);
+        setCurrentEducation(null);
+        setEducationIndex(null);
+        resetForm();
       }
     } catch (error) {
       console.error("Error updating education:", error);
+      toast.error("Failed to save education");
     } finally {
-      setIsEducationDialogOpen(false);
-      setCurrentEducation(null);
-      setEducationIndex(null);
+      setSubmitting(false);
     }
   };
 
@@ -255,10 +386,12 @@ export default function ProfilePage() {
       );
 
       if (response.data.success) {
+        toast.success("Education removed successfully");
         setUser(response.data.response || updatedUser);
       }
     } catch (error) {
       console.error("Error deleting education:", error);
+      toast.error("Failed to remove education");
     }
   };
 
@@ -279,16 +412,13 @@ export default function ProfilePage() {
     setIsExperienceDialogOpen(true);
   };
 
-  const saveExperience = async () => {
+  const saveExperience = async (values, { setSubmitting, resetForm }) => {
     const updatedUser = { ...user };
 
     if (experienceIndex !== null) {
-      updatedUser.experience[experienceIndex] = currentExperience;
+      updatedUser.experience[experienceIndex] = values;
     } else {
-      updatedUser.experience = [
-        ...(updatedUser.experience || []),
-        currentExperience,
-      ];
+      updatedUser.experience = [...(updatedUser.experience || []), values];
     }
 
     try {
@@ -298,14 +428,22 @@ export default function ProfilePage() {
       );
 
       if (response.data.success) {
+        toast.success(
+          experienceIndex !== null
+            ? "Experience updated successfully"
+            : "Experience added successfully"
+        );
         setUser(response.data.response || updatedUser);
+        setIsExperienceDialogOpen(false);
+        setCurrentExperience(null);
+        setExperienceIndex(null);
+        resetForm();
       }
     } catch (error) {
       console.error("Error updating experience:", error);
+      toast.error("Failed to save experience");
     } finally {
-      setIsExperienceDialogOpen(false);
-      setCurrentExperience(null);
-      setExperienceIndex(null);
+      setSubmitting(false);
     }
   };
 
@@ -322,10 +460,12 @@ export default function ProfilePage() {
       );
 
       if (response.data.success) {
+        toast.success("Experience removed successfully");
         setUser(response.data.response || updatedUser);
       }
     } catch (error) {
       console.error("Error deleting experience:", error);
+      toast.error("Failed to remove experience");
     }
   };
 
@@ -391,11 +531,6 @@ export default function ProfilePage() {
                 <h1 className="text-2xl sm:text-3xl font-bold mb-1">
                   {fullName}
                 </h1>
-                {/* {user.experience && user.experience.length > 0 && (
-                  <p className="text-lg text-muted-foreground mb-1">
-                    {user.experience[0].jobTitle}
-                  </p>
-                )} */}
                 <p className="text-sm text-muted-foreground mb-3">
                   {user.location || "No location set"}
                 </p>
@@ -736,7 +871,7 @@ export default function ProfilePage() {
         </Card>
       </div>
 
-      {/* Edit Profile Dialog */}
+      {/* Edit Profile Dialog with Formik */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
@@ -745,106 +880,78 @@ export default function ProfilePage() {
               Update your profile information below
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="first-name">First Name</Label>
-                <Input
-                  id="first-name"
-                  placeholder="Enter your first name"
-                  value={tempUser?.firstName || ""}
-                  onChange={(e) =>
-                    setTempUser({ ...tempUser, firstName: e.target.value })
-                  }
+          <Formik
+            initialValues={{
+              firstName: tempUser?.firstName || "",
+              lastName: tempUser?.lastName || "",
+              email: tempUser?.email || "",
+              phone: tempUser?.phone || "",
+              about: tempUser?.about || "",
+              DOB: tempUser?.DOB
+                ? new Date(tempUser.DOB).toISOString().split("T")[0]
+                : "",
+              location: tempUser?.location || "",
+              // Preserve other fields that might be in the user object
+              ...tempUser,
+            }}
+            validationSchema={ProfileSchema}
+            onSubmit={handleUpdateProfile}
+          >
+            {({ isSubmitting, values, errors, touched }) => (
+              <Form className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormInput
+                    label="First Name"
+                    name="firstName"
+                    placeholder="Enter your first name"
+                  />
+                  <FormInput
+                    label="Last Name"
+                    name="lastName"
+                    placeholder="Enter your last name"
+                  />
+                </div>
+                <FormInput
+                  label="Email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="last-name">Last Name</Label>
-                <Input
-                  id="last-name"
-                  placeholder="Enter your last name"
-                  value={tempUser?.lastName || ""}
-                  onChange={(e) =>
-                    setTempUser({ ...tempUser, lastName: e.target.value })
-                  }
+                <FormInput
+                  label="Phone"
+                  name="phone"
+                  placeholder="Enter your phone number"
                 />
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                placeholder="Enter your email"
-                type="email"
-                value={tempUser?.email || ""}
-                onChange={(e) =>
-                  setTempUser({ ...tempUser, email: e.target.value })
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                placeholder="Enter your phone number"
-                value={tempUser?.phone || ""}
-                onChange={(e) =>
-                  setTempUser({ ...tempUser, phone: e.target.value })
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="about">About</Label>
-              <Input
-                id="about"
-                placeholder="Enter your about yourself"
-                type="textarea"
-                value={tempUser?.about || ""}
-                onChange={(e) =>
-                  setTempUser({ ...tempUser, about: e.target.value })
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="dob">Date of Birth</Label>
-              <Input
-                id="dob"
-                type="date"
-                value={
-                  tempUser?.DOB
-                    ? new Date(tempUser.DOB).toISOString().split("T")[0]
-                    : ""
-                }
-                onChange={(e) =>
-                  setTempUser({ ...tempUser, DOB: e.target.value })
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                placeholder="Enter your location"
-                value={tempUser?.location || ""}
-                onChange={(e) =>
-                  setTempUser({ ...tempUser, location: e.target.value })
-                }
-              />
-            </div>
-          </div>
-          <DialogFooter className="border-t pt-4">
-            <Button
-              variant="outline"
-              onClick={() => setIsEditDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateProfile}>Save Changes</Button>
-          </DialogFooter>
+                <FormInput
+                  label="About"
+                  name="about"
+                  placeholder="Tell us about yourself"
+                />
+                <FormInput label="Date of Birth" name="DOB" type="date" />
+                <FormInput
+                  label="Location"
+                  name="location"
+                  placeholder="Enter your location"
+                />
+                <DialogFooter className="border-t pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Saving..." : "Save Changes"}
+                  </Button>
+                </DialogFooter>
+              </Form>
+            )}
+          </Formik>
         </DialogContent>
       </Dialog>
 
-      {/* Education Dialog */}
+      {/* Education Dialog with Formik */}
       <Dialog
         open={isEducationDialogOpen}
         onOpenChange={setIsEducationDialogOpen}
@@ -860,89 +967,70 @@ export default function ProfilePage() {
                 : "Add your education details"}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="qualification">Qualification/Degree</Label>
-              <Input
-                id="qualification"
-                placeholder="e.g. Bachelor of Science in Computer Science"
-                value={currentEducation?.qualification || ""}
-                onChange={(e) =>
-                  setCurrentEducation({
-                    ...currentEducation,
-                    qualification: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="institute">Institute/School</Label>
-              <Input
-                id="institute"
-                placeholder="e.g. University of California"
-                value={currentEducation?.institute || ""}
-                onChange={(e) =>
-                  setCurrentEducation({
-                    ...currentEducation,
-                    institute: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="startYear">Start Year</Label>
-                <Input
-                  id="startYear"
-                  type="number"
-                  placeholder="e.g. 2018"
-                  value={currentEducation?.startYear || ""}
-                  onChange={(e) =>
-                    setCurrentEducation({
-                      ...currentEducation,
-                      startYear: Number(e.target.value),
-                    })
-                  }
+          <Formik
+            initialValues={{
+              qualification: currentEducation?.qualification || "",
+              institute: currentEducation?.institute || "",
+              startYear:
+                currentEducation?.startYear || new Date().getFullYear(),
+              endYear: currentEducation?.endYear || "",
+            }}
+            validationSchema={EducationSchema}
+            onSubmit={saveEducation}
+          >
+            {({ isSubmitting, values, errors, touched }) => (
+              <Form className="grid gap-4 py-4">
+                <FormInput
+                  label="Qualification/Degree"
+                  name="qualification"
+                  placeholder="e.g. Bachelor of Science in Computer Science"
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="endYear">
-                  End Year (or leave blank if current)
-                </Label>
-                <Input
-                  id="endYear"
-                  type="number"
-                  placeholder="e.g. 2022"
-                  value={currentEducation?.endYear || ""}
-                  onChange={(e) =>
-                    setCurrentEducation({
-                      ...currentEducation,
-                      endYear: e.target.value ? Number(e.target.value) : null,
-                    })
-                  }
+                <FormInput
+                  label="Institute/School"
+                  name="institute"
+                  placeholder="e.g. University of California"
                 />
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="border-t pt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsEducationDialogOpen(false);
-                setCurrentEducation(null);
-                setEducationIndex(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={saveEducation}>
-              {educationIndex !== null ? "Update" : "Add"}
-            </Button>
-          </DialogFooter>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormInput
+                    label="Start Year"
+                    name="startYear"
+                    type="number"
+                    placeholder="e.g. 2018"
+                  />
+                  <FormInput
+                    label="End Year (or leave blank if current)"
+                    name="endYear"
+                    type="number"
+                    placeholder="e.g. 2022"
+                  />
+                </div>
+                <DialogFooter className="border-t pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsEducationDialogOpen(false);
+                      setCurrentEducation(null);
+                      setEducationIndex(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting
+                      ? "Saving..."
+                      : educationIndex !== null
+                      ? "Update"
+                      : "Add"}
+                  </Button>
+                </DialogFooter>
+              </Form>
+            )}
+          </Formik>
         </DialogContent>
       </Dialog>
 
-      {/* Experience Dialog */}
+      {/* Experience Dialog with Formik */}
       <Dialog
         open={isExperienceDialogOpen}
         onOpenChange={setIsExperienceDialogOpen}
@@ -958,85 +1046,66 @@ export default function ProfilePage() {
                 : "Add your work experience"}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="jobTitle">Job Title</Label>
-              <Input
-                id="jobTitle"
-                placeholder="e.g. Software Engineer"
-                value={currentExperience?.jobTitle || ""}
-                onChange={(e) =>
-                  setCurrentExperience({
-                    ...currentExperience,
-                    jobTitle: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="company">Company</Label>
-              <Input
-                id="company"
-                placeholder="e.g. Google"
-                value={currentExperience?.company || ""}
-                onChange={(e) =>
-                  setCurrentExperience({
-                    ...currentExperience,
-                    company: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="expStartYear">Start Year</Label>
-                <Input
-                  id="expStartYear"
-                  type="number"
-                  placeholder="e.g. 2020"
-                  value={currentExperience?.startYear || ""}
-                  onChange={(e) =>
-                    setCurrentExperience({
-                      ...currentExperience,
-                      startYear: Number(e.target.value),
-                    })
-                  }
+          <Formik
+            initialValues={{
+              jobTitle: currentExperience?.jobTitle || "",
+              company: currentExperience?.company || "",
+              startYear:
+                currentExperience?.startYear || new Date().getFullYear(),
+              endYear: currentExperience?.endYear || "",
+            }}
+            validationSchema={ExperienceSchema}
+            onSubmit={saveExperience}
+          >
+            {({ isSubmitting, values, errors, touched }) => (
+              <Form className="grid gap-4 py-4">
+                <FormInput
+                  label="Job Title"
+                  name="jobTitle"
+                  placeholder="e.g. Software Engineer"
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="expEndYear">
-                  End Year (or leave blank if current)
-                </Label>
-                <Input
-                  id="expEndYear"
-                  type="number"
-                  placeholder="e.g. 2023"
-                  value={currentExperience?.endYear || ""}
-                  onChange={(e) =>
-                    setCurrentExperience({
-                      ...currentExperience,
-                      endYear: e.target.value ? Number(e.target.value) : null,
-                    })
-                  }
+                <FormInput
+                  label="Company"
+                  name="company"
+                  placeholder="e.g. Google"
                 />
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="border-t pt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsExperienceDialogOpen(false);
-                setCurrentExperience(null);
-                setExperienceIndex(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={saveExperience}>
-              {experienceIndex !== null ? "Update" : "Add"}
-            </Button>
-          </DialogFooter>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormInput
+                    label="Start Year"
+                    name="startYear"
+                    type="number"
+                    placeholder="e.g. 2020"
+                  />
+                  <FormInput
+                    label="End Year (or leave blank if current)"
+                    name="endYear"
+                    type="number"
+                    placeholder="e.g. 2023"
+                  />
+                </div>
+                <DialogFooter className="border-t pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsExperienceDialogOpen(false);
+                      setCurrentExperience(null);
+                      setExperienceIndex(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting
+                      ? "Saving..."
+                      : experienceIndex !== null
+                      ? "Update"
+                      : "Add"}
+                  </Button>
+                </DialogFooter>
+              </Form>
+            )}
+          </Formik>
         </DialogContent>
       </Dialog>
 
