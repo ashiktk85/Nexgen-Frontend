@@ -31,11 +31,11 @@ const CompanyForm = ({ company = null }) => {
   // Initial Form Values (Pre-filled if Editing)
   const initialValues = {
     companyName: company?.companyName || "",
-    location: company?.location || "",
-    industry: company?.industry || "",
-    logo: null,
+    email: company?.email || "",
+    phone: company?.phone || "",
+    // logo: null,
     address: company?.address || "",
-    companyCertificate: null,
+    // companyCertificate: null,
     about: company?.about || "",
     webSite: company?.webSite || "",
     socialLinks: {
@@ -57,7 +57,7 @@ const CompanyForm = ({ company = null }) => {
 
   const formik = useFormik({
     initialValues,
-    validationSchema: validateCompanyForm,
+    // validationSchema: validateCompanyForm,
     onSubmit: async (values) => {
       console.log("Form submitted with values:", values); // Debugging step
       try {
@@ -120,24 +120,6 @@ const CompanyForm = ({ company = null }) => {
           }
           helperText={formik.touched.companyName && formik.errors.companyName}
         />
-        {/* Industry */}
-        <TextField
-          fullWidth
-          label="Industry"
-          name="industry"
-          {...formik.getFieldProps("industry")}
-          error={formik.touched.industry && Boolean(formik.errors.industry)}
-          helperText={formik.touched.industry && formik.errors.industry}
-        />
-        {/* Location */}
-        <TextField
-          fullWidth
-          label="Location"
-          name="location"
-          {...formik.getFieldProps("location")}
-          error={formik.touched.location && Boolean(formik.errors.location)}
-          helperText={formik.touched.location && formik.errors.location}
-        />
         {/* About */}
         <TextField
           fullWidth
@@ -158,6 +140,26 @@ const CompanyForm = ({ company = null }) => {
           {...formik.getFieldProps("webSite")}
           error={formik.touched.webSite && Boolean(formik.errors.webSite)}
           helperText={formik.touched.webSite && formik.errors.webSite}
+        />
+        {/* Email */}
+        <TextField
+          fullWidth
+          label="Company Email"
+          name="email"
+          type="email"
+          {...formik.getFieldProps("email")}
+          error={formik.touched.email && Boolean(formik.errors.email)}
+          helperText={formik.touched.email && formik.errors.email}
+        />
+        {/* phone */}
+        <TextField
+          fullWidth
+          label="Company phone"
+          name="phone"
+          type="number"
+          {...formik.getFieldProps("phone")}
+          error={formik.touched.phone && Boolean(formik.errors.phone)}
+          helperText={formik.touched.phone && formik.errors.phone}
         />
         {/* Address */}
         <TextField

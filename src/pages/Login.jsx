@@ -194,7 +194,7 @@ const LoginPage = () => {
 
             {/* Login Button */}
             <button
-              type="submit"
+              type="submits"
               className="w-full py-2 px-4 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700"
             >
               Log in
