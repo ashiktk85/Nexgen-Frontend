@@ -10,7 +10,7 @@ const isEmptyObject = (obj) => {
 export const EmployerProtectedRoute = ({ children }) => {
     const { employer } = useSelector((state) => state.employer);
     if (isEmptyObject(employer)) {
-        toast.warning("please login to continue")
+      toast.warning("please login to continue")
       return <Navigate to="/employer-login" replace />;
     }
   

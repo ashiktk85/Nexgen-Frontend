@@ -33,10 +33,10 @@ function User() {
         <Route path="/all-jobs" element={<AllJobsPage />} />
         <Route path="/job-details/:id" element={<JobDetailPage />} />
         <Route path="/job-application/:id" element={<UserProtectedRoute><JobApplication /></UserProtectedRoute>} />
-        <Route path="/application-submitted" element={<ApplicationSubmitted />}/>
-        <Route path="/job-application-history" element={<JobApplicationHistory />}/>
+        <Route path="/application-submitted" element={<UserProtectedRoute><ApplicationSubmitted /></UserProtectedRoute>}/>
+        <Route path="/job-application-history" element={<UserProtectedRoute><JobApplicationHistory /></UserProtectedRoute>}/>
 
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<UserProtectedRoute><Profile /></UserProtectedRoute>} />
         <Route path="*" element={<NotFound/>} />
       </Route>
     </Routes>

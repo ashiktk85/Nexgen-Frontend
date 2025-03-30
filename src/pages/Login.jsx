@@ -13,7 +13,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const { data, loading, error, sendRequest } = useRequest();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
     if (x.type === "password") {
@@ -43,19 +43,22 @@ const LoginPage = () => {
     onSubmit: async (values) => {
       try {
         console.log("values:", values);
-        const response = await dispatch(userLoginAction(values)).unwrap()
-        console.log('Response after loging in user login component: ', response)
-        localStorage.setItem('token', response.userData.token)
-        if(response.success){
-          toast.success('Login successful!')
+        const response = await dispatch(userLoginAction(values)).unwrap();
+        console.log(
+          "Response after loging in user login component: ",
+          response
+        );
+        localStorage.setItem("token", response.userData.token);
+        if (response.success) {
+          toast.success("Login successful!");
         }
         setTimeout(() => {
-          navigate('/')
-        }, 1500)
+          navigate("/");
+        }, 1500);
         if (loading) return <p>Loading...</p>;
         if (error) return <p>Error: {error}</p>;
       } catch (err) {
-        console.log('Error in user login component after login: ', err)
+        console.log("Error in user login component after login: ", err);
         toast.error(err?.message || "An error occurred");
       }
     },
@@ -69,9 +72,11 @@ const LoginPage = () => {
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
-            Nexgen
-          </h1>
+          <Link to="/">
+            <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left cursor-pointer">
+              Nexgen
+            </h1>
+          </Link>
 
           {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
@@ -207,9 +212,7 @@ const LoginPage = () => {
             </a>
           </p>
 
-          <p className="text-center text-sm text-gray-600 mt-4">
-            OR{" "}
-          </p>
+          <p className="text-center text-sm text-gray-600 mt-4">OR </p>
           <p className="text-center text-sm text-gray-600 mt-4">
             Are you a Recuitor?{" "}
             <a
