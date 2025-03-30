@@ -26,7 +26,7 @@ export default function JobApplicationHistory() {
       case "recent":
         filtered = allJobs;
         break;
-      case "hired":
+      case "Shortlisted":
         filtered = allJobs.filter((job)=>job.applicationStatus === "Shortlisted");
         break;
       case "in-progress":
