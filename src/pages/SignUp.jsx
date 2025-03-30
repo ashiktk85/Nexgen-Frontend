@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
@@ -143,9 +143,11 @@ const SignupPage = () => {
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <h1 className="text-2xl font-bold text-primary mb-3 text-center lg:text-left">
-            Nexgen
-          </h1>
+          <Link to="/">
+            <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left cursor-pointer">
+              Nexgen
+            </h1>
+          </Link>
 
           {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">

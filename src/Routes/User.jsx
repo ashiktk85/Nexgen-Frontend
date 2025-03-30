@@ -15,6 +15,7 @@ import JobDetailPage from "../pages/User/Outlets/JobDetails";
 // import Home3 from "@/pages/Home3";
 import HomeLayout from "@/pages/User/Layout/HomeLayout";
 import JobApplicationHistory from "@/pages/User/Outlets/JobApplicationHistory";
+import { UserProtectedRoute } from "@/services/userProtector";
 
 function User() {
   return (
@@ -31,15 +32,16 @@ function User() {
         <Route path="/" element={<Home />} />
         <Route path="/all-jobs" element={<AllJobsPage />} />
         <Route path="/job-details/:id" element={<JobDetailPage />} />
-        <Route path="/job-application/:id" element={<JobApplication />} />
-        <Route path="/application-submitted" element={<ApplicationSubmitted />}/>
-        <Route path="/job-application-history" element={<JobApplicationHistory />}/>
+        <Route path="/job-application/:id" element={<UserProtectedRoute><JobApplication /></UserProtectedRoute>} />
+        <Route path="/application-submitted" element={<UserProtectedRoute><ApplicationSubmitted /></UserProtectedRoute>}/>
+        <Route path="/job-application-history" element={<UserProtectedRoute><JobApplicationHistory /></UserProtectedRoute>}/>
 
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<UserProtectedRoute><Profile /></UserProtectedRoute>} />
         <Route path="*" element={<NotFound/>} />
       </Route>
     </Routes>
   );
 }
+
 
 export default User;

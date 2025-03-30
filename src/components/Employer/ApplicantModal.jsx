@@ -32,7 +32,7 @@ function ApplicantModal({
       };
 
       sendRequest({
-        url: `/job-applications/${applicationId}/update_status`,
+        url: `/employer/job-applications/${applicationId}/update_status`,
         method: "POST",
         data: applicationStatusData,
         onSuccess: (data) => {
@@ -58,7 +58,7 @@ function ApplicantModal({
             </DialogHeader>
             <div className="w-full md:grid-cols-2 grid-cols-1 space-y-2">
               <div className="flex items-center">
-                <p className="text-2xl font-semibold leading-none tracking-tight">Status: <span className={application.status === "Hired"? "text-green-500": application.status === "Rejected"?"text-red-500":"text-orange-500"}>{application.status}</span></p>
+                <p className="text-2xl font-semibold leading-none tracking-tight">Status: <span className={application.status === "Shortlisted"? "text-green-500": application.status === "Rejected"?"text-red-500":"text-orange-500"}>{application.status}</span></p>
               </div>
               <div className="flex items-center md:justify-end  space-x-2">
                 {/* "flex items-end justify-end space-y-6 space-x-2" */}
@@ -71,8 +71,8 @@ function ApplicantModal({
                     <option className="text-sm" value="">
                       Change Status
                     </option>
-                    <option className="text-sm" value="Hired">
-                      Hire
+                    <option className="text-sm" value="Shortlisted">
+                    Shortlist
                     </option>
                     <option className="text-sm" value="Rejected">
                       Reject
@@ -202,9 +202,9 @@ function ApplicantModal({
               <DialogTitle>Confirm Status</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {applicationStatus === "Hired" ? (
+              {applicationStatus === "Shortlisted" ? (
                 <p>
-                  Are you sure you want to hire this application? This action
+                  Are you sure you want to shortlist this application? This action
                   cannot be undone.
                 </p>
               ) : applicationStatus === "Rejected" ? (

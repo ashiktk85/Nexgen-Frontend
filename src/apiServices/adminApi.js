@@ -129,3 +129,14 @@ export const jobListUnList = async (jobId) => {
       toast.error(errorMessage)
   }
 }
+
+export const getEmployerVerificationDetails = async (id) => {
+  try {
+    const response = await adminAxiosInstance.get(
+      `/employer-verification/${id}`
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
