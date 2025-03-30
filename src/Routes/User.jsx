@@ -36,11 +36,7 @@ function User() {
         <Route path="/job-application-history" element={<JobApplicationHistory />}/>
 
         <Route path="/profile" element={<Profile />} />
-<<<<<<< HEAD
-        {/* <Route path="*" element={<NotFound />} /> */}
-=======
         <Route path="*" element={<NotFound/>} />
->>>>>>> 7cf2dcef24f97508f7d2a29fbc7056ef26a019c1
       </Route>
     </Routes>
   );
