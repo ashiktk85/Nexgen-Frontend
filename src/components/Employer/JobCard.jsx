@@ -46,7 +46,7 @@ const JobCard = ({ job, onEdit, onDelete, onUnlist, layout }) => {
             {job.jobTitle}
           </h1>
           <p className="text-sm text-gray-500">
-            p: {moment(job?.createdAt).format("MMMM Do, YYYY")}
+            Post on: {moment(job?.createdAt).format("MMMM Do, YYYY")}
           </p>
 
           {/* Job Details */}
