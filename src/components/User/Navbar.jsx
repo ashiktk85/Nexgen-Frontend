@@ -45,7 +45,7 @@ const Navbar = () => {
       <div className="flex items-center justify-between">
         {/* Left Section: Logo */}
         <div
-          className="text-2xl md:text-3xl lg:text-5xl font-bold text-primary cursor-pointer"
+          className="text-2xl md:text-3xl lg:text-5xl font-semibold font-marcellus text-primary cursor-pointer"
           onClick={() => navigate("/")}
         >
           Nexgen
@@ -60,7 +60,7 @@ const Navbar = () => {
         </div>
 
         {/* Right Section: Navigation Links (Desktop) */}
-        <div className="hidden md:flex lg:gap-4 space-x-6 text-sm md:text-base lg:text-lg font-bold">
+        <div className="hidden md:flex lg:gap-4 space-x-6 text-xs md:text-sm lg:text-md font-medium">
           <div
             className="flex items-center space-x-1 cursor-pointer text-primary hover:text-blue-300"
             onClick={() => navigate("/")}
