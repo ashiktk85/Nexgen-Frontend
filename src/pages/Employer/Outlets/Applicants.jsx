@@ -111,7 +111,7 @@ const dummyColumns = (handleActiveToggle) => [
       <>
         <span
           className={` py-1 rounded font-bold ${
-            status === "Shortlisted"
+            status === "Hired"
               ? "text-green-500"
               : status === "Pending"
               ? "text-orange-400"

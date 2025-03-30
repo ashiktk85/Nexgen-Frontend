@@ -9,6 +9,7 @@ import AdminLogin from "@/pages/Admin/AdminLogin";
 import AdminRegister from "@/pages/Admin/AdminRegister";
 import OtpVerification from "@/pages/Admin/OtpVerification";
 import EmployerVerification from "@/components/Admin/EmployerVerification";
+import { AdminProtectedRoute } from "@/services/adminProtecter";
 
 function Admin() {
   return (
@@ -16,12 +17,12 @@ function Admin() {
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/admin-register" element={<AdminRegister />} />
       <Route path="/otp-verification" element={<OtpVerification />} />
-      <Route path="/" element={<HomeLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/users" element={<Users />} />
-        <Route path="/employers" element={<Employers />} />
-        <Route path="/jobs" element={<Jobs />} />
-        <Route path="/employer-verification" element={<EmployerVerification />} />
+      <Route path="/" element={<AdminProtectedRoute><HomeLayout /></AdminProtectedRoute>}>
+        <Route path="/dashboard" element={<AdminProtectedRoute><Dashboard /></AdminProtectedRoute>} />
+        <Route path="/users" element={<AdminProtectedRoute><Users /></AdminProtectedRoute>} />
+        <Route path="/employers" element={<AdminProtectedRoute><Employers /></AdminProtectedRoute>} />
+        <Route path="/jobs" element={<AdminProtectedRoute><Jobs /></AdminProtectedRoute>} />
+        <Route path="/employer-verification" element={<AdminProtectedRoute><EmployerVerification /></AdminProtectedRoute>} />
       </Route>
     </Routes>
   );
