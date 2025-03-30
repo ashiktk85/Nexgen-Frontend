@@ -1,35 +1,31 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Sidebar from '../components/Admin/SideBar';
-import Dashboard from '../components/Admin/Dashboard';
-import Users from '../components/Admin/Users';
-import Employers from '../components/Admin/Employers';
-import Jobs from '../components/Admin/Jobs';
-import Header from '../components/Admin/Header';
+import React from "react";
+import { Route, Routes } from "react-router-dom";
+import Dashboard from "../components/Admin/Dashboard";
+import Users from "../components/Admin/Users";
+import Employers from "../components/Admin/Employers";
+import Jobs from "../components/Admin/Jobs";
+import HomeLayout from "@/pages/Admin/Layout/HomeLayout";
+import AdminLogin from "@/pages/Admin/AdminLogin";
+import AdminRegister from "@/pages/Admin/AdminRegister";
+import OtpVerification from "@/pages/Admin/OtpVerification";
+import EmployerVerification from "@/components/Admin/EmployerVerification";
+import { AdminProtectedRoute } from "@/services/adminProtecter";
 
-
-function App() {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-
+function Admin() {
   return (
-   
-      <div className="flex h-screen bg-gray-100 font-inter">
-        <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 p-4">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/users" element={<Users />} />
-              <Route path="/employers" element={<Employers />} />
-              <Route path="/jobs" element={<Jobs />} />
-            </Routes>
-          </main>
-        </div>
-      </div>
-    
+    <Routes>
+      <Route path="/admin-login" element={<AdminLogin />} />
+      <Route path="/admin-register" element={<AdminRegister />} />
+      <Route path="/otp-verification" element={<OtpVerification />} />
+      <Route path="/" element={<AdminProtectedRoute><HomeLayout /></AdminProtectedRoute>}>
+        <Route path="/dashboard" element={<AdminProtectedRoute><Dashboard /></AdminProtectedRoute>} />
+        <Route path="/users" element={<AdminProtectedRoute><Users /></AdminProtectedRoute>} />
+        <Route path="/employers" element={<AdminProtectedRoute><Employers /></AdminProtectedRoute>} />
+        <Route path="/jobs" element={<AdminProtectedRoute><Jobs /></AdminProtectedRoute>} />
+        <Route path="/employer-verification" element={<AdminProtectedRoute><EmployerVerification /></AdminProtectedRoute>} />
+      </Route>
+    </Routes>
   );
 }
 
-export default App;
-
+export default Admin;

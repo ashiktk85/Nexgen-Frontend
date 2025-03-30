@@ -8,14 +8,14 @@ import Profile from "../pages/User/Outlets/Profile";
 import JobApplication from "../pages/User/Outlets/JobApplication";
 import Home from "../pages/User/Outlets/Home";
 import ApplicationSubmitted from "../pages/User/Outlets/ApplicationSubmitted";
-import NotFound from "@/pages/Employer/NotFound";
+import NotFound from "@/pages/User/NotFound";
 // import Home2 from "../pages/Home2";
 import AllJobsPage from "../pages/User/Outlets/AllJobs";
 import JobDetailPage from "../pages/User/Outlets/JobDetails";
 // import Home3 from "@/pages/Home3";
 import HomeLayout from "@/pages/User/Layout/HomeLayout";
 import JobApplicationHistory from "@/pages/User/Outlets/JobApplicationHistory";
-// import NotFound from "@/pages/Employer/NotFound";
+import { UserProtectedRoute } from "@/services/userProtector";
 
 function User() {
   return (
@@ -32,7 +32,7 @@ function User() {
         <Route path="/" element={<Home />} />
         <Route path="/all-jobs" element={<AllJobsPage />} />
         <Route path="/job-details/:id" element={<JobDetailPage />} />
-        <Route path="/job-application/:id" element={<JobApplication />} />
+        <Route path="/job-application/:id" element={<UserProtectedRoute><JobApplication /></UserProtectedRoute>} />
         <Route path="/application-submitted" element={<ApplicationSubmitted />}/>
         <Route path="/job-application-history" element={<JobApplicationHistory />}/>
 

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { MdPlace } from "react-icons/md";
 import { FaIndianRupeeSign } from "react-icons/fa6";
@@ -23,7 +22,7 @@ const JobCard = ({ job, onEdit, onDelete, onUnlist, layout }) => {
     <article
       className={`bg-white shadow-md rounded-lg p-5 space-y-4 transition-all ${
         layout === "list" ? "w-full " : "w-80 mx-auto"
-      }`}
+      } `}
       aria-label="Job listing card"
     >
       <div className={`layout === "list` ? "flex items-center  gap-4" : ""}>
@@ -38,7 +37,11 @@ const JobCard = ({ job, onEdit, onDelete, onUnlist, layout }) => {
         {/* Logo Section */}
 
         {/* Job Info */}
-        <div className={`${layout === "list" ? "w-full flex justify-between gap-4" : ""}`}>
+        <div
+          className={`${
+            layout === "list" ? "w-full flex justify-between gap-4" : ""
+          }`}
+        >
           <h1 className="text-lg font-semibold text-gray-800">
             {job.jobTitle}
           </h1>
@@ -67,9 +70,21 @@ const JobCard = ({ job, onEdit, onDelete, onUnlist, layout }) => {
           </div>
 
           {/* Status Tag */}
-          <Tag className={`${layout === "list" ? "flex items-center h-5" :"" }`} color={job?.isBlocked ? "red" : "green"}>
+          {/* <Tag
+            className={`${layout === "list" ? "flex items-center h-5" : ""}`}
+            color={job?.isBlocked ? "red" : "green"}
+          >
             {job?.isBlocked ? "Inactive" : "Active"}
-          </Tag>
+          </Tag> */}
+          <Button
+            type="default"
+            // icon={<TeamOutlined />}
+            onClick={() => navigate(`/employer/applicants/${job?._id}`)}
+            className="flex items-center mt-1"
+          >
+            Applicants ( {job?.applications?.length} )
+          </Button>
+          {/* Actions */}
         </div>
 
         {/* Actions */}
