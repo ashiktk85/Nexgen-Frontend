@@ -21,7 +21,12 @@ import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 
 const MAX_FILE_SIZE = 5000000; // 5MB
-const ACCEPTED_PDF_TYPES = ["application/pdf"];
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
 
 const validationSchema = Yup.object({
   name: Yup.string()
@@ -40,7 +45,7 @@ const validationSchema = Yup.object({
     .test(
       "fileType",
       "Only .jpg, .jpeg, .png, and .webp formats are supported",
-      (value) => ACCEPTED_PDF_TYPES.includes(value?.type)
+      (value) => ACCEPTED_IMAGE_TYPES.includes(value?.type)
     ),
   aadharBack: Yup.mixed()
     .required("Aadhar back image is required")
@@ -52,7 +57,7 @@ const validationSchema = Yup.object({
     .test(
       "fileType",
       "Only .jpg, .jpeg, .png, and .webp formats are supported",
-      (value) => ACCEPTED_PDF_TYPES.includes(value?.type)
+      (value) => ACCEPTED_IMAGE_TYPES.includes(value?.type)
     ),
   shopCertificate: Yup.mixed()
     .required("Shop certificate is required")
@@ -64,7 +69,7 @@ const validationSchema = Yup.object({
     .test(
       "fileType",
       "Only .jpg, .jpeg, .png, and .webp formats are supported",
-      (value) => ACCEPTED_PDF_TYPES.includes(value?.type)
+      (value) => ACCEPTED_IMAGE_TYPES.includes(value?.type)
     ),
 });
 
@@ -104,24 +109,36 @@ export default function VerificationForm() {
         formData.append("email", Employer?.email);
         formData.append("name", values.name);
         formData.append("address", values.address);
-        // Append multiple files
+        // Append multiple files with appropriate names and types
         formData.append(
-          "pdf",
-          new File([values.aadharFront], "aadharFront.pdf", {
-            type: "application/pdf",
-          })
+          "images",
+          new File(
+            [values.aadharFront],
+            "aadharFront" + getFileExtension(values.aadharFront.name),
+            {
+              type: values.aadharFront.type,
+            }
+          )
         );
         formData.append(
-          "pdf",
-          new File([values.aadharBack], "aadharBack.pdf", {
-            type: "application/pdf",
-          })
+          "images",
+          new File(
+            [values.aadharBack],
+            "aadharBack" + getFileExtension(values.aadharBack.name),
+            {
+              type: values.aadharBack.type,
+            }
+          )
         );
         formData.append(
-          "pdf",
-          new File([values.shopCertificate], "certificate.pdf", {
-            type: "application/pdf",
-          })
+          "images",
+          new File(
+            [values.shopCertificate],
+            "certificate" + getFileExtension(values.shopCertificate.name),
+            {
+              type: values.shopCertificate.type,
+            }
+          )
         );
 
         console.log("formData", formData);
@@ -138,7 +155,7 @@ export default function VerificationForm() {
         );
         console.log(res);
         if (res) {
-          toast.success("Verification request sended");
+          toast.success("Verification request sent");
           setTimeout(() => {
             navigate("/employer/company_details");
           }, 1500);
@@ -153,7 +170,11 @@ export default function VerificationForm() {
       }
     },
   });
-  // const handleSubmit = formik.handleSubmit
+
+  // Helper function to get file extension
+  const getFileExtension = (filename) => {
+    return filename.substring(filename.lastIndexOf("."));
+  };
 
   const handleFilePreview = (file, type) => {
     const reader = new FileReader();
@@ -288,7 +309,7 @@ export default function VerificationForm() {
                         <input
                           className="md:ml-2"
                           type="file"
-                          accept={ACCEPTED_PDF_TYPES.join(",")}
+                          accept={ACCEPTED_IMAGE_TYPES.join(",")}
                           onChange={(event) => {
                             const file = event.target.files?.[0];
                             if (file) {
@@ -298,11 +319,13 @@ export default function VerificationForm() {
                           }}
                         />
                         {preview.aadharFront && (
-                          <img
-                            className="mt-2"
-                            src={preview.aadharFront}
-                            alt="Preview"
-                          />
+                          <div className="mt-2 border border-gray-300 rounded-md p-2 inline-block">
+                            <img
+                              src={preview.aadharFront}
+                              alt="Aadhar Front Preview"
+                              className="max-w-xs max-h-40 object-contain"
+                            />
+                          </div>
                         )}
                         {formik.errors.aadharFront && (
                           <div className="text-red-500 text-sm">
@@ -315,7 +338,7 @@ export default function VerificationForm() {
                         <input
                           className="md:ml-2"
                           type="file"
-                          accept={ACCEPTED_PDF_TYPES.join(",")}
+                          accept={ACCEPTED_IMAGE_TYPES.join(",")}
                           onChange={(event) => {
                             const file = event.target.files?.[0];
                             if (file) {
@@ -325,11 +348,13 @@ export default function VerificationForm() {
                           }}
                         />
                         {preview.aadharBack && (
-                          <img
-                            className="mt-2"
-                            src={preview.aadharBack}
-                            alt="Preview"
-                          />
+                          <div className="mt-2 border border-gray-300 rounded-md p-2 inline-block">
+                            <img
+                              src={preview.aadharBack}
+                              alt="Aadhar Back Preview"
+                              className="max-w-xs max-h-40 object-contain"
+                            />
+                          </div>
                         )}
                         {formik.errors.aadharBack && (
                           <div className="text-red-500 text-sm">
@@ -346,7 +371,7 @@ export default function VerificationForm() {
                       <input
                         className="md:ml-2"
                         type="file"
-                        accept={ACCEPTED_PDF_TYPES.join(",")}
+                        accept={ACCEPTED_IMAGE_TYPES.join(",")}
                         onChange={(event) => {
                           const file = event.target.files?.[0];
                           if (file) {
@@ -356,11 +381,13 @@ export default function VerificationForm() {
                         }}
                       />
                       {preview.shopCertificate && (
-                        <img
-                          className="mt-2"
-                          src={preview.shopCertificate}
-                          alt="Preview"
-                        />
+                        <div className="mt-2 border border-gray-300 rounded-md p-2 inline-block">
+                          <img
+                            src={preview.shopCertificate}
+                            alt="Shop Certificate Preview"
+                            className="max-w-xs max-h-40 object-contain"
+                          />
+                        </div>
                       )}
                       {formik.errors.shopCertificate && (
                         <div className="text-red-500 text-sm">
@@ -405,7 +432,7 @@ export default function VerificationForm() {
 
           {/* Create Account */}
           {/* <p className="text-center text-sm text-gray-600 mt-4">
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <a
               onClick={() => navigate("/employer/register")}
               className="text-blue-600 hover:underline cursor-pointer"
