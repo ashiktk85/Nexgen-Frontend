@@ -10,6 +10,14 @@ module.exports = {
   theme: {
   	extend: {
   		fontFamily: {
+			rubik: [
+				'Rubik',
+				'sans-serif'
+			],
+			marcellus: [
+				'Marcellus',
+				'sans-serif'
+			],
   			sans: [
   				'Roboto',
   				'sans-serif'
