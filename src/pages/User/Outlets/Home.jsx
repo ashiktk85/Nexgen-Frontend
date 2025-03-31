@@ -16,7 +16,10 @@ import { Button, Input } from "@mui/material";
 import ImageSiderComponent from "@/components/common/image-sliderComponent";
 import Navbar from "@/components/User/Navbar";
 import bannerImg from '/Images/bannerImg.jpg'
-import { MdKeyboardArrowRight } from "react-icons/md";
+import employerImg from '/Images/employer-img.jpg'
+import repairImg from '/Images/mob-repair-img1.jpg'
+
+
 
 
 // import {banner1} from "../../public/Images/banner1"
@@ -70,39 +73,36 @@ export default function Home() {
     <>
       <main className="flex-grow">
         {/* Hero Banner Section */}
-        <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
-          <img src={bannerImg || "/placeholder.svg"} alt="Banner" className="w-full h-full object-cover opacity-80" />
-          <div className="absolute top-0 left-0 w-full h-full bg-black/60"></div>
+        <div className="relative w-full min-h-[450px] sm:h-[500px] md:h-[600px] lg:h-[700px] flex items-center justify-center">
+        <img src={bannerImg || "/placeholder.svg"} alt="Banner" className="w-full h-full object-cover opacity-80" />
+        <div className="absolute top-0 left-0 w-full h-full bg-black/60"></div>
 
-          <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 md:px-16 lg:px-32 text-white">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold max-w-2xl">Find Your Dream Job Today</h1>
-            <p className="mt-2 text-sm sm:text-md md:text-lg max-w-2xl font-marcellus">
-              Whether you're a skilled technician or just starting out, our platform is designed to match you with job
-              opportunities tailored to your expertise. Explore openings, apply with ease, and secure your dream job
-              today!
-            </p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 sm:px-8 md:px-16 lg:px-20 text-white">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold max-w-2xl leading-tight">
+            Find Your Dream Job Today
+          </h1>
+          <p className="mt-2 text-sm sm:text-md md:text-lg max-w-2xl font-marcellus">
+            Whether you're a skilled technician or just starting out, our platform is designed to match you with job 
+            opportunities tailored to your expertise.
+          </p>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-6 sm:mt-10 md:mt-14">
-              <Link to="/sign-up">
-                <div className="rounded-lg bg-blue-500 py-2 px-5 text-center transform transition-transform hover:scale-105 hover:cursor-pointer w-full">
-                  <div className="flex items-center text-xs text-start">
-                    Register as <MdKeyboardArrowRight size={15} />
-                  </div>
-                  <div className="text-lg font-semibold">Job Seeker</div>
-                </div>
-              </Link>
+          <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 sm:mt-8">
+            <Link to="/sign-up" className="w-full sm:w-auto">
+              <div className="rounded-lg bg-blue-500 py-3 px-6 text-center text-white transform transition-transform hover:scale-105">
+                <span className="text-sm">Register as</span>
+                <div className="text-lg font-semibold">Job Seeker</div>
+              </div>
+            </Link>
 
-              <Link to="employer/register">
-                <div className="rounded-lg bg-blue-500 py-2 px-5 text-center transform transition-transform hover:scale-105 hover:cursor-pointer w-full">
-                  <div className="flex items-center text-xs text-start">
-                    Register as <MdKeyboardArrowRight size={15} />
-                  </div>
-                  <div className="flex items-center text-lg font-semibold">Employer</div>
-                </div>
-              </Link>
-            </div>
+            <Link to="employer/register" className="w-full sm:w-auto">
+              <div className="rounded-lg bg-blue-500 py-3 px-6 text-center text-white transform transition-transform hover:scale-105">
+                <span className="text-sm">Register as</span>
+                <div className="text-lg font-semibold">Employer</div>
+              </div>
+            </Link>
           </div>
         </div>
+      </div>
 
         {/* Jobs Recommended Section */}
         <div className="py-12 md:py-16 bg-gray-100">
@@ -156,9 +156,10 @@ export default function Home() {
             </div>
             <div className="order-1 md:order-2 mb-4 md:mb-0">
               <img
-                src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=500&auto=format&fit=crop&q=60"
+                src={repairImg}
                 alt="Job seeker using laptop"
-                className="rounded-lg w-full h-48 sm:h-64 object-cover"
+                className="rounded-xl shadow-xl w-full h-48 sm:h-64 object-cover
+                           transition-transform ease-in-out transform hover:scale-105 duration-300"
               />
             </div>
           </div>
@@ -169,9 +170,10 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 sm:px-8 lg:px-16">
             <div className="mb-4 md:mb-0">
               <img
-                src="https://plus.unsplash.com/premium_photo-1661658740167-45b56833412b?w=500&auto=format&fit=crop&q=60"
+                src={employerImg}
                 alt="Employer posting a job"
-                className="rounded-lg w-full h-48 sm:h-64 object-cover"
+                className="rounded-xl shadow-xl w-full h-48 sm:h-64 object-cover
+                           transition-transform ease-in-out transform hover:scale-105 duration-300"
               />
             </div>
             <div>

@@ -2,7 +2,6 @@ import { formatDistanceToNow } from 'date-fns';
 
 export const calculateTimeAgo = (dateString) => {
     const timeDifference = formatDistanceToNow(new Date(dateString), { addSuffix: false });
-    console.log(dateString)
     const parts = timeDifference.split(' '); // Split the formatted string
 
     if (timeDifference.includes('minute')) return parts[0] + 'm';
