@@ -49,16 +49,10 @@ const JobCard = ({ job, layout }) => {
       </figure>
 
       {/* Job Info */}
-<<<<<<< HEAD
       <div className={`flex-1 min-w-0 ${layout === "list" ? "sm:ml-2" : ""}`}>
         <h1 className="text-lg font-semibold text-gray-800 line-clamp-1">{job.jobTitle}</h1>
 
         <p className="text-sm text-gray-500 mb-1">{job?.companyName?.toUpperCase()}</p>
-=======
-      <div className={`${layout === "list" ? "flex-1" : ""}`}>
-        <h1 className="text-lg font-semibold text-gray-800">{job.jobTitle}</h1>
-        {/* <p className="text-sm text-gray-500">{job.companyName.toUpperCase()}</p> */}
->>>>>>> b471bedafde581479bcfba587e68b567a8b01e2f
 
         {/* Job Details */}
         <div className="space-y-1">
