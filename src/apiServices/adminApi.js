@@ -116,6 +116,8 @@ export const getAllJobs = async (page, limit) => {
   }
 }
 
+
+
 export const jobListUnList = async (jobId) => {
   try {
       const response = await adminAxiosInstance.put(`/changeJobStatus/${jobId}`)
