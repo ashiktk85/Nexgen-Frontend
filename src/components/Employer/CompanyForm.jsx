@@ -33,9 +33,9 @@ const CompanyForm = ({ company = null }) => {
     companyName: company?.companyName || "",
     email: company?.email || "",
     phone: company?.phone || "",
-    // logo: null,
+    logo: null,
     address: company?.address || "",
-    // companyCertificate: null,
+    companyCertificate: null,
     about: company?.about || "",
     webSite: company?.webSite || "",
     socialLinks: {
@@ -60,13 +60,44 @@ const CompanyForm = ({ company = null }) => {
     // validationSchema: validateCompanyForm,
     onSubmit: async (values) => {
       console.log("Form submitted with values:", values); // Debugging step
+      const formData = new FormData();
+      formData.append("companyName", values?.companyName);
+      formData.append("email", values?.email);
+      formData.append("phone", values.phone);
+      formData.append("address", values.address);
+      formData.append("about", values.about);
+      formData.append("webSite", values.webSite);
+      formData.append("socialLinks", values.socialLinks);
+      // Append multiple files with appropriate names and types
+      formData.append(
+        "images",
+        new File(
+          [values.logo],
+          "logo" + getFileExtension(values.logo.name),
+          {
+            type: values.logo.type,
+          }
+        )
+      );
+      formData.append(
+        "images",
+        new File(
+          [values.companyCertificate],
+          "companyCertificate" + getFileExtension(values.companyCertificate.name),
+          {
+            type: values.companyCertificate.type,
+          }
+        )
+      );
+      console.log("formData", formData);
+
       try {
         let response;
         if (isEditMode && company?._id) {
-          response = await employerCompanyUpdate(company._id, values);
+          response = await employerCompanyUpdate(company._id, formData);
         } else {
           response = await employerCompanyCreation(
-            values,
+            formData,
             Employer?.employerId
           );
         }

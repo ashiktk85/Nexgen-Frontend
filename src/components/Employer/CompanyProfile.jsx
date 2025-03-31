@@ -105,19 +105,19 @@ const CompanyProfile = ({
                     className="text-gray-600 mr-2"
                   />
                   <Typography variant="body2" className="text-gray-600">
-                    <strong>Industry:</strong>{" "}
-                    {company.industry || "Not specified"}
+                    <strong>Email:</strong>{" "}
+                    {company.email || "Not specified"}
                   </Typography>
                 </Box>
 
                 <Box display="flex" alignItems="center">
-                  <LocationOnIcon
+                  <BusinessIcon
                     fontSize="small"
                     className="text-gray-600 mr-2"
                   />
                   <Typography variant="body2" className="text-gray-600">
-                    <strong>Location:</strong>{" "}
-                    {company.location || "Not available"}
+                    <strong>Phone:</strong>{" "}
+                    {company.phone || "Not specified"}
                   </Typography>
                 </Box>
 

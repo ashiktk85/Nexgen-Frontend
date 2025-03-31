@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoIosLogOut } from "react-icons/io";
-import AdminAxiosInstance from "@/config/axiosConfig/AdminAxiosInstance";
+import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import { logout } from "@/redux/slices/adminSlice";
@@ -13,7 +13,7 @@ const Sidebar = ({ open, setOpen }) => {
 
   const handleLogout = async () => {
     try {
-      const response = await AdminAxiosInstance.post("/logout");
+      const response = await adminAxiosInstance.post("/logout");
       console.log("logout response", response);
       if (response.status === 200) {
         dispatch(logout());

@@ -48,8 +48,8 @@ const JobDetails = () => {
         <Navbar />
       </header> */}
 
-      <main className="flex flex-col lg:flex-row p-4 lg:p-6 flex-grow gap-4 lg:gap-8">
-        <section className="w-full lg:w-3/4 space-y-6">
+      <main className="mx-14 flex flex-col lg:flex-row p-4 lg:p-6 flex-grow gap-4 lg:gap-8">
+        <section className="w-full  space-y-6">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="space-y-2">
@@ -92,7 +92,7 @@ const JobDetails = () => {
 
           <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
             <h5 className="text-lg font-semibold text-gray-700">Job Description</h5>
-            <p className="text-sm lg:text-base whitespace-pre-wrap">{job.description}</p>
+            <p className="text-sm lg:text-base whitespace-pre-wrap break-words">{job.description}</p>
 
             <h5 className="text-lg font-semibold text-gray-700 mt-6">Requirements</h5>
             <ul className="list-disc pl-5 space-y-2">
@@ -119,12 +119,11 @@ const JobDetails = () => {
           </div>
         </section>
 
-        <aside className="w-full lg:w-1/4 space-y-4">
+        {/* <aside className="w-full lg:w-1/4 space-y-4">
           <h2 className="text-xl font-semibold">Related Jobs</h2>
           <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto overflow-x-hidden pr-2">
-            {/* Add related jobs here if available */}
           </div>
-        </aside>
+        </aside> */}
       </main>
     </div>
   );
