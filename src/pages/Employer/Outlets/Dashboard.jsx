@@ -334,7 +334,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {overallData ? overallData.totalApplications : "---"}
+                    {overallData?.totalApplications ? overallData.totalApplications : "0"}
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center">
                     <span className="text-green-500 flex items-center mr-1">
@@ -354,7 +354,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {overallData ? overallData.totalJobs : "---"}
+                    {overallData?.totalJobs ? overallData.totalJobs : '0'}
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center">
                     <span className="text-green-500 flex items-center mr-1">
@@ -390,7 +390,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {overallData ? `${overallData.totalApplication}%` : "---%"}
+                    {overallData?.totalApplication ? `${overallData.totalApplication}%` : "0%"}
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center">
                     <span className="text-red-500 flex items-center mr-1">

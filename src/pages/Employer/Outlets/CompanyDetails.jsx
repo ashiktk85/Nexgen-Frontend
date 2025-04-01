@@ -105,9 +105,9 @@ console.error("Error updating profile:", error);
                 <EditIcon />
               </IconButton>
             </Box>
-            <Box className="flex-1">
+            <Box className="flex-1 space-y-1">
               <Box className="flex gap-2 items-center">
-                <Typography variant="body1" className="text-gray-200">
+                <Typography variant="body1" className="text-gray-700">
                   {employer.name?.toUpperCase()}
                 </Typography>
                 {employer.isVerified ? (
