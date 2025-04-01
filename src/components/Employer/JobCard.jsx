@@ -82,7 +82,7 @@ const JobCard = ({ job, onEdit, onDelete, onUnlist, layout }) => {
             onClick={() => navigate(`/employer/applicants/${job?._id}`)}
             className="flex items-center mt-1"
           >
-            Applicants ( {job?.applications?.length} )
+            Applicants ( {job?.applicantsCount} )
           </Button>
           {/* Actions */}
         </div>
