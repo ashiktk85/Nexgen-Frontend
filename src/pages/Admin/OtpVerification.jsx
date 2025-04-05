@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import AdminAxiosInstance from "@/config/axiosConfig/AdminAxiosInstance";
+import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 import GrapeAnimation from "@/components/GrapeAnimation";
 import useRequest from "@/hooks/useRequestUser";
 
@@ -59,7 +59,7 @@ const OtpVerification = () => {
       
       console.log(data);
       
-      const res = await AdminAxiosInstance.post('/verify-otp' , data)
+      const res = await adminAxiosInstance.post('/verify-otp' , data)
       console.log(res);
       if(res) {
         localStorage.removeItem("admin-email")

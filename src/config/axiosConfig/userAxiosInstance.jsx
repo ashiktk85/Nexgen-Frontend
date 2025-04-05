@@ -1,7 +1,8 @@
 import axios from "axios";
+const env = import.meta.env;
 
 const userAxiosInstance = axios.create({
-  baseURL: "http://localhost:3001",
+  baseURL: `${env.VITE_backend_url}`,
   withCredentials: true,
 });
 
