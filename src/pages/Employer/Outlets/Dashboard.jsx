@@ -530,7 +530,7 @@ export default function Dashboard() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b text-left">
-                        <th className="px-4 py-3 font-medium">ID</th>
+                        <th className="px-4 py-3 font-medium">S.No</th>
                         <th className="px-4 py-3 font-medium">Candidate</th>
                         <th className="px-4 py-3 font-medium">Position</th>
                         <th className="px-4 py-3 font-medium">Date</th>
@@ -543,14 +543,14 @@ export default function Dashboard() {
                     <tbody>
                       {recentApplications.map((app, index) => (
                         <tr key={index} className="border-b">
-                          <td className="px-4 py-3 font-medium">{index}</td>
+                          <td className="px-4 py-3 font-medium">{index + 1}</td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
                               <span>{app.name}</span>
                             </div>
                           </td>
                           <td className="px-4 py-3">{app.jobTitle}</td>
-                          <td className="px-4 py-3">{app.createdAt}</td>
+                          <td className="px-4 py-3">{moment(app.createdAt).format('MMM D, YYYY h:mm A')}</td>
                           <td className="px-4 py-3">{app.status}</td>
                           <td className="px-4 py-3 text-right">
                             <DropdownMenu>
