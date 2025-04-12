@@ -182,7 +182,7 @@ function Applicants() {
     setSelectedData(null);
   };
 
-  const formSubmittionURL = "http:localhost:3000/api/edit_job";
+  // const formSubmittionURL = "http:localhost:3000/api/edit_job";
 
   if (loading) return <p>Loading</p>;
 
