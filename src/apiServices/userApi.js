@@ -58,6 +58,53 @@ export const employerJobCreation = async (data, id) => {
     }
 };
 
+export const employerJobUpdate = async (data, id) => {
+    try {
+        const response = await employerAxiosInstance.put(`/updateJobPost/${id}`, data);
+        console.log('Response after job updation: ', response);
+        return response.data;
+    } catch (error) {
+        console.error("Error in updation Job at API services: ", error);
+        let errorMessage = "An unexpected error occurred";
+        if (error.response) {
+            errorMessage = error.response.data.message || `Error ${error.response.status}: ${error.response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+};
+
+export const employerJobStatusChange = async ( JobId, data ) => {
+    try {
+        const response = await employerAxiosInstance.put(`/updateJobStatus/${JobId}`, data);
+        console.log('Response after job status updation: ', response);
+        return response;
+    } catch (error) {
+        console.error("Error in updation Job at API services: ", error);
+        let errorMessage = "An unexpected error occurred";
+        if (error.response) {
+            errorMessage = error.response.data.message || `Error ${error.response.status}: ${error.response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+};
+
+export const employerJobDelete = async ( jobId, empId ) => {
+    try {
+        const response = await employerAxiosInstance.delete(`/jobs/${jobId}`, {
+            data: { empId },
+        });
+        console.log('Response after job deletion: ', response);
+        return response;
+    } catch (error) {
+        console.error("Error in Job deletion: ", error);
+        let errorMessage = "An unexpected error occurred";
+        if (error.response) {
+            errorMessage = error.response.data.message || `Error ${error.response.status}: ${error.response.statusText}`;
+        }
+        throw new Error(errorMessage);
+    }
+};
+
 export const getCompanyById = async (data, id) => {
     try {
         const response = await employerAxiosInstance.post(`/getcompanybyid/${id}`, data);

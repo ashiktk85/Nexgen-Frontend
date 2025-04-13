@@ -8,10 +8,11 @@ import {
   EditOutlined,
   EyeInvisibleOutlined,
   DeleteOutlined,
+  EyeOutlined
 } from "@ant-design/icons";
 import moment from "moment";
 
-const JobCard = ({ job, onEdit, onDelete, onUnlist, layout }) => {
+const JobCard = ({ job, handleEdit, handleDelete, handleStatus, layout }) => {
   const navigate = useNavigate();
 
   // const jobDetailNavigation = () => {
@@ -90,13 +91,13 @@ const JobCard = ({ job, onEdit, onDelete, onUnlist, layout }) => {
         {/* Actions */}
       </div>
       <footer className="flex space-x-1 justify-end">
-        <Button icon={<EditOutlined />} onClick={onEdit}>
+        <Button icon={<EditOutlined />} onClick={()=>handleEdit(job)}>
           Edit
         </Button>
-        <Button icon={<EyeInvisibleOutlined />} onClick={onUnlist}>
-          Unlist
+        <Button icon={job?.status === "open" ? <EyeInvisibleOutlined /> : <EyeOutlined />} onClick={()=>handleStatus(job)}>
+          {job?.status === "open" ? "Close": "Open"}
         </Button>
-        <Button icon={<DeleteOutlined />} onClick={onDelete} danger>
+        <Button icon={<DeleteOutlined />} onClick={()=>handleDelete(job)} danger>
           Delete
         </Button>
         {/* <Button
