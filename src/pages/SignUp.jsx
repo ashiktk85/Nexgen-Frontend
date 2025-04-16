@@ -45,16 +45,16 @@ const SignupPage = () => {
       email: "",
       password: "",
     },
-    validationSchema: Yup.object({  
+    validationSchema: Yup.object({
       firstName: Yup.string()
         .trim()
-        .min(2, "First name must be at least 2 characters")
+        .min(1, "First name must be at least 1 characters")
         .max(50, "First name must not exceed 50 characters")
         .required("First name is required"),
 
       lastName: Yup.string()
         .trim()
-        .min(2, "Last name must be at least 2 characters")
+        .min(1, "Last name must be at least 1 characters")
         .max(50, "Last name must not exceed 50 characters")
         .required("Last name is required"),
 
@@ -71,13 +71,8 @@ const SignupPage = () => {
       password: Yup.string()
         .trim()
         .min(8, "Password must be at least 8 characters")
-        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-        .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+        .matches(/[a-zA-Z]/, "Password must contain at least one letter")
         .matches(/[0-9]/, "Password must contain at least one number")
-        .matches(
-          /[@$!%*?&]/,
-          "Password must contain at least one special character"
-        )
         .required("Password is required"),
 
       confirmPassword: Yup.string()
@@ -92,19 +87,19 @@ const SignupPage = () => {
           lastName: values.lastName,
           email: values.email,
           phone: values.phone,
-          password : values.password
+          password: values.password,
+        };
+
+        const { data } = await userAxiosInstance.post("/signup", payload);
+        if (data) {
+          localStorage.setItem("email", values.email);
+          navigate("/otp-verification");
         }
-        
-        const {data} = await userAxiosInstance.post('/signup' , payload)
-        if(data) {
-          localStorage.setItem("email", values.email)
-          navigate('/otp-verification')
-        }
-        
+
         if (loading) return <p>Loading...</p>;
         if (error) return <p>Error: {error}</p>;
       } catch (err) {
-        toast.warning(err.response.data.message || "An error occured")
+        toast.warning(err.response.data.message || "An error occured");
       }
     },
   });

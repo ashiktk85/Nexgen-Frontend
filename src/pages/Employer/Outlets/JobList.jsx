@@ -96,6 +96,8 @@ function JobList() {
           error.message ||
           "An unexpected error occurred";
         toast.error(`Error: ${errorMessage}`);
+      } finally{
+        setIsDialogOpen(false);
       }
     }
   };

@@ -46,7 +46,7 @@ const ForgotPassword = () => {
           <GrapeAnimation className="sm:hidden" />
 
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
-            Find Jobs Tailored for Mobile Technicians
+            Find Jobs for Mobile Technicians
           </h2>
 
           <p className="text-base lg:text-lg text-gray-200 mb-4">
@@ -109,7 +109,7 @@ const ForgotPassword = () => {
           {/* Create Account */}
           <p className="text-center text-sm text-gray-600 mt-4">
             Back to{" "}
-            <Link to="/" className="text-blue-600 hover:underline">
+            <Link to="/login" className="text-blue-600 hover:underline">
               Login
             </Link>
           </p>
