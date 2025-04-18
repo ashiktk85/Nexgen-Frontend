@@ -60,7 +60,7 @@ const ForgotPassword = () => {
         <div className="w-full max-w-md">
           {/* Logo */}
           <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
-            Nexgen
+          Techpath
           </h1>
 
           {/* Welcome Text */}

@@ -35,7 +35,8 @@ const JobDetails = () => {
         jobTitle: job?.name,
         companyName: company?.name,
         phone: job?.phone,
-        companyLocation: `${job?.state}, ${job?.city}`
+        companyLocation: `${job?.state}, ${job?.city}`,
+        employerId: company?.employerId
       }
     })
   }
@@ -82,8 +83,8 @@ const JobDetails = () => {
                   {job.applied ? 'Applied' : 'Apply Now'}
                 </button>
                 <div className="flex gap-4">
-                  <CiBookmarkCheck className="text-2xl text-gray-700 cursor-pointer hover:text-primary transition-colors" />
-                  <CiShare2 className="text-2xl text-gray-700 cursor-pointer hover:text-primary transition-colors" />
+                  {/* <CiBookmarkCheck className="text-2xl text-gray-700 cursor-pointer hover:text-primary transition-colors" />
+                  <CiShare2 className="text-2xl text-gray-700 cursor-pointer hover:text-primary transition-colors" /> */}
                 </div>
               </div>
 

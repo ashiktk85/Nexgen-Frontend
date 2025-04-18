@@ -1,7 +1,7 @@
 import React from "react";
 import { TextField, InputAdornment, IconButton, Button } from "@mui/material";
 import { Search, Home, Work, Person } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { logout } from "@/redux/slices/userSlice";
@@ -20,6 +20,8 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -41,19 +43,19 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed bg-white z-50 w-full px-3 md:px-10 lg:px-20 py-4">
+<nav className={`fixed z-50 w-full px-3 md:px-10 lg:px-20 py-4 ${isHomePage ? '' : 'bg-white'}`}>
       <div className="flex items-center justify-between">
         {/* Left Section: Logo */}
         <div
-          className="text-2xl md:text-3xl lg:text-5xl font-semibold font-marcellus text-primary cursor-pointer"
+          className={`text-2xl md:text-3xl lg:text-5xl font-semibold font-marcellus cursor-pointer ${isHomePage ? 'text-white' : 'text-primary'}`}
           onClick={() => navigate("/")}
         >
-          Nexgen
+          Techpath
         </div>
 
         {/* Hamburger Icon for Mobile */}
         <div
-          className="md:hidden text-primary cursor-pointer"
+          className={`md:hidden cursor-pointer ${isHomePage ? 'text-white' : 'text-primary'}`}
           onClick={toggleMobileMenu}
         >
           {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -62,13 +64,13 @@ const Navbar = () => {
         {/* Right Section: Navigation Links (Desktop) */}
         <div className="hidden md:flex lg:gap-4 space-x-6 text-xs md:text-sm lg:text-md font-medium">
           <div
-            className="flex items-center space-x-1 cursor-pointer text-primary hover:text-blue-300"
+            className={`flex items-center space-x-1 cursor-pointer ${isHomePage ? 'text-white hover:text-gray-300' : 'text-primary hover:text-blue-300'}`}
             onClick={() => navigate("/")}
           >
             <span>Home</span>
           </div>
           <div
-            className="flex items-center space-x-1 cursor-pointer text-primary hover:text-blue-300"
+            className={`flex items-center space-x-1 cursor-pointer ${isHomePage ? 'text-white hover:text-gray-300' : 'text-primary hover:text-blue-300'}`}            
             onClick={() => navigate("/all-jobs")}
           >
             <span>Browse Jobs</span>
@@ -76,7 +78,7 @@ const Navbar = () => {
 
           {Object.keys(user).length > 0 && (
             <div
-              className="flex items-center space-x-1 cursor-pointer text-primary hover:text-blue-300"
+              className={`flex items-center space-x-1 cursor-pointer ${isHomePage ? 'text-white hover:text-gray-300' : 'text-primary hover:text-blue-300'}`}
               onClick={()=> navigate('/job-application-history')}
             >
               My Jobs
@@ -84,7 +86,7 @@ const Navbar = () => {
           )}
 
           <div
-            className="flex items-center space-x-1 cursor-pointer text-primary hover:text-blue-300"
+            className={`flex items-center space-x-1 cursor-pointer ${isHomePage ? 'text-white hover:text-gray-300' : 'text-primary hover:text-blue-300'}`}
             onClick={() =>
               navigate(
                 user && Object.keys(user).length > 0 ? "/profile" : "/login"
@@ -99,7 +101,7 @@ const Navbar = () => {
           </div>
           {Object.keys(user).length > 0 && (
             <div
-              className="flex items-center space-x-1 cursor-pointer text-primary hover:text-blue-300"
+            className={`flex items-center space-x-1 cursor-pointer ${isHomePage ? 'text-white hover:text-gray-300' : 'text-primary hover:text-blue-300'}`}
               onClick={handleLogout}
             >
               Logout

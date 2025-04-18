@@ -140,7 +140,7 @@ const SignupPage = () => {
           {/* Logo */}
           <Link to="/">
             <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left cursor-pointer">
-              Nexgen
+            Techpath
             </h1>
           </Link>
 

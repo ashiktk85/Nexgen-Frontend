@@ -24,7 +24,7 @@ const JobApplication = () => {
   const dispatch = useDispatch();
   const { id: jobId } = useParams();
   const location = useLocation();
-  const { jobTitle, companyName, phone, companyLocation } = location.state || {};
+  const { jobTitle, companyName, phone, companyLocation, employerId } = location.state || {};
   const navigate = useNavigate()
 
   // Retrieve user data from Redux store
@@ -44,6 +44,7 @@ const JobApplication = () => {
       resume: null,
       additionalDoc: null,
       coverLetter: "",
+      employerId: employerId
     },
     validate: (values) => {
       let errors = {};
@@ -61,6 +62,9 @@ const JobApplication = () => {
       if (!values.resume) {
         errors.resume = "Resume is required";
       }
+      // if (!values.employerId) {
+      //   errors.resume = "Employer not found";
+      // }
       return errors;
     },
     onSubmit: async (values) => {
@@ -75,7 +79,9 @@ const JobApplication = () => {
           phone: values?.phone,
           resume: values?.resume,
           coverLetter: values?.coverLetter,
+          employerId: values?.employerId
         }
+        console.log("values", payload)
         const { data } = await userAxiosInstance.post(`/submit-application`, payload,
           {
             headers: {
