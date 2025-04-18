@@ -46,7 +46,7 @@ export default function ApplicationConfirmation() {
           </div>
           <button
             type="button"
-            class="text-white mt-6 bg-[#000080] hover:bg-[#001F3F] focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-10 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            className="text-white mt-6 bg-[#000080] hover:bg-[#001F3F] focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-10 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
             <Link to="/all-jobs">Return to job search</Link>
           </button>

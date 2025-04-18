@@ -12,6 +12,7 @@ import RegisterOtp from "@/pages/Employer/OtpVerification";
 import VerificationForm from "@/pages/Employer/Outlets/VerificationForm";
 import NotFound from "@/pages/Employer/NotFound";
 import AddorEditCompany from "@/pages/Employer/Outlets/AddorEditCompany";
+import UpdateJob from "@/pages/Employer/Outlets/UpdateJob";
 import { EmployerProtectedRoute } from "@/services/employerProtector";
 
 function Employer() {
@@ -25,6 +26,7 @@ function Employer() {
       <Route path="/" element={<EmployerProtectedRoute><HomeLayout /></EmployerProtectedRoute>}>
         <Route path="dashboard" element={<EmployerProtectedRoute><Dashboard /></EmployerProtectedRoute>} />
         <Route path="create_job" element={<EmployerProtectedRoute><CreateJob /></EmployerProtectedRoute>} />
+        <Route path="job/edit" element={<UpdateJob />} />
         <Route path="job_list" element={<EmployerProtectedRoute><JobList /></EmployerProtectedRoute>} />
         <Route path="applicants/:jobId" element={<EmployerProtectedRoute><Applicants /></EmployerProtectedRoute>} />
         <Route path="company_details" element={<EmployerProtectedRoute><CompanyDetails /></EmployerProtectedRoute>} />

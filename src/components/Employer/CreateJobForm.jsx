@@ -4,13 +4,13 @@ import { Country, State, City } from "country-state-city";
 import { useFormik } from "formik";
 import { jobData } from "@/data/Job_titles";
 import validateJobForm from "@/Validations/CreateJob-validation";
-import { employerJobCreation } from "@/apiServices/userApi";
+import { employerJobCreation, employerJobUpdate } from "@/apiServices/userApi";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FaBuilding } from "react-icons/fa";
 
-function CreateJobForm({ selectedData = null }) {
+function CreateJobForm({ selectedData = null, page = "create"}) {
   const Employer = useSelector((state) => state.employer.employer);
   const navigate = useNavigate();
   const [states, setStates] = useState([]);
@@ -19,26 +19,44 @@ function CreateJobForm({ selectedData = null }) {
     selectedData?.requirements || []
   );
   const [availableRequirements, setAvailableRequirements] = useState([]);
+  // var selectedJob = null;
+  // var selectedState = null;
+  // var selectedCity = null;
 
   const formik = useFormik({
     initialValues: {
-      jobTitle: selectedData?.title || "",
+      jobTitle: selectedData?.jobTitle || "",
       email: selectedData?.email || "",
       phone: selectedData?.phone || "",
       countryCode: "+91",
       country: "IN",
-      salaryFrom: selectedData?.salaryFrom || 0,
-      salaryTo: selectedData?.salaryTo || 0,
+      salaryFrom: selectedData?.salaryRange[0] || 0,
+      salaryTo: selectedData?.salaryRange[1] || 0,
       state: selectedData?.state || null,
       city: selectedData?.city || null,
-      experienceRequired: selectedData?.experienceRequired || [0, 3],
+      experienceRequired: [
+        selectedData?.experienceRequired[0],
+        selectedData?.experienceRequired[
+          selectedData?.experienceRequired.length - 1
+        ],
+      ] || [0, 3],
       description: selectedData?.description || "",
       requirements: selectedData?.requirements || [],
     },
     validationSchema: validateJobForm,
     onSubmit: async (values) => {
       try {
-        const status = await employerJobCreation(values, Employer?.employerId);
+        console.log(values);
+        var status = null;
+        if (page === "create") {
+          status = await employerJobCreation(
+            values,
+            Employer?.employerId
+          );
+        } else if (page === "update") {
+          values._id = selectedData?._id
+          status = await employerJobUpdate(values, Employer?.employerId);
+        }
         if (status) {
           toast.success("Job created successfully");
           navigate("/employer/job_list");
@@ -58,6 +76,21 @@ function CreateJobForm({ selectedData = null }) {
       }
     },
   });
+  // useEffect(() => {
+  //   console.log('entering useeffect', selectedData)
+  //   if (selectedData !== null) {
+  //     console.log('entering IfCondition')
+  //     // Find the selected job object
+  //     selectedJob = jobData.jobs.find((job) => job.title === selectedData.title) || null;
+
+  //     // Find the selected state object
+  //     selectedState = states.find((state) => state.isoCode === selectedData.state) || null;
+
+  //     // Find the selected city object
+  //     selectedCity = cities.find((city) => city.name === selectedData.city) || null;
+  //     console.log(selectedJob, selectedState, selectedCity)
+  //   }
+  // },[]);
 
   useEffect(() => {
     if (formik.values.jobTitle) {
@@ -135,7 +168,9 @@ function CreateJobForm({ selectedData = null }) {
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <FaBuilding className="h-5 w-5 text-gray-400" />
-          <span className="text-sm text-gray-600">{Employer.name.toUpperCase()}</span>
+          <span className="text-sm text-gray-600">
+            {Employer.name.toUpperCase()}
+          </span>
         </div>
         <h1 className="text-2xl font-bold">Create Job</h1>
         {/* <p className="text-sm text-gray-600">{Employer.location}</p> */}
@@ -144,246 +179,239 @@ function CreateJobForm({ selectedData = null }) {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Job Information</h2>
 
-            {/* Job Title Dropdown */}
-            <div className="w-full">
-              <Autocomplete
-                options={jobData.jobs}
-                getOptionLabel={(option) => option.title}
-                value={selectedJob}
-                onChange={handleJobTitleChange}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Job Title"
-                    variant="outlined"
-                    fullWidth
-                    error={
-                      formik.touched.jobTitle && Boolean(formik.errors.jobTitle)
-                    }
-                    helperText={
-                      formik.touched.jobTitle && formik.errors.jobTitle
-                    }
-                  />
-                )}
-              />
-            </div>
-
-            {/* Requirements Selection */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Select Requirements
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {availableRequirements.map((requirement) => (
-                  <Chip
-                    key={requirement}
-                    label={requirement}
-                    onClick={() => handleRequirementToggle(requirement)}
-                    color={
-                      selectedRequirements.includes(requirement)
-                        ? "primary"
-                        : "default"
-                    }
-                    className="cursor-pointer"
-                  />
-                ))}
-              </div>
-              {formik.touched.requirements &&
-                formik.errors.requirements &&
-                selectedRequirements.length === 0 && (
-                  <div className="text-red-600 text-sm mt-1">
-                    {formik.errors.requirements}
-                  </div>
-                )}
-            </div>
-
-            {/* Contact Information */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <TextField
-                fullWidth
-                label="Contact Email"
-                name="email"
-                type="email"
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
-              />
-            </div>
-
-            <div className="flex gap-2 w-3/4">
-              <TextField
-                sx={{ width: 80 }}
-                label="Country Code"
-                value={formik.values.countryCode}
-                InputProps={{
-                  readOnly: true,
-                  style: {
-                    pointerEvents: "none",
-                  },
-                }}
-              />
-              <TextField
-                fullWidth
-                label="Phone"
-                name="phone"
-                type="tel"
-                value={formik.values.phone}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.phone && Boolean(formik.errors.phone)}
-                helperText={formik.touched.phone && formik.errors.phone}
-              />
-            </div>
-
-            {/* Location Selection */}
-            <div className="grid gap-4 sm:grid-cols-3">
-              <TextField
-                fullWidth
-                label="Country"
-                value="India"
-                InputProps={{
-                  readOnly: true,
-                  style: {
-                    pointerEvents: "none",
-                  },
-                }}
-              />
-
-              <Autocomplete
-                options={states}
-                getOptionLabel={(option) => option.name}
-                value={selectedState}
-                disabled={!formik.values.country}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue(
-                    "state",
-                    newValue ? newValue.isoCode : null
-                  );
-                  formik.setFieldValue("city", null);
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="State"
-                    error={formik.touched.state && Boolean(formik.errors.state)}
-                    helperText={formik.touched.state && formik.errors.state}
-                  />
-                )}
-              />
-
-              <Autocomplete
-                options={cities}
-                getOptionLabel={(option) => option.name}
-                value={selectedCity}
-                disabled={!formik.values.state}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue("city", newValue ? newValue.name : null);
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="City"
-                    error={formik.touched.city && Boolean(formik.errors.city)}
-                    helperText={formik.touched.city && formik.errors.city}
-                  />
-                )}
-              />
-            </div>
-
-            {/* Salary Range */}
-            <div className="flex gap-5">
-              <TextField
-                fullWidth
-                label="Salary From"
-                name="salaryFrom"
-                type="number"
-                value={formik.values.salaryFrom}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={
-                  formik.touched.salaryFrom && Boolean(formik.errors.salaryFrom)
-                }
-                helperText={
-                  formik.touched.salaryFrom && formik.errors.salaryFrom
-                }
-                InputProps={{
-                  startAdornment: <span className="text-gray-500 mr-1">₹</span>,
-                }}
-              />
-              <TextField
-                fullWidth
-                label="Salary To"
-                name="salaryTo"
-                type="number"
-                value={formik.values.salaryTo}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={
-                  formik.touched.salaryTo && Boolean(formik.errors.salaryTo)
-                }
-                helperText={formik.touched.salaryTo && formik.errors.salaryTo}
-                InputProps={{
-                  startAdornment: <span className="text-gray-500 mr-1">₹</span>,
-                }}
-              />
-            </div>
-
-            {/* Experience Required */}
-            <div className="w-full max-w-md">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Experience Required
-              </label>
-              <Box sx={{ px: 2 }}>
-                <Slider
-                  value={formik.values.experienceRequired}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue("experienceRequired", newValue);
-                  }}
-                  valueLabelDisplay="auto"
-                  min={0}
-                  max={10}
-                  marks
+          {/* Job Title Dropdown */}
+          <div className="w-full">
+            <Autocomplete
+              options={jobData.jobs}
+              getOptionLabel={(option) => option.title}
+              value={selectedJob}
+              onChange={handleJobTitleChange}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Job Title"
+                  variant="outlined"
+                  fullWidth
+                  error={
+                    formik.touched.jobTitle && Boolean(formik.errors.jobTitle)
+                  }
+                  helperText={formik.touched.jobTitle && formik.errors.jobTitle}
                 />
-                <div className="text-sm text-gray-600">
-                  {formik.values.experienceRequired[0]} -{" "}
-                  {formik.values.experienceRequired[1]}
-                  {formik.values.experienceRequired[1] === 10 ? "+" : ""} years
-                </div>
-              </Box>
-            </div>
-
-            {/* Description */}
-            <div className="space-y-4">
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label="Job Description"
-                name="description"
-                value={formik.values.description}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={
-                  formik.touched.description &&
-                  Boolean(formik.errors.description)
-                }
-                helperText={
-                  formik.touched.description && formik.errors.description
-                }
-              />
-            </div>
+              )}
+            />
           </div>
 
-          <button
-            type="submit"
-            disabled={formik.isSubmitting}
-            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:bg-blue-300"
-          >
-            Submit
-          </button>
-        </form>
+          {/* Requirements Selection */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Select Requirements
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {availableRequirements.map((requirement) => (
+                <Chip
+                  key={requirement}
+                  label={requirement}
+                  onClick={() => handleRequirementToggle(requirement)}
+                  color={
+                    selectedRequirements.includes(requirement)
+                      ? "primary"
+                      : "default"
+                  }
+                  className="cursor-pointer"
+                />
+              ))}
+            </div>
+            {formik.touched.requirements &&
+              formik.errors.requirements &&
+              selectedRequirements.length === 0 && (
+                <div className="text-red-600 text-sm mt-1">
+                  {formik.errors.requirements}
+                </div>
+              )}
+          </div>
+
+          {/* Contact Information */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField
+              fullWidth
+              label="Contact Email"
+              name="email"
+              type="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
+            />
+          </div>
+
+          <div className="flex gap-2 w-3/4">
+            <TextField
+              sx={{ width: 80 }}
+              label="Country Code"
+              value={formik.values.countryCode}
+              InputProps={{
+                readOnly: true,
+                style: {
+                  pointerEvents: "none",
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Phone"
+              name="phone"
+              type="tel"
+              value={formik.values.phone}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.phone && Boolean(formik.errors.phone)}
+              helperText={formik.touched.phone && formik.errors.phone}
+            />
+          </div>
+
+          {/* Location Selection */}
+          <div className="grid gap-4 sm:grid-cols-3">
+            <TextField
+              fullWidth
+              label="Country"
+              value="India"
+              InputProps={{
+                readOnly: true,
+                style: {
+                  pointerEvents: "none",
+                },
+              }}
+            />
+
+            <Autocomplete
+              options={states}
+              getOptionLabel={(option) => option.name}
+              value={selectedState}
+              disabled={!formik.values.country}
+              onChange={(event, newValue) => {
+                formik.setFieldValue(
+                  "state",
+                  newValue ? newValue.isoCode : null
+                );
+                formik.setFieldValue("city", null);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="State"
+                  error={formik.touched.state && Boolean(formik.errors.state)}
+                  helperText={formik.touched.state && formik.errors.state}
+                />
+              )}
+            />
+
+            <Autocomplete
+              options={cities}
+              getOptionLabel={(option) => option.name}
+              value={selectedCity}
+              disabled={!formik.values.state}
+              onChange={(event, newValue) => {
+                formik.setFieldValue("city", newValue ? newValue.name : null);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="City"
+                  error={formik.touched.city && Boolean(formik.errors.city)}
+                  helperText={formik.touched.city && formik.errors.city}
+                />
+              )}
+            />
+          </div>
+
+          {/* Salary Range */}
+          <div className="flex gap-5">
+            <TextField
+              fullWidth
+              label="Salary From"
+              name="salaryFrom"
+              type="number"
+              value={formik.values.salaryFrom}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={
+                formik.touched.salaryFrom && Boolean(formik.errors.salaryFrom)
+              }
+              helperText={formik.touched.salaryFrom && formik.errors.salaryFrom}
+              InputProps={{
+                startAdornment: <span className="text-gray-500 mr-1">₹</span>,
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Salary To"
+              name="salaryTo"
+              type="number"
+              value={formik.values.salaryTo}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.salaryTo && Boolean(formik.errors.salaryTo)}
+              helperText={formik.touched.salaryTo && formik.errors.salaryTo}
+              InputProps={{
+                startAdornment: <span className="text-gray-500 mr-1">₹</span>,
+              }}
+            />
+          </div>
+
+          {/* Experience Required */}
+          <div className="w-full max-w-md">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Experience Required
+            </label>
+            <Box sx={{ px: 2 }}>
+              <Slider
+                value={formik.values.experienceRequired}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue("experienceRequired", newValue);
+                }}
+                valueLabelDisplay="auto"
+                min={0}
+                max={10}
+                marks
+              />
+              <div className="text-sm text-gray-600">
+                {formik.values.experienceRequired[0]} -{" "}
+                {formik.values.experienceRequired[1]}
+                {formik.values.experienceRequired[1] === 10 ? "+" : ""} years
+              </div>
+            </Box>
+          </div>
+
+          {/* Description */}
+          <div className="space-y-4">
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              label="Job Description"
+              name="description"
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={
+                formik.touched.description && Boolean(formik.errors.description)
+              }
+              helperText={
+                formik.touched.description && formik.errors.description
+              }
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={formik.isSubmitting}
+          className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:bg-blue-300"
+        >
+          Submit
+        </button>
+      </form>
     </>
   );
 }

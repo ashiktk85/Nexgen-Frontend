@@ -74,7 +74,7 @@ const LoginPage = () => {
           {/* Logo */}
           <Link to="/">
             <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left cursor-pointer">
-              Nexgen
+            Techpath
             </h1>
           </Link>
 
@@ -237,7 +237,7 @@ const LoginPage = () => {
           <GrapeAnimation className="sm:hidden" />
 
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
-            Find Jobs Tailored for Mobile Technicians
+            Find Jobs for Mobile Technicians
           </h2>
 
           <p className="text-base lg:text-lg text-gray-200 mb-4">
