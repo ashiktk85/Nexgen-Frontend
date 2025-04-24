@@ -11,7 +11,7 @@ export const AdminProtectedRoute = ({ children }) => {
     const  admin  = useSelector((state) => state.admin.adminInfo);
     if (isEmptyObject(admin)) {
         toast.warning("please login to continue")
-        return <Navigate to="/admin-login" replace />;
+        return <Navigate to="/admin/admin-login" replace />;
     }
     return children;
   };

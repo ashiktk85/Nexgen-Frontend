@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FaSearch, FaTh, FaList } from "react-icons/fa";
+import { RxCross2 } from "react-icons/rx";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
@@ -20,7 +21,11 @@ const AllJobsPage = () => {
   const [searchedJobs, setSearchedJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const searchBoxRef = useRef(null);
-  
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  // const [paginationJobs, setPaginationJobs] = useState([]);
+  const jobsPerPage = 6; // Adjust the number of jobs per page
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -41,7 +46,6 @@ const AllJobsPage = () => {
     };
   }, [showSearchBox]);
 
-  
   useEffect(() => {
     fetchJobs();
   }, []);
@@ -53,10 +57,11 @@ const AllJobsPage = () => {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const {data} = await userAxiosInstance.get("/getJobPosts");
-      console.log(data)
+      const { data } = await userAxiosInstance.get("/getJobPosts");
+      console.log(data);
       setJobs(data.jobPosts);
-setFilteredJobs(data.jobPosts);
+      setFilteredJobs(data.jobPosts);
+      // setPaginationJobs(data.jobPosts);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -68,40 +73,49 @@ setFilteredJobs(data.jobPosts);
     let searchedJobs = [...jobs];
     if (searchTerm) {
       searchedJobs = searchedJobs.filter(
-        (job) =>
-          job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          job.companyName.toLowerCase().includes(searchTerm.toLowerCase())
+        (job) => job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase())
+        // ||  job.companyName.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    if (searchLocation) {
-      searchedJobs = searchedJobs.filter((job) =>
-        job.city.toLowerCase().includes(searchLocation.toLowerCase())
-      );
-    }
+    // if (searchLocation) {
+    //   searchedJobs = searchedJobs.filter((job) =>
+    //     job.city.toLowerCase().includes(searchLocation.toLowerCase())
+    //   );
+    // }
+
     setSearchedJobs(searchedJobs);
+    setFilteredJobs(searchedJobs);
     setShowSearchBox(false);
   };
 
   const filterJobs = () => {
-    let updatedJobs = [...searchedJobs];
+    if (searchTerm.length > 0) {
+      var updatedJobs = [...searchedJobs];
+      console.log("searched");
+    } else {
+      var updatedJobs = [...filteredJobs];
+      console.log("filter");
+    }
 
     if (searchTerm) {
       updatedJobs = updatedJobs.filter(
-        (job) =>
-          job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          job.companyName.toLowerCase().includes(searchTerm.toLowerCase())
+        (job) => job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase())
+        //  ||  job.companyName.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
+    console.log("searchTerm", updatedJobs);
 
     if (searchLocation) {
       updatedJobs = updatedJobs.filter((job) =>
         job.city.toLowerCase().includes(searchLocation.toLowerCase())
       );
     }
+    console.log("searchLocation", updatedJobs);
 
     if (jobType) {
-      updatedJobs = updatedJobs.filter((job) => job.jobType === jobType);
+      updatedJobs = updatedJobs.filter((job) => job.jobTitle === jobType);
     }
+    console.log("jobType", updatedJobs);
 
     if (experienceLevel) {
       updatedJobs = updatedJobs.filter((job) =>
@@ -110,11 +124,25 @@ setFilteredJobs(data.jobPosts);
     }
 
     setFilteredJobs(updatedJobs);
+    setCurrentPage(1); // Reset to first page when filtering
   };
   const clearAll = () => {
-    
     setFilteredJobs(jobs);
-  }
+    setSearchLocation("");
+    setJobType("");
+    setExperienceLevel("");
+  };
+
+  const clearSearchTerm = () => {
+    setSearchTerm("");
+    setFilteredJobs(jobs);
+  };
+
+  // Pagination Logic
+  const indexOfLastJob = currentPage * jobsPerPage;
+  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+  const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
+  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
 
   return (
     <div className="bg-gray-100 min-h-screen py-10">
@@ -139,7 +167,9 @@ setFilteredJobs(data.jobPosts);
                   <option value="">Select Location</option>
                   {Array.from(new Set(jobs.map((job) => job.city))).map(
                     (city, index) => (
-                      <option key={index} value={city}>{city}</option>
+                      <option key={index} value={city}>
+                        {city}
+                      </option>
                     )
                   )}
                 </select>
@@ -188,8 +218,11 @@ setFilteredJobs(data.jobPosts);
                     ))}
                 </select>
               </div>
+              <button 
+            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+            onClick={clearAll}>Clear All</button>
             </div>
-            <button onClick={clearAll}>Clear All</button>
+            
           </div>
 
           {/* Search Section */}
@@ -197,16 +230,28 @@ setFilteredJobs(data.jobPosts);
             <div className="flex flex-row gap-3">
               <div className="w-3/4 relative mb-6" ref={searchBoxRef}>
                 <div
-                  className="flex items-center rounded-md p-3 bg-white cursor-pointer"
+                  className="flex justify-between items-center rounded-md p-3 bg-white cursor-pointer"
                   onClick={() => setShowSearchBox(!showSearchBox)}
                 >
-                  <FaSearch
-                    className={`text-gray-500 transition-all ${
-                      showSearchBox ? "mr-0" : "mr-2"
-                    }`}
-                  />
-                  {!showSearchBox && (
-                    <span className="text-gray-600">Search jobs</span>
+                  <div className="flex items-center">
+                    <FaSearch
+                      className={`text-gray-500 transition-all ${
+                        showSearchBox ? "mr-0" : "mr-2"
+                      }`}
+                    />
+                    {!showSearchBox && (
+                      <span className="text-gray-600">
+                        {searchTerm ? `${searchTerm}` : "Search job"}
+                      </span>
+                    )}
+                  </div>
+                  {searchTerm && (
+                    <RxCross2
+                      onClick={clearSearchTerm}
+                      className={`text-gray-500 transition-all ${
+                        showSearchBox ? "mr-0" : "mr-2"
+                      }`}
+                    />
                   )}
                 </div>
 
@@ -237,7 +282,7 @@ setFilteredJobs(data.jobPosts);
                     </div>
 
                     {/* Location Input */}
-                    <div className="relative w-full mb-4">
+                    {/* <div className="relative w-full mb-4">
                       <input
                         type="text"
                         id="location"
@@ -258,7 +303,7 @@ setFilteredJobs(data.jobPosts);
                       >
                         Location
                       </label>
-                    </div>
+                    </div> */}
 
                     {/* Search Button */}
                     <button
@@ -300,20 +345,55 @@ setFilteredJobs(data.jobPosts);
               <div className="flex justify-center items-center h-40">
                 <p className="text-gray-600 text-lg">Loading jobs...</p>
               </div>
-            ) : filteredJobs.length > 0 ? (
-              <div
-                className={`gap-3 ${
-                  viewMode === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 "
-                    : "flex flex-col"
-                }`}
-              >
-                {filteredJobs.map((job) => (
-                  <div key={job._id} className="flex justify-center">
-                    <JobCard job={job} layout={viewMode} />
-                  </div>
-                ))}
-              </div>
+            ) : currentJobs.length > 0 ? (
+              <>
+                <div
+                  className={`gap-3 ${
+                    viewMode === "grid"
+                      ? "grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 "
+                      : "flex flex-col"
+                  }`}
+                >
+                  {currentJobs.map((job) => (
+                    <div key={job._id} className="flex justify-center">
+                      <JobCard job={job} layout={viewMode} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="flex justify-center mt-6">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    className="px-4 py-2 mx-1 bg-blue-500 text-white rounded disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+
+                  {[...Array(totalPages)].map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentPage(index + 1)}
+                      className={`px-4 py-2 mx-1 rounded ${
+                        currentPage === index + 1
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-300"
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    className="px-4 py-2 mx-1 bg-blue-500 text-white rounded disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </>
             ) : (
               <div className="flex justify-center items-center h-40">
                 <h1 className="text-xl md:text-2xl font-bold text-gray-700">

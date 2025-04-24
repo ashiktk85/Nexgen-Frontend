@@ -1,11 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import AdminAxiosInstance from "@/config/axiosConfig/AdminAxiosInstance";
+import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 
 export const adminLoginAction = createAsyncThunk(
     'admin/login',
     async (values, { rejectWithValue }) => {
         try {
-            const response = await AdminAxiosInstance.post('/login', values);
+            const response = await adminAxiosInstance.post('/login', values);
             console.log('Response after login: ', response)
 
             if(response.status === 200){

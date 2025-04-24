@@ -4,10 +4,17 @@ import JobCard from "@/components/Employer/JobCard";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance"; // Fix typo
-import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FaSearch, FaTh, FaList } from "react-icons/fa";
 import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 import { ImBriefcase } from "react-icons/im";
+import { employerJobDelete, employerJobStatusChange } from "@/apiServices/userApi";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function JobList() {
   const employer = useSelector((state) => state.employer.employer);
@@ -15,6 +22,85 @@ function JobList() {
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
   const [currentViewMode, setCurrentViewMode] = useState(viewMode);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const navigate = useNavigate();
+
+  const handleEdit = (job) => {
+    if (job) {
+      console.log("jobedit", job);
+      navigate("/employer/job/edit", { state: { job } });
+    }
+  };
+
+  const handleDelete = (job) => {
+    if (job) {
+      console.log("job delete", job);
+      setSelectedJob(job);
+      setIsDialogOpen(true);
+    }
+  };
+
+  const handleStatus = async (job) => {
+    if (job) {
+      try {
+        console.log("jobedit", job);
+        const data = {
+          status: job?.status === "open" ? "close" : "open"
+        };
+        const response = await employerJobStatusChange(job._id, data);
+        if (response) {
+          const updatedJob = response.data.updatedJob;
+          setJobs(prevJobs=>
+            prevJobs.map(job => job._id === updatedJob._id ? updatedJob : job )
+          )
+          toast.success(`Status updated to ${data.status}.`);
+          return;
+        }
+        toast.error(response?.message || "Error updating job status");
+      } catch (error) {
+        console.error("Job creation error:", error);
+
+        // Extract and show detailed error message
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data ||
+          error.message ||
+          "An unexpected error occurred";
+        toast.error(`Error: ${errorMessage}`);
+      }
+    }
+  };
+  
+  const handleDeleteDecision = async () => {
+    if (selectedJob) {
+      try {
+        console.log("jobedit", selectedJob);
+
+        const response = await employerJobDelete(selectedJob._id, employer?.employerId);
+        if (response) {
+          setJobs(prevJobs=>
+            prevJobs.filter(job => job._id !== selectedJob._id )
+          )
+          toast.success(`Job deleted!`);
+          return;
+        }
+        toast.error(response?.message || "Error updating job status");
+      } catch (error) {
+        console.error("Job creation error:", error);
+
+        // Extract and show detailed error message
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data ||
+          error.message ||
+          "An unexpected error occurred";
+        toast.error(`Error: ${errorMessage}`);
+      } finally{
+        setIsDialogOpen(false);
+      }
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -53,6 +139,7 @@ function JobList() {
   }, [employer?.employerId]);
 
   return (
+    <>
     <div className="my-6 px-2">
       <main className="container mx-auto px-8 py-8">
         <div className="mx-auto max-w-2xl space-y-8">
@@ -100,7 +187,14 @@ function JobList() {
             >
               {jobs.map((job, index) => (
                 <div key={index} className="flex justify-center">
-                  <JobCard key={index} job={job} layout={viewMode} />
+                  <JobCard
+                    key={index}
+                    job={job}
+                    layout={viewMode}
+                    handleEdit={handleEdit}
+                    handleStatus={handleStatus}
+                    handleDelete={handleDelete}
+                  />
                 </div>
               ))}
             </div>
@@ -114,6 +208,41 @@ function JobList() {
         </div>
       </main>
     </div>
+
+    {/* Status confirmation modal */}
+            <Dialog
+              open={isDialogOpen}
+              onOpenChange={setIsDialogOpen}
+            >
+              <DialogContent className="w-[1000px] ">
+                <DialogHeader>
+                  <DialogTitle>Confirm Deletion</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  
+                    <p>
+                      Are you sure you want to delete this job application? This action
+                      cannot be undone.
+                    </p>
+                  
+                  <div className="flex justify-end space-x-4">
+                    <button
+                      onClick={() => setIsDialogOpen(false)}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDeleteDecision}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+    </>
   );
 }
 

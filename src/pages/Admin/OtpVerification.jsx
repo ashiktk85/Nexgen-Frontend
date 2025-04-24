@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import AdminAxiosInstance from "@/config/axiosConfig/AdminAxiosInstance";
+import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 import GrapeAnimation from "@/components/GrapeAnimation";
 import useRequest from "@/hooks/useRequestUser";
 
@@ -59,7 +59,7 @@ const OtpVerification = () => {
       
       console.log(data);
       
-      const res = await AdminAxiosInstance.post('/verify-otp' , data)
+      const res = await adminAxiosInstance.post('/verify-otp' , data)
       console.log(res);
       if(res) {
         localStorage.removeItem("admin-email")
@@ -99,7 +99,7 @@ const OtpVerification = () => {
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10 font-sans">
         <div className="w-full max-w-md">
           <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
-            Nexgen
+          Techpath
           </h1>
           <h2 className="text-3xl font-bold mb-4 text-center lg:text-left">
             Verify your email

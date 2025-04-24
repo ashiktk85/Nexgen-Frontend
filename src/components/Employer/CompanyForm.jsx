@@ -31,8 +31,8 @@ const CompanyForm = ({ company = null }) => {
   // Initial Form Values (Pre-filled if Editing)
   const initialValues = {
     companyName: company?.companyName || "",
-    location: company?.location || "",
-    industry: company?.industry || "",
+    email: company?.email || "",
+    phone: company?.phone || "",
     logo: null,
     address: company?.address || "",
     companyCertificate: null,
@@ -57,16 +57,58 @@ const CompanyForm = ({ company = null }) => {
 
   const formik = useFormik({
     initialValues,
-    validationSchema: validateCompanyForm,
+    // validationSchema: validateCompanyForm,
     onSubmit: async (values) => {
       console.log("Form submitted with values:", values); // Debugging step
+
+      const formData = new FormData();
+
+      // Append text fields
+      formData.append("companyName", values.companyName);
+      formData.append("email", values.email);
+      formData.append("phone", values.phone);
+      formData.append("address", values.address);
+      formData.append("about", values.about);
+      formData.append("webSite", values.webSite);
+
+      // Convert socialLinks to JSON string before appending
+      formData.append("socialLinks", JSON.stringify(values.socialLinks));
+
+      // Append images if they exist
+      if (values.logo) {
+        formData.append(
+          "images",
+          new File([values.logo], "logo" + getFileExtension(values.logo.name), {
+            type: values.logo.type,
+          })
+        );
+      }
+
+      if (values.companyCertificate) {
+        formData.append(
+          "images",
+          new File(
+            [values.companyCertificate],
+            "companyCertificate" +
+              getFileExtension(values.companyCertificate.name),
+            {
+              type: values.companyCertificate.type,
+            }
+          )
+        );
+      }
+
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ": ", pair[1]);
+      }
+
       try {
         let response;
         if (isEditMode && company?._id) {
-          response = await employerCompanyUpdate(company._id, values);
+          response = await employerCompanyUpdate(company._id, formData);
         } else {
           response = await employerCompanyCreation(
-            values,
+            formData,
             Employer?.employerId
           );
         }
@@ -91,6 +133,11 @@ const CompanyForm = ({ company = null }) => {
       }
     },
   });
+
+  // Helper function to get file extension
+  const getFileExtension = (filename) => {
+    return filename.substring(filename.lastIndexOf("."));
+  };
 
   return (
     <Box className="bg-white shadow-lg rounded-lg p-6 max-w-3xl mx-auto">
@@ -120,24 +167,6 @@ const CompanyForm = ({ company = null }) => {
           }
           helperText={formik.touched.companyName && formik.errors.companyName}
         />
-        {/* Industry */}
-        <TextField
-          fullWidth
-          label="Industry"
-          name="industry"
-          {...formik.getFieldProps("industry")}
-          error={formik.touched.industry && Boolean(formik.errors.industry)}
-          helperText={formik.touched.industry && formik.errors.industry}
-        />
-        {/* Location */}
-        <TextField
-          fullWidth
-          label="Location"
-          name="location"
-          {...formik.getFieldProps("location")}
-          error={formik.touched.location && Boolean(formik.errors.location)}
-          helperText={formik.touched.location && formik.errors.location}
-        />
         {/* About */}
         <TextField
           fullWidth
@@ -158,6 +187,26 @@ const CompanyForm = ({ company = null }) => {
           {...formik.getFieldProps("webSite")}
           error={formik.touched.webSite && Boolean(formik.errors.webSite)}
           helperText={formik.touched.webSite && formik.errors.webSite}
+        />
+        {/* Email */}
+        <TextField
+          fullWidth
+          label="Company Email"
+          name="email"
+          type="email"
+          {...formik.getFieldProps("email")}
+          error={formik.touched.email && Boolean(formik.errors.email)}
+          helperText={formik.touched.email && formik.errors.email}
+        />
+        {/* phone */}
+        <TextField
+          fullWidth
+          label="Company phone"
+          name="phone"
+          type="number"
+          {...formik.getFieldProps("phone")}
+          error={formik.touched.phone && Boolean(formik.errors.phone)}
+          helperText={formik.touched.phone && formik.errors.phone}
         />
         {/* Address */}
         <TextField
@@ -241,6 +290,7 @@ const CompanyForm = ({ company = null }) => {
               />
             ))}
           </div>
+          <div className="mt-3 space-y-2">
           {selectedSocials.includes("LinkedIn") && (
             <TextField
               fullWidth
@@ -289,6 +339,7 @@ const CompanyForm = ({ company = null }) => {
               }
             />
           )}
+          </div>
         </Box>
         {/* Submit & Cancel Buttons */}
         <Box className="flex gap-4 mt-4">

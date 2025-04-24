@@ -28,7 +28,7 @@ const Register = () => {
     "Pathanamthitta",
     "Thiruvananthapuram",
     "Thrissur",
-    "Wayanad"
+    "Wayanad",
   ];
 
   const showPasswordFunction = () => {
@@ -60,7 +60,7 @@ const Register = () => {
       email: "",
       password: "",
       confirmPassword: "",
-      district: ""
+      district: "",
     },
     validationSchema: Yup.object({
       name: Yup.string()
@@ -82,21 +82,15 @@ const Register = () => {
       password: Yup.string()
         .trim()
         .min(8, "Password must be at least 8 characters")
-        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-        .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+        .matches(/[a-zA-Z]/, "Password must contain at least one letter")
         .matches(/[0-9]/, "Password must contain at least one number")
-        .matches(
-          /[@$!%*?&]/,
-          "Password must contain at least one special character"
-        )
         .required("Password is required"),
 
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password"), null], "Passwords must match")
         .required("Confirm password is required"),
-        
-      district: Yup.string()
-        .required("District is required")
+
+      district: Yup.string().required("District is required"),
     }),
     onSubmit: async (values) => {
       try {
@@ -106,16 +100,14 @@ const Register = () => {
           email: values.email,
           password: values.password,
           phone: values.phone,
-        }
+        };
         console.log(values);
-        const {data} = await employerAxiosInstance.post('/signup' ,paylaod)
+        const { data } = await employerAxiosInstance.post("/signup", paylaod);
         console.log(data);
-        if(data) {
-          localStorage.setItem("employer-email" , values?.email)
-          navigate('/employer/otp')
+        if (data) {
+          localStorage.setItem("employer-email", values?.email);
+          navigate("/employer/otp");
         }
-        
-        
       } catch (err) {
         toast.error(err.message || "An error occurred");
       }
@@ -144,12 +136,11 @@ const Register = () => {
       </div>
 
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10 ">
-        <div className="w-full max-w-md">
-          <h1 className="text-2xl font-bold text-primary mb-3 text-center lg:text-left">
-            Nexgen
-          </h1>
-
+      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
+        <h1 className="text-2xl font-bold text-primary mb-3 text-center lg:text-left">
+        Techpath
+        </h1>
+        <div className="w-full max-w-md px-2 overflow-y-scroll">
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
             Register as an Employer
           </h2>

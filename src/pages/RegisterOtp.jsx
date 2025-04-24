@@ -97,7 +97,7 @@ const RegisterOtp = () => {
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10 font-sans">
         <div className="w-full max-w-md">
           <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
-            Nexgen
+          Techpath
           </h1>
           <h2 className="text-3xl font-bold mb-4 text-center lg:text-left">
             Verify your email

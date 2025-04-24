@@ -6,7 +6,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
 import useRequestEmployer from "@/hooks/useRequestEmployer";
-import AdminAxiosInstance from "@/config/axiosConfig/AdminAxiosInstance";
+import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 
 const AdminRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +73,7 @@ const AdminRegister = () => {
           password : values.password
         }
         
-        const {data} = await AdminAxiosInstance.post('/signup' , payload)
+        const {data} = await adminAxiosInstance.post('/signup' , payload)
         if(data) {
           localStorage.setItem("admin-email", values.email)
           navigate('/admin/otp-verification')
@@ -122,7 +122,7 @@ const AdminRegister = () => {
         <div className="w-full max-w-md">
           {/* Logo */}
           <h1 className="text-2xl font-bold text-primary mb-3 text-center lg:text-left">
-            Nexgen
+          Techpath
           </h1>
 
           {/* Welcome Text */}

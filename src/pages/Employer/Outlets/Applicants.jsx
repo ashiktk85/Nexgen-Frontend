@@ -111,7 +111,7 @@ const dummyColumns = (handleActiveToggle) => [
       <>
         <span
           className={` py-1 rounded font-bold ${
-            status === "Hired"
+            status === "Shortlisted"
               ? "text-green-500"
               : status === "Pending"
               ? "text-orange-400"
@@ -182,7 +182,7 @@ function Applicants() {
     setSelectedData(null);
   };
 
-  const formSubmittionURL = "http:localhost:3000/api/edit_job";
+  // const formSubmittionURL = "http:localhost:3000/api/edit_job";
 
   if (loading) return <p>Loading</p>;
 

@@ -5,6 +5,7 @@ import { Button } from "antd";
 
 import { getAllJobs, jobListUnList } from "@/apiServices/adminApi";
 import { toast } from "sonner";
+import moment from "moment";
 
 const Jobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -64,17 +65,18 @@ const Jobs = () => {
     { key: "createdAt", label: "Posted on" },
     { key: "status", label: "Open/Close" },
     { key: "isBlocked", label: "Status" },
-    { key: "action", label: "" },
+    { key: "action", label: "Action" },
   ];
+
 
   const tableData = jobs.map((item) => ({
     ...item,
+    createdAt: moment(item.createdAt).format("DD/MM/YYYY"), // Format: "January 25th, 2025"
     isBlocked: item.isBlocked ? (
       <span className="text-red-500">Unlisted</span>
     ) : (
       <span className="text-green-500">Listed</span>
     ),
-
     action: (
       <ConfirmDialog
         title={item.isBlocked ? "List job" : "Unlist job"}

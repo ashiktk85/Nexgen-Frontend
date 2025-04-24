@@ -1,10 +1,11 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoIosLogOut } from "react-icons/io";
-import AdminAxiosInstance from "@/config/axiosConfig/AdminAxiosInstance";
+// import AdminAxiosInstance from "@/config/axiosConfig/AdminAxiosInstance";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import { logout } from "@/redux/slices/adminSlice";
+import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 
 const Sidebar = ({ open, setOpen }) => {
   const location = useLocation();
@@ -13,7 +14,7 @@ const Sidebar = ({ open, setOpen }) => {
 
   const handleLogout = async () => {
     try {
-      const response = await AdminAxiosInstance.post("/logout");
+      const response = await adminAxiosInstance.post("/logout");
       console.log("logout response", response);
       if (response.status === 200) {
         dispatch(logout());
@@ -59,10 +60,10 @@ const Sidebar = ({ open, setOpen }) => {
       <nav className="mt-4">
         {/* <span className="text-sm text-gray-500 py-2 px-4">Navigation</span> */}
         <Link
-          to="/admin"
+          to="/admin/dashboard"
           className={`block py-2 px-4 hover:scale-105 transition-transform duration-200 
         ${
-          location.pathname === "/admin" ? "font-extrabold text-blue-900" : ""
+          location.pathname === "/admin/dashboard" ? "font-extrabold text-blue-900" : ""
         }`}
         >
           Dashboard
