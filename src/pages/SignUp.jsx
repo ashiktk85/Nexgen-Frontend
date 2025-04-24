@@ -7,12 +7,17 @@ import * as Yup from "yup";
 import { toast } from "sonner";
 import useRequestUser from "../hooks/useRequestUser";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { useDispatch } from "react-redux";
+import { userGoogleLoginAction } from "@/redux/actions/userAction";
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const { data, loading, error, sendRequest } = useRequestUser();
 
   const showPasswordFunction = () => {
@@ -45,7 +50,7 @@ const SignupPage = () => {
       email: "",
       password: "",
     },
-    validationSchema: Yup.object({  
+    validationSchema: Yup.object({
       firstName: Yup.string()
         .trim()
         .min(2, "First name must be at least 2 characters")
@@ -92,22 +97,42 @@ const SignupPage = () => {
           lastName: values.lastName,
           email: values.email,
           phone: values.phone,
-          password : values.password
+          password: values.password,
+        };
+
+        const { data } = await userAxiosInstance.post("/signup", payload);
+        if (data) {
+          localStorage.setItem("email", values.email);
+          navigate("/otp-verification");
         }
-        
-        const {data} = await userAxiosInstance.post('/signup' , payload)
-        if(data) {
-          localStorage.setItem("email", values.email)
-          navigate('/otp-verification')
-        }
-        
+
         if (loading) return <p>Loading...</p>;
         if (error) return <p>Error: {error}</p>;
       } catch (err) {
-        toast.warning(err.response.data.message || "An error occured")
+        toast.warning(err.response.data.message || "An error occured");
       }
     },
   });
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const { credential } = credentialResponse;
+    console.log("Google login response: ", credential);
+    try {
+      const result = await dispatch(
+        userGoogleLoginAction({ id_token: credential })
+      ).unwrap();
+      if (result) {
+        localStorage.setItem("token", result.token);
+        toast.success("Google Login successful!");
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      }
+    } catch (err) {
+      console.error("Error in Google login: ", err);
+      toast.error(err?.message || "An error occurred");
+    }
+  };
 
   return (
     <div className="flex flex-col lg:flex-row h-ful">
@@ -159,17 +184,16 @@ const SignupPage = () => {
 
           {/* Social Login Buttons */}
           <div className="flex flex-col lg:flex-row gap-4 mb-6">
-            <button
-              className=" font-poppins py-2 px-4 border border-gray-300 rounded-md flex items-center justify-center gap-2 text-gray-700 w-full font-semibold"
-              aria-label="Log in with Google"
-            >
-              <img
-                src="https://img.icons8.com/color/24/google-logo.png"
-                alt="Google"
-                loading="lazy"
-              />
-              Google
-            </button>
+            <div className="flex justify-center">
+              <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => {
+                    toast.error("Google sign up failed");
+                  }}
+                />
+              </GoogleOAuthProvider>
+            </div>
           </div>
 
           {/* Divider */}
