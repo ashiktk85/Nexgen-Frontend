@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import ListingTable from "../../../components/common/table";
 import {
   Dialog,
@@ -13,6 +13,7 @@ import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import { toast } from "sonner";
 import ApplicantModal from "@/components/Employer/ApplicantModal";
+import { motion, AnimatePresence } from "framer-motion";
 
 const initialDummyUsers = [
   {
@@ -100,6 +101,7 @@ const initialDummyUsers = [
     active: true,
   },
 ];
+
 const dummyColumns = (handleActiveToggle) => [
   { key: "name", label: "Name" },
   { key: "email", label: "Email" },
@@ -109,21 +111,23 @@ const dummyColumns = (handleActiveToggle) => [
     label: "Status",
     render: (status, row) => (
       <>
-        <span
-          className={` py-1 rounded font-bold ${
+        <motion.span
+          className={`py-1 rounded font-bold ${
             status === "Shortlisted"
               ? "text-green-500"
               : status === "Pending"
               ? "text-orange-400"
               : "text-red-500"
           }`}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
         >
           {status}
-        </span>
-
+        </motion.span>
         {/* <Switch
           checked={status}
-          onChange={() => handleActiveToggle(row.id)} // Call the passed function with the row ID
+          onChange={() => handleActiveToggle(row.id)}
           inputProps={{ "aria-label": "Active Status" }}
         /> */}
       </>
@@ -133,7 +137,7 @@ const dummyColumns = (handleActiveToggle) => [
 
 function Applicants() {
   const { jobId } = useParams();
-  const [applications, setApplications] = useState([]); // State for users
+  const [applications, setApplications] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -145,7 +149,6 @@ function Applicants() {
         `/job-applications/${jobId}`
       );
       console.log(data, "ress");
-
       setApplications(data.jobApplications);
       setLoading(false);
     } catch (error) {
@@ -182,38 +185,76 @@ function Applicants() {
     setSelectedData(null);
   };
 
-  // const formSubmittionURL = "http:localhost:3000/api/edit_job";
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.5, staggerChildren: 0.2 },
+    },
+  };
 
-  if (loading) return <p>Loading</p>;
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  };
+
+  const modalVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+    exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } },
+  };
 
   return (
-    <div className="my-6 px-2">
-      <h1>Job List</h1>
-      <div>
-        <ListingTable
-          users={applications}
-          columns={dummyColumns(handleActiveToggle)}
-          rowsPerPage={5}
-          onView={handleView}
-          // onDelete={(id) => {
-          //   const user = users.find((user) => user.id === id);
-          //   setSelectedData(user);
-          //   setIsDeleteDialogOpen(true);
-          // }}
-        />
-      </div>
+    <motion.div
+      className="my-6 px-2"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.h1 className="text-2xl font-bold" variants={itemVariants}>
+        Job Applicants
+      </motion.h1>
+      <motion.div variants={itemVariants}>
+        {loading ? (
+          <motion.div
+            className="flex justify-center items-center h-40"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="text-gray-600 text-lg">Loading...</p>
+          </motion.div>
+        ) : (
+          <ListingTable
+            users={applications}
+            columns={dummyColumns(handleActiveToggle)}
+            rowsPerPage={5}
+            onView={handleView}
+          />
+        )}
+      </motion.div>
 
       {/* Detail Modal */}
-      {selectedData && (
-        <ApplicantModal
-          isDialogOpen={isDialogOpen}
-          setIsDialogOpen={setIsDialogOpen}
-          application={selectedData}
-          setSelectedData={setSelectedData}
-          fetchApplications={fetchApplications}
-        />
-      )}
-    </div>
+      <AnimatePresence>
+        {selectedData && (
+          <motion.div
+            variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <ApplicantModal
+              isDialogOpen={isDialogOpen}
+              setIsDialogOpen={setIsDialogOpen}
+              application={selectedData}
+              setSelectedData={setSelectedData}
+              fetchApplications={fetchApplications}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 

@@ -1,11 +1,30 @@
+
+
+
 import React, { useEffect, useRef, useState } from "react";
 import { FaSearch, FaTh, FaList } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-
+import { motion } from "framer-motion";
 import JobCard from "../../../components/User/JobCard";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
+
+// Animation variants for staggered children
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
 
 const AllJobsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,19 +32,16 @@ const AllJobsPage = () => {
   const [showSearchBox, setShowSearchBox] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [jobType, setJobType] = useState("");
-  // const [companyData, setCompanyData] = useState("");
   const [experienceLevel, setExperienceLevel] = useState("");
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
-
   const [searchedJobs, setSearchedJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const searchBoxRef = useRef(null);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  // const [paginationJobs, setPaginationJobs] = useState([]);
-  const jobsPerPage = 6; // Adjust the number of jobs per page
+  const jobsPerPage = 6;
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -61,7 +77,6 @@ const AllJobsPage = () => {
       console.log(data);
       setJobs(data.jobPosts);
       setFilteredJobs(data.jobPosts);
-      // setPaginationJobs(data.jobPosts);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -74,15 +89,8 @@ const AllJobsPage = () => {
     if (searchTerm) {
       searchedJobs = searchedJobs.filter(
         (job) => job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase())
-        // ||  job.companyName.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    // if (searchLocation) {
-    //   searchedJobs = searchedJobs.filter((job) =>
-    //     job.city.toLowerCase().includes(searchLocation.toLowerCase())
-    //   );
-    // }
-
     setSearchedJobs(searchedJobs);
     setFilteredJobs(searchedJobs);
     setShowSearchBox(false);
@@ -100,7 +108,6 @@ const AllJobsPage = () => {
     if (searchTerm) {
       updatedJobs = updatedJobs.filter(
         (job) => job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase())
-        //  ||  job.companyName.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     console.log("searchTerm", updatedJobs);
@@ -124,8 +131,9 @@ const AllJobsPage = () => {
     }
 
     setFilteredJobs(updatedJobs);
-    setCurrentPage(1); // Reset to first page when filtering
+    setCurrentPage(1);
   };
+
   const clearAll = () => {
     setFilteredJobs(jobs);
     setSearchLocation("");
@@ -145,17 +153,28 @@ const AllJobsPage = () => {
   const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
 
   return (
-    <div className="bg-gray-100 min-h-screen py-10">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+      className="bg-gray-100 min-h-screen py-10"
+    >
       <div className="container mx-auto px-2 pt-12">
-        {/* Top Section: Search Bar and Filters */}
-        <div className="flex flex-col md:flex-row gap-3">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col md:flex-row gap-3"
+        >
           {/* Filters Section */}
-          <div className="w-full md:w-1/4 bg-white p-4 rounded-md shadow-md">
+          <motion.div
+            variants={itemVariants}
+            className="w-full md:w-1/4 bg-white p-4 rounded-md shadow-md"
+          >
             <h2 className="text-lg font-semibold mb-4">Filters</h2>
-
             <div className="space-y-4">
               {/* Location Filter */}
-              <div>
+              <motion.div variants={itemVariants}>
                 <label className="block text-gray-700 font-medium mb-1">
                   Location
                 </label>
@@ -173,10 +192,10 @@ const AllJobsPage = () => {
                     )
                   )}
                 </select>
-              </div>
+              </motion.div>
 
               {/* Job Type Filter */}
-              <div>
+              <motion.div variants={itemVariants}>
                 <label className="block text-gray-700 font-medium mb-1">
                   Job Type
                 </label>
@@ -194,10 +213,10 @@ const AllJobsPage = () => {
                     )
                   )}
                 </select>
-              </div>
+              </motion.div>
 
               {/* Experience Level Filter */}
-              <div>
+              <motion.div variants={itemVariants}>
                 <label className="block text-gray-700 font-medium mb-1">
                   Experience Level
                 </label>
@@ -217,16 +236,24 @@ const AllJobsPage = () => {
                       </option>
                     ))}
                 </select>
-              </div>
-              <button 
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
-            onClick={clearAll}>Clear All</button>
+              </motion.div>
+
+              {/* Clear All Button */}
+              <motion.button
+                variants={itemVariants}
+                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+                onClick={clearAll}
+              >
+                Clear All
+              </motion.button>
             </div>
-            
-          </div>
+          </motion.div>
 
           {/* Search Section */}
-          <div className="w-full">
+          <motion.div
+            variants={itemVariants}
+            className="w-full"
+          >
             <div className="flex flex-row gap-3">
               <div className="w-3/4 relative mb-6" ref={searchBoxRef}>
                 <div
@@ -256,7 +283,12 @@ const AllJobsPage = () => {
                 </div>
 
                 {showSearchBox && (
-                  <div className="absolute top-full left-0 w-full bg-white p-4 shadow-md rounded-md mt-0">
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute top-full left-0 w-full bg-white p-4 shadow-md rounded-md mt-0 z-10"
+                  >
                     {/* Designation/Company Input */}
                     <div className="relative w-full mb-4">
                       <input
@@ -270,40 +302,16 @@ const AllJobsPage = () => {
                       <label
                         htmlFor="designation"
                         className={`absolute left-3 text-gray-500 text-base transition-all 
-                      ${
-                        searchTerm
-                          ? "top-1 text-sm text-blue-500"
-                          : "top-4 text-gray-400"
-                      } 
-                      peer-focus:top-1 peer-focus:text-sm peer-focus:text-blue-500`}
+                        ${
+                          searchTerm
+                            ? "top-1 text-sm text-blue-500"
+                            : "top-4 text-gray-400"
+                        } 
+                        peer-focus:top-1 peer-focus:text-sm peer-focus:text-blue-500`}
                       >
                         Designation/Company
                       </label>
                     </div>
-
-                    {/* Location Input */}
-                    {/* <div className="relative w-full mb-4">
-                      <input
-                        type="text"
-                        id="location"
-                        className="w-full px-3 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 peer"
-                        value={searchLocation}
-                        onChange={(e) => setSearchLocation(e.target.value)}
-                        placeholder=""
-                      />
-                      <label
-                        htmlFor="location"
-                        className={`absolute left-3 text-gray-500 text-base transition-all 
-                      ${
-                        searchLocation
-                          ? "top-1 text-sm text-blue-500"
-                          : "top-4 text-gray-400"
-                      } 
-                      peer-focus:top-1 peer-focus:text-sm peer-focus:text-blue-500`}
-                      >
-                        Location
-                      </label>
-                    </div> */}
 
                     {/* Search Button */}
                     <button
@@ -312,14 +320,17 @@ const AllJobsPage = () => {
                     >
                       Search
                     </button>
-                  </div>
+                  </motion.div>
                 )}
               </div>
 
               {/* View Toggle Buttons */}
-              <div className="w-1/4 relative flex justify-end mb-6">
+              <motion.div
+                variants={itemVariants}
+                className="w-1/4 relative flex justify-end mb-6"
+              >
                 <button
-                  className={`py-3 px-4 rounded-l-md  ${
+                  className={`py-3 px-4 rounded-l-md ${
                     viewMode === "grid"
                       ? "bg-blue-600 border text-white"
                       : "bg-gray-300"
@@ -338,37 +349,55 @@ const AllJobsPage = () => {
                 >
                   <FaList />
                 </button>
-              </div>
+              </motion.div>
             </div>
+
             {/* Job Listings */}
             {loading ? (
-              <div className="flex justify-center items-center h-40">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="flex justify-center items-center h-40"
+              >
                 <p className="text-gray-600 text-lg">Loading jobs...</p>
-              </div>
+              </motion.div>
             ) : currentJobs.length > 0 ? (
               <>
-                <div
+                <motion.div
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
                   className={`gap-3 ${
                     viewMode === "grid"
-                      ? "grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 "
+                      ? "grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
                       : "flex flex-col"
                   }`}
                 >
                   {currentJobs.map((job) => (
-                    <div key={job._id} className="flex justify-center">
+                    <motion.div
+                      key={job._id}
+                      variants={itemVariants}
+                      className="flex justify-center"
+                    >
                       <JobCard job={job} layout={viewMode} />
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
 
                 {/* Pagination Controls */}
-                <div className="flex justify-center mt-6">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  className="flex justify-center mt-6"
+                >
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(currentPage - 1)}
                     className="px-4 py-2 mx-1 bg-blue-500 text-white rounded disabled:opacity-50"
                   >
-                    Previous
+                    {'<'}
                   </button>
 
                   {[...Array(totalPages)].map((_, index) => (
@@ -390,21 +419,26 @@ const AllJobsPage = () => {
                     onClick={() => setCurrentPage(currentPage + 1)}
                     className="px-4 py-2 mx-1 bg-blue-500 text-white rounded disabled:opacity-50"
                   >
-                    Next
+                    {'>'}
                   </button>
-                </div>
+                </motion.div>
               </>
             ) : (
-              <div className="flex justify-center items-center h-40">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="flex justify-center items-center h-40"
+              >
                 <h1 className="text-xl md:text-2xl font-bold text-gray-700">
                   No jobs available
                 </h1>
-              </div>
+              </motion.div>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

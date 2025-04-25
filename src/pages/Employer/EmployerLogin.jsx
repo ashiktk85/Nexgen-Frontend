@@ -4,14 +4,16 @@ import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { toast } from "sonner"
+import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { employerLogin } from "@/redux/actions/EmployerAction";
+import { motion, AnimatePresence } from "framer-motion";
 
 const EmployerLogin = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
+
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
     if (x.type === "password") {
@@ -40,15 +42,14 @@ const EmployerLogin = () => {
     }),
     onSubmit: async (values) => {
       try {
-       
         const loginResult = await dispatch(employerLogin(values)).unwrap();
-        if(loginResult.status === 200) {
-          toast.success("Login successfull")
+        if (loginResult.status === 200) {
+          toast.success("Login successful");
           setTimeout(() => {
-            navigate('/employer/dashboard')
+            navigate("/employer/dashboard");
           }, 1000);
         } else {
-          toast.error()
+          toast.error("Login failed");
         }
       } catch (err) {
         toast.error(err.message || "An error occurred");
@@ -56,30 +57,71 @@ const EmployerLogin = () => {
     },
   });
 
-  return (
-    <div className="flex flex-col lg:flex-row h-screen">
-      {/* Right Section */}
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.5, staggerChildren: 0.2 },
+    },
+  };
 
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  };
+
+  const buttonVariants = {
+    hover: { scale: 1.05, transition: { duration: 0.2 } },
+    tap: { scale: 0.95 },
+  };
+
+  const iconVariants = {
+    hover: { scale: 1.2, rotate: 10, transition: { duration: 0.2 } },
+    tap: { scale: 0.9 },
+  };
+
+  return (
+    <motion.div
+      className="flex flex-col lg:flex-row h-screen"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Left Section */}
-      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
+      <motion.div
+        className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <div className="w-full max-w-md">
           {/* Logo */}
-          <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
-          Techpath
-          </h1>
+          <motion.h1
+            className="text-2xl font-bold text-primary mb-8 text-center lg:text-left"
+            variants={itemVariants}
+          >
+            Techpath
+          </motion.h1>
 
           {/* Welcome Text */}
-          <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">
+          <motion.h2
+            className="text-3xl font-semibold mb-4 text-center lg:text-left"
+            variants={itemVariants}
+          >
             Employer Login
-          </h2>
-          <p className="text-gray-500 mb-6 text-center lg:text-left">
+          </motion.h2>
+          <motion.p
+            className="text-gray-500 mb-6 text-center lg:text-left"
+            variants={itemVariants}
+          >
             Log in to access your dashboard and connect with top candidates.
             Let's build your dream team!
-          </p>
+          </motion.p>
 
           {/* Email and Password Form */}
           <form onSubmit={formik.handleSubmit}>
-            <div className="mb-4">
+            <motion.div className="mb-4" variants={itemVariants}>
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
@@ -97,13 +139,21 @@ const EmployerLogin = () => {
                 onBlur={formik.handleBlur}
                 name="email"
               />
-              {formik.touched.email && formik.errors.email ? (
-                <div className="text-red-500 text-sm">
-                  {formik.errors.email}
-                </div>
-              ) : null}
-            </div>
-            <div className="mb-4">
+              <AnimatePresence>
+                {formik.touched.email && formik.errors.email && (
+                  <motion.div
+                    className="text-red-500 text-sm"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {formik.errors.email}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+            <motion.div className="mb-4" variants={itemVariants}>
               <label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
@@ -122,27 +172,41 @@ const EmployerLogin = () => {
                   onBlur={formik.handleBlur}
                   name="password"
                 />
-                {formik.touched.password && formik.errors.password ? (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.password}
-                  </div>
-                ) : null}
-                <button
+                <motion.button
                   type="button"
                   className="absolute inset-y-0 right-4 flex items-center text-gray-500"
                   aria-label="Toggle password visibility"
+                  variants={iconVariants}
+                  whileHover="hover"
+                  whileTap="tap"
                 >
                   {showPassword ? (
                     <PiEyeBold onClick={showPasswordFunction} />
                   ) : (
                     <PiEyeSlashBold onClick={showPasswordFunction} />
                   )}
-                </button>
+                </motion.button>
               </div>
-            </div>
+              <AnimatePresence>
+                {formik.touched.password && formik.errors.password && (
+                  <motion.div
+                    className="text-red-500 text-sm"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {formik.errors.password}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
 
             {/* Remember Me */}
-            <div className="flex items-center justify-between mb-4">
+            <motion.div
+              className="flex items-center justify-between mb-4"
+              variants={itemVariants}
+            >
               <label className="flex items-center">
                 <input
                   type="checkbox"
@@ -150,73 +214,87 @@ const EmployerLogin = () => {
                 />
                 <span className="ml-2 text-sm text-gray-700">Remember me</span>
               </label>
-              <p
+              <motion.p
                 onClick={() => navigate("/forgot-password")}
                 className="text-sm text-blue-600 hover:underline cursor-pointer"
                 aria-label="Forgot Password"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 Forgot Password?
-              </p>
-            </div>
+              </motion.p>
+            </motion.div>
 
             {/* Login Button */}
-            <button
+            <motion.button
               type="submit"
               className="w-full py-2 px-4 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700"
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
             >
               Log in
-            </button>
+            </motion.button>
           </form>
 
           {/* Create Account */}
-          <p className="text-center text-sm text-gray-600 mt-4">
+          <motion.p
+            className="text-center text-sm text-gray-600 mt-4"
+            variants={itemVariants}
+          >
             Don’t have an account?{" "}
-            <a
+            <motion.span
               onClick={() => navigate("/employer/register")}
               className="text-blue-600 hover:underline cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               Create an Employer Account
-            </a>
-          </p>
-          <p className="text-center text-sm text-gray-600 mt-4">
+            </motion.span>
+          </motion.p>
+          <motion.p
+            className="text-center text-sm text-gray-600 mt-4"
+            variants={itemVariants}
+          >
             Login as User?{" "}
-            <a
+            <motion.span
               onClick={() => navigate("/login")}
               className="text-blue-600 hover:underline cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               User Login
-            </a>
-          </p>
+            </motion.span>
+          </motion.p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
+      <motion.div
+        className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <div className="max-w-md">
-          {/* <img
-      src="https://undraw.co/api/illustrations/random?color=ffffff&theme=teamwork"
-      alt="Mobile Technician Illustration"
-      className="mb-6 max-h-64 w-full object-contain"
-      loading="lazy"
-    /> */}
-          <GrapeAnimation className="sm:hidden" />
-
-          <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
+          <motion.div variants={itemVariants}>
+            <GrapeAnimation className="sm:hidden" />
+          </motion.div>
+          <motion.h2
+            className="text-2xl lg:text-3xl font-semibold mb-4"
+            variants={itemVariants}
+          >
             Connecting Talent with Opportunity—Post Jobs, Build Futures.
-          </h2>
-
-          <p className="text-base lg:text-lg text-gray-200 mb-4">
+          </motion.h2>
+          <motion.p
+            className="text-base lg:text-lg text-gray-200 mb-4"
+            variants={itemVariants}
+          >
             Empowering Careers, One Opportunity at a Time.
-          </p>
-
-          {/* <div className="flex justify-center gap-2">
-      <span className="h-2 w-2 bg-white rounded-full"></span>
-      <span className="h-2 w-2 bg-white opacity-50 rounded-full"></span>
-      <span className="h-2 w-2 bg-white opacity-50 rounded-full"></span>
-    </div> */}
+          </motion.p>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

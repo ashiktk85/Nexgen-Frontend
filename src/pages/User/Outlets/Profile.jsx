@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Edit, Plus, FileText, Trash2, Check, X } from "lucide-react";
 import userAxiosInstance from "../../../config/axiosConfig/userAxiosInstance";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Validation schemas
 const ProfileSchema = Yup.object().shape({
@@ -184,7 +185,6 @@ export default function ProfilePage() {
     }
 
     setSelectedImageFile(file);
-    // Create the preview URL here and store it in state
     const previewUrl = URL.createObjectURL(file);
     setPreviewImageUrl(previewUrl);
     setIsImageConfirmationOpen(true);
@@ -213,7 +213,6 @@ export default function ProfilePage() {
       console.error("Error uploading profile image:", error);
       toast.error("Failed to update profile image");
     } finally {
-      // Clean up the object URL to avoid memory leaks
       if (previewImageUrl) {
         URL.revokeObjectURL(previewImageUrl);
       }
@@ -224,7 +223,6 @@ export default function ProfilePage() {
   };
 
   const cancelImageUpload = () => {
-    // Clean up the object URL to avoid memory leaks
     if (previewImageUrl) {
       URL.revokeObjectURL(previewImageUrl);
     }
@@ -243,7 +241,6 @@ export default function ProfilePage() {
       return;
     }
 
-    // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Resume size should be less than 10MB");
       return;
@@ -471,17 +468,27 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <motion.div
+        className="flex justify-center items-center min-h-screen"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         Loading...
-      </div>
+      </motion.div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <motion.div
+        className="flex justify-center items-center min-h-screen"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         Failed to load user data
-      </div>
+      </motion.div>
     );
   }
 
@@ -491,703 +498,861 @@ export default function ProfilePage() {
     return parts[parts.length - 1];
   };
 
+  // Animation variants
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
+  const tabContentVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+    exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
+  };
+
+  const dialogVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
+  };
+
+  const listItemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: (i) => ({
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.3, delay: i * 0.1 },
+    }),
+  };
+
+  const buttonVariants = {
+    hover: { scale: 1.05, transition: { duration: 0.2 } },
+    tap: { scale: 0.95 },
+  };
+
   return (
-    <div className="bg-background min-h-screen py-20">
+    <motion.div
+      className="bg-background min-h-screen py-20"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="container max-w-5xl mx-auto py-8 px-4 sm:px-6">
-        <Card className="border border-border rounded-lg shadow-sm overflow-hidden">
-          {/* Profile Header - Made more prominent */}
-          <div className="bg-muted/30 p-6 sm:p-8 border-b">
-            <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
-              <div className="relative">
-                <Avatar className="h-24 w-24 sm:h-28 sm:w-28 border-4 border-background shadow-md">
-                  <AvatarImage
-                    src={
-                      user.profileUrl || "/placeholder.svg?height=112&width=112"
-                    }
-                    alt={fullName}
-                  />
-                  <AvatarFallback className="text-2xl">
-                    {user.firstName.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-background shadow-sm"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Edit className="h-4 w-4" />
-                  <span className="sr-only">Change profile picture</span>
-                </Button>
-                <input
-                  type="file"
-                  hidden
-                  ref={fileInputRef}
-                  onChange={handleImageUpload}
-                  accept="image/*"
-                />
-              </div>
-              <div className="text-center sm:text-left flex-1">
-                <h1 className="text-2xl sm:text-3xl font-bold mb-1">
-                  {fullName}
-                </h1>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {user.location || "No location set"}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => {
-                    setTempUser({ ...user });
-                    setIsEditDialogOpen(true);
-                  }}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs - Improved styling and spacing */}
-          <Tabs
-            defaultValue="about"
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <div className="border-b sticky top-0 bg-background z-10">
-              <TabsList className="bg-transparent h-auto p-0 w-full justify-start overflow-x-auto flex">
-                <TabsTrigger
-                  value="about"
-                  className="px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none font-medium"
-                >
-                  About
-                </TabsTrigger>
-                <TabsTrigger
-                  value="resume"
-                  className="px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none font-medium"
-                >
-                  Resume
-                </TabsTrigger>
-                <TabsTrigger
-                  value="education"
-                  className="px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none font-medium"
-                >
-                  Education
-                </TabsTrigger>
-                <TabsTrigger
-                  value="experience"
-                  className="px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none font-medium"
-                >
-                  Experience
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            {/* Tab Content - Better spacing and organization */}
-            <div className="p-6 sm:p-8">
-              <TabsContent value="about" className="mt-0 space-y-6">
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">About</h3>
-                  <div className="bg-muted/20 rounded-lg p-4 mb-6">
-                    <p className="text-muted-foreground">
-                      {user.about || "No about information provided."}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                    <div className="space-y-1 p-3 rounded-md bg-muted/10">
-                      <span className="text-xs font-medium text-muted-foreground uppercase">
-                        Full Name
-                      </span>
-                      <p className="font-medium">{fullName}</p>
-                    </div>
-                    <div className="space-y-1 p-3 rounded-md bg-muted/10">
-                      <span className="text-xs font-medium text-muted-foreground uppercase">
-                        Email
-                      </span>
-                      <p className="font-medium">{user.email}</p>
-                    </div>
-                    <div className="space-y-1 p-3 rounded-md bg-muted/10">
-                      <span className="text-xs font-medium text-muted-foreground uppercase">
-                        Phone
-                      </span>
-                      <p className="font-medium">{user.phone}</p>
-                    </div>
-                    {user.DOB && (
-                      <div className="space-y-1 p-3 rounded-md bg-muted/10">
-                        <span className="text-xs font-medium text-muted-foreground uppercase">
-                          Date of Birth
-                        </span>
-                        <p className="font-medium">
-                          {new Date(user.DOB).toLocaleDateString()}
-                        </p>
-                      </div>
-                    )}
-                    {user.location && (
-                      <div className="space-y-1 p-3 rounded-md bg-muted/10">
-                        <span className="text-xs font-medium text-muted-foreground uppercase">
-                          Location
-                        </span>
-                        <p className="font-medium">{user.location}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="resume" className="mt-0">
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold">Resume</h3>
-                    {!user.resume ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => resumeInputRef.current?.click()}
-                        className="flex items-center gap-1"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Add Resume
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => resumeInputRef.current?.click()}
-                        className="flex items-center gap-1"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Change Resume
-                      </Button>
-                    )}
-                    <input
-                      type="file"
-                      hidden
-                      ref={resumeInputRef}
-                      onChange={handleResumeUpload}
-                      accept=".pdf"
+        <motion.div variants={cardVariants} initial="hidden" animate="visible">
+          <Card className="border border-border rounded-lg shadow-sm overflow-hidden">
+            <motion.div
+              className="bg-muted/30 p-6 sm:p-8 border-b"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+                <div className="relative">
+                  <Avatar className="h-24 w-24 sm:h-28 sm:w-28 border-4 border-background shadow-md">
+                    <AvatarImage
+                      src={
+                        user.profileUrl || "/placeholder.svg?height=112&width=112"
+                      }
+                      alt={fullName}
                     />
-                  </div>
+                    <AvatarFallback className="text-2xl">
+                      {user.firstName.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-background shadow-sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Edit className="h-4 w-4" />
+                      <span className="sr-only">Change profile picture</span>
+                    </Button>
+                  </motion.div>
+                  <input
+                    type="file"
+                    hidden
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                  />
+                </div>
+                <div className="text-center sm:text-left flex-1">
+                  <h1 className="text-2xl sm:text-3xl font-bold mb-1">
+                    {fullName}
+                  </h1>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {user.location || "No location set"}
+                  </p>
+                  <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => {
+                        setTempUser({ ...user });
+                        setIsEditDialogOpen(true);
+                      }}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
 
-                  {user.resume ? (
-                    <Card className="border border-border shadow-sm hover:shadow-md transition-shadow">
-                      <CardContent className="p-4 flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-primary/10 p-2 rounded-md">
-                            <FileText className="h-6 w-6 text-primary" />
-                          </div>
-                          <div className="truncate max-w-[150px]">
-                            <p className="font-medium truncate">
-                              {getResumeFileName(user.resume)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              PDF Document
-                            </p>
-                          </div>
+            <Tabs
+              defaultValue="about"
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <div className="border-b sticky top-0 bg-background z-10">
+                <TabsList className="bg-transparent h-auto p-0 w-full justify-start overflow-x-auto flex">
+                  {["about", "resume", "education", "experience"].map((tab) => (
+                    <motion.div
+                      key={tab}
+                      whileHover={{ y: -2 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <TabsTrigger
+                        value={tab}
+                        className="px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none font-medium capitalize"
+                      >
+                        {tab}
+                      </TabsTrigger>
+                    </motion.div>
+                  ))}
+                </TabsList>
+              </div>
+
+              <div className="p-6 sm:p-8">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    variants={tabContentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                  >
+                    <TabsContent value="about" className="mt-0 space-y-6">
+                      <div>
+                        <h3 className="text-xl font-semibold mb-4">About</h3>
+                        <motion.div
+                          className="bg-muted/20 rounded-lg p-4 mb-6"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <p className="text-muted-foreground">
+                            {user.about || "No about information provided."}
+                          </p>
+                        </motion.div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                          {[
+                            { label: "Full Name", value: fullName },
+                            { label: "Email", value: user.email },
+                            { label: "Phone", value: user.phone },
+                            user.DOB && {
+                              label: "Date of Birth",
+                              value: new Date(user.DOB).toLocaleDateString(),
+                            },
+                            user.location && {
+                              label: "Location",
+                              value: user.location,
+                            },
+                          ]
+                            .filter(Boolean)
+                            .map((item, i) => (
+                              <motion.div
+                                key={item.label}
+                                custom={i}
+                                variants={listItemVariants}
+                                initial="hidden"
+                                animate="visible"
+                                className="space-y-1 p-3 rounded-md bg-muted/10"
+                              >
+                                <span className="text-xs font-medium text-muted-foreground uppercase">
+                                  {item.label}
+                                </span>
+                                <p className="font-medium">{item.value}</p>
+                              </motion.div>
+                            ))}
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleRemoveResume(user.resume)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <div className="bg-muted/20 rounded-lg p-6 text-center">
-                      <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-muted-foreground mb-4">
-                        No resume uploaded yet
-                      </p>
-                      <Button
-                        variant="outline"
-                        onClick={() => resumeInputRef.current?.click()}
-                        className="mx-auto"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Upload Resume (PDF only)
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
+                      </div>
+                    </TabsContent>
 
-              <TabsContent value="education" className="mt-0">
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold">Education</h3>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openEducationDialog()}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Education
-                    </Button>
-                  </div>
+                    <TabsContent value="resume" className="mt-0">
+                      <div className="mb-6">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="text-xl font-semibold">Resume</h3>
+                          <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => resumeInputRef.current?.click()}
+                              className="flex items-center gap-1"
+                            >
+                              <Plus className="h-4 w-4" />
+                              {user.resume ? "Change Resume" : "Add Resume"}
+                            </Button>
+                          </motion.div>
+                          <input
+                            type="file"
+                            hidden
+                            ref={resumeInputRef}
+                            onChange={handleResumeUpload}
+                            accept=".pdf"
+                          />
+                        </div>
 
-                  {user.education && user.education.length > 0 ? (
-                    <div className="grid gap-4">
-                      {user.education.map((edu, index) => (
-                        <Card
-                          key={index}
-                          className="border border-border shadow-sm hover:shadow-md transition-shadow"
-                        >
-                          <CardContent className="p-5">
-                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                              <div className="flex-1">
-                                <h4 className="text-lg font-semibold mb-1">
-                                  {edu.qualification}
-                                </h4>
-                                <p className="text-muted-foreground mb-1">
-                                  {edu.institute}
-                                </p>
-                                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                                  {edu.startYear} - {edu.endYear || "Present"}
+                        {user.resume ? (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <Card className="border border-border shadow-sm hover:shadow-md transition-shadow">
+                              <CardContent className="p-4 flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                  <div className="bg-primary/10 p-2 rounded-md">
+                                    <FileText className="h-6 w-6 text-primary" />
+                                  </div>
+                                  <div className="truncate max-w-[150px]">
+                                    <p className="font-medium truncate">
+                                      {getResumeFileName(user.resume)}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      PDF Document
+                                    </p>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex gap-2 sm:self-start">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => openEducationDialog(index)}
-                                >
-                                  <Edit className="h-4 w-4 mr-1" />
-                                  Edit
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                  onClick={() => deleteEducation(index)}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-1" />
-                                  Delete
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="bg-muted/20 rounded-lg p-6 text-center">
-                      <p className="text-muted-foreground mb-4">
-                        No education history added yet
-                      </p>
-                      <Button
-                        variant="outline"
-                        onClick={() => openEducationDialog()}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Education
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
+                                <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    onClick={() => handleRemoveResume(user.resume)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </motion.div>
+                              </CardContent>
+                            </Card>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            className="bg-muted/20 rounded-lg p-6 text-center"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                            <p className="text-muted-foreground mb-4">
+                              No resume uploaded yet
+                            </p>
+                            <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                              <Button
+                                variant="outline"
+                                onClick={() => resumeInputRef.current?.click()}
+                                className="mx-auto"
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Upload Resume (PDF only)
+                              </Button>
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </div>
+                    </TabsContent>
 
-              <TabsContent value="experience" className="mt-0">
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold">Experience</h3>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openExperienceDialog()}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Experience
-                    </Button>
-                  </div>
+                    <TabsContent value="education" className="mt-0">
+                      <div className="mb-6">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="text-xl font-semibold">Education</h3>
+                          <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openEducationDialog()}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Education
+                            </Button>
+                          </motion.div>
+                        </div>
 
-                  {user.experience && user.experience.length > 0 ? (
-                    <div className="grid gap-4">
-                      {user.experience.map((exp, index) => (
-                        <Card
-                          key={index}
-                          className="border border-border shadow-sm hover:shadow-md transition-shadow"
-                        >
-                          <CardContent className="p-5">
-                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                              <div className="flex-1">
-                                <h4 className="text-lg font-semibold mb-1">
-                                  {exp.jobTitle}
-                                </h4>
-                                <p className="text-muted-foreground mb-1">
-                                  {exp.company}
-                                </p>
-                                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                                  {exp.startYear} - {exp.endYear || "Present"}
-                                </div>
-                              </div>
-                              <div className="flex gap-2 sm:self-start">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => openExperienceDialog(index)}
-                                >
-                                  <Edit className="h-4 w-4 mr-1" />
-                                  Edit
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                  onClick={() => deleteExperience(index)}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-1" />
-                                  Delete
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="bg-muted/20 rounded-lg p-6 text-center">
-                      <p className="text-muted-foreground mb-4">
-                        No work experience added yet
-                      </p>
-                      <Button
-                        variant="outline"
-                        onClick={() => openExperienceDialog()}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Experience
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-            </div>
-          </Tabs>
-        </Card>
+                        {user.education && user.education.length > 0 ? (
+                          <div className="grid gap-4">
+                            {user.education.map((edu, index) => (
+                              <motion.div
+                                key={index}
+                                custom={index}
+                                variants={listItemVariants}
+                                initial="hidden"
+                                animate="visible"
+                              >
+                                <Card className="border border-border shadow-sm hover:shadow-md transition-shadow">
+                                  <CardContent className="p-5">
+                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                                      <div className="flex-1">
+                                        <h4 className="text-lg font-semibold mb-1">
+                                          {edu.qualification}
+                                        </h4>
+                                        <p className="text-muted-foreground mb-1">
+                                          {edu.institute}
+                                        </p>
+                                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                          {edu.startYear} - {edu.endYear || "Present"}
+                                        </div>
+                                      </div>
+                                      <div className="flex gap-2 sm:self-start">
+                                        <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => openEducationDialog(index)}
+                                          >
+                                            <Edit className="h-4 w-4 mr-1" />
+                                            Edit
+                                          </Button>
+                                        </motion.div>
+                                        <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            onClick={() => deleteEducation(index)}
+                                          >
+                                            <Trash2 className="h-4 w-4 mr-1" />
+                                            Delete
+                                          </Button>
+                                        </motion.div>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </motion.div>
+                            ))}
+                          </div>
+                        ) : (
+                          <motion.div
+                            className="bg-muted/20 rounded-lg p-6 text-center"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <p className="text-muted-foreground mb-4">
+                              No education history added yet
+                            </p>
+                            <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                              <Button
+                                variant="outline"
+                                onClick={() => openEducationDialog()}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Education
+                              </Button>
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="experience" className="mt-0">
+                      <div className="mb-6">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="text-xl font-semibold">Experience</h3>
+                          <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openExperienceDialog()}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Experience
+                            </Button>
+                          </motion.div>
+                        </div>
+
+                        {user.experience && user.experience.length > 0 ? (
+                          <div className="grid gap-4">
+                            {user.experience.map((exp, index) => (
+                              <motion.div
+                                key={index}
+                                custom={index}
+                                variants={listItemVariants}
+                                initial="hidden"
+                                animate="visible"
+                              >
+                                <Card className="border border-border shadow-sm hover:shadow-md transition-shadow">
+                                  <CardContent className="p-5">
+                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                                      <div className="flex-1">
+                                        <h4 className="text-lg font-semibold mb-1">
+                                          {exp.jobTitle}
+                                        </h4>
+                                        <p className="text-muted-foreground mb-1">
+                                          {exp.company}
+                                        </p>
+                                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                          {exp.startYear} - {exp.endYear || "Present"}
+                                        </div>
+                                      </div>
+                                      <div className="flex gap-2 sm:self-start">
+                                        <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => openExperienceDialog(index)}
+                                          >
+                                            <Edit className="h-4 w-4 mr-1" />
+                                            Edit
+                                          </Button>
+                                        </motion.div>
+                                        <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            onClick={() => deleteExperience(index)}
+                                          >
+                                            <Trash2 className="h-4 w-4 mr-1" />
+                                            Delete
+                                          </Button>
+                                        </motion.div>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </motion.div>
+                            ))}
+                          </div>
+                        ) : (
+                          <motion.div
+                            className="bg-muted/20 rounded-lg p-6 text-center"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <p className="text-muted-foreground mb-4">
+                              No work experience added yet
+                            </p>
+                            <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                              <Button
+                                variant="outline"
+                                onClick={() => openExperienceDialog()}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Experience
+                              </Button>
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </div>
+                    </TabsContent>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </Tabs>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Edit Profile Dialog with Formik */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Edit Profile</DialogTitle>
-            <DialogDescription>
-              Update your profile information below
-            </DialogDescription>
-          </DialogHeader>
-          <Formik
-            initialValues={{
-              firstName: tempUser?.firstName || "",
-              lastName: tempUser?.lastName || "",
-              email: tempUser?.email || "",
-              phone: tempUser?.phone || "",
-              about: tempUser?.about || "",
-              DOB: tempUser?.DOB
-                ? new Date(tempUser.DOB).toISOString().split("T")[0]
-                : "",
-              location: tempUser?.location || "",
-              // Preserve other fields that might be in the user object
-              ...tempUser,
-            }}
-            validationSchema={ProfileSchema}
-            onSubmit={handleUpdateProfile}
-          >
-            {({ isSubmitting, values, errors, touched }) => (
-              <Form className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormInput
-                    label="First Name"
-                    name="firstName"
-                    placeholder="Enter your first name"
-                  />
-                  <FormInput
-                    label="Last Name"
-                    name="lastName"
-                    placeholder="Enter your last name"
-                  />
-                </div>
-                <FormInput
-                  label="Email"
-                  name="email"
-                  type="email"
-                  placeholder="Enter your email"
-                />
-                <FormInput
-                  label="Phone"
-                  name="phone"
-                  placeholder="Enter your phone number"
-                />
-                <FormInput
-                  label="About"
-                  name="about"
-                  placeholder="Tell us about yourself"
-                />
-                <FormInput label="Date of Birth" name="DOB" type="date" />
-                <FormInput
-                  label="Location"
-                  name="location"
-                  placeholder="Enter your location"
-                />
-                <DialogFooter className="border-t pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsEditDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Saving..." : "Save Changes"}
-                  </Button>
-                </DialogFooter>
-              </Form>
-            )}
-          </Formik>
-        </DialogContent>
-      </Dialog>
+      <AnimatePresence>
+        {isEditDialogOpen && (
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <motion.div
+              variants={dialogVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Edit Profile</DialogTitle>
+                  <DialogDescription>
+                    Update your profile information below
+                  </DialogDescription>
+                </DialogHeader>
+                <Formik
+                  initialValues={{
+                    firstName: tempUser?.firstName || "",
+                    lastName: tempUser?.lastName || "",
+                    email: tempUser?.email || "",
+                    phone: tempUser?.phone || "",
+                    about: tempUser?.about || "",
+                    DOB: tempUser?.DOB
+                      ? new Date(tempUser.DOB).toISOString().split("T")[0]
+                      : "",
+                    location: tempUser?.location || "",
+                    ...tempUser,
+                  }}
+                  validationSchema={ProfileSchema}
+                  onSubmit={handleUpdateProfile}
+                >
+                  {({ isSubmitting }) => (
+                    <Form className="grid gap-4 py-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormInput
+                          label="First Name"
+                          name="firstName"
+                          placeholder="Enter your first name"
+                        />
+                        <FormInput
+                          label="Last Name"
+                          name="lastName"
+                          placeholder="Enter your last name"
+                        />
+                      </div>
+                      <FormInput
+                        label="Email"
+                        name="email"
+                        type="email"
+                        placeholder="Enter your email"
+                      />
+                      <FormInput
+                        label="Phone"
+                        name="phone"
+                        placeholder="Enter your phone number"
+                      />
+                      <FormInput
+                        label="About"
+                        name="about"
+                        placeholder="Tell us about yourself"
+                      />
+                      <FormInput label="Date of Birth" name="DOB" type="date" />
+                      <FormInput
+                        label="Location"
+                        name="location"
+                        placeholder="Enter your location"
+                      />
+                      <DialogFooter className="border-t pt-4">
+                        <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsEditDialogOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                        </motion.div>
+                        <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                          <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? "Saving..." : "Save Changes"}
+                          </Button>
+                        </motion.div>
+                      </DialogFooter>
+                    </Form>
+                  )}
+                </Formik>
+              </DialogContent>
+            </motion.div>
+          </Dialog>
+        )}
+      </AnimatePresence>
 
       {/* Education Dialog with Formik */}
-      <Dialog
-        open={isEducationDialogOpen}
-        onOpenChange={setIsEducationDialogOpen}
-      >
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
-              {educationIndex !== null ? "Edit Education" : "Add Education"}
-            </DialogTitle>
-            <DialogDescription>
-              {educationIndex !== null
-                ? "Update your education details"
-                : "Add your education details"}
-            </DialogDescription>
-          </DialogHeader>
-          <Formik
-            initialValues={{
-              qualification: currentEducation?.qualification || "",
-              institute: currentEducation?.institute || "",
-              startYear:
-                currentEducation?.startYear || new Date().getFullYear(),
-              endYear: currentEducation?.endYear || "",
-            }}
-            validationSchema={EducationSchema}
-            onSubmit={saveEducation}
+      <AnimatePresence>
+        {isEducationDialogOpen && (
+          <Dialog
+            open={isEducationDialogOpen}
+            onOpenChange={setIsEducationDialogOpen}
           >
-            {({ isSubmitting, values, errors, touched }) => (
-              <Form className="grid gap-4 py-4">
-                <FormInput
-                  label="Qualification/Degree"
-                  name="qualification"
-                  placeholder="e.g. Bachelor of Science in Computer Science"
-                />
-                <FormInput
-                  label="Institute/School"
-                  name="institute"
-                  placeholder="e.g. University of California"
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <FormInput
-                    label="Start Year"
-                    name="startYear"
-                    type="number"
-                    placeholder="e.g. 2018"
-                  />
-                  <FormInput
-                    label="End Year (or leave blank if current)"
-                    name="endYear"
-                    type="number"
-                    placeholder="e.g. 2022"
-                  />
-                </div>
-                <DialogFooter className="border-t pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setIsEducationDialogOpen(false);
-                      setCurrentEducation(null);
-                      setEducationIndex(null);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting
-                      ? "Saving..."
-                      : educationIndex !== null
-                      ? "Update"
-                      : "Add"}
-                  </Button>
-                </DialogFooter>
-              </Form>
-            )}
-          </Formik>
-        </DialogContent>
-      </Dialog>
+            <motion.div
+              variants={dialogVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>
+                    {educationIndex !== null ? "Edit Education" : "Add Education"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {educationIndex !== null
+                      ? "Update your education details"
+                      : "Add your education details"}
+                  </DialogDescription>
+                </DialogHeader>
+                <Formik
+                  initialValues={{
+                    qualification: currentEducation?.qualification || "",
+                    institute: currentEducation?.institute || "",
+                    startYear:
+                      currentEducation?.startYear || new Date().getFullYear(),
+                    endYear: currentEducation?.endYear || "",
+                  }}
+                  validationSchema={EducationSchema}
+                  onSubmit={saveEducation}
+                >
+                  {({ isSubmitting }) => (
+                    <Form className="grid gap-4 py-4">
+                      <FormInput
+                        label="Qualification/Degree"
+                        name="qualification"
+                        placeholder="e.g. Bachelor of Science in Computer Science"
+                      />
+                      <FormInput
+                        label="Institute/School"
+                        name="institute"
+                        placeholder="e.g. University of California"
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormInput
+                          label="Start Year"
+                          name="startYear"
+                          type="number"
+                          placeholder="e.g. 2018"
+                        />
+                        <FormInput
+                          label="End Year (or leave blank if current)"
+                          name="endYear"
+                          type="number"
+                          placeholder="e.g. 2022"
+                        />
+                      </div>
+                      <DialogFooter className="border-t pt-4">
+                        <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setIsEducationDialogOpen(false);
+                              setCurrentEducation(null);
+                              setEducationIndex(null);
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </motion.div>
+                        <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                          <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting
+                              ? "Saving..."
+                              : educationIndex !== null
+                              ? "Update"
+                              : "Add"}
+                          </Button>
+                        </motion.div>
+                      </DialogFooter>
+                    </Form>
+                  )}
+                </Formik>
+              </DialogContent>
+            </motion.div>
+          </Dialog>
+        )}
+      </AnimatePresence>
 
       {/* Experience Dialog with Formik */}
-      <Dialog
-        open={isExperienceDialogOpen}
-        onOpenChange={setIsExperienceDialogOpen}
-      >
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
-              {experienceIndex !== null ? "Edit Experience" : "Add Experience"}
-            </DialogTitle>
-            <DialogDescription>
-              {experienceIndex !== null
-                ? "Update your work experience"
-                : "Add your work experience"}
-            </DialogDescription>
-          </DialogHeader>
-          <Formik
-            initialValues={{
-              jobTitle: currentExperience?.jobTitle || "",
-              company: currentExperience?.company || "",
-              startYear:
-                currentExperience?.startYear || new Date().getFullYear(),
-              endYear: currentExperience?.endYear || "",
-            }}
-            validationSchema={ExperienceSchema}
-            onSubmit={saveExperience}
+      <AnimatePresence>
+        {isExperienceDialogOpen && (
+          <Dialog
+            open={isExperienceDialogOpen}
+            onOpenChange={setIsExperienceDialogOpen}
           >
-            {({ isSubmitting, values, errors, touched }) => (
-              <Form className="grid gap-4 py-4">
-                <FormInput
-                  label="Job Title"
-                  name="jobTitle"
-                  placeholder="e.g. Software Engineer"
-                />
-                <FormInput
-                  label="Company"
-                  name="company"
-                  placeholder="e.g. Google"
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <FormInput
-                    label="Start Year"
-                    name="startYear"
-                    type="number"
-                    placeholder="e.g. 2020"
-                  />
-                  <FormInput
-                    label="End Year (or leave blank if current)"
-                    name="endYear"
-                    type="number"
-                    placeholder="e.g. 2023"
-                  />
-                </div>
-                <DialogFooter className="border-t pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setIsExperienceDialogOpen(false);
-                      setCurrentExperience(null);
-                      setExperienceIndex(null);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting
-                      ? "Saving..."
-                      : experienceIndex !== null
-                      ? "Update"
-                      : "Add"}
-                  </Button>
-                </DialogFooter>
-              </Form>
-            )}
-          </Formik>
-        </DialogContent>
-      </Dialog>
+            <motion.div
+              variants={dialogVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>
+                    {experienceIndex !== null ? "Edit Experience" : "Add Experience"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {experienceIndex !== null
+                      ? "Update your work experience"
+                      : "Add your work experience"}
+                  </DialogDescription>
+                </DialogHeader>
+                <Formik
+                  initialValues={{
+                    jobTitle: currentExperience?.jobTitle || "",
+                    company: currentExperience?.company || "",
+                    startYear:
+                      currentExperience?.startYear || new Date().getFullYear(),
+                    endYear: currentExperience?.endYear || "",
+                  }}
+                  validationSchema={ExperienceSchema}
+                  onSubmit={saveExperience}
+                >
+                  {({ isSubmitting }) => (
+                    <Form className="grid gap-4 py-4">
+                      <FormInput
+                        label="Job Title"
+                        name="jobTitle"
+                        placeholder="e.g. Software Engineer"
+                      />
+                      <FormInput
+                        label="Company"
+                        name="company"
+                        placeholder="e.g. Google"
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormInput
+                          label="Start Year"
+                          name="startYear"
+                          type="number"
+                          placeholder="e.g. 2020"
+                        />
+                        <FormInput
+                          label="End Year (or leave blank if current)"
+                          name="endYear"
+                          type="number"
+                          placeholder="e.g. 2023"
+                        />
+                      </div>
+                      <DialogFooter className="border-t pt-4">
+                        <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setIsExperienceDialogOpen(false);
+                              setCurrentExperience(null);
+                              setExperienceIndex(null);
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </motion.div>
+                        <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                          <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting
+                              ? "Saving..."
+                              : experienceIndex !== null
+                              ? "Update"
+                              : "Add"}
+                          </Button>
+                        </motion.div>
+                      </DialogFooter>
+                    </Form>
+                  )}
+                </Formik>
+              </DialogContent>
+            </motion.div>
+          </Dialog>
+        )}
+      </AnimatePresence>
 
       {/* Profile Image Confirmation Dialog */}
-      <Dialog
-        open={isImageConfirmationOpen}
-        onOpenChange={setIsImageConfirmationOpen}
-      >
-        <DialogContent className="sm:max-w-[450px]">
-          <DialogHeader>
-            <DialogTitle>Confirm Profile Picture</DialogTitle>
-            <DialogDescription>
-              Would you like to use this image as your profile picture?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center py-4">
-            <Avatar className="h-32 w-32">
-              <AvatarImage
-                src={
-                  previewImageUrl ||
-                  user.profileUrl ||
-                  "/placeholder.svg?height=80&width=80"
-                }
-                alt="Profile preview"
-              />
-              <AvatarFallback>{user.firstName.charAt(0)}</AvatarFallback>
-            </Avatar>
-          </div>
-          <DialogFooter className="flex justify-between border-t pt-4">
-            <Button variant="outline" onClick={cancelImageUpload}>
-              <X className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
-            <Button onClick={confirmImageUpload}>
-              <Check className="h-4 w-4 mr-2" />
-              Confirm
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AnimatePresence>
+        {isImageConfirmationOpen && (
+          <Dialog
+            open={isImageConfirmationOpen}
+            onOpenChange={setIsImageConfirmationOpen}
+          >
+            <motion.div
+              variants={dialogVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <DialogContent className="sm:max-w-[450px]">
+                <DialogHeader>
+                  <DialogTitle>Confirm Profile Picture</DialogTitle>
+                  <DialogDescription>
+                    Would you like to use this image as your profile picture?
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex justify-center py-4">
+                  <Avatar className="h-32 w-32">
+                    <AvatarImage
+                      src={
+                        previewImageUrl ||
+                        user.profileUrl ||
+                        "/placeholder.svg?height=80&width=80"
+                      }
+                      alt="Profile preview"
+                    />
+                    <AvatarFallback>{user.firstName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </div>
+                <DialogFooter className="flex justify-between border-t pt-4">
+                  <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                    <Button variant="outline" onClick={cancelImageUpload}>
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </motion.div>
+                  <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                    <Button onClick={confirmImageUpload}>
+                      <Check className="h-4 w-4 mr-2" />
+                      Confirm
+                    </Button>
+                  </motion.div>
+                </DialogFooter>
+              </DialogContent>
+            </motion.div>
+          </Dialog>
+        )}
+      </AnimatePresence>
 
       {/* Resume Confirmation Dialog */}
-      <Dialog
-        open={isResumeConfirmationOpen}
-        onOpenChange={setIsResumeConfirmationOpen}
-      >
-        <DialogContent className="sm:max-w-[450px]">
-          <DialogHeader>
-            <DialogTitle>Confirm Resume Upload</DialogTitle>
-            <DialogDescription>
-              Would you like to upload this resume to your profile?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center gap-3 py-4">
-            <FileText className="h-10 w-10 text-primary" />
-            <div>
-              <p className="font-medium">{selectedResumeFile?.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {selectedResumeFile
-                  ? `${(selectedResumeFile.size / 1024 / 1024).toFixed(2)} MB`
-                  : ""}
-              </p>
-            </div>
-          </div>
-          <DialogFooter className="flex justify-between border-t pt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsResumeConfirmationOpen(false);
-                setSelectedResumeFile(null);
-              }}
+      <AnimatePresence>
+        {isResumeConfirmationOpen && (
+          <Dialog
+            open={isResumeConfirmationOpen}
+            onOpenChange={setIsResumeConfirmationOpen}
+          >
+            <motion.div
+              variants={dialogVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
             >
-              <X className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
-            <Button onClick={confirmResumeUpload}>
-              <Check className="h-4 w-4 mr-2" />
-              Upload
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+              <DialogContent className="sm:max-w-[450px]">
+                <DialogHeader>
+                  <DialogTitle>Confirm Resume Upload</DialogTitle>
+                  <DialogDescription>
+                    Would you like to upload this resume to your profile?
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex items-center gap-3 py-4">
+                  <FileText className="h-10 w-10 text-primary" />
+                  <div>
+                    <p className="font-medium">{selectedResumeFile?.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedResumeFile
+                        ? `${(selectedResumeFile.size / 1024 / 1024).toFixed(2)} MB`
+                        : ""}
+                    </p>
+                  </div>
+                </div>
+                <DialogFooter className="flex justify-between border-t pt-4">
+                  <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsResumeConfirmationOpen(false);
+                        setSelectedResumeFile(null);
+                      }}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </motion.div>
+                  <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+                    <Button onClick={confirmResumeUpload}>
+                      <Check className="h-4 w-4 mr-2" />
+                      Upload
+                    </Button>
+                  </motion.div>
+                </DialogFooter>
+              </DialogContent>
+            </motion.div>
+          </Dialog>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
