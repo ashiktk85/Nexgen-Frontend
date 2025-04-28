@@ -280,7 +280,6 @@
 
 // export default LoginPage;
 
-
 import React, { useState } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
@@ -290,7 +289,10 @@ import * as Yup from "yup";
 import { toast } from "sonner";
 import useRequest from "../hooks/useRequestUser";
 import { useDispatch } from "react-redux";
-import { userGoogleLoginAction, userLoginAction } from "@/redux/actions/userAction";
+import {
+  userGoogleLoginAction,
+  userLoginAction,
+} from "@/redux/actions/userAction";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { motion } from "framer-motion";
 
@@ -312,13 +314,13 @@ const itemVariants = {
 
 console.log("env.VITE_GOOGLE_CLIENT_ID", import.meta.env.VITE_GOOGLE_CLIENT_ID);
 
-
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const { data, loading, error, sendRequest } = useRequest();
   const dispatch = useDispatch();
-  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const GOOGLE_CLIENT_ID =
+    "356987224140-nruiian6hrfgt5sk7bf0hi7o47lm210f.apps.googleusercontent.com";
 
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
@@ -597,9 +599,8 @@ const LoginPage = () => {
         className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10"
       >
         <div className="max-w-md">
-         
           <GrapeAnimation className="sm:hidden" />
-         
+
           <motion.h2
             variants={itemVariants}
             className="text-2xl lg:text-3xl font-semibold mb-4"
