@@ -7,6 +7,9 @@ const adminAxiosInstance = axios.create({
   withCredentials: true,
 });
 
+console.log("env.VITE_backend_url", env.VITE_backend_url);
+
+
 
 adminAxiosInstance.interceptors.request.use(
   (config) => {
