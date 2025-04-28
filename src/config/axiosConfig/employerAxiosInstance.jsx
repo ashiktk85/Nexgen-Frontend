@@ -2,7 +2,9 @@ import axios from "axios";
 const env = import.meta.env;
 
 const employerAxiosInstance = axios.create({
+
   baseURL: `${env.backend_url}/employer`,
+
   withCredentials: true,
 });
 

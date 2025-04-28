@@ -2,7 +2,9 @@ import axios from "axios";
 const env = import.meta.env;
 
 const adminAxiosInstance = axios.create({
+
   baseURL: `${env.backend_url}/admin`,
+
   withCredentials: true,
 });
 
