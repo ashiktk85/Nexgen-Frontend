@@ -315,7 +315,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { data, loading, error, sendRequest } = useRequest();
   const dispatch = useDispatch();
-  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const GOOGLE_CLIENT_ID = import.meta.env.GOOGLE_CLIENT_ID;
 
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
