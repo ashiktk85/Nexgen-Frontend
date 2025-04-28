@@ -17,7 +17,7 @@ const SignupPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const GOOGLE_CLIENT_ID = import.meta.env.GOOGLE_CLIENT_ID;
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const { data, loading, error, sendRequest } = useRequestUser();
 
   const showPasswordFunction = () => {
