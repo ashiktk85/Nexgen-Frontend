@@ -2,11 +2,10 @@ import axios from "axios";
 const env = import.meta.env;
 
 const userAxiosInstance = axios.create({
-  baseURL: `http://localhost:3001`,
+  baseURL: `http://api.techpath.in`,
 
   withCredentials: true,
 });
-
 
 userAxiosInstance.interceptors.request.use(
   (config) => {
@@ -21,7 +20,6 @@ userAxiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
 
 userAxiosInstance.interceptors.response.use(
   (response) => {

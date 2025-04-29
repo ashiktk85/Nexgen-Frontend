@@ -2,11 +2,10 @@ import axios from "axios";
 const env = import.meta.env;
 
 const AdminAxiosInstance = axios.create({
-  baseURL: `http://localhost:3001/admin`,
+  baseURL: `http://api.techpath.in/admin`,
 
   withCredentials: true,
 });
-
 
 AdminAxiosInstance.interceptors.request.use(
   (config) => {
@@ -22,7 +21,6 @@ AdminAxiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
 
 AdminAxiosInstance.interceptors.response.use(
   (response) => {
