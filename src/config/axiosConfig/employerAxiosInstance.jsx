@@ -2,11 +2,10 @@ import axios from "axios";
 const env = import.meta.env;
 
 const employerAxiosInstance = axios.create({
-  baseURL: `http://localhost:3001/employer`,
+  baseURL: `http://api.techpath.in/employer`,
 
   withCredentials: true,
 });
-
 
 employerAxiosInstance.interceptors.request.use(
   (config) => {
@@ -18,7 +17,6 @@ employerAxiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
 
 employerAxiosInstance.interceptors.response.use(
   (response) => {
