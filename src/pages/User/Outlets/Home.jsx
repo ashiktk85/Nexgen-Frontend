@@ -178,9 +178,11 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
-                Find Jobs
-              </button>
+              <Link to="/all-jobs">
+                <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
+                  Find Jobs
+                </button>
+              </Link>
             </div>
             <div className="order-1 md:order-2 mb-4 md:mb-0">
               <img
@@ -226,9 +228,11 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
-                Post a Job
-              </button>
+              <Link to="/employer/register">
+                <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
+                  Post a Job
+                </button>
+              </Link>
             </div>
           </div>
         </motion.div>
