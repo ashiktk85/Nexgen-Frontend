@@ -40,7 +40,7 @@ const NavbarEmp = () => {
       >
         {/* Sidebar Items */}
         <div className="flex justify-center px-4 py-4 bg-white shadow-md min-h-[64px] z-20 sticky top-0">
-          <h1 className="text-3xl font-bold text-primary">Nexgen</h1>
+          <h1 className="text-3xl font-bold text-primary">Techpath</h1>
         </div>
 
         <div className="py-4 px-4 flex-1">
