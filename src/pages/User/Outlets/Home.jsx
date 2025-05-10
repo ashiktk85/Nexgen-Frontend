@@ -20,6 +20,7 @@ import { motion } from "framer-motion";
 import bannerImg from '/Images/bannerImg.jpg';
 import employerImg from '/Images/employer-img.jpg';
 import repairImg from '/Images/mob-repair-img1.jpg';
+import { useSelector } from "react-redux";
 
 // Animation variants for staggered children
 const containerVariants = {
@@ -40,6 +41,7 @@ const itemVariants = {
 export default function Home() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const user = useSelector((state) => state.user.seekerInfo);
 
   const fetchJobs = async () => {
     setLoading(true);
@@ -91,26 +93,28 @@ export default function Home() {
               opportunities tailored to your expertise.
             </p>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex flex-col sm:flex-row items-center gap-4 mt-6 sm:mt-8"
-            >
-              <Link to="/sign-up" className="w-full sm:w-auto">
-                <div className="rounded-lg bg-blue-500 py-3 px-6 text-center text-white transform transition-transform hover:scale-105">
-                  <span className="text-sm">Register as</span>
-                  <div className="text-lg font-semibold">Job Seeker</div>
-                </div>
-              </Link>
+            {Object.keys(user).length < 1 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="flex flex-col sm:flex-row items-center gap-4 mt-6 sm:mt-8"
+              >
+                <Link to="/sign-up" className="w-full sm:w-auto">
+                  <div className="rounded-lg bg-blue-500 py-3 px-6 text-center text-white transform transition-transform hover:scale-105">
+                    <span className="text-sm">Register as</span>
+                    <div className="text-lg font-semibold">Job Seeker</div>
+                  </div>
+                </Link>
 
-              <Link to="/employer/register" className="w-full sm:w-auto">
-                <div className="rounded-lg bg-blue-500 py-3 px-6 text-center text-white transform transition-transform hover:scale-105">
-                  <span className="text-sm">Register as</span>
-                  <div className="text-lg font-semibold">Employer</div>
-                </div>
-              </Link>
-            </motion.div>
+                <Link to="/employer/register" className="w-full sm:w-auto">
+                  <div className="rounded-lg bg-blue-500 py-3 px-6 text-center text-white transform transition-transform hover:scale-105">
+                    <span className="text-sm">Register as</span>
+                    <div className="text-lg font-semibold">Employer</div>
+                  </div>
+                </Link>
+              </motion.div>
+            )}
           </motion.div>
         </motion.div>
 
@@ -174,9 +178,11 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
-                Find Jobs
-              </button>
+              <Link to="/all-jobs">
+                <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
+                  Find Jobs
+                </button>
+              </Link>
             </div>
             <div className="order-1 md:order-2 mb-4 md:mb-0">
               <img
@@ -222,9 +228,11 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
-                Post a Job
-              </button>
+              <Link to="/employer/register">
+                <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
+                  Post a Job
+                </button>
+              </Link>
             </div>
           </div>
         </motion.div>
