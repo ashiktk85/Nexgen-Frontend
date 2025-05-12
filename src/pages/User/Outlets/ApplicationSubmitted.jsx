@@ -55,8 +55,8 @@ export default function ApplicationConfirmation() {
             >
               <FaCheckCircle className="h-5 w-5 text-green-500" />
               <p>
-                You will get an email confirmation at{" "}
-                <span className="font-medium">Philip.Mayo@gmail.com</span>
+                You will get updations at{" "}
+                <span className="font-medium">nexgendigital.in@gmail.com</span>
               </p>
             </motion.div>
 
@@ -80,9 +80,9 @@ export default function ApplicationConfirmation() {
               Keep track of your applications
             </h2>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              You will receive a status update in an email from Jobber within a
+              You will receive a status update in an email from Techpath within a
               few weeks of submitting your application. In the meantime, you can
-              view and track all your applications in the Jobber My jobs section
+              view and track all your applications in the Techpath My jobs section
               at any time.
             </p>
           </motion.div>

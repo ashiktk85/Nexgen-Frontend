@@ -36,7 +36,7 @@ const Sidebar = ({ open, setOpen }) => {
       <div className="flex items-center justify-between p-4  border-gray-700 bg-[#FFFFFF]">
         <div className="flex flex-col">
           <span className="text-2xl font-semibold text-primary">
-            Nexgen Admin
+            Techpath Admin
           </span>
           <p className="text-sm text-gray-500">Admin Dashboard</p>
         </div>
