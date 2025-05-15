@@ -21,6 +21,8 @@ import bannerImg from '/Images/bannerImg.jpg';
 import employerImg from '/Images/employer-img.jpg';
 import repairImg from '/Images/mob-repair-img1.jpg';
 import { useSelector } from "react-redux";
+import seekerImg from '/Images/cv.png'
+import businessmanImg from '/Images/businessman.png'
 
 // Animation variants for staggered children
 const containerVariants = {
@@ -70,7 +72,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
-          className="relative w-full min-h-[450px] sm:h-[500px] md:h-[600px] lg:h-[700px] flex items-center justify-center"
+          className="relative w-full h-[calc(100vh-80px)] sm:min-h-[500px] flex items-center justify-center"
         >
           <img
             src={bannerImg || "/placeholder.svg"}
@@ -98,19 +100,29 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="flex flex-col sm:flex-row items-center gap-4 mt-6 sm:mt-8"
+                className="flex flex-col sm:flex-row items-center gap-6 mt-6 sm:mt-8 w-full max-w-md"
               >
-                <Link to="/sign-up" className="w-full sm:w-auto">
-                  <div className="rounded-lg bg-blue-500 py-3 px-6 text-center text-white transform transition-transform hover:scale-105">
-                    <span className="text-sm">Register as</span>
-                    <div className="text-lg font-semibold">Job Seeker</div>
+                <Link to="/sign-up" className="w-full">
+                  <div className="flex items-center justify-between w-full rounded-lg bg-blue-500 py-4 px-6 text-white transform transition-transform hover:scale-105">
+                    <div className="mx-auto text-center">
+                      <span className="text-sm block">Register as</span>
+                      <div className="text-lg font-semibold">Job Seeker</div>
+                    </div>
+                    <img src={seekerImg} alt="img" 
+                    className="w-12 h-12"
+                    />
                   </div>
                 </Link>
 
-                <Link to="/employer/register" className="w-full sm:w-auto">
-                  <div className="rounded-lg bg-blue-500 py-3 px-6 text-center text-white transform transition-transform hover:scale-105">
-                    <span className="text-sm">Register as</span>
-                    <div className="text-lg font-semibold">Employer</div>
+                <Link to="/employer/register" className="w-full">
+                  <div className="flex items-center justify-between w-full rounded-lg bg-blue-500 py-4 px-6 text-center text-white transform transition-transform hover:scale-105">
+                    <div className="mx-auto text-center">
+                      <span className="text-sm block">Register as</span>
+                      <div className="text-lg font-semibold">Employer</div>
+                    </div>
+                    <img src={businessmanImg} alt="businessImg" 
+                    className="w-12 h-12"
+                    />
                   </div>
                 </Link>
               </motion.div>
