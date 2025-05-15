@@ -72,7 +72,8 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
-          className="relative w-full h-[calc(100vh-80px)] sm:min-h-[500px] flex items-center justify-center"
+          className="relative w-full h-[500px] sm:h-[500px] md:h-[600px] lg:h-[700px] flex items-center justify-center"
+
         >
           <img
             src={bannerImg || "/placeholder.svg"}
@@ -85,7 +86,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="absolute inset-0 flex flex-col items-center justify-center text-center px  px-4 sm:px-8 md:px-16 lg:px-20 text-white"
+            className="absolute inset-0 flex flex-col items-center justify-center text-center pt-16 sm:pt-20 md:pt-24 px-4 sm:px-8 md:px-16 lg:px-20 text-white"
           >
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold max-w-2xl leading-tight">
               Find Your Dream Job Today
@@ -115,7 +116,7 @@ export default function Home() {
                 </Link>
 
                 <Link to="/employer/register" className="w-full">
-                  <div className="flex items-center justify-between w-full rounded-lg bg-blue-500 py-4 px-6 text-center text-white transform transition-transform hover:scale-105">
+                  <div className="flex items-center justify-between w-full rounded-lg bg-blue-500 py-4 px-6 text-white transform transition-transform hover:scale-105">
                     <div className="mx-auto text-center">
                       <span className="text-sm block">Register as</span>
                       <div className="text-lg font-semibold">Employer</div>
