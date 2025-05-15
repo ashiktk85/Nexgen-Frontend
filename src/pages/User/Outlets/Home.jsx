@@ -72,7 +72,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
-          className="relative w-full h-[500px] sm:h-[500px] md:h-[600px] lg:h-[700px] flex items-center justify-center"
+          className="relative w-full h-[600px] sm:h-[600px] md:h-[700px] lg:h-[700px] flex items-center justify-center"
 
         >
           <img
