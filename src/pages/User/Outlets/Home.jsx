@@ -1,28 +1,23 @@
+"use client";
 
-
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Search,
   People,
   BarChart,
   Star,
   CheckCircleOutline,
 } from "@mui/icons-material";
 import JobCard from "@/components/User/JobCard";
-import axios from "axios";
-import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
-import { Button, Input } from "@mui/material";
-import ImageSiderComponent from "@/components/common/image-sliderComponent";
-import Navbar from "@/components/User/Navbar";
 import { motion } from "framer-motion";
-import bannerImg from '/Images/bannerImg.jpg';
-import employerImg from '/Images/employer-img.jpg';
-import repairImg from '/Images/mob-repair-img1.jpg';
+import bannerImg from "/Images/bannerImg.jpg";
+import employerImg from "/Images/employer-img.jpg";
+import repairImg from "/Images/mob-repair-img1.jpg";
 import { useSelector } from "react-redux";
-import seekerImg from '/Images/cv.png'
-import businessmanImg from '/Images/businessman.png'
+import seekerImg from "/Images/cv.png";
+import businessmanImg from "/Images/businessman.png";
+import AdBannerCarousel from "@/components/User/adBanner";
 
 // Animation variants for staggered children
 const containerVariants = {
@@ -44,6 +39,32 @@ export default function Home() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.user.seekerInfo);
+  const [adBanners, setAdBanners] = useState([]);
+
+  const fetchAdBanners = async () => {
+    try {
+      const { data } = await userAxiosInstance.get("/getAdBanners");
+      setAdBanners(data.banners || []);
+    } catch (error) {
+      console.log(error);
+      setAdBanners([
+        {
+          id: "1",
+          imageUrl:
+            "https://support.kickofflabs.com/wp-content/uploads/2019/06/Screen-Shot-on-2019-06-16-at-180523-1024x317.png",
+          link: "#",
+          altText: "Special Offer Banner",
+        },
+        {
+          id: "2",
+          imageUrl:
+            "https://static.vecteezy.com/system/resources/thumbnails/011/125/619/small/retro-vintage-golden-frames-sale-png.png",
+          link: "#",
+          altText: "Golden Sale Frame",
+        },
+      ]);
+    }
+  };
 
   const fetchJobs = async () => {
     setLoading(true);
@@ -60,6 +81,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchJobs();
+    fetchAdBanners(); // Add this line to fetch ad banners
   }, []);
 
   if (loading) return <p>Loading</p>;
@@ -73,7 +95,6 @@ export default function Home() {
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
           className="relative w-full h-[600px] sm:h-[600px] md:h-[700px] lg:h-[700px] flex items-center justify-center"
-
         >
           <img
             src={bannerImg || "/placeholder.svg"}
@@ -92,8 +113,9 @@ export default function Home() {
               Find Your Dream Job Today
             </h1>
             <p className="mt-2 text-sm sm:text-md md:text-lg max-w-2xl font-marcellus">
-              Whether you're a skilled technician or just starting out, our platform is designed to match you with job
-              opportunities tailored to your expertise.
+              Whether you're a skilled technician or just starting out, our
+              platform is designed to match you with job opportunities tailored
+              to your expertise.
             </p>
 
             {Object.keys(user).length < 1 && (
@@ -109,8 +131,10 @@ export default function Home() {
                       <span className="text-sm block">Register as</span>
                       <div className="text-lg font-semibold">Job Seeker</div>
                     </div>
-                    <img src={seekerImg} alt="img" 
-                    className="w-12 h-12"
+                    <img
+                      src={seekerImg || "/placeholder.svg"}
+                      alt="img"
+                      className="w-12 h-12"
                     />
                   </div>
                 </Link>
@@ -121,8 +145,10 @@ export default function Home() {
                       <span className="text-sm block">Register as</span>
                       <div className="text-lg font-semibold">Employer</div>
                     </div>
-                    <img src={businessmanImg} alt="businessImg" 
-                    className="w-12 h-12"
+                    <img
+                      src={businessmanImg || "/placeholder.svg"}
+                      alt="businessImg"
+                      className="w-12 h-12"
                     />
                   </div>
                 </Link>
@@ -131,6 +157,11 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
+        {/* Ad Banner Section - only renders if banners exist */}
+        {adBanners.length > 0 && (
+          <AdBannerCarousel banners={adBanners} autoSlideInterval={5000} />
+        )}
+
         {/* Jobs Recommended Section */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -138,7 +169,9 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           className="py-12 md:py-16 bg-gray-100"
         >
-          <h2 className="text-xl sm:text-2xl font-bold text-primary text-center px-4">Jobs Recommended for You</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-primary text-center px-4">
+            Jobs Recommended for You
+          </h2>
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -175,9 +208,12 @@ export default function Home() {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 sm:px-8 lg:px-16">
             <div className="order-2 md:order-1">
-              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">For Job Seekers</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
+                For Job Seekers
+              </h2>
               <p className="text-gray-700 mb-4 sm:mb-6">
-                Discover your next career move with our extensive job listings and personalized recommendations.
+                Discover your next career move with our extensive job listings
+                and personalized recommendations.
               </p>
               <ul className="space-y-2 mb-4">
                 {[
@@ -199,7 +235,7 @@ export default function Home() {
             </div>
             <div className="order-1 md:order-2 mb-4 md:mb-0">
               <img
-                src={repairImg}
+                src={repairImg || "/placeholder.svg"}
                 alt="Job seeker using laptop"
                 className="rounded-xl shadow-xl w-full h-48 sm:h-64 object-cover
                           transition-transform ease-in-out transform hover:scale-105 duration-300"
@@ -218,16 +254,19 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 sm:px-8 lg:px-16">
             <div className="mb-4 md:mb-0">
               <img
-                src={employerImg}
+                src={employerImg || "/placeholder.svg"}
                 alt="Employer posting a job"
                 className="rounded-xl shadow-xl w-full h-48 sm:h-64 object-cover
                           transition-transform ease-in-out transform hover:scale-105 duration-300"
               />
             </div>
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">For Employers</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
+                For Employers
+              </h2>
               <p className="text-gray-700 mb-4 sm:mb-6">
-                Find the perfect candidates quickly and efficiently with our advanced recruiting tools.
+                Find the perfect candidates quickly and efficiently with our
+                advanced recruiting tools.
               </p>
               <ul className="space-y-2 mb-4">
                 {[
@@ -258,7 +297,9 @@ export default function Home() {
           className="py-12 md:py-16 bg-white"
         >
           <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold">What Our Users Say</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold">
+              What Our Users Say
+            </h2>
           </div>
           <motion.div
             variants={containerVariants}
@@ -286,7 +327,9 @@ export default function Home() {
                 className="p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow"
               >
                 <p className="text-gray-700 mb-4">"{testimonial.text}"</p>
-                <p className="font-semibold text-gray-900">{testimonial.author}</p>
+                <p className="font-semibold text-gray-900">
+                  {testimonial.author}
+                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -300,7 +343,9 @@ export default function Home() {
           className="py-12 md:py-16 bg-gray-50"
         >
           <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold">Why Choose JobConnect</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold">
+              Why Choose JobConnect
+            </h2>
           </div>
           <motion.div
             variants={containerVariants}
@@ -312,12 +357,14 @@ export default function Home() {
               {
                 icon: <People className="text-blue-500 text-4xl" />,
                 title: "Large Talent Pool",
-                description: "Access thousands of qualified candidates or job listings.",
+                description:
+                  "Access thousands of qualified candidates or job listings.",
               },
               {
                 icon: <BarChart className="text-blue-500 text-4xl" />,
                 title: "Advanced Matching",
-                description: "Our AI-powered system ensures perfect job-candidate fits.",
+                description:
+                  "Our AI-powered system ensures perfect job-candidate fits.",
               },
               {
                 icon: <Star className="text-blue-500 text-4xl" />,
@@ -347,10 +394,16 @@ export default function Home() {
         className="py-6 bg-gray-200"
       >
         <div className="container mx-auto px-4">
-          <p className="text-gray-600 text-sm text-center mb-2">© 2024 JobConnect. All rights reserved.</p>
+          <p className="text-gray-600 text-sm text-center mb-2">
+            © 2024 JobConnect. All rights reserved.
+          </p>
           <div className="flex justify-center space-x-4">
-            <button className="text-blue-600 hover:underline text-sm">Terms of Service</button>
-            <button className="text-blue-600 hover:underline text-sm">Privacy</button>
+            <button className="text-blue-600 hover:underline text-sm">
+              Terms of Service
+            </button>
+            <button className="text-blue-600 hover:underline text-sm">
+              Privacy
+            </button>
           </div>
         </div>
       </motion.footer>
