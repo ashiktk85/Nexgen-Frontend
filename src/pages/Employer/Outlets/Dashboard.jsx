@@ -33,7 +33,6 @@ import {
   CloudAlert,
 } from "lucide-react";
 
-
 // import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 // import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button";
@@ -67,6 +66,7 @@ import { useSelector } from "react-redux";
 import { employerAnalyticsData } from "@/apiServices/employerApi";
 import { toast } from "sonner";
 import moment from "moment";
+import { Link } from "react-router-dom";
 
 // Sample data
 const applicationData = [
@@ -143,9 +143,9 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 export default function Dashboard() {
   const [timeRange, setTimeRange] = useState("year");
   const [overallData, setOverallData] = useState();
-  const [applicationData, setApplicationData] = useState([])
+  const [applicationData, setApplicationData] = useState([]);
   // const [sourceData, setSourceData] = useState([])
-  const [recentApplications, setRecentApplications] = useState([])
+  const [recentApplications, setRecentApplications] = useState([]);
   const Employer = useSelector((state) => state.employer.employer);
 
   const fetchData = async () => {
@@ -155,31 +155,33 @@ export default function Dashboard() {
       if (response?.data) {
         // const updated = response.data.response;
         const data = response.data;
-      
-        setOverallData(data.overallData)
-        setRecentApplications(data.recentApplications)
+
+        setOverallData(data.overallData);
+        setRecentApplications(data.recentApplications);
 
         // Format data for frontend chart (sorting by month)
-        const chartD = data.chartData
+        const chartD = data.chartData;
         const dataMap = new Map(
-          chartD.map(item => {
-              const monthKey = `${item.year}-${item.month.toString().padStart(2, "0")}`;
-              return [monthKey, item];
+          chartD.map((item) => {
+            const monthKey = `${item.year}-${item.month
+              .toString()
+              .padStart(2, "0")}`;
+            return [monthKey, item];
           })
-      );
+        );
 
-      // Generate the past 12 months
-      const last12Months = Array.from({ length: 12 }, (_, i) => {
+        // Generate the past 12 months
+        const last12Months = Array.from({ length: 12 }, (_, i) => {
           const date = moment().subtract(i, "months");
           const monthKey = date.format("YYYY-MM"); // e.g., "2025-02"
           const monthLabel = date.format("MMM"); // e.g., "Feb"
 
           return dataMap.has(monthKey)
-              ? { ...dataMap.get(monthKey), month: monthLabel } // Use existing data
-              : { month: monthLabel, applications: 0, jobs: 0, shortlist: 0 }; // Fill missing months with 0
-      }).reverse(); // Keep months in order (oldest to newest)
+            ? { ...dataMap.get(monthKey), month: monthLabel } // Use existing data
+            : { month: monthLabel, applications: 0, jobs: 0, shortlist: 0 }; // Fill missing months with 0
+        }).reverse(); // Keep months in order (oldest to newest)
 
-      setApplicationData(last12Months);
+        setApplicationData(last12Months);
       }
     } catch (error) {
       console.log(
@@ -192,8 +194,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
-  }
-  ,[]);
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -301,27 +302,24 @@ export default function Dashboard() {
         {/* Dashboard Content */}
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-6 md:gap-8 ">
           <div className="flex flex-col gap-4 md:gap-8">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col-reverse gap-4 sm:flex-col-reverse md:flex-row md:items-center md:justify-between">
               <h1 className="text-2xl font-bold tracking-tight">
                 Recruitment Dashboard
               </h1>
-              {/* <div className="flex items-center gap-2">
-                <Select value={timeRange} onValueChange={setTimeRange}>
-                  <SelectTrigger className="h-8 w-[150px]">
-                    <SelectValue placeholder="Select Range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                    <SelectItem value="quarter">This Quarter</SelectItem>
-                    <SelectItem value="year">This Year</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" size="sm" className="h-8 gap-1">
-                  <Filter className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline-block">Filter</span>
-                </Button>
-              </div> */}
+
+              <div className="flex flex-row sm:flex-col gap-2 md:flex-row md:items-center md:gap-2">
+                <Link to="/employer/create_job">
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                    Create Job
+                  </button>
+                </Link>
+
+                <Link to="/employer/job_list">
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                    View Jobs
+                  </button>
+                </Link>
+              </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -334,7 +332,9 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {overallData?.totalApplications ? overallData.totalApplications : "0"}
+                    {overallData?.totalApplications
+                      ? overallData.totalApplications
+                      : "0"}
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center">
                     <span className="text-green-500 flex items-center mr-1">
@@ -354,7 +354,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {overallData?.totalJobs ? overallData.totalJobs : '0'}
+                    {overallData?.totalJobs ? overallData.totalJobs : "0"}
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center">
                     <span className="text-green-500 flex items-center mr-1">
@@ -390,7 +390,9 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {overallData?.totalApplication ? `${overallData.totalApplication}%` : "0%"}
+                    {overallData?.totalApplication
+                      ? `${overallData.totalApplication}%`
+                      : "0%"}
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center">
                     <span className="text-red-500 flex items-center mr-1">
@@ -430,8 +432,8 @@ export default function Dashboard() {
                     className="aspect-[4/3]"
                   >
                     {!applicationData && applicationData.length < 1 ? (
-                      <div className='flex flex-col h-full items-center justify-center text-lg font-semibold text-slate-500'>
-                        <CloudAlert className="h-32 w-32"/>
+                      <div className="flex flex-col h-full items-center justify-center text-lg font-semibold text-slate-500">
+                        <CloudAlert className="h-32 w-32" />
                         <p>Data not found</p>
                       </div>
                     ) : (
@@ -550,7 +552,9 @@ export default function Dashboard() {
                             </div>
                           </td>
                           <td className="px-4 py-3">{app.jobTitle}</td>
-                          <td className="px-4 py-3">{moment(app.createdAt).format('MMM D, YYYY h:mm A')}</td>
+                          <td className="px-4 py-3">
+                            {moment(app.createdAt).format("MMM D, YYYY h:mm A")}
+                          </td>
                           <td className="px-4 py-3">{app.status}</td>
                           <td className="px-4 py-3 text-right">
                             <DropdownMenu>
