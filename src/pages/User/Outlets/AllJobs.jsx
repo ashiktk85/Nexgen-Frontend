@@ -1,14 +1,12 @@
-
-
-
 import React, { useEffect, useRef, useState } from "react";
 import { FaSearch, FaTh, FaList } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import JobCard from "../../../components/User/JobCard";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
+import { useSelector } from 'react-redux';
 
 // Animation variants for staggered children
 const containerVariants = {
@@ -38,6 +36,9 @@ const AllJobsPage = () => {
   const [searchedJobs, setSearchedJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const searchBoxRef = useRef(null);
+  const location = useLocation();
+  var { searchInput } = location.state || {};
+  const user = useSelector((state) => state.user.seekerInfo);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,37 +64,63 @@ const AllJobsPage = () => {
   }, [showSearchBox]);
 
   useEffect(() => {
-    fetchJobs();
+    if (searchInput) {
+      setSearchTerm(searchInput);
+      fetchJobs(searchInput); // ⬅️ This will fetch + search
+      window.history.replaceState({}, document.title);
+    } else {
+      fetchJobs();
+    }
   }, []);
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   filterJobs();
+  // }, [jobType, experienceLevel, searchLocation]);
+  const handleFilter = () => {
     filterJobs();
-  }, [jobType, experienceLevel, searchLocation]);
+  };
 
-  const fetchJobs = async () => {
+  const fetchJobs = async (searchInput = null) => {
     try {
       setLoading(true);
-      const { data } = await userAxiosInstance.get("/getJobPosts");
-      console.log(data);
+      const { data } = await userAxiosInstance.get("/getJobPosts", { params: { userId: user.userId } });
       setJobs(data.jobPosts);
       setFilteredJobs(data.jobPosts);
       setLoading(false);
+      console.log("RESULT", data.jobPosts)
+
+      if (searchInput) {
+        handleSearch(searchInput, data.jobPosts); // ⬅️ Pass jobs explicitly
+      }
     } catch (error) {
       setLoading(false);
       toast.warning(error?.response?.data?.message || "An error occurred");
     }
   };
 
-  const handleSearch = () => {
-    let searchedJobs = [...jobs];
-    if (searchTerm) {
-      searchedJobs = searchedJobs.filter(
-        (job) => job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  const handleSearch = (inputTerm = null, jobsList = jobs) => {
+    let term;
+
+    // Check if called as an event handler
+    if (inputTerm && inputTerm.target) {
+      // Called from a button click or keypress — use current searchTerm state
+      term = searchTerm.trim();
+    } else if (typeof inputTerm === "string") {
+      term = inputTerm.trim();
+    } else {
+      term = searchTerm.trim();
     }
-    setSearchedJobs(searchedJobs);
-    setFilteredJobs(searchedJobs);
-    setShowSearchBox(false);
+
+    console.log("HANDLESEARCH TRIGGERED", searchTerm);
+    console.log("HANDLESEARCH TRIGGERED", typeof inputTerm);
+    if (term) {
+      const searchedJobs = jobsList.filter((job) =>
+        job.jobTitle.toLowerCase().includes(term.toLowerCase())
+      );
+      setSearchedJobs(searchedJobs);
+      setFilteredJobs(searchedJobs);
+      setShowSearchBox(false);
+    }
   };
 
   const filterJobs = () => {
@@ -101,13 +128,13 @@ const AllJobsPage = () => {
       var updatedJobs = [...searchedJobs];
       console.log("searched");
     } else {
-      var updatedJobs = [...filteredJobs];
+      var updatedJobs = [...jobs];
       console.log("filter");
     }
 
     if (searchTerm) {
-      updatedJobs = updatedJobs.filter(
-        (job) => job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase())
+      updatedJobs = updatedJobs.filter((job) =>
+        job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     console.log("searchTerm", updatedJobs);
@@ -135,7 +162,11 @@ const AllJobsPage = () => {
   };
 
   const clearAll = () => {
-    setFilteredJobs(jobs);
+    if (searchTerm.length > 0) {
+      setFilteredJobs(searchedJobs);
+    } else {
+      setFilteredJobs(jobs);
+    }
     setSearchLocation("");
     setJobType("");
     setExperienceLevel("");
@@ -238,22 +269,29 @@ const AllJobsPage = () => {
                 </select>
               </motion.div>
 
-              {/* Clear All Button */}
-              <motion.button
-                variants={itemVariants}
-                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
-                onClick={clearAll}
-              >
-                Clear All
-              </motion.button>
+              {/* Filter Button */}
+              <div className="flex gap-2 items-center">
+                <motion.button
+                  variants={itemVariants}
+                  className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition text-center"
+                  onClick={handleFilter}
+                >
+                  Filter
+                </motion.button>
+
+                <motion.button
+                  variants={itemVariants}
+                  className="w-10 h-10 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex items-center justify-center"
+                  onClick={clearAll}
+                >
+                  <RxCross2 className="text-white text-lg" />
+                </motion.button>
+              </div>
             </div>
           </motion.div>
 
           {/* Search Section */}
-          <motion.div
-            variants={itemVariants}
-            className="w-full"
-          >
+          <motion.div variants={itemVariants} className="w-full">
             <div className="flex flex-row gap-3">
               <div className="w-3/4 relative mb-6" ref={searchBoxRef}>
                 <div
@@ -309,7 +347,7 @@ const AllJobsPage = () => {
                         } 
                         peer-focus:top-1 peer-focus:text-sm peer-focus:text-blue-500`}
                       >
-                        Designation/Company
+                        Enter job title
                       </label>
                     </div>
 
@@ -397,7 +435,7 @@ const AllJobsPage = () => {
                     onClick={() => setCurrentPage(currentPage - 1)}
                     className="px-4 py-2 mx-1 bg-blue-500 text-white rounded disabled:opacity-50"
                   >
-                    {'<'}
+                    {"<"}
                   </button>
 
                   {[...Array(totalPages)].map((_, index) => (
@@ -419,7 +457,7 @@ const AllJobsPage = () => {
                     onClick={() => setCurrentPage(currentPage + 1)}
                     className="px-4 py-2 mx-1 bg-blue-500 text-white rounded disabled:opacity-50"
                   >
-                    {'>'}
+                    {">"}
                   </button>
                 </motion.div>
               </>

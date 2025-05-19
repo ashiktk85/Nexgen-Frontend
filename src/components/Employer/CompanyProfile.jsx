@@ -189,14 +189,14 @@ const CompanyProfile = ({
                   </motion.div>
 
                   <motion.div
-                    className="flex items-center"
+                    className="bg-slate-400 flex items-center "
                     variants={itemVariants}
                   >
                     <InfoIcon
                       fontSize="small"
                       className="text-gray-600 mr-2"
                     />
-                    <Typography variant="body2" className="text-gray-600">
+                    <Typography variant="body2" className="text-gray-600 "> {/*  text-sm lg:text-base whitespace-pre-wrap break-words */}
                       <strong>Description:</strong>{" "}
                       {company.about || "Not available"}
                     </Typography>

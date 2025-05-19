@@ -1,7 +1,5 @@
-
-
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Search,
   People,
@@ -17,9 +15,9 @@ import { Button, Input } from "@mui/material";
 import ImageSiderComponent from "@/components/common/image-sliderComponent";
 import Navbar from "@/components/User/Navbar";
 import { motion } from "framer-motion";
-import bannerImg from '/Images/bannerImg.jpg';
-import employerImg from '/Images/employer-img.jpg';
-import repairImg from '/Images/mob-repair-img1.jpg';
+import bannerImg from "/Images/bannerImg.jpg";
+import employerImg from "/Images/employer-img.jpg";
+import repairImg from "/Images/mob-repair-img1.jpg";
 import { useSelector } from "react-redux";
 
 // Animation variants for staggered children
@@ -42,6 +40,22 @@ export default function Home() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.user.seekerInfo);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    if (e.key === "Enter" || e.type === "click") {
+      const query = searchTerm.trim();
+      if (query) {
+        navigate("/all-jobs", {
+          state: {
+            searchInput: query
+          }
+        });
+      }
+    }
+  };
 
   const fetchJobs = async () => {
     setLoading(true);
@@ -89,9 +103,28 @@ export default function Home() {
               Find Your Dream Job Today
             </h1>
             <p className="mt-2 text-sm sm:text-md md:text-lg max-w-2xl font-marcellus">
-              Whether you're a skilled technician or just starting out, our platform is designed to match you with job
-              opportunities tailored to your expertise.
+              Whether you're a skilled technician or just starting out, our
+              platform is designed to match you with job opportunities tailored
+              to your expertise.
             </p>
+
+            {/* Search box */}
+            <div className="mt-4 w-full max-w-xl flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Search jobs by title, keyword, or location"
+                className="w-full py-3 px-5 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleSearch}
+              />
+              <button
+                onClick={handleSearch}
+                className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition"
+              >
+                Search
+              </button>
+            </div>
 
             {Object.keys(user).length < 1 && (
               <motion.div
@@ -125,7 +158,9 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           className="py-12 md:py-16 bg-gray-100"
         >
-          <h2 className="text-xl sm:text-2xl font-bold text-primary text-center px-4">Jobs Recommended for You</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-primary text-center px-4">
+            Jobs Recommended for You
+          </h2>
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -162,9 +197,12 @@ export default function Home() {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 sm:px-8 lg:px-16">
             <div className="order-2 md:order-1">
-              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">For Job Seekers</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
+                For Job Seekers
+              </h2>
               <p className="text-gray-700 mb-4 sm:mb-6">
-                Discover your next career move with our extensive job listings and personalized recommendations.
+                Discover your next career move with our extensive job listings
+                and personalized recommendations.
               </p>
               <ul className="space-y-2 mb-4">
                 {[
@@ -212,9 +250,12 @@ export default function Home() {
               />
             </div>
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">For Employers</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
+                For Employers
+              </h2>
               <p className="text-gray-700 mb-4 sm:mb-6">
-                Find the perfect candidates quickly and efficiently with our advanced recruiting tools.
+                Find the perfect candidates quickly and efficiently with our
+                advanced recruiting tools.
               </p>
               <ul className="space-y-2 mb-4">
                 {[
@@ -245,7 +286,9 @@ export default function Home() {
           className="py-12 md:py-16 bg-white"
         >
           <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold">What Our Users Say</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold">
+              What Our Users Say
+            </h2>
           </div>
           <motion.div
             variants={containerVariants}
@@ -273,7 +316,9 @@ export default function Home() {
                 className="p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow"
               >
                 <p className="text-gray-700 mb-4">"{testimonial.text}"</p>
-                <p className="font-semibold text-gray-900">{testimonial.author}</p>
+                <p className="font-semibold text-gray-900">
+                  {testimonial.author}
+                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -287,7 +332,9 @@ export default function Home() {
           className="py-12 md:py-16 bg-gray-50"
         >
           <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold">Why Choose JobConnect</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold">
+              Why Choose JobConnect
+            </h2>
           </div>
           <motion.div
             variants={containerVariants}
@@ -299,12 +346,14 @@ export default function Home() {
               {
                 icon: <People className="text-blue-500 text-4xl" />,
                 title: "Large Talent Pool",
-                description: "Access thousands of qualified candidates or job listings.",
+                description:
+                  "Access thousands of qualified candidates or job listings.",
               },
               {
                 icon: <BarChart className="text-blue-500 text-4xl" />,
                 title: "Advanced Matching",
-                description: "Our AI-powered system ensures perfect job-candidate fits.",
+                description:
+                  "Our AI-powered system ensures perfect job-candidate fits.",
               },
               {
                 icon: <Star className="text-blue-500 text-4xl" />,
@@ -334,10 +383,16 @@ export default function Home() {
         className="py-6 bg-gray-200"
       >
         <div className="container mx-auto px-4">
-          <p className="text-gray-600 text-sm text-center mb-2">© 2024 JobConnect. All rights reserved.</p>
+          <p className="text-gray-600 text-sm text-center mb-2">
+            © 2024 JobConnect. All rights reserved.
+          </p>
           <div className="flex justify-center space-x-4">
-            <button className="text-blue-600 hover:underline text-sm">Terms of Service</button>
-            <button className="text-blue-600 hover:underline text-sm">Privacy</button>
+            <button className="text-blue-600 hover:underline text-sm">
+              Terms of Service
+            </button>
+            <button className="text-blue-600 hover:underline text-sm">
+              Privacy
+            </button>
           </div>
         </div>
       </motion.footer>
