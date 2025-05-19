@@ -43,7 +43,8 @@ const Navbar = () => {
   };
 
   return (
-<nav className={`fixed z-50 w-full px-3 md:px-10 lg:px-20 py-4 ${isHomePage ? '' : 'bg-white'}`}>
+<nav className={`fixed z-50 w-full px-3 md:px-10 lg:px-20 py-4 transition-colors duration-300
+     ${isHomePage ? 'bg-transparent' : 'bg-white'}`}>
       <div className="flex items-center justify-between">
         {/* Left Section: Logo */}
         <div
