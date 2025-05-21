@@ -103,6 +103,17 @@ const Sidebar = ({ open, setOpen }) => {
         >
           Verifications
         </Link>
+        <Link
+          to="/admin/banner"
+          className={`block py-2 px-4 hover:scale-105 transition-transform duration-200 
+        ${
+          location.pathname === "/admin/banner"
+            ? "font-extrabold text-blue-900"
+            : ""
+        }`}
+        >
+          Banner
+        </Link>
         <button
           onClick={handleLogout}
           className="w-full rounded-md text-left py-2 px-4 hover:bg-gradient-to-t from-slate-200 to-slate-100 flex items-center space-x-2"
