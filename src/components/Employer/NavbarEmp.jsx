@@ -59,11 +59,6 @@ const NavbarEmp = () => {
                   { label: "Jobs", url: "/employer/job_list" },
                 ],
               },
-              // {
-              //   id: "applicants",
-              //   label: "Applicants",
-              //   url: "/employer/applicants",
-              // },
               {
                 id: "company_details",
                 label: "Company Details",

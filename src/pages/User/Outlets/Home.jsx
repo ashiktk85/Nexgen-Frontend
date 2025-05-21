@@ -66,6 +66,22 @@ export default function Home() {
     }
   };
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    if (e.key === "Enter" || e.type === "click") {
+      const query = searchTerm.trim();
+      if (query) {
+        navigate("/all-jobs", {
+          state: {
+            searchInput: query
+          }
+        });
+      }
+    }
+  };
+
   const fetchJobs = async () => {
     setLoading(true);
     try {
@@ -117,6 +133,24 @@ export default function Home() {
               platform is designed to match you with job opportunities tailored
               to your expertise.
             </p>
+
+            {/* Search box */}
+            <div className="mt-4 w-full max-w-xl flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Search jobs by title, keyword, or location"
+                className="w-full py-3 px-5 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleSearch}
+              />
+              <button
+                onClick={handleSearch}
+                className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition"
+              >
+                Search
+              </button>
+            </div>
 
             {Object.keys(user).length < 1 && (
               <motion.div
