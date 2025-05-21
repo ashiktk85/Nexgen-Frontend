@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   People,
   BarChart,
@@ -18,6 +18,7 @@ import { useSelector } from "react-redux";
 import seekerImg from "/Images/cv.png";
 import businessmanImg from "/Images/businessman.png";
 import AdBannerCarousel from "@/components/User/adBanner";
+import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 
 // Animation variants for staggered children
 const containerVariants = {
@@ -40,34 +41,21 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.user.seekerInfo);
   const [adBanners, setAdBanners] = useState([]);
+  const navigate = useNavigate();
 
+  // Fetch ad banners from the same endpoint used in banner-admin
   const fetchAdBanners = async () => {
     try {
-      const { data } = await userAxiosInstance.get("/getAdBanners");
+      const { data } = await adminAxiosInstance.get("/all-banners");
       setAdBanners(data.banners || []);
     } catch (error) {
       console.log(error);
-      setAdBanners([
-        {
-          id: "1",
-          imageUrl:
-            "https://support.kickofflabs.com/wp-content/uploads/2019/06/Screen-Shot-on-2019-06-16-at-180523-1024x317.png",
-          link: "#",
-          altText: "Special Offer Banner",
-        },
-        {
-          id: "2",
-          imageUrl:
-            "https://static.vecteezy.com/system/resources/thumbnails/011/125/619/small/retro-vintage-golden-frames-sale-png.png",
-          link: "#",
-          altText: "Golden Sale Frame",
-        },
-      ]);
+      // Fallback to empty array if fetch fails
+      setAdBanners([]);
     }
   };
 
   const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
 
   const handleSearch = (e) => {
     if (e.key === "Enter" || e.type === "click") {
@@ -75,8 +63,8 @@ export default function Home() {
       if (query) {
         navigate("/all-jobs", {
           state: {
-            searchInput: query
-          }
+            searchInput: query,
+          },
         });
       }
     }
@@ -97,7 +85,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchJobs();
-    fetchAdBanners(); // Add this line to fetch ad banners
+    fetchAdBanners(); // Fetch ad banners when component mounts
   }, []);
 
   if (loading) return <p>Loading</p>;

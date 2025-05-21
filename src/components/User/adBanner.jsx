@@ -1,6 +1,4 @@
 "use client";
-
-import React from "react";
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -109,10 +107,10 @@ export default function AdBannerCarousel({
         <div
           ref={carouselRef}
           className="relative overflow-hidden rounded-lg shadow-md"
-          style={{ 
+          style={{
             height: isMobile ? "200px" : "250px",
             maxWidth: "100%",
-            margin: "0 auto"
+            margin: "0 auto",
           }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -120,12 +118,18 @@ export default function AdBannerCarousel({
         >
           <div
             className="flex transition-transform duration-500 ease-in-out h-full"
-            style={{ transform: `translateX(-${currentIndex * (isMobile ? 100 : 50)}%)` }}
+            style={{
+              transform: `translateX(-${
+                currentIndex * (isMobile ? 100 : 50)
+              }%)`,
+            }}
           >
             {banners.map((banner) => (
-              <div 
-                key={banner.id} 
-                className={`h-full flex-shrink-0 flex items-center justify-center ${isMobile ? 'w-full' : 'w-1/2'}`}
+              <div
+                key={banner.id}
+                className={`h-full flex-shrink-0 flex items-center justify-center ${
+                  isMobile ? "w-full" : "w-1/2"
+                }`}
               >
                 <a
                   href={banner.link}
@@ -142,7 +146,7 @@ export default function AdBannerCarousel({
               </div>
             ))}
           </div>
-  
+
           {/* Navigation arrows - only visible on desktop */}
           {banners.length > (isMobile ? 1 : 2) && (
             <>
@@ -162,7 +166,7 @@ export default function AdBannerCarousel({
               </button>
             </>
           )}
-  
+
           {/* Indicator dots */}
           {banners.length > (isMobile ? 1 : 2) && (
             <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
@@ -185,4 +189,4 @@ export default function AdBannerCarousel({
       </div>
     </div>
   );
-}  
+}
