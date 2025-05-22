@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Dashboard from "../components/Admin/Dashboard";
-import BannerManagement from "../components/Admin/banner"
+import BannerManagement from "../components/Admin/Banner";
 import Users from "../components/Admin/Users";
 import Employers from "../components/Admin/Employers";
 import Jobs from "../components/Admin/Jobs";
@@ -12,22 +12,70 @@ import OtpVerification from "@/pages/Admin/OtpVerification";
 import EmployerVerification from "@/components/Admin/EmployerVerification";
 import { AdminProtectedRoute } from "@/services/adminProtecter";
 
-
 function Admin() {
   return (
     <Routes>
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/admin-register" element={<AdminRegister />} />
       <Route path="/otp-verification" element={<OtpVerification />} />
-      <Route path="/" element={<AdminProtectedRoute><HomeLayout /></AdminProtectedRoute>}>
-        <Route path="/dashboard" element={<AdminProtectedRoute><Dashboard /></AdminProtectedRoute>} />
-        <Route path="/users" element={<AdminProtectedRoute><Users /></AdminProtectedRoute>} />
-        <Route path="/employers" element={<AdminProtectedRoute><Employers /></AdminProtectedRoute>} />
-        <Route path="/jobs" element={<AdminProtectedRoute><Jobs /></AdminProtectedRoute>} />
-        <Route path="/banner" element={<AdminProtectedRoute><BannerManagement /></AdminProtectedRoute>} />
+      <Route
+        path="/"
+        element={
+          <AdminProtectedRoute>
+            <HomeLayout />
+          </AdminProtectedRoute>
+        }
+      >
+        <Route
+          path="/dashboard"
+          element={
+            <AdminProtectedRoute>
+              <Dashboard />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <AdminProtectedRoute>
+              <Users />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/employers"
+          element={
+            <AdminProtectedRoute>
+              <Employers />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/jobs"
+          element={
+            <AdminProtectedRoute>
+              <Jobs />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/banner"
+          element={
+            <AdminProtectedRoute>
+              <BannerManagement />
+            </AdminProtectedRoute>
+          }
+        />
         {/* <Route path="/banner" element={<AdminProtectedRoute><Banner /></AdminProtectedRoute>} /> */}
         {/* <Route path="/employer-verification" element={<AdminProtectedRoute><EmployerVerification /></AdminProtectedRoute>} /> */}
-        <Route path="/employer-verification" element={<AdminProtectedRoute><EmployerVerification /></AdminProtectedRoute>} />
+        <Route
+          path="/employer-verification"
+          element={
+            <AdminProtectedRoute>
+              <EmployerVerification />
+            </AdminProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   );
