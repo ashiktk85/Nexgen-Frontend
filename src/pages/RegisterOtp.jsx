@@ -80,7 +80,7 @@ const RegisterOtp = () => {
   return (
     <div className="flex flex-col lg:flex-row h-screen">
       {/* Left Section */}
-      <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
+      <div className="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-center items-center text-center text-white p-6 lg:p-10">
         <div className="max-w-md">
           <GrapeAnimation className="sm:hidden" />
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
@@ -94,7 +94,7 @@ const RegisterOtp = () => {
       </div>
 
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10 font-sans">
+      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-14 lg:p-10 font-sans">
         <div className="w-full max-w-md">
           <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
           Techpath
@@ -107,7 +107,7 @@ const RegisterOtp = () => {
             . Please enter it below to verify your account.
           </p>
           <form onSubmit={handleSubmit}>
-            <div className="flex justify-center gap-3">
+            <div className="flex justify-center gap-2 lg:gap-3">
               {otp.map((digit, index) => (
                 <input
                   key={index}
@@ -118,7 +118,7 @@ const RegisterOtp = () => {
                   onChange={(e) => handleChange(e.target, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
                   onPaste={handlePaste}
-                  className={`w-14 h-14 text-center text-2xl font-semibold border ${
+                  className={`w-12 h-12 lg:w-14 lg:h-14 text-center text-2xl font-semibold border ${
                     document.activeElement === inputRefs.current[index]
                       ? "border-blue-500"
                       : "border-gray-300"
