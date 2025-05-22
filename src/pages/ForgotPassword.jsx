@@ -56,7 +56,7 @@ const ForgotPassword = () => {
         </div>
       </div>
       {/* Left Section */}
-      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-8 lg:p-10">
+      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-8 pt-20 lg:p-10">
         <div className="w-full max-w-md">
           {/* Logo */}
           <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
