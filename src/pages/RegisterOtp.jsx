@@ -94,7 +94,7 @@ const RegisterOtp = () => {
       </div>
 
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-14 lg:p-10 font-sans">
+      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-10 lg:p-10 font-sans">
         <div className="w-full max-w-md">
           <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
           Techpath
