@@ -241,7 +241,7 @@ const AllJobsPage = () => {
               {/* Clear All Button */}
               <motion.button
                 variants={itemVariants}
-                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+                className="w-full bg-primary text-white py-2 rounded-md hover:bg-blue-700 transition"
                 onClick={clearAll}
               >
                 Clear All
@@ -406,7 +406,7 @@ const AllJobsPage = () => {
                       onClick={() => setCurrentPage(index + 1)}
                       className={`px-4 py-2 mx-1 rounded ${
                         currentPage === index + 1
-                          ? "bg-blue-600 text-white"
+                          ? "bg-primary text-white"
                           : "bg-gray-300"
                       }`}
                     >
@@ -417,7 +417,7 @@ const AllJobsPage = () => {
                   <button
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage(currentPage + 1)}
-                    className="px-4 py-2 mx-1 bg-blue-500 text-white rounded disabled:opacity-50"
+                    className="px-4 py-2 mx-1 bg-primary text-white rounded disabled:opacity-50"
                   >
                     {'>'}
                   </button>
