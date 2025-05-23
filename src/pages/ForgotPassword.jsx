@@ -41,7 +41,7 @@ const ForgotPassword = () => {
   return (
     <div className="flex flex-col lg:flex-row h-screen">
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
+      <div className="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-center items-center text-center text-white p-6 lg:p-10">
         <div className="max-w-md">
           <GrapeAnimation className="sm:hidden" />
 
@@ -56,7 +56,7 @@ const ForgotPassword = () => {
         </div>
       </div>
       {/* Left Section */}
-      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
+      <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-8 pt-20 lg:p-10">
         <div className="w-full max-w-md">
           {/* Logo */}
           <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
