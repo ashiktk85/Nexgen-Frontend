@@ -2,12 +2,11 @@ import axios from "axios";
 const env = import.meta.env;
 
 const adminAxiosInstance = axios.create({
-  baseURL: `http://localhost:3001/admin`,
-
+  baseURL: `https://api.techpath.in/admin`,
   withCredentials: true,
 });
 
-console.log("env.VITE_backend_url", env.VITE_backend_url);
+// console.log("env.VITE_LOCAL_BACKEND_URL", env.VITE_LOCAL_BACKEND_URL);
 
 adminAxiosInstance.interceptors.request.use(
   (config) => {

@@ -77,8 +77,6 @@ const SignupPage = () => {
       password: Yup.string()
         .trim()
         .min(8, "Password must be at least 8 characters")
-        .matches(/[a-zA-Z]/, "Password must contain at least one letter")
-        .matches(/[0-9]/, "Password must contain at least one number")
         .required("Password is required"),
 
       confirmPassword: Yup.string()
@@ -133,14 +131,9 @@ const SignupPage = () => {
   return (
     <div className="flex flex-col lg:flex-row h-ful">
       {/* Left Section */}
-      <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
+      <div className="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-center items-center text-center text-white p-6 lg:p-10">
         <div className="max-w-md">
-          {/* <img
-      src="https://undraw.co/api/illustrations/random?color=ffffff&theme=teamwork"
-      alt="Mobile Technician Illustration"
-      className="mb-6 max-h-64 w-full object-contain"
-      loading="lazy"
-    /> */}
+
           <GrapeAnimation className="sm:hidden" />
 
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
@@ -152,11 +145,6 @@ const SignupPage = () => {
             your skills.
           </p>
 
-          {/* <div className="flex justify-center gap-2">
-      <span className="h-2 w-2 bg-white rounded-full"></span>
-      <span className="h-2 w-2 bg-white opacity-50 rounded-full"></span>
-      <span className="h-2 w-2 bg-white opacity-50 rounded-full"></span>
-    </div> */}
         </div>
       </div>
 

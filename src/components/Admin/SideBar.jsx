@@ -36,7 +36,7 @@ const Sidebar = ({ open, setOpen }) => {
       <div className="flex items-center justify-between p-4  border-gray-700 bg-[#FFFFFF]">
         <div className="flex flex-col">
           <span className="text-2xl font-semibold text-primary">
-            Nexgen Admin
+            Techpath Admin
           </span>
           <p className="text-sm text-gray-500">Admin Dashboard</p>
         </div>
@@ -102,6 +102,17 @@ const Sidebar = ({ open, setOpen }) => {
         }`}
         >
           Verifications
+        </Link>
+        <Link
+          to="/admin/banner"
+          className={`block py-2 px-4 hover:scale-105 transition-transform duration-200 
+        ${
+          location.pathname === "/admin/banner"
+            ? "font-extrabold text-blue-900"
+            : ""
+        }`}
+        >
+          Banner
         </Link>
         <button
           onClick={handleLogout}
