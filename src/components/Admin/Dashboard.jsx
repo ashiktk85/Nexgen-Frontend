@@ -6,366 +6,313 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import {
   Briefcase,
-  Building,
+  Building2,
   Users,
-  ArrowUp,
-  ArrowDown,
-  ChevronDown,
-  Loader2,
   MapPin,
   Banknote,
   Calendar,
-  FolderX,
+  FolderOpen,
+  RefreshCw,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 import { getDashboardStats } from "@/apiServices/dashboardApi";
+import StatCard from "@/components/ui/StatCard";
 
-const Dashboard = () => {
-  const [timeRange, setTimeRange] = useState("monthly");
-  const [loading, setLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState({
-    stats: {
-      totalUsers: 0,
-      totalEmployers: 0,
-      totalJobs: 0,
-      userGrowth: 0,
-      employerGrowth: 0,
-      jobGrowth: 0,
-    },
-    topJobs: [],
-    chartData: Array(12)
-      .fill()
-      .map((_, i) => ({
-        name: [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ][i],
-        users: 0,
-        employers: 0,
-        jobs: 0,
-      })),
-  });
+/* ─── helpers ─── */
+const fmt = (n) =>
+  Intl.NumberFormat("en-IN", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(n ?? 0);
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await getDashboardStats(timeRange);
-        console.log(response, "eres");
+const TIME_OPTS = [
+  { value: "weekly", label: "This Week" },
+  { value: "monthly", label: "This Month" },
+  { value: "yearly", label: "This Year" },
+];
 
-        if (response.success && response.data) {
-          setDashboardData({
-            stats: response.data.stats || {
-              totalUsers: 0,
-              totalEmployers: 0,
-              totalJobs: 0,
-              userGrowth: 0,
-              employerGrowth: 0,
-              jobGrowth: 0,
-            },
-            topJobs: response.data.topJobs || [],
-            chartData:
-              response.data.chartData ||
-              Array(12)
-                .fill()
-                .map((_, i) => ({
-                  name: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
-                  ][i],
-                  users: 0,
-                  employers: 0,
-                  jobs: 0,
-                })),
-          });
-        }
-      } catch (error) {
-        toast.error("Failed to load dashboard data");
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+const EMPTY_CHART = MONTHS.map((name) => ({
+  name,
+  users: 0,
+  employers: 0,
+  jobs: 0,
+}));
 
-    fetchData();
-  }, [timeRange]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
-      </div>
-    );
-  }
-
+/* ─── custom tooltip ─── */
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
   return (
-    <div className="flex flex-col gap-4 p-6">
-      {/* Header and controls */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <div className="flex items-center gap-4">
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select time range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="weekly">Weekly</SelectItem>
-              <SelectItem value="monthly">Monthly</SelectItem>
-              <SelectItem value="yearly">Yearly</SelectItem>
-            </SelectContent>
-          </Select>
-          {/* <Button variant="outline">
-            Export <ChevronDown className="ml-2 h-4 w-4" />
-          </Button> */}
+    <div className="bg-white border border-slate-200 rounded-xl shadow-xl p-3 text-sm min-w-[140px]">
+      <p className="font-semibold text-slate-700 mb-2">{label}</p>
+      {payload.map((p) => (
+        <div key={p.name} className="flex items-center justify-between gap-4">
+          <span className="flex items-center gap-1.5 text-slate-500">
+            <span className="w-2 h-2 rounded-full" style={{ background: p.fill }} />
+            {p.name}
+          </span>
+          <span className="font-semibold text-slate-800">{p.value.toLocaleString()}</span>
         </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard
-          title="Total Users"
-          value={dashboardData.stats.totalUsers}
-          growth={dashboardData.stats.userGrowth}
-          icon={<Users className="h-4 w-4" />}
-          timeRange={timeRange}
-        />
-        <StatCard
-          title="Total Employers"
-          value={dashboardData.stats.totalEmployers}
-          growth={dashboardData.stats.employerGrowth}
-          icon={<Building className="h-4 w-4" />}
-          timeRange={timeRange}
-        />
-        <StatCard
-          title="Total Job Posts"
-          value={dashboardData.stats.totalJobs}
-          growth={dashboardData.stats.jobGrowth}
-          icon={<Briefcase className="h-4 w-4" />}
-          timeRange={timeRange}
-        />
-      </div>
-
-      {/* Chart Section */}
-      {/* Chart Section */}
-      <Card className="mt-4">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">
-            Platform Growth
-          </CardTitle>
-          <CardDescription className="text-sm text-gray-500">
-            Comparison of users, employers, and job posts over time
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={dashboardData.chartData}
-                margin={{
-                  top: 20,
-                  right: 20,
-                  left: 20,
-                  bottom: 10,
-                }}
-                barSize={20}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="#f3f4f6"
-                />
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#6b7280", fontSize: 12 }}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#6b7280", fontSize: 12 }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: "white",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "0.5rem",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                  }}
-                  formatter={(value, name) => [value, name]}
-                  labelFormatter={(label) => `Period: ${label}`}
-                  labelStyle={{ fontWeight: "bold", color: "#1f2937" }}
-                />
-                <Legend />
-                <Bar
-                  dataKey="users"
-                  name="Users"
-                  fill="#1e40af"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="employers"
-                  name="Employers"
-                  fill="#000000"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="jobs"
-                  name="Job Posts"
-                  fill="#93c5fd"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="mt-4">
-        <CardHeader>
-          <CardTitle>Most Popular Job Posts</CardTitle>
-          <CardDescription>
-            {dashboardData.topJobs.length > 0
-              ? "Top 5 jobs with most applications"
-              : "No job applications yet"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {dashboardData.topJobs.length > 0 ? (
-            <div className="space-y-4">
-              {dashboardData.topJobs.map((job) => (
-                <div
-                  key={job._id}
-                  className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium text-lg">{job.jobTitle}</h3>
-                      {/* <p className="text-sm text-gray-600 line-clamp-2">
-                        {job.description}
-                      </p> */}
-                    </div>
-                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                      {job.applicationCount} application
-                      {job.applicationCount !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex items-center">
-                      <MapPin className="h-4 w-4 mr-1 text-gray-500" />
-                      <span>
-                        {job.city}, {job.state}, {job.country}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center">
-                      <Banknote className="h-4 w-4 mr-1 text-gray-500" />
-                      <span>
-                        {job.salaryRange[0] === 0 && job.salaryRange[1] === 0
-                          ? "Salary not specified"
-                          : `₹${job.salaryRange[0]} - ₹${job.salaryRange[1]}`}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center">
-                      <Briefcase className="h-4 w-4 mr-1 text-gray-500" />
-                      <span>
-                        {job.experienceRequired.length === 2
-                          ? `${job.experienceRequired[0]} - ${job.experienceRequired[1]} years`
-                          : job.experienceRequired.join(", ")}{" "}
-                        years
-                      </span>
-                    </div>
-
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-1 text-gray-500" />
-                      <span>
-                        {new Date(job.createdAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <FolderX className="h-10 w-10 mx-auto mb-2" />
-              <p>No job applications received yet</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      ))}
     </div>
   );
 };
 
-const StatCard = ({ title, value, growth, icon, timeRange }) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      {icon}
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value.toLocaleString()}</div>
-      <div
-        className={`flex items-center text-xs ${
-          growth >= 0 ? "text-green-500" : "text-red-500"
-        }`}
-      >
-        {growth >= 0 ? (
-          <ArrowUp className="h-3 w-3" />
-        ) : (
-          <ArrowDown className="h-3 w-3" />
-        )}
-        {Math.abs(growth).toFixed(1)}% from last {timeRange}
-      </div>
-    </CardContent>
-  </Card>
+/* ─── skeleton ─── */
+const Skeleton = ({ className }) => (
+  <div className={`animate-pulse bg-slate-100 rounded-xl ${className}`} />
 );
+
+/* ─── job card ─── */
+const JobCard = ({ job, rank }) => (
+  <div className="flex gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200 group">
+    {/* rank badge */}
+    <div className="w-8 h-8 flex-shrink-0 rounded-xl bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+      #{rank}
+    </div>
+    <div className="flex-1 min-w-0">
+      <div className="flex items-start justify-between gap-3">
+        <p className="font-semibold text-slate-800 text-sm leading-tight truncate">{job.jobTitle}</p>
+        <span className="flex-shrink-0 inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+          <Users className="w-3 h-3" />
+          {job.applicationCount}
+        </span>
+      </div>
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+        <span className="flex items-center gap-1 text-xs text-slate-500">
+          <MapPin className="w-3 h-3" /> {job.city}, {job.state}
+        </span>
+        <span className="flex items-center gap-1 text-xs text-slate-500">
+          <Banknote className="w-3 h-3" />
+          {job.salaryRange?.[0] === 0 && job.salaryRange?.[1] === 0
+            ? "Undisclosed"
+            : `₹${fmt(job.salaryRange?.[0])} – ₹${fmt(job.salaryRange?.[1])}`}
+        </span>
+        <span className="flex items-center gap-1 text-xs text-slate-500">
+          <Briefcase className="w-3 h-3" />
+          {job.experienceRequired?.join(" – ")} yrs
+        </span>
+        <span className="flex items-center gap-1 text-xs text-slate-500">
+          <Calendar className="w-3 h-3" />
+          {new Date(job.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+        </span>
+      </div>
+    </div>
+  </div>
+);
+
+/* ─── main ─── */
+const Dashboard = () => {
+  const [timeRange, setTimeRange] = useState("monthly");
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [data, setData] = useState({
+    stats: { totalUsers: 0, totalEmployers: 0, totalJobs: 0, userGrowth: 0, employerGrowth: 0, jobGrowth: 0 },
+    topJobs: [],
+    chartData: EMPTY_CHART,
+  });
+
+  const fetchData = async (silent = false) => {
+    if (!silent) setLoading(true); else setRefreshing(true);
+    try {
+      const res = await getDashboardStats(timeRange);
+      if (res?.success && res?.data) {
+        setData({
+          stats: res.data.stats ?? data.stats,
+          topJobs: res.data.topJobs ?? [],
+          chartData: res.data.chartData ?? EMPTY_CHART,
+        });
+      }
+    } catch {
+      toast.error("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, [timeRange]);
+
+  const BAR_SERIES = [
+    { key: "users", name: "Users", fill: "#3b82f6" },
+    { key: "employers", name: "Employers", fill: "#8b5cf6" },
+    { key: "jobs", name: "Job Posts", fill: "#10b981" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-slate-50/60">
+      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+
+        {/* ── header ── */}
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Admin Dashboard</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Platform overview and analytics</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* time range pills */}
+            <div className="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+              {TIME_OPTS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setTimeRange(opt.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    timeRange === opt.value
+                      ? "bg-slate-900 text-white shadow-sm"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => fetchData(true)}
+              disabled={refreshing}
+              className="w-9 h-9 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-all shadow-sm disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* ── stat cards ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {loading ? (
+            <>
+              <Skeleton className="h-28" />
+              <Skeleton className="h-28" />
+              <Skeleton className="h-28" />
+            </>
+          ) : (
+            <>
+              <StatCard
+                icon={<Users size={20} color="#fff" />}
+                value={fmt(data.stats.totalUsers)}
+                label="Total Users"
+                gradient="linear-gradient(135deg,#4f46e5 0%,#6366f1 55%,#818cf8 100%)"
+                shadow="0 8px 24px rgba(99,102,241,.35)"
+              />
+              <StatCard
+                icon={<Building2 size={20} color="#fff" />}
+                value={fmt(data.stats.totalEmployers)}
+                label="Total Employers"
+                gradient="linear-gradient(135deg,#059669 0%,#10b981 55%,#34d399 100%)"
+                shadow="0 8px 24px rgba(16,185,129,.32)"
+              />
+              <StatCard
+                icon={<Briefcase size={20} color="#fff" />}
+                value={fmt(data.stats.totalJobs)}
+                label="Job Posts"
+                gradient="linear-gradient(135deg,#0369a1 0%,#0ea5e9 55%,#38bdf8 100%)"
+                shadow="0 8px 24px rgba(14,165,233,.3)"
+              />
+            </>
+          )}
+        </div>
+
+        {/* ── chart ── */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Platform Growth</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Users, employers and job posts over time</p>
+            </div>
+            {/* legend */}
+            <div className="hidden sm:flex items-center gap-4">
+              {BAR_SERIES.map((s) => (
+                <div key={s.key} className="flex items-center gap-1.5 text-xs text-slate-500">
+                  <span className="w-2.5 h-2.5 rounded-sm" style={{ background: s.fill }} />
+                  {s.name}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-6">
+            {loading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : (
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data.chartData} barSize={10} barGap={3}
+                    margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false}
+                      tick={{ fill: "#94a3b8", fontSize: 11 }} />
+                    <YAxis axisLine={false} tickLine={false}
+                      tick={{ fill: "#94a3b8", fontSize: 11 }}
+                      tickFormatter={(v) => fmt(v)} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f8fafc", radius: 4 }} />
+                    {BAR_SERIES.map((s) => (
+                      <Bar key={s.key} dataKey={s.key} name={s.name} fill={s.fill} radius={[4, 4, 0, 0]} />
+                    ))}
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── top jobs ── */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Most Popular Job Posts</h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {data.topJobs.length > 0 ? "Top jobs by application count" : "No applications yet"}
+              </p>
+            </div>
+            {data.topJobs.length > 0 && (
+              <span className="text-xs font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
+                Top {data.topJobs.length}
+              </span>
+            )}
+          </div>
+
+          <div className="p-4">
+            {loading ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+              </div>
+            ) : data.topJobs.length > 0 ? (
+              <div className="divide-y divide-slate-100">
+                {data.topJobs.map((job, i) => (
+                  <JobCard key={job._id} job={job} rank={i + 1} />
+                ))}
+              </div>
+            ) : (
+              <div className="py-16 text-center">
+                <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <FolderOpen className="w-7 h-7 text-slate-300" />
+                </div>
+                <p className="text-sm font-medium text-slate-500">No job applications received yet</p>
+                <p className="text-xs text-slate-400 mt-1">Applications will appear here once employers start posting jobs</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
 
 export default Dashboard;

@@ -1,19 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import Sidebar from "@/components/Admin/SideBar";
-import Header from "@/components/Admin/Header";
 import { Outlet } from "react-router-dom";
 
 function HomeLayout() {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gray-100 font-inter">
-      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 p-4">
-          <Outlet />
-        </main>
+    <div className="relative bg-[#f7f6f9] min-h-screen font-[sans-serif]">
+      <div className="flex items-start">
+        <section className="main-content w-full px-10 lg:px-10">
+          <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+          <div
+            className={`transition-all duration-300 pt-8 ${
+              isCollapsed ? "lg:ml-[80px]" : "lg:ml-[250px]"
+            }`}
+          >
+            <Outlet />
+          </div>
+        </section>
       </div>
     </div>
   );

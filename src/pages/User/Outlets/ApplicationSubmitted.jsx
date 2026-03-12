@@ -24,7 +24,7 @@ export default function ApplicationConfirmation() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-background pt-24"
     >
       {/* Main Content */}
       <motion.main
@@ -94,7 +94,7 @@ export default function ApplicationConfirmation() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="text-white mt-6 bg-[#000080] hover:bg-[#001F3F] focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-10 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            className="text-white mt-6 bg-primary hover:bg-[#07407d] focus:outline-none focus:ring-4 focus:ring-primary/50 font-medium rounded-full text-sm px-10 py-2.5 text-center me-2 mb-2"
           >
             <Link to="/all-jobs">Return to job search</Link>
           </motion.button>

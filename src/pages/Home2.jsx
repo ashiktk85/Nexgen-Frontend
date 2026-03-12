@@ -194,26 +194,30 @@ export default function JobPortalLanding() {
         {/* Why Choose Us Section */}
         <div className="py-16 bg-gray-50">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold">Why Choose JobConnect</h2>
+            <h2 className="text-3xl font-bold">Why Choose TechPath</h2>
+            <p className="mt-2 text-gray-600 text-lg">
+              A fresh platform built for modern hiring
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4 lg:px-16">
             {[
               {
                 icon: <People className="text-blue-500" />,
-                title: "Large Talent Pool",
+                title: "High-intent talent, not just traffic",
                 description:
-                  "Access thousands of qualified candidates or job listings.",
+                  "TechPath curates a growing community of verified professionals and companies. We focus on quality over volume so every profile and job post is relevant and worth your time.",
               },
               {
                 icon: <BarChart className="text-blue-500" />,
-                title: "Advanced Matching",
+                title: "Smart matching that learns from you",
                 description:
-                  "Our AI-powered system ensures perfect job-candidate fits.",
+                  "Our matching engine looks beyond keywords to understand skills, experience, and preferences on both sides, improving recommendations with every interaction.",
               },
               {
                 icon: <Star className="text-blue-500" />,
-                title: "Top Companies",
-                description: "Partner with industry-leading organizations.",
+                title: "Built for ambitious teams and talent",
+                description:
+                  "TechPath is designed for fast-growing startups and forward-thinking enterprises, shaping a modern hiring experience together with early users.",
               },
             ].map((item, index) => (
               <div

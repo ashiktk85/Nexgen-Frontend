@@ -1,617 +1,322 @@
 import { useEffect, useState } from "react";
 import {
-  BarChart,
-  LineChart,
-  PieChart,
-  Bar,
-  Line,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
+  LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import {
-  ArrowDown,
-  ArrowUp,
-  Briefcase,
-  Building,
-  Calendar,
-  ChevronDown,
-  Clock,
-  Filter,
-  Home,
-  LayoutDashboard,
-  MessageSquare,
-  Search,
-  Settings,
-  User,
-  Users,
-  CloudAlert,
+  Briefcase, Users, CheckCircle2, CloudAlert,
+  ChevronDown, Plus, LayoutList, TrendingUp,
 } from "lucide-react";
 
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-// import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { DataTable } from "@/components/ui/DataTable";
+import StatCard from "@/components/ui/StatCard";
 import { useSelector } from "react-redux";
 import { employerAnalyticsData } from "@/apiServices/employerApi";
 import { toast } from "sonner";
 import moment from "moment";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
-// Sample data
-const applicationData = [
-  { month: "Jan", applications: 65, jobs: 28, shortlist: 12 },
-  { month: "Feb", applications: 59, jobs: 24, shortlist: 10 },
-  { month: "Mar", applications: 80, jobs: 35, shortlist: 15 },
-  { month: "Apr", applications: 81, jobs: 33, shortlist: 14 },
-  { month: "May", applications: 56, jobs: 25, shortlist: 11 },
-  { month: "Jun", applications: 55, jobs: 22, shortlist: 9 },
-  { month: "Jul", applications: 40, jobs: 18, shortlist: 7 },
-  { month: "Aug", applications: 45, jobs: 20, shortlist: 8 },
-  { month: "Sep", applications: 62, jobs: 27, shortlist: 12 },
-  { month: "Oct", applications: 78, jobs: 34, shortlist: 15 },
-  { month: "Nov", applications: 91, jobs: 40, shortlist: 18 },
-  { month: "Dec", applications: 74, jobs: 32, shortlist: 14 },
-];
+/* ─── Inject styles once ─── */
+if (!document.getElementById("edb-styles")) {
+  const s = document.createElement("style");
+  s.id = "edb-styles";
+  s.textContent = `
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+    .edb-root { font-family:'DM Sans',sans-serif; }
+    .edb-root h1,.edb-root h2,.edb-root h3 { font-family:'Plus Jakarta Sans',sans-serif; }
 
-const sourceData = [
-  { name: "LinkedIn", value: 35 },
-  { name: "Company Website", value: 25 },
-  { name: "Indeed", value: 20 },
-  { name: "Referrals", value: 15 },
-  { name: "Other", value: 5 },
-];
+    /* Chart card */
+    .edb-card {
+      background:#fff; border:1.5px solid #e8edf5; border-radius:18px;
+      overflow:hidden; transition:box-shadow .2s,border-color .2s;
+    }
+    .edb-card:hover { box-shadow:0 8px 28px rgba(79,70,229,.07); border-color:#c7d2fe; }
+    .edb-card-header { padding:20px 24px 0; }
+    .edb-card-body   { padding:20px 24px 24px; }
 
-// const jobPerformanceData = [
-//   { name: "Software Engineer", applications: 120, jobs: 45, hires: 8 },
-//   { name: "Product Manager", applications: 85, jobs: 30, hires: 5 },
-//   { name: "UX Designer", applications: 65, jobs: 25, hires: 4 },
-//   { name: "Data Analyst", applications: 55, jobs: 20, hires: 3 },
-//   { name: "Marketing", applications: 40, jobs: 15, hires: 2 },
-// ]
+    /* Chart title */
+    .edb-chart-title { font-size:15px; font-weight:700; color:#0f172a; margin:0 0 3px; }
+    .edb-chart-sub   { font-size:12.5px; color:#94a3b8; margin:0 0 16px; }
 
-const recentApplications = [
-  {
-    id: "APP-1234",
-    name: "John Smith",
-    position: "Software Engineer",
-    date: "2025-03-25",
-    status: "Interview",
-  },
-  {
-    id: "APP-1235",
-    name: "Sarah Johnson",
-    position: "Product Manager",
-    date: "2025-03-24",
-    status: "Review",
-  },
-  {
-    id: "APP-1236",
-    name: "Michael Brown",
-    position: "UX Designer",
-    date: "2025-03-23",
-    status: "Hired",
-  },
-  {
-    id: "APP-1237",
-    name: "Emily Davis",
-    position: "Data Analyst",
-    date: "2025-03-22",
-    status: "Rejected",
-  },
-  {
-    id: "APP-1238",
-    name: "David Wilson",
-    position: "Marketing Specialist",
-    date: "2025-03-21",
-    status: "Review",
-  },
-];
+    /* Table status badges */
+    .edb-badge {
+      display:inline-flex; align-items:center; gap:4px;
+      padding:3px 9px; border-radius:999px;
+      font-size:11px; font-weight:700;
+      font-family:'Plus Jakarta Sans',sans-serif; white-space:nowrap;
+    }
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+    /* CTA buttons */
+    .edb-btn-primary {
+      display:inline-flex; align-items:center; gap:7px;
+      padding:9px 18px; border-radius:10px; border:none; cursor:pointer;
+      font-size:13px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;
+      background:linear-gradient(135deg,#4f46e5,#6366f1); color:#fff;
+      box-shadow:0 4px 12px rgba(99,102,241,.3); transition:all .18s;
+      text-decoration:none;
+    }
+    .edb-btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(99,102,241,.38); }
+    .edb-btn-outline {
+      display:inline-flex; align-items:center; gap:7px;
+      padding:9px 18px; border-radius:10px; border:1.5px solid #e2e8f0;
+      background:#fff; color:#475569; cursor:pointer;
+      font-size:13px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;
+      transition:all .18s; text-decoration:none;
+    }
+    .edb-btn-outline:hover { border-color:#c7d2fe; color:#4f46e5; background:#f5f3ff; }
 
+    /* Custom chart tooltip */
+    .edb-tooltip {
+      background:#1e293b; border:none; border-radius:10px;
+      padding:10px 14px; font-family:'DM Sans',sans-serif;
+      box-shadow:0 8px 24px rgba(0,0,0,.18);
+    }
+    .edb-tooltip-label { font-size:11px; font-weight:700; color:#94a3b8; margin:0 0 6px; letter-spacing:.06em; text-transform:uppercase; }
+    .edb-tooltip-row   { display:flex; align-items:center; gap:8px; font-size:12.5px; color:#fff; margin:2px 0; }
+    .edb-tooltip-dot   { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+    /* Table wrapper */
+    .edb-table-wrap { overflow:auto; border-radius:12px; border:1.5px solid #f1f5f9; }
+
+    /* Legend dots */
+    .edb-legend { display:flex; flex-wrap:wrap; gap:14px; margin-top:14px; }
+    .edb-legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:#64748b; font-weight:600; }
+    .edb-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  `;
+  document.head.appendChild(s);
+}
+
+/* ─── Status badge config ─── */
+const statusStyle = (status) => {
+  const s = (status || "").toLowerCase();
+  if (s === "shortlisted" || s === "hired") return { bg: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0" };
+  if (s === "pending" || s === "review") return { bg: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" };
+  if (s === "rejected") return { bg: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" };
+  return { bg: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0" };
+};
+
+/* ─── Custom Tooltip ─── */
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  const colors = { applications: "#6366f1", jobs: "#10b981", shortlist: "#f59e0b" };
+  return (
+    <div className="edb-tooltip">
+      <p className="edb-tooltip-label">{label}</p>
+      {payload.map(p => (
+        <div key={p.dataKey} className="edb-tooltip-row">
+          <div className="edb-tooltip-dot" style={{ background: colors[p.dataKey] || p.stroke }} />
+          <span style={{ color: "#94a3b8", marginRight: 4, textTransform: "capitalize" }}>{p.dataKey}:</span>
+          <strong>{p.value}</strong>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/* ─── Variants ─── */
+const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: .09 } } };
+const itemVariants = { hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0, transition: { duration: .35, ease: "easeOut" } } };
+
+/* ════════════════════════════════════════════ */
 export default function Dashboard() {
-  const [timeRange, setTimeRange] = useState("year");
-  const [overallData, setOverallData] = useState();
+  const [overallData, setOverallData] = useState(null);
   const [applicationData, setApplicationData] = useState([]);
-  // const [sourceData, setSourceData] = useState([])
   const [recentApplications, setRecentApplications] = useState([]);
   const Employer = useSelector((state) => state.employer.employer);
 
   const fetchData = async () => {
     try {
       const response = await employerAnalyticsData(Employer?.employerId);
-      console.log("response after employer AnalyticsData: ", response);
       if (response?.data) {
-        // const updated = response.data.response;
         const data = response.data;
-
         setOverallData(data.overallData);
         setRecentApplications(data.recentApplications);
 
-        // Format data for frontend chart (sorting by month)
         const chartD = data.chartData;
-        const dataMap = new Map(
-          chartD.map((item) => {
-            const monthKey = `${item.year}-${item.month
-              .toString()
-              .padStart(2, "0")}`;
-            return [monthKey, item];
-          })
-        );
-
-        // Generate the past 12 months
-        const last12Months = Array.from({ length: 12 }, (_, i) => {
+        const dataMap = new Map(chartD.map(item => {
+          const key = `${item.year}-${item.month.toString().padStart(2, "0")}`;
+          return [key, item];
+        }));
+        const last12 = Array.from({ length: 12 }, (_, i) => {
           const date = moment().subtract(i, "months");
-          const monthKey = date.format("YYYY-MM"); // e.g., "2025-02"
-          const monthLabel = date.format("MMM"); // e.g., "Feb"
-
-          return dataMap.has(monthKey)
-            ? { ...dataMap.get(monthKey), month: monthLabel } // Use existing data
-            : { month: monthLabel, applications: 0, jobs: 0, shortlist: 0 }; // Fill missing months with 0
-        }).reverse(); // Keep months in order (oldest to newest)
-
-        setApplicationData(last12Months);
+          const key = date.format("YYYY-MM");
+          const label = date.format("MMM");
+          return dataMap.has(key)
+            ? { ...dataMap.get(key), month: label }
+            : { month: label, applications: 0, jobs: 0, shortlist: 0 };
+        }).reverse();
+        setApplicationData(last12);
       }
-    } catch (error) {
-      console.log(
-        "Error in AnalyticsData at employer listing component: ",
-        error.message
-      );
-      toast.error("An unexpected error occured");
+    } catch (err) {
+      console.error(err.message);
+      toast.error("An unexpected error occurred");
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
+
+  const columns = [
+    {
+      id: "candidate",
+      header: "Candidate",
+      cell: (row) => (
+        <span style={{ fontSize: 13.5, fontWeight: 600, color: "#0f172a" }}>{row.name}</span>
+      ),
+    },
+    { id: "position", header: "Position", accessor: "jobTitle", sortable: true },
+    {
+      id: "date", header: "Date",
+      accessor: (row) => moment(row.createdAt).format("MMM D, YYYY"),
+      sortable: true,
+    },
+    {
+      id: "status", header: "Status",
+      cell: (row) => {
+        const st = statusStyle(row.status);
+        return (
+          <span className="edb-badge" style={{ background: st.bg, color: st.color, border: st.border }}>
+            <div style={{ width: 5, height: 5, borderRadius: "50%", background: st.color }} />
+            {row.status}
+          </span>
+        );
+      },
+      sortable: true,
+    },
+  ];
+
+  const chartColors = { applications: "#6366f1", jobs: "#10b981", shortlist: "#f59e0b" };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Sidebar */}
-      {/* <div className="hidden w-64 flex-col border-r bg-muted/40 md:flex">
-        <div className="flex h-14 items-center border-b px-4">
-          <Building className="mr-2 h-6 w-6" />
-          <h1 className="font-semibold">TalentHub</h1>
-        </div>
-        <div className="flex-1 overflow-auto py-2">
-          <nav className="grid items-start px-2 text-sm font-medium">
-            <Button
-              variant="ghost"
-              className="relative flex h-9 justify-start gap-2 rounded-lg px-3 text-muted-foreground"
-            >
-              <Home className="h-4 w-4" />
-              <span>Home</span>
-            </Button>
-            <Button
-              variant="secondary"
-              className="relative flex h-9 justify-start gap-2 rounded-lg bg-primary/10 px-3 text-primary"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              <span>Dashboard</span>
-            </Button>
-            <Button
-              variant="ghost"
-              className="relative flex h-9 justify-start gap-2 rounded-lg px-3 text-muted-foreground"
-            >
-              <Briefcase className="h-4 w-4" />
-              <span>Jobs</span>
-              <Badge className="ml-auto flex h-6 w-6 items-center justify-center rounded-full">12</Badge>
-            </Button>
-            <Button
-              variant="ghost"
-              className="relative flex h-9 justify-start gap-2 rounded-lg px-3 text-muted-foreground"
-            >
-              <Users className="h-4 w-4" />
-              <span>Candidates</span>
-            </Button>
-            <Button
-              variant="ghost"
-              className="relative flex h-9 justify-start gap-2 rounded-lg px-3 text-muted-foreground"
-            >
-              <MessageSquare className="h-4 w-4" />
-              <span>Messages</span>
-              <Badge className="ml-auto flex h-6 w-6 items-center justify-center rounded-full">5</Badge>
-            </Button>
-            <Button
-              variant="ghost"
-              className="relative flex h-9 justify-start gap-2 rounded-lg px-3 text-muted-foreground"
-            >
-              <Calendar className="h-4 w-4" />
-              <span>Calendar</span>
-            </Button>
-            <Button
-              variant="ghost"
-              className="relative flex h-9 justify-start gap-2 rounded-lg px-3 text-muted-foreground"
-            >
-              <Settings className="h-4 w-4" />
-              <span>Settings</span>
-            </Button>
-          </nav>
-        </div>
-        <div className="mt-auto p-4 border-t">
-          <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarImage src="/placeholder.svg?height=32&width=32" />
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">Jane Doe</span>
-              <span className="text-xs text-muted-foreground">HR Manager</span>
-            </div>
+    <div className="edb-root" style={{ background: "#f1f5f9", minHeight: "100vh", padding: "32px 24px 56px" }}>
+      <motion.div variants={containerVariants} initial="hidden" animate="visible">
+
+        {/* ── Page heading ── */}
+        <motion.div variants={itemVariants} style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 28 }}>
+          <div>
+            <p style={{ fontSize: 11.5, fontWeight: 700, color: "#94a3b8", letterSpacing: ".09em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+              Employer Dashboard
+            </p>
+            <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-0.02em" }}>
+              Recruitment Analytics
+            </h1>
           </div>
-        </div>
-      </div> */}
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        {/* Header */}
-        {/* <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
-          <Button variant="outline" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
-          </Button>
-          <div className="w-full flex-1">
-            <form>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search..."
-                  className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
-                />
-              </div>
-            </form>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Link to="/employer/job_list" className="edb-btn-outline">
+              <LayoutList size={14} /> View Jobs
+            </Link>
+            <Link to="/employer/create_job" className="edb-btn-primary">
+              <Plus size={14} /> Post a Job
+            </Link>
           </div>
-          <Button variant="outline" size="sm" className="ml-auto h-8 gap-1">
-            <User className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline-block">Account</span>
-          </Button>
-        </header> */}
+        </motion.div>
 
-        {/* Dashboard Content */}
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-6 md:gap-8 ">
-          <div className="flex flex-col gap-4 md:gap-8">
-            <div className="flex flex-col-reverse gap-4 sm:flex-col-reverse md:flex-row md:items-center md:justify-between">
-              <h1 className="text-2xl font-bold tracking-tight">
-                Recruitment Dashboard
-              </h1>
+        {/* ── Stat cards ── */}
+        <motion.div variants={itemVariants} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 14, marginBottom: 24 }}>
+          <StatCard
+            icon={<Briefcase size={20} color="#fff" />}
+            label="Total Applications"
+            value={overallData?.totalApplications ?? "0"}
+            gradient="linear-gradient(135deg,#4f46e5 0%,#6366f1 55%,#818cf8 100%)"
+            shadow="0 8px 24px rgba(99,102,241,.35)"
+          />
+          <StatCard
+            icon={<CheckCircle2 size={20} color="#fff" />}
+            label="Active Jobs"
+            value={overallData?.totalJobs ?? "0"}
+            gradient="linear-gradient(135deg,#059669 0%,#10b981 55%,#34d399 100%)"
+            shadow="0 8px 24px rgba(16,185,129,.32)"
+          />
+          <StatCard
+            icon={<Users size={20} color="#fff" />}
+            label="Hiring Rate"
+            value={overallData?.totalApplication ? `${overallData.totalApplication}%` : "0%"}
+            gradient="linear-gradient(135deg,#b45309 0%,#f59e0b 55%,#fbbf24 100%)"
+            shadow="0 8px 24px rgba(217,119,6,.28)"
+          />
+          <StatCard
+            icon={<TrendingUp size={20} color="#fff" />}
+            label="Shortlisted"
+            value={overallData?.totalShortlisted ?? "—"}
+            gradient="linear-gradient(135deg,#7c3aed 0%,#8b5cf6 55%,#a78bfa 100%)"
+            shadow="0 8px 24px rgba(139,92,246,.3)"
+          />
+        </motion.div>
 
-              <div className="flex flex-row sm:flex-col gap-2 md:flex-row md:items-center md:gap-2">
-                <Link to="/employer/create_job">
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    Create Job
-                  </button>
-                </Link>
-
-                <Link to="/employer/job_list">
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    View Jobs
-                  </button>
-                </Link>
+        {/* ── Chart ── */}
+        <motion.div variants={itemVariants} className="edb-card" style={{ marginBottom: 24 }}>
+          <div className="edb-card-header">
+            <p className="edb-chart-title">Application Trends</p>
+            <p className="edb-chart-sub">Monthly breakdown of applications, job posts, and shortlists over the past 12 months</p>
+          </div>
+          <div className="edb-card-body">
+            {!applicationData || applicationData.length < 1 ? (
+              <div style={{ height: 280, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, color: "#94a3b8" }}>
+                <CloudAlert size={48} style={{ color: "#c7d2fe" }} />
+                <p style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>No data available</p>
               </div>
-            </div>
+            ) : (
+              <>
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={applicationData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 11.5, fill: "#94a3b8", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600 }} />
+                    <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11.5, fill: "#94a3b8", fontFamily: "'Plus Jakarta Sans',sans-serif" }} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line type="monotone" dataKey="applications" stroke={chartColors.applications} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: chartColors.applications, strokeWidth: 0 }} />
+                    <Line type="monotone" dataKey="jobs" stroke={chartColors.jobs} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: chartColors.jobs, strokeWidth: 0 }} />
+                    <Line type="monotone" dataKey="shortlist" stroke={chartColors.shortlist} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: chartColors.shortlist, strokeWidth: 0 }} />
+                  </LineChart>
+                </ResponsiveContainer>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Applications
-                  </CardTitle>
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {overallData?.totalApplications
-                      ? overallData.totalApplications
-                      : "0"}
-                  </div>
-                  <p className="text-xs text-muted-foreground flex items-center">
-                    <span className="text-green-500 flex items-center mr-1">
-                      <ArrowUp className="h-3 w-3 mr-1" />
-                      12.5%
-                    </span>
-                    from last month
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Active Jobs
-                  </CardTitle>
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {overallData?.totalJobs ? overallData.totalJobs : "0"}
-                  </div>
-                  <p className="text-xs text-muted-foreground flex items-center">
-                    <span className="text-green-500 flex items-center mr-1">
-                      <ArrowUp className="h-3 w-3 mr-1" />
-                      4.2%
-                    </span>
-                    from last month
-                  </p>
-                </CardContent>
-              </Card>
-              {/* <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Time to Hire</CardTitle>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">18 days</div>
-                  <p className="text-xs text-muted-foreground flex items-center">
-                    <span className="text-green-500 flex items-center mr-1">
-                      <ArrowDown className="h-3 w-3 mr-1" />
-                      3.1%
-                    </span>
-                    from last month
-                  </p>
-                </CardContent>
-              </Card> */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Hiring Rate
-                  </CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {overallData?.totalApplication
-                      ? `${overallData.totalApplication}%`
-                      : "0%"}
-                  </div>
-                  <p className="text-xs text-muted-foreground flex items-center">
-                    <span className="text-red-500 flex items-center mr-1">
-                      <ArrowDown className="h-3 w-3 mr-1" />
-                      1.8%
-                    </span>
-                    from last month
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="lg:col-span-4">
-                <CardHeader>
-                  <CardTitle>Application Trends</CardTitle>
-                  <CardDescription>
-                    Monthly application, jobs, and hire rates
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      applications: {
-                        label: "Applications",
-                        color: "hsl(var(--chart-1))",
-                      },
-                      jobs: {
-                        label: "jobs",
-                        color: "hsl(var(--chart-2))",
-                      },
-                      hires: {
-                        label: "shortlist",
-                        color: "hsl(var(--chart-3))",
-                      },
-                    }}
-                    className="aspect-[4/3]"
-                  >
-                    {!applicationData && applicationData.length < 1 ? (
-                      <div className="flex flex-col h-full items-center justify-center text-lg font-semibold text-slate-500">
-                        <CloudAlert className="h-32 w-32" />
-                        <p>Data not found</p>
-                      </div>
-                    ) : (
-                      <LineChart
-                        data={applicationData}
-                        margin={{ top: 5, right: 10, left: 10, bottom: 0 }}
-                      >
-                        <XAxis
-                          dataKey="month"
-                          tickLine={false}
-                          axisLine={false}
-                        />
-                        <YAxis
-                          tickLine={false}
-                          axisLine={false}
-                          tickFormatter={(value) => `${value}`}
-                        />
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Line
-                          type="monotone"
-                          dataKey="applications"
-                          stroke="var(--color-applications)"
-                          strokeWidth={2}
-                          dot={false}
-                          activeDot={{ r: 6 }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="jobs"
-                          stroke="var(--color-jobs)"
-                          strokeWidth={2}
-                          dot={false}
-                          activeDot={{ r: 6 }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="shortlist"
-                          stroke="var(--color-hires)"
-                          strokeWidth={2}
-                          dot={false}
-                          activeDot={{ r: 6 }}
-                        />
-                      </LineChart>
-                    )}
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-
-              {/* <Card className="lg:col-span-3">
-                <CardHeader>
-                  <CardTitle>Candidate Sources</CardTitle>
-                  <CardDescription>
-                    Where candidates are coming from
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={sourceData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, percent }) =>
-                            `${name} ${(percent * 100).toFixed(0)}%`
-                          }
-                        >
-                          {sourceData.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={COLORS[index % COLORS.length]}
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card> */}
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Applications</CardTitle>
-                <CardDescription>Latest candidate applications</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b text-left">
-                        <th className="px-4 py-3 font-medium">S.No</th>
-                        <th className="px-4 py-3 font-medium">Candidate</th>
-                        <th className="px-4 py-3 font-medium">Position</th>
-                        <th className="px-4 py-3 font-medium">Date</th>
-                        <th className="px-4 py-3 font-medium">Status</th>
-                        <th className="px-4 py-3 font-medium text-right">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recentApplications.map((app, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="px-4 py-3 font-medium">{index + 1}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <span>{app.name}</span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">{app.jobTitle}</td>
-                          <td className="px-4 py-3">
-                            {moment(app.createdAt).format("MMM D, YYYY h:mm A")}
-                          </td>
-                          <td className="px-4 py-3">{app.status}</td>
-                          <td className="px-4 py-3 text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <span className="sr-only">Actions</span>
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem>
-                                  View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                  Schedule Interview
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                  Send Message
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                  Reject Application
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                {/* Custom legend */}
+                <div className="edb-legend">
+                  {Object.entries(chartColors).map(([key, color]) => (
+                    <div key={key} className="edb-legend-item">
+                      <div className="edb-legend-dot" style={{ background: color }} />
+                      <span style={{ textTransform: "capitalize" }}>{key}</span>
+                    </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
+              </>
+            )}
           </div>
-        </main>
-      </div>
-    </div>
-  );
-}
+        </motion.div>
 
-// Menu icon component
-function Menu(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="4" x2="20" y1="12" y2="12" />
-      <line x1="4" x2="20" y1="6" y2="6" />
-      <line x1="4" x2="20" y1="18" y2="18" />
-    </svg>
+        {/* ── Recent Applications table ── */}
+        <motion.div variants={itemVariants} className="edb-card">
+          <div className="edb-card-header" style={{ paddingBottom: 16, borderBottom: "1.5px solid #f1f5f9" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+              <div>
+                <p className="edb-chart-title">Recent Applications</p>
+                <p className="edb-chart-sub" style={{ marginBottom: 0 }}>Latest candidate applications across all your job listings</p>
+              </div>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b", background: "#f1f5f9", padding: "4px 12px", borderRadius: 999, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                {recentApplications.length} total
+              </span>
+            </div>
+          </div>
+          <div className="edb-card-body" style={{ paddingTop: 16 }}>
+            <div className="edb-table-wrap">
+              <DataTable
+                columns={columns}
+                data={recentApplications}
+                selectable={false}
+                showActions={true}
+                compact={false}
+                showSno={true}
+                currentPage={1}
+                totalPages={1}
+                onPageChange={() => { }}
+                onViewDetails={() => { }}
+                onOthers={() => { }}
+              />
+            </div>
+          </div>
+        </motion.div>
+
+      </motion.div>
+    </div>
   );
 }

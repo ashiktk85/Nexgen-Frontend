@@ -3,110 +3,147 @@ import { MdPlace } from "react-icons/md";
 import { FaIndianRupeeSign } from "react-icons/fa6";
 import { IoBriefcase } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
-import { Button, Tag } from "antd";
-import {
-  EditOutlined,
-  EyeInvisibleOutlined,
-  DeleteOutlined,
-  EyeOutlined
-} from "@ant-design/icons";
+import { EditOutlined, EyeInvisibleOutlined, DeleteOutlined, EyeOutlined, TeamOutlined } from "@ant-design/icons";
 import moment from "moment";
+
+/* ─── Inject styles once ─── */
+if (!document.getElementById("ejc-styles")) {
+  const s = document.createElement("style");
+  s.id = "ejc-styles";
+  s.textContent = `
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+    .ejc-root { font-family:'DM Sans',sans-serif; }
+    .ejc-root h2,.ejc-root h3 { font-family:'Plus Jakarta Sans',sans-serif; }
+
+    .ejc-card {
+      background:#fff;
+      border:1.5px solid #e8edf5;
+      border-radius:14px;
+      transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+      overflow:hidden;
+      width:100%;
+    }
+    .ejc-card:hover {
+      box-shadow:0 8px 28px rgba(79,70,229,.09);
+      transform:translateY(-2px);
+      border-color:#c7d2fe;
+    }
+    .ejc-accent { height:3px; background:linear-gradient(90deg,#6366f1,#a5b4fc); opacity:0; transition:opacity .2s; }
+    .ejc-card:hover .ejc-accent { opacity:1; }
+
+    .ejc-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:3px 9px; border-radius:999px;
+      font-size:11.5px; font-weight:600;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      white-space:nowrap;
+    }
+
+    .ejc-action-btn {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:6px 12px; border-radius:8px; border:1.5px solid #e2e8f0;
+      font-size:12px; font-weight:600; cursor:pointer;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      background:#fff; color:#475569;
+      transition:all .18s ease; white-space:nowrap;
+    }
+    .ejc-action-btn:hover { background:#f8fafc; border-color:#c7d2fe; color:#4f46e5; }
+    .ejc-action-btn.danger:hover { background:#fef2f2; border-color:#fecaca; color:#ef4444; }
+    .ejc-action-btn.primary { background:linear-gradient(135deg,#4f46e5,#6366f1); color:#fff; border-color:transparent; box-shadow:0 3px 8px rgba(99,102,241,.25); }
+    .ejc-action-btn.primary:hover { opacity:.9; transform:translateY(-1px); }
+
+    .ejc-meta { display:flex; align-items:center; gap:5px; font-size:12px; color:#64748b; }
+  `;
+  document.head.appendChild(s);
+}
+
+/* ─── Avatar gradient ─── */
+const getGrad = (ch = "A") => {
+  const gs = ["linear-gradient(135deg,#6366f1,#818cf8)","linear-gradient(135deg,#0ea5e9,#38bdf8)","linear-gradient(135deg,#f59e0b,#fbbf24)","linear-gradient(135deg,#10b981,#34d399)","linear-gradient(135deg,#ec4899,#f472b6)"];
+  return gs[((ch.toUpperCase().charCodeAt(0)-65)%gs.length+gs.length)%gs.length];
+};
 
 const JobCard = ({ job, handleEdit, handleDelete, handleStatus, layout }) => {
   const navigate = useNavigate();
-
-  // const jobDetailNavigation = () => {
-  //   navigate(`/job-details/${job._id}`);
-  // };
+  const isList = layout === "list";
+  const initial = job.jobTitle?.charAt(0) || "J";
+  const isOpen = job?.status === "open";
 
   return (
-    <article
-      className={`bg-white shadow-md rounded-lg p-5 space-y-4 transition-all ${
-        layout === "list" ? "w-full " : "w-80 mx-auto"
-      } `}
-      aria-label="Job listing card"
-    >
-      <div className={`layout === "list` ? "flex items-center  gap-4" : ""}>
-        {/* <figure
-          className={`${
-            layout === "list" ? "w-12 h-12" : "w-10 h-10"
-          } bg-black rounded-full flex items-center justify-center`}
-          aria-hidden="true"
-        >
-          <span className="text-white font-bold text-lg">F</span>
-        </figure> */}
-        {/* Logo Section */}
+    <article className="ejc-root ejc-card" aria-label="Job listing card">
+      <div className="ejc-accent" />
+      <div style={{ padding: isList ? "14px 18px" : "16px 18px" }}>
 
-        {/* Job Info */}
-        <div
-          className={`${
-            layout === "list" ? "w-full flex justify-between gap-4" : ""
-          }`}
-        >
-          <h1 className="text-lg font-semibold text-gray-800">
-            {job.jobTitle}
-          </h1>
-          <p className="text-sm text-gray-500">
-            Post on: {moment(job?.createdAt).format("MMMM Do, YYYY")}
-          </p>
+        {/* ── Top Row ── */}
+        <div style={{ display:"flex", alignItems:"flex-start", gap:12, marginBottom:12 }}>
+          {/* Avatar */}
+          <div style={{
+            width:42, height:42, borderRadius:11, flexShrink:0,
+            background:getGrad(initial), display:"flex", alignItems:"center",
+            justifyContent:"center", fontSize:17, fontWeight:800,
+            color:"#fff", fontFamily:"'Plus Jakarta Sans',sans-serif",
+            boxShadow:"0 3px 10px rgba(99,102,241,.2)"
+          }}>
+            {initial}
+          </div>
 
-          {/* Job Details */}
-          <div className="flex items-center space-x-2 text-gray-600 text-sm">
-            <IoBriefcase />
-            <p>
-              {[
-                job.experienceRequired[0],
-                job.experienceRequired[job.experienceRequired.length - 1],
-              ].join(" - ")}{" "}
-              yrs
+          {/* Title + date */}
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, flexWrap:"wrap" }}>
+              <h2 style={{ fontSize:14.5, fontWeight:700, color:"#0f172a", margin:0, letterSpacing:"-0.01em", lineHeight:1.3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:220 }}>
+                {job.jobTitle}
+              </h2>
+              {/* Status pill */}
+              <span className="ejc-badge" style={isOpen
+                ? { background:"#f0fdf4", color:"#16a34a", border:"1px solid #bbf7d0" }
+                : { background:"#f8fafc", color:"#94a3b8", border:"1px solid #e2e8f0" }
+              }>
+                <div style={{ width:5, height:5, borderRadius:"50%", background: isOpen ? "#22c55e" : "#94a3b8" }} />
+                {isOpen ? "Active" : "Closed"}
+              </span>
+            </div>
+            <p style={{ fontSize:11.5, color:"#94a3b8", margin:"3px 0 0", fontWeight:500 }}>
+              Posted {moment(job?.createdAt).format("MMM D, YYYY")}
             </p>
           </div>
-          <div className="flex items-center space-x-2 text-gray-600 text-sm">
-            <MdPlace />
-            <p>{`${job.city}, ${job.country}`}</p>
-          </div>
-          <div className="flex items-center space-x-2 text-gray-600 text-sm">
-            <FaIndianRupeeSign />
-            <p>{job.salaryRange?.join(" - ")}</p>
-          </div>
-
-          {/* Status Tag */}
-          {/* <Tag
-            className={`${layout === "list" ? "flex items-center h-5" : ""}`}
-            color={job?.isBlocked ? "red" : "green"}
-          >
-            {job?.isBlocked ? "Inactive" : "Active"}
-          </Tag> */}
-          <Button
-            type="default"
-            // icon={<TeamOutlined />}
-            onClick={() => navigate(`/employer/applicants/${job?._id}`)}
-            className="flex items-center mt-1"
-          >
-            Applicants ( {job?.applicantsCount} )
-          </Button>
-          {/* Actions */}
         </div>
 
-        {/* Actions */}
-      </div>
-      <footer className="flex space-x-1 justify-end">
-        <Button icon={<EditOutlined />} onClick={()=>handleEdit(job)}>
-          Edit
-        </Button>
-        <Button icon={job?.status === "open" ? <EyeInvisibleOutlined /> : <EyeOutlined />} onClick={()=>handleStatus(job)}>
-          {job?.status === "open" ? "Close": "Open"}
-        </Button>
-        <Button icon={<DeleteOutlined />} onClick={()=>handleDelete(job)} danger>
-          Delete
-        </Button>
-        {/* <Button
-          className="bg-blue-600 text-white hover:bg-blue-700"
-          onClick={jobDetailNavigation}
+        {/* ── Meta chips ── */}
+        <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:12 }}>
+          <span className="ejc-meta"><IoBriefcase style={{ color:"#6366f1", fontSize:12 }} />{job.experienceRequired[0]}–{job.experienceRequired[job.experienceRequired.length-1]} yrs</span>
+          <span style={{ color:"#e2e8f0" }}>·</span>
+          <span className="ejc-meta"><MdPlace style={{ color:"#ec4899", fontSize:13 }} />{job.city}, {job.country}</span>
+          <span style={{ color:"#e2e8f0" }}>·</span>
+          <span className="ejc-meta"><FaIndianRupeeSign style={{ color:"#16a34a", fontSize:11 }} />{job.salaryRange?.join(" – ")}</span>
+        </div>
+
+        {/* ── Applicants count ── */}
+        <button
+          className="ejc-action-btn primary"
+          style={{ marginBottom:12, fontSize:12 }}
+          onClick={() => navigate(`/employer/applicants/${job?._id}`)}
         >
-          Job Details
-        </Button> */}
-      </footer>
+          <TeamOutlined style={{ fontSize:12 }} />
+          {job?.applicantsCount} Applicant{job?.applicantsCount !== 1 ? "s" : ""}
+        </button>
+
+        {/* ── Divider ── */}
+        <div style={{ height:1, background:"#f1f5f9", margin:"0 0 12px" }} />
+
+        {/* ── Action buttons ── */}
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+          <button className="ejc-action-btn" onClick={() => handleEdit(job)}>
+            <EditOutlined style={{ fontSize:11 }} /> Edit
+          </button>
+          <button className="ejc-action-btn" onClick={() => handleStatus(job)}>
+            {isOpen ? <EyeInvisibleOutlined style={{ fontSize:11 }} /> : <EyeOutlined style={{ fontSize:11 }} />}
+            {isOpen ? "Close" : "Reopen"}
+          </button>
+          <button className="ejc-action-btn danger" onClick={() => handleDelete(job)}>
+            <DeleteOutlined style={{ fontSize:11 }} /> Delete
+          </button>
+        </div>
+      </div>
     </article>
   );
 };

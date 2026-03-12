@@ -278,7 +278,9 @@ const BannerManagement = () => {
             <DialogHeader>
               <DialogTitle>Add New Banner</DialogTitle>
               <DialogDescription>
-                Upload a new banner image to display on the website.
+                Upload a banner for the home page. Use{" "}
+                <strong>1200×300 px (4:1 ratio)</strong> for a perfect fit. You can add
+                multiple banners; they will scroll in a carousel (one at a time with arrows and dots).
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddBanner}>
@@ -316,7 +318,7 @@ const BannerManagement = () => {
                           Click to upload or drag and drop
                         </span>
                         <span className="text-xs text-gray-400 mt-1">
-                          PNG, JPG or GIF (Recommended: 1200×200px)
+                          PNG, JPG or GIF. Recommended: <strong>1200×300 px</strong> (4:1). Max 5MB.
                         </span>
                         <input
                           id="image-upload"
@@ -359,7 +361,8 @@ const BannerManagement = () => {
         <CardHeader>
           <CardTitle>All Banners</CardTitle>
           <CardDescription>
-            Manage promotional banners displayed on the website
+            Banners appear on the home page in a carousel. One banner is shown at a time;
+            with multiple active banners, users can scroll with arrows or dots. Upload at 1200×300 px for best fit.
           </CardDescription>
         </CardHeader>
         <CardContent>

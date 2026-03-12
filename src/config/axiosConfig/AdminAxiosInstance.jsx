@@ -2,7 +2,7 @@ import axios from "axios";
 const env = import.meta.env;
 
 const AdminAxiosInstance = axios.create({
-  baseURL: `https://api.techpath.in/admin`,
+  baseURL: `${import.meta.env.VITE_BACKEND_URL || 'https://api.techpath.in'}/admin`,
   withCredentials: true,
 });
 
@@ -11,7 +11,7 @@ AdminAxiosInstance.interceptors.request.use(
     // Build the full URL
     const fullUrl = `${config.baseURL || ""}${config.url}`;
     console.log("Full URL:", fullUrl);
-    
+
     // You can add additional configurations or modifications here if needed
     return config;
   },

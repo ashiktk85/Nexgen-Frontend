@@ -1,152 +1,303 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardFooter,
-//   CardHeader,
-//   CardTitle
-// } from "../ui/card";
-
-// import {
-//   Avatar,
-//   AvatarFallback,
-//   AvatarImage
-// } from "../ui/avatar";
-
 import { MdPlace } from "react-icons/md";
 import { FaIndianRupeeSign } from "react-icons/fa6";
 import { IoBriefcase } from "react-icons/io5";
 import { calculateTimeAgo } from "@/utils/dateFormation";
 
+/* ─── Inline styles injected once ─── */
+const styleTag = document.getElementById("jobcard-styles");
+if (!styleTag) {
+  const s = document.createElement("style");
+  s.id = "jobcard-styles";
+  s.textContent = `
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+    .jc-root { font-family: 'DM Sans', sans-serif; }
+    .jc-root h2 { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .jc-card {
+      background: #ffffff;
+      border: 1.5px solid #e8edf5;
+      border-radius: 16px;
+      transition: box-shadow 0.22s ease, transform 0.22s ease, border-color 0.22s ease;
+      cursor: default;
+      overflow: hidden;
+    }
+    .jc-card:hover {
+      box-shadow: 0 12px 40px rgba(79,70,229,0.1);
+      transform: translateY(-3px);
+      border-color: #c7d2fe;
+    }
+
+    .jc-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      color: #fff;
+      border-radius: 12px;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .jc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      padding: 4px 9px;
+      font-size: 12px;
+      color: #64748b;
+      white-space: nowrap;
+    }
+
+    .jc-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      border: 1.5px solid transparent;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      white-space: nowrap;
+    }
+    .jc-btn-apply {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(34,197,94,0.28);
+    }
+    .jc-btn-apply:hover {
+      background: #fff;
+      color: #16a34a;
+      border-color: #22c55e;
+      box-shadow: none;
+    }
+    .jc-btn-applied {
+      background: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
+      border-color: #e2e8f0;
+    }
+
+    /* List layout specific */
+    .jc-list-layout {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      flex: 1;
+    }
+    .jc-grid-layout {
+      display: flex;
+      flex-direction: column;
+      padding: 24px 24px 28px;
+      flex: 1;
+    }
+
+    /* Accent top bar */
+    .jc-accent-bar {
+      height: 3px;
+      background: linear-gradient(90deg, #6366f1, #a5b4fc);
+      opacity: 0;
+      transition: opacity 0.22s;
+    }
+    .jc-card:hover .jc-accent-bar { opacity: 1; }
+  `;
+  document.head.appendChild(s);
+}
+
+/* ─── Avatar color palette based on first letter ─── */
+const avatarGradients = [
+  "linear-gradient(135deg, #6366f1, #818cf8)",
+  "linear-gradient(135deg, #0ea5e9, #38bdf8)",
+  "linear-gradient(135deg, #f59e0b, #fbbf24)",
+  "linear-gradient(135deg, #10b981, #34d399)",
+  "linear-gradient(135deg, #ec4899, #f472b6)",
+  "linear-gradient(135deg, #8b5cf6, #a78bfa)",
+  "linear-gradient(135deg, #ef4444, #f87171)",
+  "linear-gradient(135deg, #14b8a6, #2dd4bf)",
+];
+const getAvatarGradient = (letter = "J") => {
+  const idx = (letter.toUpperCase().charCodeAt(0) - 65) % avatarGradients.length;
+  return avatarGradients[Math.max(0, idx)];
+};
+
+/* ═══════════════════════════════════════════
+   JobCard
+═══════════════════════════════════════════ */
 const JobCard = ({ job, layout }) => {
   const navigate = useNavigate();
+  const isList = layout === "list";
+  // First letter of shop/company for avatar (like job cards)
+  const initial = (job.companyName || job.jobTitle)?.charAt(0)?.toUpperCase() || "J";
 
-  const jobDetailNavigation = () => {
-    navigate(`/job-details/${job._id}`);
-  };
-
-  const handleApplyJob = (job) => {
+  const jobDetailNavigation = () => navigate(`/job-details/${job._id}`);
+  const handleApplyJob = () =>
     navigate(`/job-application/${job._id}`, {
       state: {
         jobTitle: job?.jobTitle,
         companyName: job?.companyName,
         phone: job?.phone,
         companyLocation: `${job?.state}, ${job?.city}`,
-        employerId: job?.employerId
-      }
+        employerId: job?.employerId,
+      },
     });
-  };
 
   return (
-    <article
-      className={`bg-white shadow-md rounded-2xl transition-all hover:shadow-lg 
-    ${
-      layout === "list"
-        ? "w-full flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 sm:p-6"
-        : "w-full max-w-sm mx-auto p-5"
-    }`}
-      aria-label="Job listing card"
-    >
-      {/* Logo Section */}
-      <figure
-        className={`${
-          layout === "list"
-            ? "w-14 h-14 sm:w-16 sm:h-16 mb-3 sm:mb-0"
-            : "w-14 h-14 mb-3"
-        } 
-      bg-black rounded-full flex items-center justify-center flex-shrink-0`}
-        aria-hidden="true"
-      >
-        <span className="text-white font-bold text-lg">
-          {job.companyName?.charAt(0) || "J"}
-        </span>
-      </figure>
+    <article className="jc-root jc-card" style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column" }} aria-label="Job listing card">
+      {/* Animated accent bar */}
+      <div className="jc-accent-bar" style={{ flexShrink: 0 }} />
 
-      {/* Job Info */}
-      <div className={`${layout === "list" ? "flex-1" : ""}`}>
-        <h1 className="text-lg font-semibold text-gray-800">{job.jobTitle}</h1>
-        {/* <p className="text-sm text-gray-500">{job.companyName.toUpperCase()}</p> */}
+      <div className={isList ? "jc-list-layout" : "jc-grid-layout"} >
 
-        {/* Job Details */}
-        <div className="space-y-1">
-          <div className="flex items-center space-x-2 text-gray-600 text-sm">
-            <MdPlace className="flex-shrink-0" />
-            <p className="truncate">{`${job.city}, ${job.country}`}</p>
-          </div>
+        {/* ── Avatar ── */}
+        <div
+          className="jc-avatar"
+          style={{
+            width: isList ? 52 : 48,
+            height: isList ? 52 : 48,
+            fontSize: isList ? 20 : 18,
+            background: getAvatarGradient(initial),
+            marginBottom: isList ? 0 : 14,
+            boxShadow: "0 4px 12px rgba(99,102,241,0.2)",
+          }}
+        >
+          {initial}
+        </div>
 
-          <div className="flex items-center space-x-2 text-gray-600 text-sm">
-            <FaIndianRupeeSign className="flex-shrink-0" />
-            <p className="truncate">{job.salaryRange?.join(" - ")}</p>
-          </div>
-
-          <div className="flex items-center space-x-2 text-gray-600 text-sm">
-            <IoBriefcase className="flex-shrink-0" />
-            <p className="truncate">
-              {job.experienceRequired[0]} -{" "}
-              {job.experienceRequired[job.experienceRequired.length - 1]} yrs
+        {/* ── Main Info ── */}
+        <div style={{ flex: 1, minWidth: 0, marginBottom: isList ? 0 : 14 }}>
+          {/* Title + company */}
+          <div style={{ marginBottom: 8 }}>
+            <h2
+              style={{
+                fontSize: isList ? 15 : 16,
+                fontWeight: 700,
+                color: "#0f172a",
+                margin: 0,
+                lineHeight: 1.3,
+                letterSpacing: "-0.01em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {job.jobTitle}
+            </h2>
+            <p
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "#6366f1",
+                margin: "3px 0 0",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+              }}
+            >
+              {job.companyName}
             </p>
           </div>
+
+          {/* Badges */}
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+            }}
+          >
+            <span className="jc-badge">
+              <MdPlace style={{ color: "#6366f1", fontSize: 13 }} />
+              {job.city}, {job.country}
+            </span>
+            <span className="jc-badge">
+              <FaIndianRupeeSign style={{ color: "#16a34a", fontSize: 11 }} />
+              {job.salaryRange?.join(" – ")}
+            </span>
+            <span className="jc-badge">
+              <IoBriefcase style={{ color: "#f59e0b", fontSize: 12 }} />
+              {job.experienceRequired[0]}–{job.experienceRequired[job.experienceRequired.length - 1]} yrs
+            </span>
+          </div>
         </div>
+
+        {/* ── Footer: time + buttons ── */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: isList ? "column" : "row",
+            alignItems: isList ? "flex-end" : "center",
+            justifyContent: isList ? "center" : "space-between",
+            gap: 12,
+            marginTop: isList ? 0 : 16,
+            flexShrink: 0,
+          }}
+        >
+          {/* Time ago pill */}
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: "#94a3b8",
+              background: "#f8fafc",
+              border: "1px solid #f1f5f9",
+              borderRadius: 6,
+              padding: "3px 8px",
+              whiteSpace: "nowrap",
+              alignSelf: isList ? "flex-end" : "auto",
+            }}
+          >
+            🕐 {calculateTimeAgo(job.createdAt)}
+          </span>
+
+          {/* Action buttons */}
+          <div
+            style={{
+              display: "flex",
+              gap: 7,
+              flexDirection: isList ? "column" : "row",
+              width: isList ? "100%" : "auto",
+            }}
+          >
+            <button
+              className={`jc-btn ${job.alreadyApplied ? "jc-btn-applied" : "jc-btn-apply"}`}
+              disabled={job.alreadyApplied}
+              aria-label={job.alreadyApplied ? "Already applied" : "Apply to job"}
+              onClick={!job.alreadyApplied ? handleApplyJob : undefined}
+              style={{ flex: isList ? 1 : "none" }}
+            >
+              {job.alreadyApplied ? "✓ Applied" : "Apply Now"}
+            </button>
+
+            <button
+              className={
+                "jc-btn jc-btn-details " +
+                "bg-gradient-to-r from-indigo-950 via-indigo-900 to-indigo-800 " +
+                "text-white border border-indigo-900/60 shadow-md " +
+                "hover:bg-gradient-to-r hover:from-indigo-600 hover:via-indigo-500 hover:to-indigo-400 " +
+                "hover:shadow-lg hover:-translate-y-0.5 " +
+                "transition-all duration-150"
+              }
+              aria-label="View job details"
+              onClick={jobDetailNavigation}
+              style={{ flex: isList ? 1 : "none" }}
+            >
+              Details →
+            </button>
+          </div>
+        </div>
+
       </div>
-
-      <footer
-        className={`mt-1 w-full flex flex-col items-center sm:items-end gap-2`}
-      >
-        {/* Date in top-right */}
-        <p className="text-xs sm:text-sm text-gray-500 self-end">
-          {calculateTimeAgo(job.createdAt)}
-        </p>
-
-        {/* Buttons centered below */}
-        <div className={`${layout === "list" ? "w-full md:w-fit flex flex-col sm:flex-row items-center justify-center gap-2" : "w-full flex flex-col sm:flex-row items-center justify-center gap-2"}`}>
-          {/* Apply / Applied Button */}
-          <button
-            className={`text-sm font-medium px-4 py-2 rounded-lg border transition w-full sm:w-auto
-        ${
-          job.alreadyApplied
-            ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-            : "bg-green-500 text-white hover:bg-white hover:border-green-500 hover:text-green-500"
-        }`}
-            disabled={job.alreadyApplied}
-            aria-label={job.alreadyApplied ? "Already applied" : "Apply to job"}
-            onClick={!job.alreadyApplied ? ()=> handleApplyJob(job) : undefined}
-          >
-            {job.alreadyApplied ? "Applied" : "Apply"}
-          </button>
-
-          {/* Job Details Button */}
-          <button
-            className="bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg 
-        hover:bg-white border hover:border-blue-500 hover:text-blue-500 transition w-full sm:w-auto"
-            aria-label="View job details"
-            onClick={jobDetailNavigation}
-          >
-            Job Details
-          </button>
-        </div>
-      </footer>
-
-      {/* Job Details Button and Posted Date */}
-      {/* <footer
-    className={`mt-4 ${layout === "list"
-      ? "w-full sm:w-auto flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 sm:ml-auto"
-      : "flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0"
-    }`}
-  >
-    <button
-      className="bg-primary text-white text-sm font-medium px-4 py-2 rounded-lg 
-        hover:bg-white border hover:border-blue-500 hover:text-blue-500 transition w-full sm:w-auto"
-      aria-label="View job details"
-      onClick={jobDetailNavigation}
-    >
-      Job Details
-    </button>
-
-    <p className="text-xs sm:text-sm text-gray-500">{calculateTimeAgo(job.createdAt)}</p>
-  </footer> */}
     </article>
   );
 };

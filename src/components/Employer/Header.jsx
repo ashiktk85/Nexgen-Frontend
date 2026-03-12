@@ -4,14 +4,28 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import { logout } from "@/redux/slices/employer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 import NavbarEmp from "./NavbarEmp";
 
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const employerData = useSelector((state) => state.employer.employer);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   console.log(employerData);
+  const confirmLogout = () => setIsLogoutDialogOpen(true);
+
   const handleLogout = async () => {
     try {
       const response = await employerAxiosInstance.post("/logout");
@@ -187,7 +201,7 @@ const Header = () => {
                     Schedules
                   </Link>
                   <p
-                    onClick={handleLogout}
+                    onClick={confirmLogout}
                     className="text-sm text-gray-800 cursor-pointer flex items-center p-2 rounded-md hover:bg-gray-100 dropdown-item transition duration-300 ease-in-out"
                   >
                     <svg
@@ -208,6 +222,23 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
+        <AlertDialogContent className="bg-white rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will need to sign in again to access your employer dashboard.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white">
+              Logout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </header>
   );
 };

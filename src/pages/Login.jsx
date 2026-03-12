@@ -38,6 +38,7 @@ const LoginPage = () => {
   const { data, loading, error, sendRequest } = useRequest();
   const dispatch = useDispatch();
   const GOOGLE_CLIENT_ID =
+    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
     "356987224140-nruiian6hrfgt5sk7bf0hi7o47lm210f.apps.googleusercontent.com";
 
   const showPasswordFunction = () => {
@@ -97,8 +98,8 @@ const LoginPage = () => {
       const result = await dispatch(
         userGoogleLoginAction({ id_token: credential })
       ).unwrap();
-      if (result) {
-        localStorage.setItem("token", result.token);
+      if (result?.userData?.token) {
+        localStorage.setItem("token", result.userData.token);
         toast.success("Google Login successful!");
         setTimeout(() => {
           navigate("/");

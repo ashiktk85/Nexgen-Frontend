@@ -25,11 +25,11 @@ export const userLoginAction = createAsyncThunk(
 );
 
 export const userGoogleLoginAction = createAsyncThunk(
-  "user/login",
-  async (id_token, { rejectWithValue }) => {
+  "user/googleLogin",
+  async ({ id_token }, { rejectWithValue }) => {
     try {
       const response = await userAxiosInstance.post("/google-login", {
-        credential: id_token,
+        credential: { id_token },
       });
       console.log("Response after google login: ", response);
       console.log("Response after google login cred: ", response.data.cred);

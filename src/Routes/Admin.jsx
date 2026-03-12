@@ -4,6 +4,7 @@ import Dashboard from "../components/Admin/Dashboard";
 import BannerManagement from "../components/Admin/Banner";
 import Users from "../components/Admin/Users";
 import Employers from "../components/Admin/Employers";
+import Shops from "../components/Admin/Shops";
 import Jobs from "../components/Admin/Jobs";
 import HomeLayout from "@/pages/Admin/Layout/HomeLayout";
 import AdminLogin from "@/pages/Admin/AdminLogin";
@@ -47,6 +48,14 @@ function Admin() {
           element={
             <AdminProtectedRoute>
               <Employers />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/shops"
+          element={
+            <AdminProtectedRoute>
+              <Shops />
             </AdminProtectedRoute>
           }
         />

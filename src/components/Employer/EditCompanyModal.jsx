@@ -43,7 +43,7 @@ const EditCompanyModal = ({ company = {}, open, close, onSave }) => {
   const validateField = (name, value) => {
     let errorMsg = "";
     if (name === "companyName" && !value.trim()) {
-      errorMsg = "Company Name is required";
+      errorMsg = "Shop Name is required";
     } else if (
       name === "email" &&
       !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)
@@ -102,12 +102,12 @@ const EditCompanyModal = ({ company = {}, open, close, onSave }) => {
         </IconButton>
 
         <Typography variant="h6" className="pb-7 text-center">
-          Edit Company Details
+          Edit Shop Details
         </Typography>
 
         <TextField
           fullWidth
-          label="Company Name"
+          label="Shop Name"
           name="companyName"
           value={formData.companyName}
           onChange={handleChange}

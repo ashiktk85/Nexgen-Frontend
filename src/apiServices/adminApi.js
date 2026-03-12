@@ -2,10 +2,19 @@ import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 
 import { toast } from "sonner";
 
-export const getAllUsersSerive = async (page, limit) => {
+export const getAllUsersSerive = async (page, limit, search = "") => {
   try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+
+    if (search) {
+      params.append("search", search);
+    }
+
     const response = await adminAxiosInstance.get(
-      `/getUsers?page=${page}&limit=${limit}`
+      `/getUsers?${params.toString()}`
     );
     return response;
   } catch (error) {
@@ -36,10 +45,42 @@ export const userChangeStatusService = async (userId) => {
   }
 };
 
-export const getAllEmployerVerification = async (page, limit, type) => {
+// PRIORITY VISIBILITY FEATURE — update user role (public/student)
+export const changeUserRoleService = async (userId, data) => {
   try {
+    const response = await adminAxiosInstance.put(
+      `/changeUserRole/${userId}`,
+      data
+    );
+    return response;
+  } catch (error) {
+    console.error(
+      "Error in changeUserRoleService at admin Api service: ",
+      error
+    );
+    let errorMessage = "An unexpected error occurred";
+    if (error.response) {
+      errorMessage =
+        error.response.data.message ||
+        `Error ${error.response.status}: ${error.response.statusText}`;
+    }
+    toast.error(errorMessage);
+  }
+};
+
+export const getAllEmployerVerification = async (page, limit, type, search = "") => {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+
+    if (search) {
+      params.append("search", search);
+    }
+
     const response = await adminAxiosInstance.get(
-      `/getAllApplication/${type}?page=${page}&limit=${limit}`
+      `/getAllApplication/${type}?${params.toString()}`
     );
     return response;
   } catch (error) {
@@ -54,15 +95,29 @@ export const getAllEmployerVerification = async (page, limit, type) => {
   }
 };
 
-export const employerVerificationChangeStatus = async (applicationId, decision) => {
+export const employerVerificationChangeStatus = async (employerId, decision, reason) => {
   try {
-    const data = {
-        'verificationStatus' : decision,
+    if (decision === "Rejected") {
+      const response = await adminAxiosInstance.post(
+        `/rejectEmployer/${employerId}`,
+        { reason }
+      );
+      return response;
     }
-    const response = await adminAxiosInstance.put(`/changeEmployerVerification/${applicationId}`, data);
+
+    const data = {
+      verificationStatus: decision,
+    };
+    const response = await adminAxiosInstance.put(
+      `/changeEmployerVerification/${employerId}`,
+      data
+    );
     return response;
   } catch (error) {
-    console.error("Error in get updating verification at admin Api service: ", error);
+    console.error(
+      "Error in get updating verification at admin Api service: ",
+      error
+    );
     let errorMessage = "An unexpected error occurred";
     if (error.response) {
       errorMessage =
@@ -73,21 +128,73 @@ export const employerVerificationChangeStatus = async (applicationId, decision) 
   }
 };
 
-export const getAllEmployers = async (page, limit) => {
-    try {
-        const response = await adminAxiosInstance.get(`/getEmployers?page=${page}&limit=${limit}`)
-        return response
-    } catch (error) {
-        console.error('Error in get all employers at admin Api service: ', error)
-        let errorMessage = "An unexpected error occurred";
-        if(error.response){
-            errorMessage = error.response.data.message || `Error ${error.response.status}: ${error.response.statusText}`
-        }
-        toast.error(errorMessage)
+export const getAllEmployers = async (page, limit, search = "") => {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+
+    if (search) {
+      params.append("search", search);
     }
-}
 
+    const response = await adminAxiosInstance.get(
+      `/getEmployers?${params.toString()}`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in get all employers at admin Api service: ", error);
+    let errorMessage = "An unexpected error occurred";
+    if (error.response) {
+      errorMessage =
+        error.response.data.message ||
+        `Error ${error.response.status}: ${error.response.statusText}`;
+    }
+    toast.error(errorMessage);
+  }
+};
 
+export const getAllShops = async (page, limit, search = "") => {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (search) params.append("search", search);
+    const response = await adminAxiosInstance.get(
+      `/getShops?${params.toString()}`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in get all shops at admin Api service: ", error);
+    let errorMessage =
+      error.response?.data?.message || "An unexpected error occurred";
+    toast.error(errorMessage);
+  }
+};
+
+// PRIORITY VISIBILITY FEATURE — bulk-create institute students
+export const bulkCreateStudentsService = async (students) => {
+  try {
+    const response = await adminAxiosInstance.post("/students/bulk", {
+      students,
+    });
+    return response;
+  } catch (error) {
+    console.error(
+      "Error in bulkCreateStudentsService at admin Api service: ",
+      error
+    );
+    let errorMessage = "An unexpected error occurred";
+    if (error.response) {
+      errorMessage =
+        error.response.data.message ||
+        `Error ${error.response.status}: ${error.response.statusText}`;
+    }
+    toast.error(errorMessage);
+  }
+};
 export const employerListUnList = async (employerId) => {
     try {
         const response = await adminAxiosInstance.put(`/changeEmployerStatus/${employerId}`)
@@ -102,17 +209,30 @@ export const employerListUnList = async (employerId) => {
     }
 }
 
-export const getAllJobs = async (page, limit) => {
+export const getAllJobs = async (page, limit, search = "") => {
   try {
-      const response = await adminAxiosInstance.get(`/getJobs?page=${page}&limit=${limit}`)
-      return response
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+
+    if (search) {
+      params.append("search", search);
+    }
+
+    const response = await adminAxiosInstance.get(
+      `/getJobs?${params.toString()}`
+    );
+    return response;
   } catch (error) {
-      console.error('Error in get all jobs at admin Api service: ', error)
-      let errorMessage = "An unexpected error occurred";
-      if(error.response){
-          errorMessage = error.response.data.message || `Error ${error.response.status}: ${error.response.statusText}`
-      }
-      toast.error(errorMessage)
+    console.error("Error in get all jobs at admin Api service: ", error);
+    let errorMessage = "An unexpected error occurred";
+    if (error.response) {
+      errorMessage =
+        error.response.data.message ||
+        `Error ${error.response.status}: ${error.response.statusText}`;
+    }
+    toast.error(errorMessage);
   }
 }
 
@@ -135,7 +255,7 @@ export const jobListUnList = async (jobId) => {
 export const getEmployerVerificationDetails = async (id) => {
   try {
     const response = await adminAxiosInstance.get(
-      `/employer-verification/${id}`
+      `/employer-verification-files/${id}`
     );
     return response;
   } catch (error) {

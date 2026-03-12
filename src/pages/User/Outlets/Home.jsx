@@ -7,6 +7,12 @@ import {
   BarChart,
   Star,
   CheckCircleOutline,
+  Facebook,
+  Twitter,
+  LinkedIn,
+  Mail,
+  // MapPin,
+  Phone,
 } from "@mui/icons-material";
 import JobCard from "@/components/User/JobCard";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
@@ -88,9 +94,22 @@ export default function Home() {
   const fetchJobs = async () => {
     setLoading(true);
     try {
-      const { data } = await userAxiosInstance.get("/getJobPosts");
-      console.log(data.jobPosts);
-      setJobs(data.jobPosts);
+      const { data } = await userAxiosInstance.get("/getJobPosts", {
+        params: { userId: user?.userId, page: 1, limit: 12 },
+      });
+      const jobPosts = data?.jobs || data?.jobPosts || [];
+      console.log(jobPosts);
+
+      // Sort: Unapplied first, then by newest date
+      const sortedJobs = (jobPosts || []).sort((a, b) => {
+        if (a.alreadyApplied !== b.alreadyApplied) {
+          return a.alreadyApplied ? 1 : -1;
+        }
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+
+      // Limit to 12 jobs for the Home page
+      setJobs(sortedJobs.slice(0, 12));
     } catch (error) {
       console.log(error);
     } finally {
@@ -113,12 +132,12 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
-          className="relative w-full h-[600px] sm:h-[600px] md:h-[700px] lg:h-[700px] flex items-center justify-center"
+          className="relative w-full min-h-[520px] sm:min-h-[600px] md:min-h-[700px] flex items-center justify-center"
         >
           <img
             src={bannerImg || "/placeholder.svg"}
             alt="Banner"
-            className="w-full h-full object-cover opacity-80"
+            className="absolute inset-0 w-full h-full object-cover opacity-80"
           />
           <div className="absolute top-0 left-0 w-full h-full bg-black/60"></div>
 
@@ -138,7 +157,7 @@ export default function Home() {
             </p>
 
             {/* Search box */}
-            <div className="mt-4 w-full max-w-xl flex items-center gap-2">
+            <div className="mt-4 w-full max-w-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <input
                 type="text"
                 placeholder="Search jobs by title, keyword, or location"
@@ -149,7 +168,7 @@ export default function Home() {
               />
               <button
                 onClick={handleSearch}
-                className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition"
+                className="bg-primary text-white px-4 py-3 rounded-lg hover:bg-[#07407d] transition w-full sm:w-auto"
               >
                 Search
               </button>
@@ -163,7 +182,7 @@ export default function Home() {
                 className="flex flex-col sm:flex-row items-center gap-6 mt-6 sm:mt-8 w-full max-w-md"
               >
                 <Link to="/sign-up" className="w-full">
-                  <div className="flex items-center justify-between w-full rounded-lg bg-blue-500 py-4 px-6 text-white transform transition-transform hover:scale-105">
+                  <div className="flex items-center justify-between w-full rounded-lg bg-primary py-4 px-6 text-white transform transition-transform hover:scale-105">
                     <div className="mx-auto text-center">
                       <span className="text-sm block">Register as</span>
                       <div className="text-lg font-semibold">Job Seeker</div>
@@ -177,7 +196,7 @@ export default function Home() {
                 </Link>
 
                 <Link to="/employer/register" className="w-full">
-                  <div className="flex items-center justify-between w-full rounded-lg bg-blue-500 py-4 px-6 text-white transform transition-transform hover:scale-105">
+                  <div className="flex items-center justify-between w-full rounded-lg bg-primary py-4 px-6 text-white transform transition-transform hover:scale-105">
                     <div className="mx-auto text-center">
                       <span className="text-sm block">Register as</span>
                       <div className="text-lg font-semibold">Employer</div>
@@ -194,47 +213,76 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        {/* Ad Banner Section - only renders if banners exist */}
-        {adBanners.length > 0 && (
-          <AdBannerCarousel banners={adBanners} autoSlideInterval={5000} />
-        )}
-
         {/* Jobs Recommended Section */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
-          className="py-12 md:py-16 bg-gray-100"
+          className="py-16 md:py-20 bg-slate-200"
         >
-          <h2 className="text-xl sm:text-2xl font-bold text-primary text-center px-4">
-            Jobs Recommended for You
-          </h2>
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="container mx-auto max-w-screen-xl mt-6 sm:mt-8"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4 sm:px-5">
+          <div className="container mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+                Featured Job Opportunities
+              </h2>
+              <p className="text-gray-600 text-lg">
+                Discover roles perfectly matched to your skills and aspirations
+              </p>
+            </motion.div>
+
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
               {jobs?.map((job, index) => (
-                <motion.div key={index} variants={itemVariants}>
+                <motion.div
+                  key={index}
+                  variants={itemVariants}
+                  className="h-full flex"
+                >
                   <JobCard job={job} />
                 </motion.div>
               ))}
-            </div>
-          </motion.div>
+            </motion.div>
 
-          <div className="mt-8 text-center">
-            <Link to="/all-jobs">
-              <button
-                className="px-6 py-2 bg-white border border-blue-500 text-blue-500 shadow-md rounded-lg
-                hover:bg-blue-500 hover:text-white transition duration-300"
-              >
-                Browse All Jobs
-              </button>
-            </Link>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="mt-12 text-center"
+            >
+              <Link to="/all-jobs">
+                <button
+                  className="px-8 py-3 bg-primary text-white font-semibold rounded-lg
+                  hover:bg-[#07407d] transition duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                >
+                  View All Jobs
+                </button>
+              </Link>
+            </motion.div>
+
+            {/* Ad Banner Section (mobile) */}
+            {adBanners.length > 0 && (
+              <div className="mt-8 md:hidden">
+                <AdBannerCarousel banners={adBanners} autoSlideInterval={5000} />
+              </div>
+            )}
           </div>
         </motion.div>
+
+        {/* Ad Banner Section - only renders if banners exist */}
+        {adBanners.length > 0 && (
+          <div className="hidden md:block">
+            <AdBannerCarousel banners={adBanners} autoSlideInterval={5000} />
+          </div>
+        )}
 
         {/* For Job Seekers Section */}
         <motion.div
@@ -326,100 +374,70 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Testimonials Section */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          className="py-12 md:py-16 bg-white"
-        >
-          <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              What Our Users Say
-            </h2>
-          </div>
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 px-4 sm:px-8 lg:px-16"
-          >
-            {[
-              {
-                text: "JobConnect helped me find my dream job in just two weeks. The platform is user kinematic-friendly and the job recommendations were spot-on!",
-                author: "Sarah T. - Software Developer",
-              },
-              {
-                text: "As an employer, I've been impressed with the quality of candidates we've found through JobConnect. It's streamlined our hiring process significantly.",
-                author: "Mark R. - HR Manager",
-              },
-              {
-                text: "The AI-powered matching on JobConnect is a game-changer. I've never had such relevant job recommendations before!",
-                author: "Emily L. - Marketing Specialist",
-              },
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-                className="p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <p className="text-gray-700 mb-4">"{testimonial.text}"</p>
-                <p className="font-semibold text-gray-900">
-                  {testimonial.author}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
+        {/* Testimonials Section removed */}
 
         {/* Why Choose Us Section */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
-          className="py-12 md:py-16 bg-gray-50"
+          className="py-16 md:py-20 bg-gradient-to-b from-gray-50 to-white"
         >
-          <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              Why Choose JobConnect
-            </h2>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-xl">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+                Why Choose TechPath
+              </h2>
+              <p className="text-gray-600 text-lg">
+                A fresh platform built for modern hiring
+              </p>
+            </motion.div>
+
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+            >
+              {[
+                {
+                  icon: <People className="text-blue-500 text-5xl" />,
+                  title: "High-intent talent, not just traffic",
+                  description:
+                    "TechPath curates a growing community of verified professionals and companies. We focus on quality over volume so every profile and job post is relevant and worth your time.",
+                },
+                {
+                  icon: <BarChart className="text-blue-500 text-5xl" />,
+                  title: "Smart matching that learns from you",
+                  description:
+                    "Our matching engine looks beyond keywords to understand skills, experience, and preferences on both sides, improving recommendations with every interaction.",
+                },
+                {
+                  icon: <Star className="text-blue-500 text-5xl" />,
+                  title: "Built for ambitious teams and talent",
+                  description:
+                    "TechPath is designed for fast-growing startups and forward-thinking enterprises, shaping a modern hiring experience together with early users.",
+                },
+              ].map((item, index) => (
+                <motion.div
+                  key={index}
+                  variants={itemVariants}
+                  className="p-8 bg-white border border-gray-200 rounded-xl text-center shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 group"
+                >
+                  <div className="mb-4 flex justify-center transform group-hover:scale-110 transition-transform duration-300">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-gray-900">{item.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 px-4 sm:px-8 lg:px-16"
-          >
-            {[
-              {
-                icon: <People className="text-blue-500 text-4xl" />,
-                title: "Large Talent Pool",
-                description:
-                  "Access thousands of qualified candidates or job listings.",
-              },
-              {
-                icon: <BarChart className="text-blue-500 text-4xl" />,
-                title: "Advanced Matching",
-                description:
-                  "Our AI-powered system ensures perfect job-candidate fits.",
-              },
-              {
-                icon: <Star className="text-blue-500 text-4xl" />,
-                title: "Top Companies",
-                description: "Partner with industry-leading organizations.",
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-                className="p-6 bg-white border rounded-lg text-center shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="mb-4 flex justify-center">{item.icon}</div>
-                <h3 className="text-lg font-bold mb-2">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
-              </motion.div>
-            ))}
-          </motion.div>
         </motion.div>
       </main>
 
@@ -428,20 +446,152 @@ export default function Home() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="py-6 bg-gray-200"
+        className="bg-gray-900 text-gray-100 pt-16 pb-8"
       >
-        <div className="container mx-auto px-4">
-          <p className="text-gray-600 text-sm text-center mb-2">
-            © 2024 JobConnect. All rights reserved.
-          </p>
-          <div className="flex justify-center space-x-4">
-            <button className="text-blue-600 hover:underline text-sm">
-              Terms of Service
-            </button>
-            <button className="text-blue-600 hover:underline text-sm">
-              Privacy
-            </button>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Main Footer Content */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            {/* About Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              <h3 className="text-xl font-bold text-white mb-4">Techpath</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Connecting talented professionals with opportunities that match their skills and ambitions.
+              </p>
+              <div className="flex gap-4 mt-4">
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition">
+                  <Facebook size={20} />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition">
+                  <Twitter size={20} />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition">
+                  <LinkedIn size={20} />
+                </a>
+              </div>
+            </motion.div>
+
+            {/* For Job Seekers */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <h4 className="text-lg font-semibold text-white mb-4">For Job Seekers</h4>
+              <ul className="space-y-2">
+                <li>
+                  <a href="/all-jobs" className="text-gray-400 hover:text-blue-400 transition text-sm">
+                    Browse Jobs
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-blue-400 transition text-sm">
+                    My Applications
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-blue-400 transition text-sm">
+                    Career Advice
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-blue-400 transition text-sm">
+                    Resume Tips
+                  </a>
+                </li>
+              </ul>
+            </motion.div>
+
+            {/* For Employers */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <h4 className="text-lg font-semibold text-white mb-4">For Employers</h4>
+              <ul className="space-y-2">
+                <li>
+                  <a href="/employer/register" className="text-gray-400 hover:text-blue-400 transition text-sm">
+                    Post a Job
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-blue-400 transition text-sm">
+                    Browse Candidates
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-blue-400 transition text-sm">
+                    Pricing Plans
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-blue-400 transition text-sm">
+                    Hiring Resources
+                  </a>
+                </li>
+              </ul>
+            </motion.div>
+
+            {/* Contact Info */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <h4 className="text-lg font-semibold text-white mb-4">Contact Us</h4>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-2 text-gray-400 text-sm">
+                  {/* <MapPin size={16} className="text-blue-400 flex-shrink-0" /> */}
+                  <span>123 Tech Street, City, Country</span>
+                </li>
+                <li className="flex items-center gap-2 text-gray-400 text-sm">
+                  <Phone size={16} className="text-blue-400 flex-shrink-0" />
+                  <a href="tel:+1234567890" className="hover:text-blue-400 transition">
+                    +1 (234) 567-890
+                  </a>
+                </li>
+                <li className="flex items-center gap-2 text-gray-400 text-sm">
+                  <Mail size={16} className="text-blue-400 flex-shrink-0" />
+                  <a href="mailto:support@jobconnect.com" className="hover:text-blue-400 transition">
+                    support@jobconnect.com
+                  </a>
+                </li>
+              </ul>
+            </motion.div>
           </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-700 my-8"></div>
+
+          {/* Bottom Footer */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex flex-col sm:flex-row justify-between items-center"
+          >
+            <p className="text-gray-400 text-sm mb-4 sm:mb-0">
+              © Techpath. All rights reserved.
+            </p>
+            <div className="flex flex-wrap justify-center gap-6 text-sm">
+              <a href="#" className="text-gray-400 hover:text-blue-400 transition">
+                Terms of Service
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-400 transition">
+                Privacy Policy
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-400 transition">
+                Cookie Settings
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-400 transition">
+                Accessibility
+              </a>
+            </div>
+          </motion.div>
         </div>
       </motion.footer>
     </>

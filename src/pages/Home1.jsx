@@ -199,9 +199,9 @@ export default function Home() {
                     {company.location}
                   </p>
                   <Link to="">
-                  <Button variant="contained" size="sm" className="w-full mt-4">
-                    View Jobs
-                  </Button>
+                    <Button variant="contained" size="sm" className="w-full mt-4">
+                      View Jobs
+                    </Button>
                   </Link>
                 </CardContent>
               </Card>

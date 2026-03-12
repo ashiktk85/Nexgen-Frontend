@@ -13,7 +13,7 @@ const NotFound = () => {
       </p>
       <Button 
         type="primary" 
-        className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+        className="mt-6 bg-primary hover:bg-[#07407d] text-white px-6 py-2 rounded-lg"
         onClick={() => navigate("/")}
       >
         Go Back Home

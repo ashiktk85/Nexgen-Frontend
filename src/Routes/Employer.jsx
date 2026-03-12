@@ -9,10 +9,10 @@ import JobList from "../pages/Employer/Outlets/JobList";
 import Applicants from "../pages/Employer/Outlets/Applicants";
 import CompanyDetails from "../pages/Employer/Outlets/CompanyDetails";
 import RegisterOtp from "@/pages/Employer/OtpVerification";
-import VerificationForm from "@/pages/Employer/Outlets/VerificationForm";
 import NotFound from "@/pages/Employer/NotFound";
 import AddorEditCompany from "@/pages/Employer/Outlets/AddorEditCompany";
 import UpdateJob from "@/pages/Employer/Outlets/UpdateJob";
+import Settings from "@/pages/Employer/Outlets/Settings";
 import { EmployerProtectedRoute } from "@/services/employerProtector";
 
 function Employer() {
@@ -22,7 +22,6 @@ function Employer() {
       <Route path="/register" element={<Register />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/otp" element={<RegisterOtp />} />
-      <Route path="Verification" element={<VerificationForm />} />
       <Route path="/" element={<EmployerProtectedRoute><HomeLayout /></EmployerProtectedRoute>}>
         <Route path="dashboard" element={<EmployerProtectedRoute><Dashboard /></EmployerProtectedRoute>} />
         <Route path="create_job" element={<EmployerProtectedRoute><CreateJob /></EmployerProtectedRoute>} />
@@ -32,6 +31,7 @@ function Employer() {
         <Route path="company_details" element={<EmployerProtectedRoute><CompanyDetails /></EmployerProtectedRoute>} />
         <Route path="addCompany" element={<EmployerProtectedRoute><AddorEditCompany /></EmployerProtectedRoute>} />
         <Route path="addCompany/:companyId" element={<EmployerProtectedRoute><AddorEditCompany /></EmployerProtectedRoute>} />
+        <Route path="account" element={<EmployerProtectedRoute><Settings /></EmployerProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
