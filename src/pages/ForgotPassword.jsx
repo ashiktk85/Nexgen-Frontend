@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
 
 const ForgotPassword = () => {
+  const navigate = useNavigate();
+  const [userType, setUserType] = useState("user");
+
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -18,20 +21,24 @@ const ForgotPassword = () => {
     }),
     onSubmit: async (values) => {
       try {
-        toast.success("Login successful");
-        // const loginResult = await dispatch(login(values)).unwrap();
-        // if (loginResult) {
-        //   if (userInfo?.isBlocked) {
-        //     toast.error(
-        //       "Currently, you are restricted from accessing the site."
-        //     );
-        //     return;
-        //   }
-        //   toast.success("Login successful");
-        //   setTimeout(() => {
-        //     navigate("/");
-        //   }, 1500);
-        // }
+        const endpoint = userType === "user" 
+          ? "http://localhost:3001/api/user/forgot-password" 
+          : "http://localhost:3001/api/employer/forgot-password";
+          
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: values.email }),
+        });
+
+        const data = await response.json();
+        
+        if (data.status) {
+           toast.success("OTP sent to your email");
+           navigate("/forgot-password-otp", { state: { email: values.email, userType } });
+        } else {
+           toast.error(data.message || "Failed to send OTP");
+        }
       } catch (err) {
         toast.error(err.message || "An error occurred");
       }
@@ -73,6 +80,34 @@ const ForgotPassword = () => {
 
           {/* Email and Password Form */}
           <form onSubmit={formik.handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Account Type
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="user"
+                    checked={userType === "user"}
+                    onChange={(e) => setUserType(e.target.value)}
+                    className="mr-2"
+                  />
+                  Candidate
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="employer"
+                    checked={userType === "employer"}
+                    onChange={(e) => setUserType(e.target.value)}
+                    className="mr-2"
+                  />
+                  Employer
+                </label>
+              </div>
+            </div>
+
             <div className="mb-4">
               <label
                 htmlFor="email"

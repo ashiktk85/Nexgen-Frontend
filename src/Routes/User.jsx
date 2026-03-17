@@ -4,6 +4,9 @@ import LoginPage from "./../pages/Login";
 import ForgotPassword from "./../pages/ForgotPassword";
 import RegisterOtp from "./../pages/RegisterOtp";
 import SignupPage from "./../pages/SignUp";
+import Register from "../pages/Register";
+import Dashboard from "../pages/Dashboard";
+import AuthCallback from "../pages/AuthCallback";
 import Profile from "../pages/User/Outlets/Profile";
 import JobApplication from "../pages/User/Outlets/JobApplication";
 import Home from "../pages/User/Outlets/Home";
@@ -16,6 +19,7 @@ import ShopDetails from "../pages/User/Outlets/ShopDetails";
 import HomeLayout from "@/pages/User/Layout/HomeLayout";
 import JobApplicationHistory from "@/pages/User/Outlets/JobApplicationHistory";
 import { UserProtectedRoute } from "@/services/userProtector";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 function User() {
   return (
@@ -24,7 +28,17 @@ function User() {
       {/* <Route path="/home" element={<Home3 />} /> */}
       {/* <Route path="/home3" element={<Home3 />} /> */}
       <Route path="/sign-up" element={<SignupPage />} />
+      <Route path="/register" element={<Register />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/otp-verification" element={<RegisterOtp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 

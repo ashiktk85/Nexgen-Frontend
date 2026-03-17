@@ -1,18 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
-import useRequest from "../hooks/useRequestUser";
-import { useDispatch } from "react-redux";
-import {
-  userGoogleLoginAction,
-  userLoginAction,
-} from "@/redux/actions/userAction";
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { motion } from "framer-motion";
+import { GoogleButton } from "@/components/GoogleButton";
+import { useAuth } from "@/hooks/useAuth";
 
 // Animation variants for staggered children
 const containerVariants = {
@@ -30,16 +25,14 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-console.log("env.VITE_GOOGLE_CLIENT_ID", import.meta.env.VITE_GOOGLE_CLIENT_ID);
-
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const { data, loading, error, sendRequest } = useRequest();
-  const dispatch = useDispatch();
-  const GOOGLE_CLIENT_ID =
-    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-    "356987224140-nruiian6hrfgt5sk7bf0hi7o47lm210f.apps.googleusercontent.com";
+  const { login, loginWithGoogle, user } = useAuth();
+
+  useEffect(() => {
+    if (user) navigate("/");
+  }, [navigate, user]);
 
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
@@ -69,47 +62,16 @@ const LoginPage = () => {
     }),
     onSubmit: async (values) => {
       try {
-        console.log("values:", values);
-        const response = await dispatch(userLoginAction(values)).unwrap();
-        console.log(
-          "Response after loging in user login component: ",
-          response
-        );
-        localStorage.setItem("token", response.userData.token);
-        if (response.success) {
-          toast.success("Login successful!");
-        }
-        setTimeout(() => {
-          navigate("/");
-        }, 1500);
-        if (loading) return <p>Loading...</p>;
-        if (error) return <p>Error: {error}</p>;
+        await login(values.email, values.password);
+        toast.success("Login successful!");
+        navigate("/");
       } catch (err) {
-        console.log("Error in user login component after login: ", err);
-        toast.error(err?.message || "An error occurred");
+        const message =
+          err?.response?.data?.message || err?.message || "An error occurred";
+        toast.error(message);
       }
     },
   });
-
-  const handleGoogleSuccess = async (credentialResponse) => {
-    const { credential } = credentialResponse;
-    console.log("Google login response: ", credential);
-    try {
-      const result = await dispatch(
-        userGoogleLoginAction({ id_token: credential })
-      ).unwrap();
-      if (result?.userData?.token) {
-        localStorage.setItem("token", result.userData.token);
-        toast.success("Google Login successful!");
-        setTimeout(() => {
-          navigate("/");
-        }, 1500);
-      }
-    } catch (err) {
-      console.error("Error in Google login: ", err);
-      toast.error(err?.message || "An error occurred");
-    }
-  };
 
   return (
     <motion.div
@@ -156,14 +118,7 @@ const LoginPage = () => {
             className="flex flex-col lg:flex-row gap-4 mb-6"
           >
             <div className="flex justify-center">
-              <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => {
-                    toast.error("Google sign up failed");
-                  }}
-                />
-              </GoogleOAuthProvider>
+              <GoogleButton onClick={loginWithGoogle} />
             </div>
           </motion.div>
 
@@ -281,12 +236,9 @@ const LoginPage = () => {
             className="text-center text-sm text-gray-600 mt-4"
           >
             Don’t have an account?{" "}
-            <a
-              onClick={() => navigate("/sign-up")}
-              className="text-blue-600 hover:underline cursor-pointer"
-            >
+            <Link to="/register" className="text-blue-600 hover:underline">
               Create a user account
-            </a>
+            </Link>
           </motion.p>
 
           <motion.p

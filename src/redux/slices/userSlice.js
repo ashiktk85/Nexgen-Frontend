@@ -11,6 +11,9 @@ const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
+        setSeekerInfo: (state, action) => {
+            state.seekerInfo = action.payload || {}
+        },
         logout: (state) => {
             state.seekerInfo = {}
             state.error = null
@@ -31,6 +34,6 @@ const userSlice = createSlice({
     }
 })
 
-export const {logout} = userSlice.actions
+export const { logout, setSeekerInfo } = userSlice.actions
 
 export default userSlice.reducer
