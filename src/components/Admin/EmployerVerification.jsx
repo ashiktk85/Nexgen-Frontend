@@ -99,6 +99,53 @@ const DocImg = ({ src, label, onViewLarge }) => (
   </div>
 );
 
+// New: render doc inside an iframe preview and open full in new tab on click
+const IframeDoc = ({ src, label, onViewLarge }) => {
+  if (!src) {
+    return (
+      <div>
+        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">{label}</p>
+        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 h-32 flex items-center justify-center">
+          <p className="text-sm text-slate-400">Not provided</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">{label}</p>
+      <div className="w-full rounded-xl overflow-hidden border border-slate-200 bg-slate-50 relative">
+        <iframe
+          title={label}
+          src={src}
+          className="w-full h-48"
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+        />
+        <a
+          href={src}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => {
+            // stop propagation if any parent handlers
+            e.stopPropagation();
+          }}
+          className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-colors text-white text-sm font-medium"
+        >
+          <span className="bg-slate-800/90 px-3 py-1.5 rounded-lg">Open full</span>
+        </a>
+        <button
+          type="button"
+          onClick={() => onViewLarge?.(src, label)}
+          className="absolute right-3 bottom-3 bg-white/90 text-slate-800 px-2 py-1 rounded-md text-xs border border-slate-200 hover:shadow"
+        >
+          View large
+        </button>
+      </div>
+    </div>
+  );
+};
+
 /* ─────────────────── confirm dialog ─────────────────── */
 function ConfirmDialog({ open, onClose, onConfirm, decision, loading, reason, setReason }) {
   const isAccept = decision === "Verified";
@@ -237,10 +284,10 @@ function DetailPanel({ details, onClose, onAction, activeTab, actionLoading }) {
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Documents</p>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <DocImg src={details.documents?.aadharFront} label="Aadhar — Front" onViewLarge={(src, label) => setLargeImage({ src, label })} />
-              <DocImg src={details.documents?.aadharBack}  label="Aadhar — Back"  onViewLarge={(src, label) => setLargeImage({ src, label })} />
+              <IframeDoc src={details.documents?.aadharFront} label="Aadhar — Front" onViewLarge={(src, label) => setLargeImage({ src, label })} />
+              <IframeDoc src={details.documents?.aadharBack}  label="Aadhar — Back"  onViewLarge={(src, label) => setLargeImage({ src, label })} />
             </div>
-            <DocImg src={details.documents?.certificate} label="Shop Certificate" onViewLarge={(src, label) => setLargeImage({ src, label })} />
+            <IframeDoc src={details.documents?.certificate} label="Shop Certificate" onViewLarge={(src, label) => setLargeImage({ src, label })} />
           </div>
         </section>
       </div>

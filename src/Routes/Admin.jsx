@@ -8,8 +8,8 @@ import Shops from "../components/Admin/Shops";
 import Jobs from "../components/Admin/Jobs";
 import HomeLayout from "@/pages/Admin/Layout/HomeLayout";
 import AdminLogin from "@/pages/Admin/AdminLogin";
-import AdminRegister from "@/pages/Admin/AdminRegister";
 import OtpVerification from "@/pages/Admin/OtpVerification";
+import Admins from "@/components/Admin/Admins";
 import EmployerVerification from "@/components/Admin/EmployerVerification";
 import { AdminProtectedRoute } from "@/services/adminProtecter";
 
@@ -17,7 +17,6 @@ function Admin() {
   return (
     <Routes>
       <Route path="/admin-login" element={<AdminLogin />} />
-      <Route path="/admin-register" element={<AdminRegister />} />
       <Route path="/otp-verification" element={<OtpVerification />} />
       <Route
         path="/"
@@ -82,6 +81,14 @@ function Admin() {
           element={
             <AdminProtectedRoute>
               <EmployerVerification />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admins"
+          element={
+            <AdminProtectedRoute>
+              <Admins />
             </AdminProtectedRoute>
           }
         />

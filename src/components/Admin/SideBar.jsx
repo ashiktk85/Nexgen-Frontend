@@ -111,6 +111,12 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       icon: <ShieldCheck className="w-4 h-4" />,
     },
     {
+      id: "admins",
+      label: "Admins",
+      url: "/admin/admins",
+      icon: <Users className="w-4 h-4" />,
+    },
+    {
       id: "banner",
       label: "Banner",
       url: "/admin/banner",

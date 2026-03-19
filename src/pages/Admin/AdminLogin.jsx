@@ -243,18 +243,7 @@ const AdminLogin = () => {
             </motion.button>
           </form>
 
-          {/* Create Account */}
-          <motion.p
-            className="text-center text-sm text-gray-600 mt-4"
-            variants={itemVariants}
-          >
-            <a
-              onClick={() => navigate("/admin/admin-register")}
-              className="text-blue-600 hover:underline cursor-pointer"
-            >
-              Create new Admin Account
-            </a>
-          </motion.p>
+          {/* Create Account link removed — admins are managed from dashboard */}
           <motion.p
             className="text-center text-sm text-gray-600 mt-4"
             variants={itemVariants}
@@ -272,7 +261,7 @@ const AdminLogin = () => {
 
       {/* Right Section */}
       <motion.div
-        className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10"
+        className="hidden lg:flex lg:w-1/2 w-full bg-primary flex-col justify-center items-center text-center text-white p-6 lg:p-10"
         variants={sectionVariants}
         initial="hidden"
         animate="visible"

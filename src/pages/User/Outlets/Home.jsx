@@ -25,6 +25,7 @@ import seekerImg from "/Images/cv.png";
 import businessmanImg from "/Images/businessman.png";
 import AdBannerCarousel from "@/components/User/adBanner";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
+import PageLoader from "@/components/PageLoader";
 
 // Animation variants for staggered children
 const containerVariants = {
@@ -122,7 +123,7 @@ export default function Home() {
     fetchAdBanners(); // Fetch ad banners when component mounts
   }, []);
 
-  if (loading) return <p>Loading</p>;
+  if (loading) return <PageLoader />;
 
   return (
     <>

@@ -8,8 +8,19 @@ import { toast } from "sonner";
 import useRequestEmployer from "@/hooks/useRequestEmployer";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 const AdminRegister = () => {
-  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    // Redirect to admin login — admin registration is handled in dashboard
+    navigate('/admin/admin-login');
+  }, [navigate]);
+  return null;
+};
+
+export default AdminRegister;
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 

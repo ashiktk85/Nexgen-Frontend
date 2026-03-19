@@ -82,7 +82,7 @@ const OtpVerification = () => {
   return (
     <div className="flex flex-col lg:flex-row h-screen">
       {/* Left Section */}
-      <div className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10">
+      <div className="hidden lg:flex lg:w-1/2 w-full bg-primary flex-col justify-center items-center text-center text-white p-6 lg:p-10">
         <div className="max-w-md">
           <GrapeAnimation className="sm:hidden" />
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">

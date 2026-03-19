@@ -271,7 +271,7 @@ const EmployerLogin = () => {
 
       {/* Right Section */}
       <motion.div
-        className="lg:w-1/2 w-full bg-primary flex flex-col justify-center items-center text-center text-white p-6 lg:p-10"
+        className="hidden lg:flex lg:w-1/2 w-full bg-primary flex-col justify-center items-center text-center text-white p-6 lg:p-10"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
