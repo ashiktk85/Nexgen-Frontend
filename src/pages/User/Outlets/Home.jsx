@@ -182,7 +182,7 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: 0.4 }}
                 className="flex flex-col sm:flex-row items-center gap-6 mt-6 sm:mt-8 w-full max-w-md"
               >
-                <Link to="/sign-up" className="w-full">
+                <Link to="/register" className="w-full">
                   <div className="flex items-center justify-between w-full rounded-lg bg-primary py-4 px-6 text-white transform transition-transform hover:scale-105">
                     <div className="mx-auto text-center">
                       <span className="text-sm block">Register as</span>

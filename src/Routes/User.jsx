@@ -3,9 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import LoginPage from "./../pages/Login";
 import ForgotPassword from "./../pages/ForgotPassword";
 import RegisterOtp from "./../pages/RegisterOtp";
-import SignupPage from "./../pages/SignUp";
 import Register from "../pages/Register";
-import Dashboard from "../pages/Dashboard";
 import AuthCallback from "../pages/AuthCallback";
 import Profile from "../pages/User/Outlets/Profile";
 import JobApplication from "../pages/User/Outlets/JobApplication";
@@ -27,18 +25,9 @@ function User() {
       {/* <Route path="/" element={<Home3 />} /> */}
       {/* <Route path="/home" element={<Home3 />} /> */}
       {/* <Route path="/home3" element={<Home3 />} /> */}
-      <Route path="/sign-up" element={<SignupPage />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
       <Route path="/otp-verification" element={<RegisterOtp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
