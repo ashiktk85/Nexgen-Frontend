@@ -1,9 +1,14 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import LegalFooter from "@/components/LegalFooter";
 
+const APP_NAME = "Techpath";
 const SUPPORT_EMAIL = "techpath786@gmail.com";
 
 function TermsOfService() {
+  useEffect(() => {
+    document.title = `${APP_NAME} | Terms of Service`;
+  }, []);
   return (
     <div className="flex min-h-screen flex-col bg-white font-rubik text-gray-800">
       <main
@@ -20,6 +25,9 @@ function TermsOfService() {
         </p>
 
         <header className="mb-10 border-b border-gray-200 pb-8">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">
+            {APP_NAME}
+          </p>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Terms of Service
           </h1>
@@ -32,9 +40,10 @@ function TermsOfService() {
               Introduction
             </h2>
             <p>
-              These Terms of Service govern your access to and use of our
-              application. By using the service, you agree to be bound by these
-              terms. If you do not agree, please do not use the application.
+              These Terms of Service govern your access to and use of {APP_NAME},
+              a job platform that connects professionals with employers. By
+              using {APP_NAME}, you agree to be bound by these terms. If you do
+              not agree, please do not use {APP_NAME}.
             </p>
           </section>
 
@@ -47,7 +56,7 @@ function TermsOfService() {
             </h2>
             <p>
               You must comply with all applicable local, national, and
-              international laws and regulations when using this service. You are
+              international laws and regulations when using {APP_NAME}. You are
               responsible for your account activity and for maintaining the
               security of your login credentials.
             </p>
@@ -58,9 +67,9 @@ function TermsOfService() {
               Disclaimer of Warranties
             </h2>
             <p>
-              The service is provided &ldquo;as is&rdquo; and &ldquo;as
+              {APP_NAME} is provided &ldquo;as is&rdquo; and &ldquo;as
               available&rdquo; without warranties of any kind, whether express
-              or implied. We do not guarantee that the service will be
+              or implied. We do not guarantee that {APP_NAME} will be
               uninterrupted, error-free, or free of harmful components.
             </p>
           </section>
@@ -73,10 +82,10 @@ function TermsOfService() {
               Service Changes
             </h2>
             <p>
-              We reserve the right to modify, suspend, or discontinue the
-              service, or any part of it, at any time without prior notice. We
-              are not liable to you or any third party for any modification,
-              suspension, or discontinuation of the service.
+              We reserve the right to modify, suspend, or discontinue {APP_NAME},
+              or any part of it, at any time without prior notice. We are not
+              liable to you or any third party for any modification, suspension,
+              or discontinuation of {APP_NAME}.
             </p>
           </section>
 
@@ -103,7 +112,7 @@ function TermsOfService() {
             </h2>
             <p>
               We may update these Terms of Service from time to time. Continued
-              use of the service after changes are posted constitutes your
+              use of {APP_NAME} after changes are posted constitutes your
               acceptance of the updated terms. We encourage you to review these
               terms periodically.
             </p>

@@ -1,9 +1,14 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import LegalFooter from "@/components/LegalFooter";
 
+const APP_NAME = "Techpath";
 const SUPPORT_EMAIL = "techpath786@gmail.com";
 
 function PrivacyPolicy() {
+  useEffect(() => {
+    document.title = `${APP_NAME} | Privacy Policy`;
+  }, []);
   return (
     <div className="flex min-h-screen flex-col bg-white font-rubik text-gray-800">
       <main
@@ -20,6 +25,9 @@ function PrivacyPolicy() {
         </p>
 
         <header className="mb-10 border-b border-gray-200 pb-8">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">
+            {APP_NAME}
+          </p>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Privacy Policy
           </h1>
@@ -32,9 +40,11 @@ function PrivacyPolicy() {
               Introduction
             </h2>
             <p>
-              This Privacy Policy describes how we collect, use, and protect your
-              information when you use our application. We are committed to
-              handling your personal data responsibly and transparently.
+              This Privacy Policy describes how {APP_NAME} (&ldquo;we,&rdquo;
+              &ldquo;us,&rdquo; or &ldquo;our&rdquo;) collects, uses, and
+              protects your information when you use the {APP_NAME} job platform
+              and related services. We are committed to handling your personal
+              data responsibly and transparently.
             </p>
           </section>
 
@@ -46,9 +56,9 @@ function PrivacyPolicy() {
               Authentication
             </h2>
             <p>
-              The application uses Google Sign-In for authentication. When you
-              sign in with Google, we receive information from your Google
-              account as permitted by you during the sign-in process.
+              {APP_NAME} uses Google Sign-In for authentication. When you sign in
+              with Google to access {APP_NAME}, we receive information from your
+              Google account as permitted by you during the sign-in process.
             </p>
           </section>
 
@@ -75,7 +85,7 @@ function PrivacyPolicy() {
             </h2>
             <p>
               We use the information we collect only for authentication and
-              providing access to the application. We do not use your personal
+              providing access to {APP_NAME}. We do not use your personal
               information for unrelated purposes without your consent.
             </p>
           </section>
