@@ -16,6 +16,8 @@ import JobDetailPage from "../pages/User/Outlets/JobDetails";
 import ShopDetails from "../pages/User/Outlets/ShopDetails";
 import HomeLayout from "@/pages/User/Layout/HomeLayout";
 import JobApplicationHistory from "@/pages/User/Outlets/JobApplicationHistory";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfService from "@/pages/TermsOfService";
 import { UserProtectedRoute } from "@/services/userProtector";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
@@ -30,6 +32,8 @@ function User() {
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/otp-verification" element={<RegisterOtp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
 
       <Route element={<HomeLayout />}>
         <Route path="/" element={<Home />} />
