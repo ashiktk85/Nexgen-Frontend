@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Image as ImageIcon,
   Store,
+  Tags,
 } from "lucide-react";
 import { logout } from "@/redux/slices/adminSlice";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
@@ -103,6 +104,12 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       label: "Jobs",
       url: "/admin/jobs",
       icon: <Briefcase className="w-4 h-4" />,
+    },
+    {
+      id: "job-titles",
+      label: "Job Titles",
+      url: "/admin/job-titles",
+      icon: <Tags className="w-4 h-4" />,
     },
     {
       id: "verifications",

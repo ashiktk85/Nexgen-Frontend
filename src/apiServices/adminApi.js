@@ -262,3 +262,44 @@ export const getEmployerVerificationDetails = async (id) => {
     throw error;
   }
 };
+
+export const getJobTitlesAdmin = async (page = 1, limit = 20, search = "") => {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (search) params.append("search", search);
+    return await adminAxiosInstance.get(`/job-titles?${params.toString()}`);
+  } catch (error) {
+    console.error("Error fetching job titles:", error);
+    throw error;
+  }
+};
+
+export const createJobTitleAdmin = async (data) => {
+  try {
+    return await adminAxiosInstance.post("/job-titles", data);
+  } catch (error) {
+    console.error("Error creating job title:", error);
+    throw error;
+  }
+};
+
+export const updateJobTitleAdmin = async (id, data) => {
+  try {
+    return await adminAxiosInstance.put(`/job-titles/${id}`, data);
+  } catch (error) {
+    console.error("Error updating job title:", error);
+    throw error;
+  }
+};
+
+export const deleteJobTitleAdmin = async (id) => {
+  try {
+    return await adminAxiosInstance.delete(`/job-titles/${id}`);
+  } catch (error) {
+    console.error("Error deleting job title:", error);
+    throw error;
+  }
+};

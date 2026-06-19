@@ -1,6 +1,20 @@
 import { useMemo, useState } from "react";
 import { Ban, Edit, Trash2, ChevronLeft, ChevronRight, Ticket, MoreHorizontal } from "lucide-react";
 import { SearchInput } from "./SearchInput";
+import { displayValue } from "@/utils/tableValue";
+
+function getCellValue(item, column) {
+    if (column.cell) return column.cell(item);
+    let value;
+    if (typeof column.accessor === "function") {
+        value = column.accessor(item);
+    } else if (column.accessor) {
+        value = item[column.accessor];
+    } else {
+        value = "";
+    }
+    return displayValue(value);
+}
 
 export function DataTable({
     data,
@@ -226,13 +240,7 @@ export function DataTable({
                                         )}
                                         {columns.map((column) => (
                                             <td key={column.id} className={`${compact ? "px-2 py-1 text-[11px]" : "px-4 py-3 text-sm"} text-slate-700 ${column.className || ""}`}>
-                                                {column.cell
-                                                    ? column.cell(item)
-                                                    : typeof column.accessor === "function"
-                                                        ? column.accessor(item)
-                                                        : column.accessor
-                                                            ? item[column.accessor]
-                                                            : ""}
+                                                {getCellValue(item, column)}
                                             </td>
                                         ))}
                                         {showActions && (

@@ -1,3 +1,4 @@
+/** @deprecated Job titles are stored in MongoDB. Use admin Job Titles or GET /employer/job-titles. */
 export const jobData = {
     jobs: [
       {

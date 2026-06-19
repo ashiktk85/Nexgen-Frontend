@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import EmployerNameAvatar from "./EmployerNameAvatar";
 
 const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -199,12 +200,12 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
 
         {/* Profile Section at bottom */}
         <div className="p-4 border-t border-white/20 pb-6">
-          <div className="flex items-center justify-center lg:justify-start gap-3">
-            <img
-              src="https://readymadeui.com/team-1.webp"
-              alt="profile-pic"
-              className="w-10 h-10 shrink-0 rounded-full border-2 border-white/50"
-            />
+            <div className="flex items-center justify-center lg:justify-start gap-3">
+              <EmployerNameAvatar
+                name={employerData?.name}
+                size="md"
+                className="border-2 border-white/50"
+              />
             {!isCollapsed && (
               <div className="flex flex-col overflow-hidden">
                 <span className="text-sm font-semibold text-white whitespace-nowrap overflow-hidden text-ellipsis">

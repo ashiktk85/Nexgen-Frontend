@@ -23,6 +23,16 @@ import {
   changeUserRoleService,
   bulkCreateStudentsService,
 } from "@/apiServices/adminApi";
+import UserTypePill from "@/components/Admin/UserTypePill";
+import {
+  ADMIN_PAGE,
+  ADMIN_HEADER_EYEBROW,
+  ADMIN_HEADER_TITLE,
+  ADMIN_STAT_GRID,
+  ADMIN_TABLE_WRAP,
+  ADMIN_SEARCH_INPUT,
+} from "@/components/Admin/adminPageLayout";
+import { displayValue } from "@/utils/tableValue";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -157,28 +167,31 @@ const Users = () => {
     {
       id: "name",
       header: "Name",
-      accessor: (row) => `${row.firstName} ${row.lastName}`,
+      accessor: (row) =>
+        displayValue(`${row.firstName || ""} ${row.lastName || ""}`.trim()),
       sortable: true,
     },
     { id: "email", header: "Email", accessor: "email", sortable: true },
     { id: "phone", header: "Mobile", accessor: "phone" },
+    {
+      id: "type",
+      header: "Type",
+      cell: (row) => (
+        <UserTypePill role={row.role} isInstituteStudent={row.isInstituteStudent} />
+      ),
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] px-4 lg:px-8 py-8">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-end justify-between flex-wrap gap-3">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Overview
-            </p>
-            <h1 className="text-[22px] md:text-[26px] font-extrabold text-slate-900 tracking-tight">
-              Users
-            </h1>
-          </div>
+    <div className={ADMIN_PAGE}>
+      <div className="flex items-end justify-between flex-wrap gap-2">
+        <div>
+          <p className={ADMIN_HEADER_EYEBROW}>Overview</p>
+          <h1 className={ADMIN_HEADER_TITLE}>Users</h1>
         </div>
+      </div>
 
-        <div className="grid gap-4 grid-template-columns-[repeat(auto-fill,minmax(190px,1fr))] md:grid-cols-4">
+      <div className={ADMIN_STAT_GRID}>
           <StatCard
             icon={<UsersIcon size={20} color="#fff" />}
             value={totalUsers}
@@ -209,19 +222,19 @@ const Users = () => {
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex-1 min-w-[220px] max-w-sm">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => {
-                setCurrentPage(1);
-                setSearchTerm(e.target.value);
-              }}
-              placeholder="Search by name or email…"
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
-            />
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex-1 min-w-[200px] max-w-sm">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => {
+              setCurrentPage(1);
+              setSearchTerm(e.target.value);
+            }}
+            placeholder="Search by name or email…"
+            className={ADMIN_SEARCH_INPUT}
+          />
+        </div>
 
           {/* PRIORITY VISIBILITY FEATURE — upload CSV to bulk-create institute students */}
           <div className="flex items-center gap-2">
@@ -245,7 +258,7 @@ const Users = () => {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 md:p-5">
+      <div className={ADMIN_TABLE_WRAP}>
           <DataTable
             title="Users"
             columns={columns}
@@ -270,7 +283,6 @@ const Users = () => {
             showSno={true}
             rowsPerPage={rowsPerPage}
           />
-        </div>
       </div>
 
       <ConfirmModal
@@ -328,12 +340,12 @@ const Users = () => {
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     <div>
                       <p className="text-[11px] font-medium text-slate-500 uppercase">Phone</p>
-                      <p className="text-xs text-slate-800">{selectedUser.phone || "—"}</p>
+                      <p className="text-xs text-slate-800">{displayValue(selectedUser.phone)}</p>
                     </div>
                     <div>
                       <p className="text-[11px] font-medium text-slate-500 uppercase">Location</p>
                       <p className="text-xs text-slate-800">
-                        {selectedUser.location || selectedUser.city || "—"}
+                        {displayValue(selectedUser.location || selectedUser.city)}
                       </p>
                     </div>
                   </div>

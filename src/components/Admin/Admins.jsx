@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { toast } from 'sonner';
 import adminAxiosInstance from '@/config/axiosConfig/adminAxiosInstance';
+import {
+  ADMIN_PAGE,
+  ADMIN_HEADER_TITLE,
+  ADMIN_TABLE_WRAP,
+} from '@/components/Admin/adminPageLayout';
+import { displayValue } from '@/utils/tableValue';
 
 // Format date like "Mar 05, 2026 · 12:39 PM"
 function formatDate(iso) {
@@ -57,7 +63,7 @@ function AdminRow({ admin, index, onEdit, onToggleBlock }) {
       <div className="w-40 min-w-0">
         <div className="flex items-center gap-1.5">
           <p className="font-semibold text-slate-800 text-sm truncate">
-            {admin.name || <span className="text-slate-400 font-normal italic">No name</span>}
+            {admin.name || <span className="text-slate-400 font-normal">—</span>}
           </p>
           {isSuperAdmin && (
             <span className="inline-flex items-center text-[9px] font-bold bg-amber-100 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide flex-shrink-0">
@@ -69,7 +75,7 @@ function AdminRow({ admin, index, onEdit, onToggleBlock }) {
 
       {/* Email column */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-slate-500 truncate">{admin.email}</p>
+        <p className="text-sm text-slate-500 truncate">{displayValue(admin.email)}</p>
       </div>
 
       {/* Joined */}
@@ -214,12 +220,10 @@ export default function Admins() {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className={ADMIN_PAGE}>
+      <div className="flex items-center justify-between mb-3">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Administrators</h2>
+          <h2 className={ADMIN_HEADER_TITLE}>Administrators</h2>
           <p className="text-sm text-slate-400 mt-0.5">
             {loading ? 'Loading…' : `${admins.length} admin${admins.length !== 1 ? 's' : ''} total`}
           </p>
@@ -236,7 +240,7 @@ export default function Admins() {
       </div>
 
       {/* Table card */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div className={ADMIN_TABLE_WRAP}>
 
         {/* Column headers */}
         <div className="flex items-center gap-4 px-5 py-3 bg-slate-50 border-b border-slate-200">

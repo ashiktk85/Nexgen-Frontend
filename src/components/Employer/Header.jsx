@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import NavbarEmp from "./NavbarEmp";
+import EmployerNameAvatar from "./EmployerNameAvatar";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -103,10 +104,10 @@ const Header = () => {
             </div>
 
             <div className="dropdown-menu relative flex shrink-0 group">
-              <img
-                src="https://readymadeui.com/team-1.webp"
-                alt="profile-pic"
-                className="w-9 h-9 rounded-full border-2 border-gray-300 cursor-pointer"
+              <EmployerNameAvatar
+                name={employerData?.name}
+                size="sm"
+                className="border-2 border-gray-300 cursor-pointer"
               />
               <div className="flex items-center gap-4 py-1 pl-1 text-gray-800">
                 {employerData?.name && employerData.name

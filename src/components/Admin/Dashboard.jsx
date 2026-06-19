@@ -21,6 +21,9 @@ import {
 import { toast } from "sonner";
 import { getDashboardStats } from "@/apiServices/dashboardApi";
 import StatCard from "@/components/ui/StatCard";
+import { ADMIN_PAGE, ADMIN_HEADER_TITLE } from "@/components/Admin/adminPageLayout";
+
+import { displayValue } from "@/utils/tableValue";
 
 /* ─── helpers ─── */
 const fmt = (n) =>
@@ -97,7 +100,7 @@ const JobCard = ({ job, rank }) => (
       </div>
       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
         <span className="flex items-center gap-1 text-xs text-slate-500">
-          <MapPin className="w-3 h-3" /> {job.city}, {job.state}
+          <MapPin className="w-3 h-3" /> {displayValue(job.city)}, {displayValue(job.state)}
         </span>
         <span className="flex items-center gap-1 text-xs text-slate-500">
           <Banknote className="w-3 h-3" />
@@ -157,14 +160,12 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50/60">
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
-
+    <div className={ADMIN_PAGE}>
         {/* ── header ── */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Admin Dashboard</h1>
-            <p className="text-sm text-slate-500 mt-0.5">Platform overview and analytics</p>
+            <h1 className={ADMIN_HEADER_TITLE}>Admin Dashboard</h1>
+            <p className="text-xs text-slate-500 mt-0.5">Platform overview and analytics</p>
           </div>
           <div className="flex items-center gap-2">
             {/* time range pills */}
@@ -194,7 +195,7 @@ const Dashboard = () => {
         </div>
 
         {/* ── stat cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {loading ? (
             <>
               <Skeleton className="h-28" />
@@ -229,8 +230,8 @@ const Dashboard = () => {
         </div>
 
         {/* ── chart ── */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-4 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h2 className="text-base font-semibold text-slate-900">Platform Growth</h2>
               <p className="text-xs text-slate-500 mt-0.5">Users, employers and job posts over time</p>
@@ -246,7 +247,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4">
             {loading ? (
               <Skeleton className="h-64 w-full" />
             ) : (
@@ -272,8 +273,8 @@ const Dashboard = () => {
         </div>
 
         {/* ── top jobs ── */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-4 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h2 className="text-base font-semibold text-slate-900">Most Popular Job Posts</h2>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -310,7 +311,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-      </div>
     </div>
   );
 };

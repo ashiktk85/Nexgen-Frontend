@@ -6,6 +6,7 @@ import Users from "../components/Admin/Users";
 import Employers from "../components/Admin/Employers";
 import Shops from "../components/Admin/Shops";
 import Jobs from "../components/Admin/Jobs";
+import JobTitles from "../components/Admin/JobTitles";
 import HomeLayout from "@/pages/Admin/Layout/HomeLayout";
 import AdminLogin from "@/pages/Admin/AdminLogin";
 import OtpVerification from "@/pages/Admin/OtpVerification";
@@ -63,6 +64,14 @@ function Admin() {
           element={
             <AdminProtectedRoute>
               <Jobs />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/job-titles"
+          element={
+            <AdminProtectedRoute>
+              <JobTitles />
             </AdminProtectedRoute>
           }
         />

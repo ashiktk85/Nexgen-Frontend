@@ -28,6 +28,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  ADMIN_PAGE,
+  ADMIN_HEADER_TITLE,
+  ADMIN_TABLE_WRAP,
+  ADMIN_SEARCH_INPUT,
+} from "@/components/Admin/adminPageLayout";
+import { displayValue } from "@/utils/tableValue";
 
 /* ─────────────────── tiny helpers ─────────────────── */
 const STATUS_META = {
@@ -256,7 +263,7 @@ function DetailPanel({ details, onClose, onAction, activeTab, actionLoading }) {
             ].map(([k, v]) => (
               <div key={k} className="bg-slate-50 rounded-xl p-3">
                 <p className="text-xs text-slate-400 mb-0.5">{k}</p>
-                <p className="text-sm font-medium text-slate-800 break-all">{v || "—"}</p>
+                <p className="text-sm font-medium text-slate-800 break-all">{displayValue(v)}</p>
               </div>
             ))}
           </div>
@@ -353,8 +360,8 @@ const EmployerVerification = () => {
   }, [debouncedSearch]);
 
   /* fetch list — backend search and pagination */
-  const fetchList = useCallback(async (page, tab, search = "") => {
-    setLoading(true);
+  const fetchList = useCallback(async (page, tab, search = "", { silent = false } = {}) => {
+    if (!silent) setLoading(true);
     try {
       const typeMap = {
         requested:   "Requested",
@@ -369,9 +376,9 @@ const EmployerVerification = () => {
         setTotalPages(Math.max(1, totalPages ?? 1));
       }
     } catch {
-      toast.error("Failed to load verification applications.");
+      if (!silent) toast.error("Failed to load verification applications.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [rowsPerPage]);
 
@@ -432,7 +439,13 @@ const EmployerVerification = () => {
         setConfirmOpen(false);
         setPendingDecision(null);
         setRejectReason("");
-        window.location.reload();
+        setPanelDetails(null);
+        setSelectedId(null);
+        setSelectedEmployerId(null);
+        setTableData((prev) =>
+          prev.filter((row) => row._id !== selectedEmployerId)
+        );
+        await fetchList(currentPage, activeTab, debouncedSearch, { silent: true });
       }
     } catch {
       toast.error("An error occurred. Please try again.");
@@ -452,7 +465,7 @@ const EmployerVerification = () => {
       cell: (row) => (
         <div className="flex items-center gap-3">
           <Avatar name={row.ownerName} />
-          <p className="text-sm font-medium text-slate-800 leading-tight">{row.ownerName}</p>
+          <p className="text-sm font-medium text-slate-800 leading-tight">{displayValue(row.ownerName)}</p>
         </div>
       ),
     },
@@ -460,7 +473,7 @@ const EmployerVerification = () => {
       id: "email",
       header: "Email",
       cell: (row) => (
-        <span className="text-sm text-slate-700 break-all">{row.email || "—"}</span>
+        <span className="text-sm text-slate-700 break-all">{displayValue(row.email)}</span>
       ),
     },
     {
@@ -468,7 +481,7 @@ const EmployerVerification = () => {
       header: "Company",
       accessor: "name",
       sortable: true,
-      cell: (row) => <span className="text-sm text-slate-700 font-medium">{row.name}</span>,
+      cell: (row) => <span className="text-sm text-slate-700 font-medium">{displayValue(row.name)}</span>,
     },
     {
       id: "status",
@@ -482,7 +495,7 @@ const EmployerVerification = () => {
         <button
           onClick={() => openPanel(row)}
           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-            selectedId === row._id
+            selectedId === row.employerId
               ? "bg-blue-600 text-white border-blue-600"
               : "bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600"
           }`}
@@ -500,16 +513,14 @@ const EmployerVerification = () => {
   const tabCounts = {}; // placeholder — wire real counts if API provides them
 
   return (
-    <div className="min-h-screen bg-slate-50/60">
-      {/* page header */}
-      <div className="px-6 pt-6 pb-4">
-        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Employer Verification</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Review and manage employer verification requests</p>
+    <div className={ADMIN_PAGE}>
+      <div>
+        <h1 className={ADMIN_HEADER_TITLE}>Employer Verification</h1>
+        <p className="text-xs text-slate-500 mt-0.5">Review and manage employer verification requests</p>
       </div>
 
-      {/* tab strip + search */}
-      <div className="px-6 mb-4 flex flex-wrap items-center gap-3 justify-between">
-        <div className="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 w-fit shadow-sm">
+      <div className="flex flex-wrap items-center gap-2 justify-between">
+        <div className="flex gap-1 bg-white border border-slate-200 rounded-lg p-1 w-fit shadow-sm">
           {TABS.map(tab => (
             <button
               key={tab}
@@ -524,7 +535,7 @@ const EmployerVerification = () => {
             </button>
           ))}
         </div>
-        <div className="flex-1 min-w-[220px] max-w-xs">
+        <div className="flex-1 min-w-[200px] max-w-xs">
           <input
             type="text"
             value={searchTerm}
@@ -533,14 +544,12 @@ const EmployerVerification = () => {
               setSearchTerm(e.target.value);
             }}
             placeholder="Search by owner or company…"
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+            className={ADMIN_SEARCH_INPUT}
           />
         </div>
       </div>
 
-      {/* content: table */}
-      <div className="px-6 pb-6 flex gap-5 items-start">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full">
+      <div className={ADMIN_TABLE_WRAP}>
           {loading ? (
             <Spinner />
           ) : tableData.length === 0 ? (
@@ -566,7 +575,6 @@ const EmployerVerification = () => {
               rowsPerPage={rowsPerPage}
             />
           )}
-        </div>
       </div>
 
       {/* slide-over sheet for review details */}

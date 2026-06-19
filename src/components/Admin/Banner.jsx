@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { ADMIN_PAGE, ADMIN_HEADER_TITLE } from "@/components/Admin/adminPageLayout";
 import {
   Table,
   TableBody,
@@ -264,10 +265,9 @@ const BannerManagement = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      {/* Header and controls */}
+    <div className={`${ADMIN_PAGE} flex flex-col`}>
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Banner Management</h1>
+        <h1 className={ADMIN_HEADER_TITLE}>Banner Management</h1>
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">

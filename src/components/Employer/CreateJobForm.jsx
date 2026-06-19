@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { TextField, Autocomplete, Box, Slider } from "@mui/material";
 import { Country, State, City } from "country-state-city";
 import { useFormik } from "formik";
-import { jobData } from "@/data/Job_titles";
 import validateJobForm from "@/Validations/CreateJob-validation";
 import { employerJobCreation, employerJobUpdate, getCompanyById } from "@/apiServices/userApi";
+import { getActiveJobTitles } from "@/apiServices/employerApi";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -134,6 +134,46 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
   const [selectedRequirements, setSelectedRequirements] = useState(selectedData?.requirements || []);
   const [availableRequirements, setAvailableRequirements] = useState([]);
   const [companies, setCompanies] = useState([]);
+  const [jobTitleOptions, setJobTitleOptions] = useState([]);
+  const [titlesLoading, setTitlesLoading] = useState(true);
+
+  useEffect(() => {
+    const loadJobTitles = async () => {
+      setTitlesLoading(true);
+      try {
+        const titles = await getActiveJobTitles();
+        let options = (titles || []).map((t) => ({
+          title: t.title,
+          requirements: t.requirements || [],
+        }));
+        if (
+          selectedData?.jobTitle &&
+          !options.some((o) => o.title === selectedData.jobTitle)
+        ) {
+          options = [
+            {
+              title: selectedData.jobTitle,
+              requirements: selectedData.requirements || [],
+            },
+            ...options,
+          ];
+        }
+        setJobTitleOptions(options);
+        if (selectedData?.jobTitle) {
+          const match = options.find((j) => j.title === selectedData.jobTitle);
+          setAvailableRequirements(
+            match?.requirements || selectedData.requirements || []
+          );
+        }
+      } catch (err) {
+        console.error("Error fetching job titles:", err);
+        toast.error("Failed to load job titles");
+      } finally {
+        setTitlesLoading(false);
+      }
+    };
+    loadJobTitles();
+  }, [selectedData?.jobTitle, selectedData?.requirements]);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -192,10 +232,11 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
 
   useEffect(() => {
     if (formik.values.jobTitle) {
-      const reqs = jobData.jobs.find(j => j.title === formik.values.jobTitle)?.requirements || [];
+      const reqs =
+        jobTitleOptions.find((j) => j.title === formik.values.jobTitle)?.requirements || [];
       setAvailableRequirements(reqs);
     }
-  }, [formik.values.jobTitle]);
+  }, [formik.values.jobTitle, jobTitleOptions]);
 
   useEffect(() => {
     if (formik.values.country) setStates(State.getStatesOfCountry(formik.values.country));
@@ -212,9 +253,12 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
     const title = newValue?.title || "";
     formik.setFieldValue("jobTitle", title);
     if (newValue) {
-      setAvailableRequirements(jobData.jobs.find(j => j.title === newValue.title)?.requirements || []);
+      setAvailableRequirements(newValue.requirements || []);
       setSelectedRequirements([]);
-    } else { setAvailableRequirements([]); setSelectedRequirements([]); }
+    } else {
+      setAvailableRequirements([]);
+      setSelectedRequirements([]);
+    }
   };
 
   const handleRequirementToggle = (req) => {
@@ -225,7 +269,7 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
     formik.setFieldValue("requirements", next);
   };
 
-  const selectedJob = jobData.jobs.find(j => j.title === formik.values.jobTitle) || null;
+  const selectedJob = jobTitleOptions.find((j) => j.title === formik.values.jobTitle) || null;
   const selectedState = states.find(s => s.isoCode === formik.values.state) || null;
   const selectedCity = cities.find(c => c.name === formik.values.city) || null;
   const isEdit = page === "update";
@@ -256,10 +300,11 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
                 <div>
                   <FL required>Job Title</FL>
                   <Autocomplete
-                    options={jobData.jobs}
+                    options={jobTitleOptions}
                     getOptionLabel={o => o.title}
                     value={selectedJob}
                     onChange={handleJobTitleChange}
+                    loading={titlesLoading}
                     disablePortal
                     renderInput={(params) => (
                       <TextField {...params} variant="outlined" placeholder="e.g. Frontend Developer"

@@ -5,6 +5,15 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Store, Building2, Users, MapPin, Globe, Image as ImageIcon, Share2 } from "lucide-react";
 import { getAllShops } from "@/apiServices/adminApi";
 import { toast } from "sonner";
+import {
+  ADMIN_PAGE,
+  ADMIN_HEADER_EYEBROW,
+  ADMIN_HEADER_TITLE,
+  ADMIN_STAT_GRID,
+  ADMIN_TABLE_WRAP,
+  ADMIN_SEARCH_INPUT,
+} from "@/components/Admin/adminPageLayout";
+import { displayValue } from "@/utils/tableValue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -86,8 +95,8 @@ const Shops = () => {
       accessor: "employerName",
       sortable: true,
       cell: (row) => (
-        <span className="inline-flex items-center justify-center min-w-[100px] max-w-[120px] h-7 px-2 rounded border border-slate-200 bg-slate-50 text-blue-600 font-bold text-[11px] truncate" title={row.employerName || ""}>
-          {row.employerName || "—"}
+        <span className="inline-flex items-center justify-center min-w-[100px] max-w-[120px] h-7 px-2 rounded border border-slate-200 bg-slate-50 text-blue-600 font-bold text-[11px] truncate" title={displayValue(row.employerName, "")}>
+          {displayValue(row.employerName)}
         </span>
       ),
     },
@@ -97,20 +106,15 @@ const Shops = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] px-4 lg:px-8 py-8">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-end justify-between flex-wrap gap-3">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Overview
-            </p>
-            <h1 className="text-[22px] md:text-[26px] font-extrabold text-slate-900 tracking-tight">
-              Shops
-            </h1>
-          </div>
+    <div className={ADMIN_PAGE}>
+      <div className="flex items-end justify-between flex-wrap gap-2">
+        <div>
+          <p className={ADMIN_HEADER_EYEBROW}>Overview</p>
+          <h1 className={ADMIN_HEADER_TITLE}>Shops</h1>
         </div>
+      </div>
 
-        <div className="grid gap-4 grid-template-columns-[repeat(auto-fill,minmax(190px,1fr))] md:grid-cols-3">
+      <div className={ADMIN_STAT_GRID}>
           <StatCard
             icon={<Store size={20} color="#fff" />}
             value={totalShops}
@@ -134,22 +138,22 @@ const Shops = () => {
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex-1 min-w-[220px] max-w-sm">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => {
-                setCurrentPage(1);
-                setSearchTerm(e.target.value);
-              }}
-              placeholder="Search by shop name…"
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
-            />
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex-1 min-w-[200px] max-w-sm">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => {
+              setCurrentPage(1);
+              setSearchTerm(e.target.value);
+            }}
+            placeholder="Search by shop name…"
+            className={ADMIN_SEARCH_INPUT}
+          />
         </div>
+      </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 md:p-5 mt-2">
+      <div className={ADMIN_TABLE_WRAP}>
           <DataTable
             title="Shops"
             columns={columns}
@@ -169,7 +173,6 @@ const Shops = () => {
             showSno={true}
             rowsPerPage={rowsPerPage}
           />
-        </div>
       </div>
 
       <Sheet open={openSheet} onOpenChange={setOpenSheet}>
