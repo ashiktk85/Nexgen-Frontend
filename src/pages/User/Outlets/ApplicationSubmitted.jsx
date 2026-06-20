@@ -56,7 +56,7 @@ export default function ApplicationConfirmation() {
               <FaCheckCircle className="h-5 w-5 text-green-500" />
               <p>
                 You will get updations at{" "}
-                <span className="font-medium">techpath786@gmail.com</span>
+                <span className="font-medium">noreply@techpath.in</span>
               </p>
             </motion.div>
 

@@ -31,6 +31,7 @@ const globalStyle = `
     white-space: nowrap;
   }
   .nav-link:hover { background: rgba(255,255,255,0.12); }
+  .nav-link.on-hero:hover { background: rgba(255,255,255,0.12); }
   .nav-link.on-white:hover { background: #f1f5f9; color: #4f46e5 !important; }
   .nav-link.active-light {
     background: #eef2ff;
@@ -228,26 +229,22 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   /* ── Nav background logic ── */
-  const primaryColor = "#0950a0";
+  const onHero = isHomePage && !scrolled;
 
   const navBg = isHomePage
     ? scrolled
-      ? primaryColor
+      ? "#ffffff"
       : "transparent"
     : "#ffffff";
-  const navBorder = isHomePage
-    ? scrolled
-      ? "1px solid rgba(255,255,255,0.08)"
-      : "none"
-    : "1px solid #e8edf5";
+  const navBorder = scrolled || !isHomePage
+    ? "1px solid #e8edf5"
+    : "none";
   const navShadow = scrolled
-    ? isHomePage
-      ? "0 4px 18px rgba(9,80,160,0.45)"
-      : "0 4px 24px rgba(0,0,0,0.06)"
+    ? "0 4px 24px rgba(0,0,0,0.06)"
     : "none";
 
-  const linkColor = isHomePage ? "#e2e8f0" : "#475569";
-  const logoColor = isHomePage ? "#ffffff" : "#4f46e5";
+  const linkColor = onHero ? "#e2e8f0" : "#475569";
+  const logoColor = onHero ? "#ffffff" : isHomePage ? "#0950a0" : "#4f46e5";
 
   return (
     <>
@@ -266,7 +263,7 @@ const Navbar = () => {
           backdropFilter: scrolled ? "blur(16px)" : "none",
           WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
           transition: "all 0.3s ease",
-          padding: "0 24px",
+          padding: "0 12px",
         }}
       >
         <div
@@ -336,8 +333,8 @@ const Navbar = () => {
             ].map(({ label, path, icon }) => (
               <span
                 key={path}
-                className={`nav-link ${isHomePage ? "" : "on-white"} ${!isHomePage && isActive(path) ? "active-light" : ""}`}
-                style={{ color: isActive(path) && !isHomePage ? "#4f46e5" : linkColor }}
+                className={`nav-link ${onHero ? "on-hero" : "on-white"} ${!onHero && isActive(path) ? "active-light" : ""}`}
+                style={{ color: isActive(path) && !onHero ? "#4f46e5" : onHero && isActive(path) ? "#ffffff" : linkColor }}
                 onClick={() => navigate(path)}
               >
                 {icon}
@@ -347,7 +344,7 @@ const Navbar = () => {
 
             {/* Profile / Login */}
             <span
-              className={`nav-link ${isHomePage ? "" : "on-white"} ${!isHomePage && isActive(isLoggedIn ? "/profile" : "/login") ? "active-light" : ""}`}
+              className={`nav-link ${onHero ? "on-hero" : "on-white"} ${!onHero && isActive(isLoggedIn ? "/profile" : "/login") ? "active-light" : ""}`}
               style={{ color: linkColor }}
               onClick={() => navigate(isLoggedIn ? "/profile" : "/login")}
             >
@@ -361,7 +358,7 @@ const Navbar = () => {
                 style={{
                   width: 1,
                   height: 22,
-                  background: isHomePage ? "rgba(255,255,255,0.18)" : "#e2e8f0",
+                  background: onHero ? "rgba(255,255,255,0.18)" : "#e2e8f0",
                   margin: "0 6px",
                 }}
               />
@@ -374,8 +371,8 @@ const Navbar = () => {
                   className="bell-btn"
                   onClick={handleNotificationClick}
                   style={{
-                    background: isHomePage ? "rgba(255,255,255,0.1)" : "#f1f5f9",
-                    color: isHomePage ? "#e2e8f0" : "#475569",
+                    background: onHero ? "rgba(255,255,255,0.1)" : "#f1f5f9",
+                    color: linkColor,
                   }}
                   aria-label="Notifications"
                 >
@@ -393,8 +390,8 @@ const Navbar = () => {
                 className="logout-btn"
                 onClick={handleLogout}
                 style={{
-                  background: isHomePage ? "rgba(239,68,68,0.15)" : "#fef2f2",
-                  color: isHomePage ? "#fca5a5" : "#ef4444",
+                  background: onHero ? "rgba(239,68,68,0.15)" : "#fef2f2",
+                  color: onHero ? "#fca5a5" : "#ef4444",
                   marginLeft: 4,
                 }}
               >
@@ -415,8 +412,8 @@ const Navbar = () => {
                   className="bell-btn"
                   onClick={handleNotificationClick}
                   style={{
-                    background: isHomePage ? "rgba(255,255,255,0.1)" : "#f1f5f9",
-                    color: isHomePage ? "#e2e8f0" : "#475569",
+                    background: onHero ? "rgba(255,255,255,0.1)" : "#f1f5f9",
+                    color: linkColor,
                   }}
                   aria-label="Notifications"
                 >
@@ -430,7 +427,7 @@ const Navbar = () => {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               style={{
-                background: isHomePage ? "rgba(255,255,255,0.1)" : "#f1f5f9",
+                background: onHero ? "rgba(255,255,255,0.1)" : "#f1f5f9",
                 border: "none",
                 borderRadius: 10,
                 width: 38,
@@ -439,7 +436,7 @@ const Navbar = () => {
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
-                color: isHomePage ? "#fff" : "#475569",
+                color: linkColor,
                 transition: "all 0.15s",
               }}
             >
