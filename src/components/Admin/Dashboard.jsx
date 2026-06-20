@@ -17,9 +17,14 @@ import {
   Calendar,
   FolderOpen,
   RefreshCw,
+  Clock,
+  GraduationCap,
+  Globe,
+  Save,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getDashboardStats } from "@/apiServices/dashboardApi";
+import { getPlatformSettings, updatePlatformSettings } from "@/apiServices/adminApi";
 import StatCard from "@/components/ui/StatCard";
 import { ADMIN_PAGE, ADMIN_HEADER_TITLE } from "@/components/Admin/adminPageLayout";
 
@@ -51,6 +56,15 @@ const TIME_OPTS = [
   { value: "monthly", label: "This Month" },
   { value: "yearly", label: "This Year" },
 ];
+
+const formatDelaySummary = (minutes) => {
+  const m = Number(minutes) || 0;
+  if (m <= 0) return "Public users see jobs immediately";
+  if (m < 60) return `Public users see jobs after ${m} minute${m === 1 ? "" : "s"}`;
+  const hours = m / 60;
+  const hoursLabel = Number.isInteger(hours) ? `${hours}` : hours.toFixed(1);
+  return `Public users see jobs after ${hoursLabel} hour${hours === 1 ? "" : "s"}`;
+};
 
 const EMPTY_CHART = MONTHS.map((name) => ({
   name,
@@ -131,6 +145,46 @@ const Dashboard = () => {
     topJobs: [],
     chartData: EMPTY_CHART,
   });
+  const [publicDelayHours, setPublicDelayHours] = useState("1");
+  const [savedDelayMinutes, setSavedDelayMinutes] = useState(60);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  const fetchSettings = async () => {
+    setSettingsLoading(true);
+    try {
+      const res = await getPlatformSettings();
+      const minutes = res?.data?.settings?.publicJobDelayMinutes ?? 60;
+      setSavedDelayMinutes(minutes);
+      setPublicDelayHours(String(minutes / 60));
+    } catch {
+      toast.error("Failed to load job visibility settings");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    const hours = Number(publicDelayHours);
+    if (Number.isNaN(hours) || hours < 0 || hours > 168) {
+      toast.error("Enter a delay between 0 and 168 hours");
+      return;
+    }
+
+    setSavingSettings(true);
+    try {
+      const publicJobDelayMinutes = Math.round(hours * 60);
+      const res = await updatePlatformSettings({ publicJobDelayMinutes });
+      const minutes = res?.data?.settings?.publicJobDelayMinutes ?? publicJobDelayMinutes;
+      setSavedDelayMinutes(minutes);
+      setPublicDelayHours(String(minutes / 60));
+      toast.success("Job visibility settings saved");
+    } catch {
+      toast.error("Failed to save job visibility settings");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const fetchData = async (silent = false) => {
     if (!silent) setLoading(true); else setRefreshing(true);
@@ -152,6 +206,7 @@ const Dashboard = () => {
   };
 
   useEffect(() => { fetchData(); }, [timeRange]);
+  useEffect(() => { fetchSettings(); }, []);
 
   const BAR_SERIES = [
     { key: "users", name: "Users", fill: "#3b82f6" },
@@ -227,6 +282,85 @@ const Dashboard = () => {
               />
             </>
           )}
+        </div>
+
+        {/* ── job visibility settings ── */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-4 pt-4 pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-indigo-600" />
+              <h2 className="text-base font-semibold text-slate-900">Job Visibility Settings</h2>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Control when newly posted jobs become visible to public users
+            </p>
+          </div>
+
+          <div className="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                  <GraduationCap className="w-4 h-4 text-indigo-700" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Students</p>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Institute students with the <strong>student</strong> role see new jobs immediately when employers post them.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                  <Globe className="w-4 h-4 text-emerald-700" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-slate-800">Public users</p>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Public users and guests see jobs only after the delay below. Set to <strong>0</strong> to show jobs to everyone immediately.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-4 pb-4">
+            {settingsLoading ? (
+              <Skeleton className="h-20 w-full" />
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:items-end gap-4 rounded-xl border border-slate-200 p-4">
+                <div className="flex-1">
+                  <label htmlFor="publicDelayHours" className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                    Public visibility delay (hours)
+                  </label>
+                  <input
+                    id="publicDelayHours"
+                    type="number"
+                    min="0"
+                    max="168"
+                    step="0.5"
+                    value={publicDelayHours}
+                    onChange={(e) => setPublicDelayHours(e.target.value)}
+                    className="w-full sm:max-w-xs px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  <p className="text-xs text-slate-500 mt-2">
+                    Current: {formatDelaySummary(savedDelayMinutes)}. Applies to new jobs posted after saving.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSaveSettings}
+                  disabled={savingSettings}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  {savingSettings ? "Saving..." : "Save Settings"}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── chart ── */}

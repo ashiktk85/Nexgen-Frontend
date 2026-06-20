@@ -6,7 +6,7 @@ function FullPageLoader() {
       <div className="flex flex-col items-center gap-3">
         <LoaderOne />
         <p className="text-sm font-medium text-muted-foreground">
-          Loading Nexgen, please wait...
+          Loading Techpath, please wait...
         </p>
       </div>
     </div>

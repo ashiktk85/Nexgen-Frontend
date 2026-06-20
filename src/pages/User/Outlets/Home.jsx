@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   People,
@@ -12,7 +12,6 @@ import {
   LinkedIn,
   Mail,
   // MapPin,
-  Phone,
 } from "@mui/icons-material";
 import JobCard from "@/components/User/JobCard";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
@@ -26,6 +25,7 @@ import businessmanImg from "/Images/businessman.png";
 import AdBannerCarousel from "@/components/User/adBanner";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 import PageLoader from "@/components/PageLoader";
+import { Helmet } from "react-helmet-async";
 
 // Animation variants for staggered children
 const containerVariants = {
@@ -45,7 +45,12 @@ const itemVariants = {
 
 export default function Home() {
   const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchDebounceRef = useRef(null);
   const user = useSelector((state) => state.user.seekerInfo);
   const [adBanners, setAdBanners] = useState([]);
   const navigate = useNavigate();
@@ -77,23 +82,69 @@ export default function Home() {
     }
   };
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const runSearch = useCallback(
+    async (query) => {
+      const trimmed = query.trim();
+      if (!trimmed) {
+        setSearchResults([]);
+        setShowSearchResults(false);
+        return;
+      }
+
+      setSearchLoading(true);
+      setShowSearchResults(true);
+      try {
+        const { data } = await userAxiosInstance.get("/getJobPosts", {
+          params: {
+            userId: user?.userId,
+            page: 1,
+            limit: 10,
+            search: trimmed,
+          },
+        });
+        setSearchResults(data?.jobs || data?.jobPosts || []);
+      } catch (error) {
+        console.error("Hero search failed:", error);
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    },
+    [user?.userId]
+  );
 
   const handleSearch = (e) => {
     if (e.key === "Enter" || e.type === "click") {
-      const query = searchTerm.trim();
-      if (query) {
-        navigate("/all-jobs", {
-          state: {
-            searchInput: query,
-          },
-        });
-      }
+      e.preventDefault?.();
+      runSearch(searchTerm);
     }
   };
 
+  const handleJobSelect = (jobId) => {
+    setShowSearchResults(false);
+    navigate(`/job-details/${jobId}`);
+  };
+
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+
+    if (!searchTerm.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    searchDebounceRef.current = setTimeout(() => {
+      runSearch(searchTerm);
+    }, 400);
+
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchTerm, runSearch]);
+
   const fetchJobs = async () => {
-    setLoading(true);
+    setInitialLoading(true);
     try {
       const { data } = await userAxiosInstance.get("/getJobPosts", {
         params: { userId: user?.userId, page: 1, limit: 12 },
@@ -114,7 +165,7 @@ export default function Home() {
     } catch (error) {
       console.log(error);
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
     }
   };
 
@@ -123,17 +174,24 @@ export default function Home() {
     fetchAdBanners(); // Fetch ad banners when component mounts
   }, []);
 
-  if (loading) return <PageLoader />;
+  if (initialLoading) return <PageLoader />;
 
   return (
     <>
+      <Helmet>
+        <title>TechPath - Mobile Phone Repair Jobs in Kerala | Technician Careers</title>
+        <meta
+          name="description"
+          content="Find mobile repair jobs in Kerala. Connect with top employers hiring chip-level technicians, iPhone/Android experts, and service managers. Register as job seeker or employer."
+        />
+      </Helmet>
       <main className="flex-grow">
         {/* Hero Banner Section */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
-          className="relative w-full min-h-[520px] sm:min-h-[600px] md:min-h-[700px] flex items-center justify-center"
+          className="relative w-full min-h-screen flex items-center justify-center"
         >
           <img
             src={bannerImg || "/placeholder.svg"}
@@ -149,30 +207,98 @@ export default function Home() {
             className="absolute inset-0 flex flex-col items-center justify-center text-center pt-16 sm:pt-20 md:pt-24 px-4 sm:px-8 md:px-16 lg:px-20 text-white"
           >
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold max-w-2xl leading-tight">
-              Find Your Dream Job Today
+              Find Your Dream Mobile Repair Job in Kerala Today
             </h1>
             <p className="mt-2 text-sm sm:text-md md:text-lg max-w-2xl font-marcellus">
-              Whether you're a skilled technician or just starting out, our
-              platform is designed to match you with job opportunities tailored
-              to your expertise.
+              Whether you&apos;re a skilled mobile technician in Kerala or just starting out,
+              TechPath connects you with top employers seeking chip-level, Android,
+              iPhone, and service experts.
             </p>
 
             {/* Search box */}
-            <div className="mt-4 w-full max-w-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <input
-                type="text"
-                placeholder="Search jobs by title, keyword, or location"
-                className="w-full py-3 px-5 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleSearch}
-              />
-              <button
-                onClick={handleSearch}
-                className="bg-primary text-white px-4 py-3 rounded-lg hover:bg-[#07407d] transition w-full sm:w-auto"
-              >
-                Search
-              </button>
+            <div className="mt-4 w-full max-w-xl relative z-10">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Search mobile repair jobs, Android, iPhone, chip-level technician, Kerala..."
+                  className="w-full py-3 px-5 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={handleSearch}
+                  onFocus={() => {
+                    if (searchTerm.trim() && searchResults.length) setShowSearchResults(true);
+                  }}
+                  aria-label="Search jobs"
+                  aria-expanded={showSearchResults}
+                  aria-controls="hero-search-results"
+                />
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  className="bg-primary text-white px-4 py-3 rounded-lg hover:bg-[#07407d] transition w-full sm:w-auto"
+                >
+                  Search
+                </button>
+              </div>
+
+              {showSearchResults && (
+                <div
+                  id="hero-search-results"
+                  className="mt-2 w-full rounded-xl bg-white/95 backdrop-blur-sm shadow-2xl border border-white/20 text-left overflow-hidden"
+                >
+                  {searchLoading ? (
+                    <div className="px-4 py-6 text-center text-sm text-slate-500">
+                      Searching jobs...
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <ul className="max-h-72 overflow-y-auto divide-y divide-slate-100">
+                      {searchResults.map((job) => (
+                        <li key={job._id}>
+                          <button
+                            type="button"
+                            onClick={() => handleJobSelect(job._id)}
+                            className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors focus:outline-none focus:bg-slate-50"
+                          >
+                            <p className="text-sm font-semibold text-slate-900 line-clamp-1">
+                              {job.jobTitle}
+                            </p>
+                            <p className="text-xs font-medium text-indigo-600 mt-0.5 line-clamp-1">
+                              {job.companyName}
+                            </p>
+                            <p className="text-xs text-slate-500 mt-1">
+                              {[job.city, job.state].filter(Boolean).join(", ")}
+                              {job.salaryRange?.[0] != null && job.salaryRange?.[1] != null && (
+                                <span>
+                                  {" "}
+                                  · ₹{job.salaryRange[0]} – ₹{job.salaryRange[job.salaryRange.length - 1]}
+                                </span>
+                              )}
+                            </p>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="px-4 py-6 text-center text-sm text-slate-500">
+                      No jobs found for &quot;{searchTerm.trim()}&quot;
+                    </div>
+                  )}
+
+                  {!searchLoading && searchResults.length > 0 && (
+                    <div className="px-4 py-2 border-t border-slate-100 bg-slate-50">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate("/all-jobs", { state: { searchInput: searchTerm.trim() } })
+                        }
+                        className="text-xs font-semibold text-primary hover:underline"
+                      >
+                        View all results on job board →
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {Object.keys(user).length < 1 && (
@@ -186,7 +312,7 @@ export default function Home() {
                   <div className="flex items-center justify-between w-full rounded-lg bg-primary py-4 px-6 text-white transform transition-transform hover:scale-105">
                     <div className="mx-auto text-center">
                       <span className="text-sm block">Register as</span>
-                      <div className="text-lg font-semibold">Job Seeker</div>
+                      <div className="text-lg font-semibold">Mobile Technician / Job Seeker</div>
                     </div>
                     <img
                       src={seekerImg || "/placeholder.svg"}
@@ -200,7 +326,7 @@ export default function Home() {
                   <div className="flex items-center justify-between w-full rounded-lg bg-primary py-4 px-6 text-white transform transition-transform hover:scale-105">
                     <div className="mx-auto text-center">
                       <span className="text-sm block">Register as</span>
-                      <div className="text-lg font-semibold">Employer</div>
+                      <div className="text-lg font-semibold">Mobile Repair Employer</div>
                     </div>
                     <img
                       src={businessmanImg || "/placeholder.svg"}
@@ -229,10 +355,10 @@ export default function Home() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-                Featured Job Opportunities
+                Featured Mobile Repair &amp; Service Jobs in Kerala
               </h2>
               <p className="text-gray-600 text-lg">
-                Discover roles perfectly matched to your skills and aspirations
+                Discover chip-level, Android, iPhone, and management roles perfectly matched to your skills
               </p>
             </motion.div>
 
@@ -545,20 +671,17 @@ export default function Home() {
             >
               <h4 className="text-lg font-semibold text-white mb-4">Contact Us</h4>
               <ul className="space-y-3">
-                <li className="flex items-center gap-2 text-gray-400 text-sm">
-                  {/* <MapPin size={16} className="text-blue-400 flex-shrink-0" /> */}
-                  <span>123 Tech Street, City, Country</span>
-                </li>
-                <li className="flex items-center gap-2 text-gray-400 text-sm">
-                  <Phone size={16} className="text-blue-400 flex-shrink-0" />
-                  <a href="tel:+1234567890" className="hover:text-blue-400 transition">
-                    +1 (234) 567-890
-                  </a>
+                <li className="flex items-start gap-2 text-gray-400 text-sm">
+                  <address className="not-italic">
+                    Koduveli Building 53/3608, Subhash Chandra Bose Road<br />
+                    opp Muthoot Finance Vyttila, near Ponnurunni,<br />
+                    Vytila, Kochi, Kerala 682019
+                  </address>
                 </li>
                 <li className="flex items-center gap-2 text-gray-400 text-sm">
                   <Mail size={16} className="text-blue-400 flex-shrink-0" />
-                  <a href="mailto:support@jobconnect.com" className="hover:text-blue-400 transition">
-                    support@jobconnect.com
+                  <a href="mailto:techpath786@gmail.com" className="hover:text-blue-400 transition">
+                    techpath786@gmail.com
                   </a>
                 </li>
               </ul>

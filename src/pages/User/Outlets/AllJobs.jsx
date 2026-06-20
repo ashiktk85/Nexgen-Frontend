@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { FaSearch, FaTh, FaList } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
+import { SlidersHorizontal, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import JobCard from "../../../components/User/JobCard";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { useSelector } from "react-redux";
+import { Helmet } from "react-helmet-async";
+import { KERALA_DISTRICTS } from "@/constants/options";
 
 /* ─── Google Fonts ─── */
 if (!document.getElementById("ajp-font-link")) {
@@ -19,14 +22,62 @@ if (!document.getElementById("ajp-font-link")) {
 const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.08 } } };
 const itemVariants = { hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } } };
 
+const EXPERIENCE_OPTIONS = [
+  { id: "0", label: "Fresher" },
+  { id: "1", label: "1+ years" },
+  { id: "2", label: "2+ years" },
+  { id: "3", label: "3+ years" },
+  { id: "5", label: "5+ years" },
+  { id: "7", label: "7+ years" },
+  { id: "10", label: "10+ years" },
+];
+
+const TIME_OPTIONS = [
+  { value: "1h", label: "Last hour" },
+  { value: "24h", label: "Last 24 hours" },
+  { value: "3d", label: "Last 3 days" },
+  { value: "7d", label: "Last 7 days" },
+  { value: "30d", label: "Last 30 days" },
+];
+
+const jobMatchesExperience = (job, selected) => {
+  if (!selected.length) return true;
+  const jobMin = Number(job.experienceRequired?.[0] ?? 0);
+  const jobMax = Number(job.experienceRequired?.[job.experienceRequired?.length - 1] ?? jobMin);
+  return selected.some((id) => {
+    const threshold = Number(id);
+    if (Number.isNaN(threshold)) return true;
+    if (threshold === 0) return jobMin === 0;
+    return jobMin >= threshold || (jobMin <= threshold && jobMax >= threshold);
+  });
+};
+
+const getTimeFilteredJobs = (source, timeRange) => {
+  if (!timeRange) return source;
+  const now = Date.now();
+  const ranges = {
+    "1h": 1 * 60 * 60 * 1000,
+    "24h": 24 * 60 * 60 * 1000,
+    "3d": 3 * 24 * 60 * 60 * 1000,
+    "7d": 7 * 24 * 60 * 60 * 1000,
+    "30d": 30 * 24 * 60 * 60 * 1000,
+  };
+  const windowMs = ranges[timeRange];
+  if (!windowMs) return source;
+  return source.filter((job) => {
+    if (!job.createdAt) return false;
+    const created = new Date(job.createdAt).getTime();
+    if (Number.isNaN(created)) return false;
+    return now - created <= windowMs;
+  });
+};
+
 const globalStyle = `
   .ajp-root *, .ajp-root *::before, .ajp-root *::after { box-sizing: border-box; }
   .ajp-root { font-family:'DM Sans',sans-serif; overflow-x:hidden; max-width:100vw; }
   .ajp-root h1,.ajp-root h2,.ajp-root h3 { font-family:'Plus Jakarta Sans',sans-serif; }
 
-  .filter-select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236366f1' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:36px !important; }
-  .filter-select:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,0.12); }
-  .job-card-wrap { transition:transform 0.2s ease; }
+  .job-card-wrap { transition:transform 0.2s ease; min-width:0; width:100%; }
   .job-card-wrap:hover { transform:translateY(-2px); }
   .page-btn { transition:all 0.18s ease; }
   .page-btn:hover:not(:disabled) { transform:scale(1.05); }
@@ -35,28 +86,56 @@ const globalStyle = `
   .filter-chip { display:inline-flex; align-items:center; gap:5px; background:#eef2ff; color:#4f46e5; border-radius:999px; padding:3px 10px 3px 12px; font-size:12px; font-weight:500; }
   .filter-chip button { display:flex; align-items:center; }
 
+  /* Technical Filters */
+  .tf-panel { background:#eef3f8; display:flex; flex-direction:column; min-height:100%; }
+  .tf-header { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:18px 18px 14px; border-bottom:1px solid #d8e0ea; }
+  .tf-header-title { display:flex; align-items:center; gap:8px; color:#121A2D; font-weight:700; font-size:15px; font-family:'Plus Jakarta Sans',sans-serif; }
+  .tf-body { padding:4px 18px 18px; flex:1; }
+  .tf-section { margin-top:14px; border-bottom:1px solid #d8e0ea; padding-bottom:12px; }
+  .tf-section:last-of-type { border-bottom:none; }
+  .tf-section-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; background:none; border:none; padding:4px 0 8px; cursor:pointer; text-align:left; }
+  .tf-section-toggle:hover .tf-section-label { color:#64748b; }
+  .tf-section-label { font-size:10px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:#94a3b8; font-family:'DM Sans',monospace,sans-serif; transition:color 0.15s ease; }
+  .tf-chevron { color:#94a3b8; flex-shrink:0; transition:transform 0.2s ease; }
+  .tf-chevron.open { transform:rotate(180deg); }
+  .tf-section-content { padding-top:2px; }
+  .tf-option { display:flex; align-items:flex-start; gap:10px; padding:5px 0; cursor:pointer; user-select:none; }
+  .tf-option-label { font-size:13.5px; color:#334155; line-height:1.35; font-family:'DM Sans',sans-serif; }
+  .tf-box { width:15px; height:15px; border:1.5px solid #c5d0dc; border-radius:3px; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; background:#fff; transition:all 0.15s ease; }
+  .tf-box.checked { background:#0950a0; border-color:#0950a0; }
+  .tf-box.checked::after { content:''; width:7px; height:4px; border-left:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(-45deg) translateY(-1px); }
+  .tf-radio { width:15px; height:15px; border:1.5px solid #c5d0dc; border-radius:50%; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; background:#fff; transition:all 0.15s ease; }
+  .tf-radio.checked { border-color:#0950a0; }
+  .tf-radio.checked::after { content:''; width:7px; height:7px; border-radius:50%; background:#0950a0; }
+  .tf-clear-btn { width:100%; margin-top:22px; padding:11px 14px; border:1.5px solid #c5d0dc; background:transparent; color:#121A2D; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; font-family:'DM Sans',monospace,sans-serif; transition:all 0.15s ease; }
+  .tf-clear-btn:hover { border-color:#0950a0; color:#0950a0; background:#fff; }
+  .tf-close-btn { background:none; border:none; color:#64748b; cursor:pointer; display:flex; align-items:center; padding:4px; border-radius:6px; }
+  .tf-close-btn:hover { background:#dde6f0; color:#121A2D; }
+  .tf-count { background:#0950a0; color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px; min-width:18px; text-align:center; }
+
   /* Drawer */
   .ajp-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.45); z-index:40; backdrop-filter:blur(2px); }
   .ajp-overlay.open { display:block; }
-  .ajp-drawer { position:fixed; top:0; left:0; bottom:0; width:min(300px,88vw); background:#fff; z-index:50; overflow-y:auto; box-shadow:4px 0 32px rgba(15,23,42,0.18); transform:translateX(-100%); transition:transform 0.28s cubic-bezier(.4,0,.2,1); border-radius:0 20px 20px 0; }
+  .ajp-drawer { position:fixed; top:0; left:0; bottom:0; width:min(300px,88vw); background:#eef3f8; z-index:50; overflow-y:auto; box-shadow:4px 0 32px rgba(15,23,42,0.18); transform:translateX(-100%); transition:transform 0.28s cubic-bezier(.4,0,.2,1); border-radius:0; }
   .ajp-drawer.open { transform:translateX(0); }
 
   /* Layout */
   .ajp-layout { display:flex; gap:20px; align-items:flex-start; width:100%; min-width:0; }
-  .ajp-sidebar { width:260px; flex-shrink:0; background:#fff; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.07); overflow:hidden; border:1px solid #e8edf5; }
-  .ajp-right-col { flex:1; min-width:0; max-width:100%; overflow:hidden; }
+  .ajp-sidebar { width:272px; flex-shrink:0; border-radius:4px; overflow:hidden; border:1px solid #d8e0ea; box-shadow:0 2px 12px rgba(18,26,45,0.05); }
+  .ajp-right-col { flex:1; min-width:0; max-width:100%; }
 
   /* Search row */
   .ajp-search-row { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:20px; align-items:stretch; width:100%; }
   .ajp-search-bar-wrap { flex:1 1 200px; min-width:0; display:flex; }
 
   /* Controls */
-  .ajp-filter-toggle { display:none; align-items:center; gap:7px; padding:10px 16px; background:linear-gradient(135deg,#4f46e5,#6366f1); color:#fff; border:none; border-radius:12px; font-size:13px; font-weight:700; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; box-shadow:0 4px 12px rgba(99,102,241,.3); white-space:nowrap; flex-shrink:0; }
+  .ajp-filter-toggle { display:none; align-items:center; gap:7px; padding:10px 16px; background:#fff; color:#121A2D; border:1.5px solid #d8e0ea; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:0.04em; text-transform:uppercase; white-space:nowrap; flex-shrink:0; }
+  .ajp-filter-toggle:hover { border-color:#0950a0; color:#0950a0; }
   .ajp-results-badge { display:flex; align-items:center; background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:10px 16px; gap:6px; white-space:nowrap; box-shadow:0 2px 8px rgba(0,0,0,0.04); flex-shrink:0; }
   .ajp-view-toggle { display:flex; background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.04); flex-shrink:0; }
 
   /* Jobs grid */
-  .ajp-jobs-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(280px,100%), 1fr)); gap:16px; width:100%; }
+  .ajp-jobs-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(280px,100%), 1fr)); gap:16px; width:100%; min-width:0; }
 
   /* Pagination */
   .ajp-pagination { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:28px; flex-wrap:wrap; }
@@ -94,95 +173,131 @@ const globalStyle = `
   @keyframes spin { to { transform:rotate(360deg); } }
 `;
 
-const SelectField = ({ label, icon, value, onChange, options, placeholder }) => (
+const CheckboxGroup = ({ options, selected, onToggle }) => (
   <div>
-    <label style={{ display:"block", fontSize:11, fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"#94a3b8", marginBottom:6, fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-      {icon} {label}
-    </label>
-    <select className="filter-select" value={value} onChange={(e) => onChange(e.target.value)}
-      style={{ width:"100%", padding:"9px 36px 9px 12px", border:"1.5px solid #e2e8f0", borderRadius:10, background:"#f8fafc", fontSize:13.5, color:value?"#1e293b":"#94a3b8", fontFamily:"'DM Sans',sans-serif", cursor:"pointer" }}>
-      <option value="">{placeholder}</option>
-      {options.map((opt, i) => <option key={i} value={opt.value}>{opt.label}</option>)}
-    </select>
+    {options.map((opt) => {
+      const checked = selected.includes(opt.id ?? opt.value);
+      return (
+        <label key={opt.id ?? opt.value} className="tf-option">
+          <span className={`tf-box${checked ? " checked" : ""}`} aria-hidden="true" />
+          <span className="tf-option-label">{opt.label}</span>
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={() => onToggle(opt.id ?? opt.value)}
+            style={{ position: "absolute", opacity: 0, width: 0, height: 0 }}
+          />
+        </label>
+      );
+    })}
   </div>
 );
 
+const RadioGroup = ({ options, value, onChange, name }) => (
+  <div>
+    {options.map((opt) => {
+      const checked = value === (opt.id ?? opt.value);
+      return (
+        <label key={opt.id ?? opt.value} className="tf-option">
+          <span className={`tf-radio${checked ? " checked" : ""}`} aria-hidden="true" />
+          <span className="tf-option-label">{opt.label}</span>
+          <input
+            type="radio"
+            name={name}
+            checked={checked}
+            onChange={() => onChange(opt.id ?? opt.value)}
+            style={{ position: "absolute", opacity: 0, width: 0, height: 0 }}
+          />
+        </label>
+      );
+    })}
+  </div>
+);
+
+const CollapsibleSection = ({ label, defaultOpen = true, children }) => {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div className="tf-section">
+      <button
+        type="button"
+        className="tf-section-toggle"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+      >
+        <span className="tf-section-label">{label}</span>
+        <ChevronDown size={14} className={`tf-chevron${open ? " open" : ""}`} />
+      </button>
+      {open && <div className="tf-section-content">{children}</div>}
+    </div>
+  );
+};
+
 const FilterPanel = ({
-  jobs,
   searchLocation,
   setSearchLocation,
-  jobType,
-  setJobType,
-  experienceLevel,
-  setExperienceLevel,
+  experienceLevels,
+  setExperienceLevels,
   timeRange,
   setTimeRange,
   activeFiltersCount,
   clearAll,
-  handleFilter,
   onClose,
 }) => {
-  const timeOptions = [
-    { value: "1h", label: "Last hour" },
-    { value: "24h", label: "Last 24 hours" },
-    { value: "3d", label: "Last 3 days" },
-    { value: "7d", label: "Last 7 days" },
-    { value: "30d", label: "Last 30 days" },
-  ];
-  const timeLabelMap = timeOptions.reduce((acc, opt) => {
-    acc[opt.value] = opt.label;
-    return acc;
-  }, {});
+  const toggleLocation = (district) => {
+    setSearchLocation((prev) => (prev === district ? "" : district));
+  };
+
+  const toggleExperience = (level) => {
+    setExperienceLevels((prev) => (prev.includes(level) ? prev.filter((v) => v !== level) : [...prev, level]));
+  };
 
   return (
-  <>
-    <div style={{ background:"linear-gradient(135deg,#312e81,#4f46e5)", padding:"18px 20px", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:1 }}>
-      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-        <span style={{ fontSize:16 }}>⚙️</span>
-        <span style={{ color:"#fff", fontWeight:700, fontSize:15, fontFamily:"'Plus Jakarta Sans',sans-serif" }}>Filters</span>
-        {activeFiltersCount > 0 && <span style={{ background:"#a5b4fc", color:"#1e1b4b", fontSize:11, fontWeight:700, padding:"2px 8px", borderRadius:999 }}>{activeFiltersCount}</span>}
-      </div>
-      <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-        {activeFiltersCount > 0 && <button onClick={clearAll} style={{ background:"rgba(255,255,255,0.15)", border:"none", color:"#e0e7ff", fontSize:11, padding:"4px 10px", borderRadius:6, cursor:"pointer", fontFamily:"'DM Sans',sans-serif", fontWeight:500 }}>Clear all</button>}
-        {onClose && <button onClick={onClose} style={{ background:"rgba(255,255,255,0.15)", border:"none", color:"#fff", borderRadius:6, padding:"4px 8px", cursor:"pointer", display:"flex", alignItems:"center" }}><RxCross2 size={16} /></button>}
-      </div>
-    </div>
-    <div style={{ padding:"20px 18px", display:"flex", flexDirection:"column", gap:18 }}>
-      <SelectField label="Location" icon="📍" value={searchLocation} onChange={setSearchLocation} placeholder="All locations" options={Array.from(new Set(jobs.map(j=>j.city))).map(c=>({value:c,label:c}))} />
-      <SelectField label="Job Type" icon="💼" value={jobType} onChange={setJobType} placeholder="All job types" options={Array.from(new Set(jobs.map(j=>j.jobTitle))).map(t=>({value:t,label:t}))} />
-      <SelectField label="Experience" icon="📈" value={experienceLevel} onChange={setExperienceLevel} placeholder="Any experience" options={Array.from(new Set(jobs.flatMap(j=>j.experienceRequired))).sort((a,b)=>a-b).map(l=>({value:l,label:`${l} years`}))} />
-      <SelectField
-        label="Posted"
-        icon="⏱️"
-        value={timeRange}
-        onChange={setTimeRange}
-        placeholder="Any time"
-        options={timeOptions}
-      />
-      {activeFiltersCount > 0 && (
-        <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
-          {searchLocation && <span className="filter-chip">📍 {searchLocation}<button onClick={()=>setSearchLocation("")} style={{ background:"none",border:"none",cursor:"pointer",color:"#6366f1",padding:0 }}><RxCross2 size={11}/></button></span>}
-          {jobType && <span className="filter-chip">💼 {jobType.length>12?jobType.slice(0,12)+"…":jobType}<button onClick={()=>setJobType("")} style={{ background:"none",border:"none",cursor:"pointer",color:"#6366f1",padding:0 }}><RxCross2 size={11}/></button></span>}
-          {experienceLevel && <span className="filter-chip">📈 {experienceLevel} yrs<button onClick={()=>setExperienceLevel("")} style={{ background:"none",border:"none",cursor:"pointer",color:"#6366f1",padding:0 }}><RxCross2 size={11}/></button></span>}
-          {timeRange && (
-            <span className="filter-chip">
-              ⏱️ {timeLabelMap[timeRange] || timeRange}
-              <button
-                onClick={() => setTimeRange("")}
-                style={{ background:"none",border:"none",cursor:"pointer",color:"#6366f1",padding:0 }}
-              >
-                <RxCross2 size={11}/>
-              </button>
-            </span>
-          )}
+    <div className="tf-panel">
+      <div className="tf-header">
+        <div className="tf-header-title">
+          <SlidersHorizontal size={16} strokeWidth={2.2} />
+          <span>Technical Filters</span>
+          {activeFiltersCount > 0 && <span className="tf-count">{activeFiltersCount}</span>}
         </div>
-      )}
-      <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.97}} onClick={()=>{handleFilter();onClose?.();}}
-        style={{ width:"100%", padding:"11px", background:"linear-gradient(135deg,#4f46e5,#6366f1)", color:"#fff", border:"none", borderRadius:10, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", boxShadow:"0 4px 12px rgba(99,102,241,0.35)" }}>
-        Apply Filters
-      </motion.button>
+        {onClose && (
+          <button type="button" className="tf-close-btn" onClick={onClose} aria-label="Close filters">
+            <RxCross2 size={18} />
+          </button>
+        )}
+      </div>
+
+      <div className="tf-body">
+        <CollapsibleSection label="Location" defaultOpen>
+          <CheckboxGroup
+            options={KERALA_DISTRICTS.map((d) => ({ id: d, label: d }))}
+            selected={searchLocation ? [searchLocation] : []}
+            onToggle={toggleLocation}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection label="Experience" defaultOpen>
+          <CheckboxGroup
+            options={EXPERIENCE_OPTIONS}
+            selected={experienceLevels}
+            onToggle={toggleExperience}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection label="Posted" defaultOpen>
+          <RadioGroup
+            options={TIME_OPTIONS.map((o) => ({ id: o.value, label: o.label }))}
+            value={timeRange}
+            name="tf-posted"
+            onChange={(id) => setTimeRange((prev) => (prev === id ? "" : id))}
+          />
+        </CollapsibleSection>
+
+        <button type="button" className="tf-clear-btn" onClick={clearAll}>
+          Clear All Filters
+        </button>
+      </div>
     </div>
-  </>
   );
 };
 
@@ -190,12 +305,10 @@ const AllJobsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [jobs, setJobs] = useState([]);
-  const [jobType, setJobType] = useState("");
-  const [experienceLevel, setExperienceLevel] = useState("");
+  const [experienceLevels, setExperienceLevels] = useState([]);
   const [timeRange, setTimeRange] = useState("");
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
-  const [filteredJobs, setFilteredJobs] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const location = useLocation();
   const { searchInput } = location.state || {};
@@ -203,6 +316,7 @@ const AllJobsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const jobsPerPage = 6;
   const [serverTotalPages, setServerTotalPages] = useState(1);
+  const skipLocationFetch = useRef(true);
 
   useEffect(() => {
     const onResize = () => { if (window.innerWidth > 900) setDrawerOpen(false); };
@@ -227,6 +341,15 @@ const AllJobsPage = () => {
 
   useEffect(() => { fetchJobs({ page: currentPage }); }, [currentPage]);
 
+  useEffect(() => {
+    if (skipLocationFetch.current) {
+      skipLocationFetch.current = false;
+      return;
+    }
+    setCurrentPage(1);
+    fetchJobs({ page: 1 });
+  }, [searchLocation]);
+
   const fetchJobs = async ({ page = 1, searchOverride } = {}) => {
     try {
       setLoading(true);
@@ -237,71 +360,59 @@ const AllJobsPage = () => {
           limit: jobsPerPage,
           search: (searchOverride ?? searchTerm)?.trim() || undefined,
           city: searchLocation || undefined,
-          jobTitle: jobType || undefined,
-          experience: experienceLevel || undefined,
         },
       });
       const serverJobs = data?.jobs || data?.jobPosts || [];
-      setJobs(serverJobs); setFilteredJobs(serverJobs);
+      setJobs(serverJobs);
       setServerTotalPages(data?.totalPages || 1);
     } catch (error) {
       toast.warning(error?.response?.data?.message || "An error occurred");
     } finally { setLoading(false); }
   };
 
-  const handleFilter = () => { setCurrentPage(1); fetchJobs({ page:1 }); };
   const clearAll = () => {
-    setFilteredJobs(jobs);
     setSearchLocation("");
-    setJobType("");
-    setExperienceLevel("");
+    setExperienceLevels([]);
     setTimeRange("");
     setCurrentPage(1);
+    fetchJobs({ page: 1 });
   };
-  const clearSearchTerm = () => { setSearchTerm(""); setCurrentPage(1); };
+  const clearSearchTerm = () => { setSearchTerm(""); setCurrentPage(1); fetchJobs({ page: 1, searchOverride: "" }); };
+
+  const activeFiltersCount =
+    (searchLocation ? 1 : 0) +
+    experienceLevels.length +
+    (timeRange ? 1 : 0);
+
+  const timeFilteredJobs = useMemo(() => {
+    let result = jobs;
+    result = result.filter((job) => jobMatchesExperience(job, experienceLevels));
+    result = getTimeFilteredJobs(result, timeRange);
+    return result;
+  }, [jobs, experienceLevels, timeRange]);
 
   const totalPages = serverTotalPages;
-  const activeFiltersCount = [searchLocation, jobType, experienceLevel, timeRange].filter(Boolean).length;
-
-  const getTimeFilteredJobs = (source) => {
-    if (!timeRange) return source;
-    const now = Date.now();
-    const ranges = {
-      "1h": 1 * 60 * 60 * 1000,
-      "24h": 24 * 60 * 60 * 1000,
-      "3d": 3 * 24 * 60 * 60 * 1000,
-      "7d": 7 * 24 * 60 * 60 * 1000,
-      "30d": 30 * 24 * 60 * 60 * 1000,
-    };
-    const windowMs = ranges[timeRange];
-    if (!windowMs) return source;
-    return source.filter((job) => {
-      if (!job.createdAt) return false;
-      const created = new Date(job.createdAt).getTime();
-      if (Number.isNaN(created)) return false;
-      return now - created <= windowMs;
-    });
-  };
-
-  const timeFilteredJobs = getTimeFilteredJobs(filteredJobs);
 
   const filterProps = {
-    jobs,
     searchLocation,
     setSearchLocation,
-    jobType,
-    setJobType,
-    experienceLevel,
-    setExperienceLevel,
+    experienceLevels,
+    setExperienceLevels,
     timeRange,
     setTimeRange,
     activeFiltersCount,
     clearAll,
-    handleFilter,
   };
 
   return (
     <>
+      <Helmet>
+        <title>Mobile Phone Repair Jobs in Kerala | TechPath Job Board</title>
+        <meta
+          name="description"
+          content="Browse mobile repair jobs in Kerala. Find chip-level technician, Android repair, iPhone repair, software, and management positions. Filter by location, job type, experience level."
+        />
+      </Helmet>
       <style>{globalStyle}</style>
 
       {/* Mobile drawer */}
@@ -321,10 +432,11 @@ const AllJobsPage = () => {
             <motion.div initial={{ opacity:0,y:-10 }} animate={{ opacity:1,y:0 }} transition={{ duration:0.5 }}>
               <p style={{ color:"#a5b4fc", fontSize:13, fontWeight:500, marginBottom:6, letterSpacing:"0.05em", textTransform:"uppercase" }}>Discover opportunities</p>
               <h1 style={{ color:"#fff", fontSize:"clamp(20px,4vw,32px)", fontWeight:800, margin:0, letterSpacing:"-0.02em" }}>
-                Find Your Next Dream Job
-               {" "}
+                Mobile Repair Jobs Available in {searchLocation || "Kerala"}
               </h1>
-              <p style={{ color:"#c7d2fe", fontSize:14, marginTop:8, fontWeight:400 }}>{timeFilteredJobs.length} positions available across top companies</p>
+              <p style={{ color:"#c7d2fe", fontSize:14, marginTop:8, fontWeight:400 }}>
+                {timeFilteredJobs.length} positions available — Chip-level, Android, iPhone, &amp; Management Roles
+              </p>
             </motion.div>
           </div>
         </div>
@@ -346,8 +458,9 @@ const AllJobsPage = () => {
 
                 {/* Row 1 on mobile: Filters toggle */}
                 <button className="ajp-filter-toggle" onClick={() => setDrawerOpen(true)}>
-                  ⚙️ Filters
-                  {activeFiltersCount > 0 && <span style={{ background:"#fff", color:"#4f46e5", borderRadius:999, fontSize:11, fontWeight:700, padding:"1px 7px" }}>{activeFiltersCount}</span>}
+                  <SlidersHorizontal size={14} />
+                  Filters
+                  {activeFiltersCount > 0 && <span className="tf-count">{activeFiltersCount}</span>}
                 </button>
 
                 {/* Row 1 on mobile: Results badge */}
@@ -436,12 +549,17 @@ const AllJobsPage = () => {
                 <motion.div initial={{opacity:0,scale:0.97}} animate={{opacity:1,scale:1}}
                   style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:260, padding:"40px 20px", background:"#fff", borderRadius:16, border:"1.5px solid #e2e8f0", gap:12, textAlign:"center" }}>
                   <div style={{ fontSize:48 }}>🔍</div>
-                  <h2 style={{ fontSize:20, fontWeight:700, color:"#1e293b", margin:0 }}>No jobs found</h2>
-                  <p style={{ fontSize:14, color:"#94a3b8", margin:0 }}>Try adjusting your filters or search term</p>
-                  <button onClick={()=>{clearAll();clearSearchTerm();}}
-                    style={{ marginTop:4, padding:"8px 20px", background:"#eef2ff", color:"#4f46e5", border:"none", borderRadius:8, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-                    Reset all filters
-                  </button>
+                  <p style={{ fontSize:18, fontWeight:700, color:"#1e293b", margin:0 }}>No jobs found</p>
+                  <ul style={{ fontSize:14, color:"#64748b", margin:0, padding:0, listStyle:"none", display:"flex", flexDirection:"column", gap:4 }}>
+                    <li>Clear filters and browse all locations</li>
+                    <li>Search for a specific job: &quot;Chip-Level Technician&quot; or &quot;iPhone Repair&quot;</li>
+                    <li>Select a different Kerala district</li>
+                    <li>Check back soon — new jobs posted daily</li>
+                  </ul>
+                  <a href="/employer/register"
+                    style={{ marginTop:8, padding:"10px 20px", background:"linear-gradient(135deg,#4f46e5,#6366f1)", color:"#fff", borderRadius:8, fontSize:13, fontWeight:600, textDecoration:"none", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+                    Post a Mobile Repair Job Now
+                  </a>
                 </motion.div>
               )}
 

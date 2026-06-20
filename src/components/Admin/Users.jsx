@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import {
   Sheet,
@@ -14,7 +14,17 @@ import {
   CheckCircle2,
   XCircle,
   UserMinus2,
+  Upload,
+  Download,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import {
   getAllUsersSerive,
@@ -34,6 +44,27 @@ import {
 } from "@/components/Admin/adminPageLayout";
 import { displayValue } from "@/utils/tableValue";
 
+const STUDENT_CSV_SAMPLE = `Name,Email,Password,FieldOfStudy
+Rahul Kumar,rahul.kumar@example.com,Student@123,Android Repair
+Anitha Nair,anitha.nair@example.com,,iPhone Repair
+Vivek Menon,vivek.menon@example.com,Welcome2024,Chip-Level Technician`;
+
+const CSV_UPLOAD_COLUMNS = [
+  { name: "Name", required: true, description: "Student full name" },
+  { name: "Email", required: true, description: "Unique login email (one account per email)" },
+  {
+    name: "Password",
+    required: false,
+    description: "Login password. If empty, default is changeme123",
+  },
+  {
+    name: "FieldOfStudy",
+    required: false,
+    description:
+      "Job specialty for email alerts (e.g. Android Repair, iPhone Repair, Chip-Level Technician)",
+  },
+];
+
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,7 +77,9 @@ const Users = () => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   // PRIORITY VISIBILITY FEATURE — CSV upload + role update loading
   const [csvUploading, setCsvUploading] = useState(false);
+  const [csvUploadModalOpen, setCsvUploadModalOpen] = useState(false);
   const [roleUpdating, setRoleUpdating] = useState(false);
+  const fileInputRef = useRef(null);
   const rowsPerPage = 20;
 
   useEffect(() => {
@@ -143,6 +176,7 @@ const Users = () => {
       toast.success(
         `Created ${count} student${count === 1 ? "" : "s"} from CSV`
       );
+      setCsvUploadModalOpen(false);
 
       // Refresh list
       fetchUsers(currentPage, searchTerm);
@@ -156,6 +190,20 @@ const Users = () => {
       setCsvUploading(false);
       event.target.value = "";
     }
+  };
+
+  const downloadSampleCsv = () => {
+    const blob = new Blob([STUDENT_CSV_SAMPLE], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "students-sample.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const triggerCsvFilePicker = () => {
+    fileInputRef.current?.click();
   };
 
   const totalUsers = users.length;
@@ -239,7 +287,7 @@ const Users = () => {
           {/* PRIORITY VISIBILITY FEATURE — upload CSV to bulk-create institute students */}
           <div className="flex items-center gap-2">
             <input
-              id="student-csv-upload"
+              ref={fileInputRef}
               type="file"
               accept=".csv"
               className="hidden"
@@ -248,11 +296,10 @@ const Users = () => {
             <button
               type="button"
               disabled={csvUploading}
-              onClick={() =>
-                document.getElementById("student-csv-upload")?.click()
-              }
-              className="px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60"
+              onClick={() => setCsvUploadModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60"
             >
+              <Upload className="w-3.5 h-3.5" />
               {csvUploading ? "Uploading..." : "Upload students CSV"}
             </button>
           </div>
@@ -309,6 +356,93 @@ const Users = () => {
           }
         }}
       />
+
+      <Dialog open={csvUploadModalOpen} onOpenChange={setCsvUploadModalOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto bg-white">
+          <DialogHeader>
+            <DialogTitle>Upload institute students (CSV)</DialogTitle>
+            <DialogDescription>
+              Bulk-create student accounts from a CSV file. Save your Excel sheet as{" "}
+              <strong>CSV (Comma delimited)</strong> before uploading.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 text-sm">
+            <div className="rounded-lg border border-slate-200 overflow-hidden">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2 font-semibold text-slate-600">Column</th>
+                    <th className="px-3 py-2 font-semibold text-slate-600">Required</th>
+                    <th className="px-3 py-2 font-semibold text-slate-600">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {CSV_UPLOAD_COLUMNS.map((col) => (
+                    <tr key={col.name}>
+                      <td className="px-3 py-2 font-mono font-medium text-slate-800">{col.name}</td>
+                      <td className="px-3 py-2">
+                        {col.required ? (
+                          <span className="text-red-600 font-semibold">Yes</span>
+                        ) : (
+                          <span className="text-slate-500">No</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-slate-600">{col.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="rounded-lg bg-indigo-50 border border-indigo-100 px-3 py-3 text-xs text-indigo-900 leading-relaxed">
+              <p className="font-semibold mb-1">Field of study &amp; job email alerts</p>
+              <p>
+                When an employer posts a new job, institute students receive an early-access email.
+                If <strong>FieldOfStudy</strong> is set, the student is notified when the job title
+                or requirements match that field (e.g. &quot;Android Repair&quot;, &quot;iPhone Repair&quot;).
+                Leave it blank to receive alerts for all new jobs.
+              </p>
+            </div>
+
+            <div className="rounded-lg bg-emerald-50 border border-emerald-100 px-3 py-3 text-xs text-emerald-900 leading-relaxed">
+              <p className="font-semibold mb-1">What happens after upload</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Each row creates a <strong>student</strong> account with institute access</li>
+                <li>Students see new jobs immediately (before public users)</li>
+                <li>Duplicate emails are skipped; other valid rows are still created</li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-slate-700 mb-2">Example format</p>
+              <pre className="text-[11px] bg-slate-900 text-slate-100 rounded-lg p-3 overflow-x-auto whitespace-pre">
+                {STUDENT_CSV_SAMPLE}
+              </pre>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <button
+              type="button"
+              onClick={downloadSampleCsv}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Download sample CSV
+            </button>
+            <button
+              type="button"
+              disabled={csvUploading}
+              onClick={triggerCsvFilePicker}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              {csvUploading ? "Uploading..." : "Choose CSV file"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* View sheet */}
       <Sheet open={openSheet} onOpenChange={setOpenSheet}>

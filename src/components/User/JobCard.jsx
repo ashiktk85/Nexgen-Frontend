@@ -4,13 +4,11 @@ import { MdPlace } from "react-icons/md";
 import { FaIndianRupeeSign } from "react-icons/fa6";
 import { IoBriefcase } from "react-icons/io5";
 import { calculateTimeAgo } from "@/utils/dateFormation";
+import { CATEGORY_COLORS, getJobCategory } from "@/constants/options";
 
 /* ─── Inline styles injected once ─── */
-const styleTag = document.getElementById("jobcard-styles");
-if (!styleTag) {
-  const s = document.createElement("style");
-  s.id = "jobcard-styles";
-  s.textContent = `
+const injectJobCardStyles = () => {
+  const css = `
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
     .jc-root { font-family: 'DM Sans', sans-serif; }
@@ -52,7 +50,9 @@ if (!styleTag) {
       padding: 4px 9px;
       font-size: 12px;
       color: #64748b;
-      white-space: nowrap;
+      max-width: 100%;
+      white-space: normal;
+      word-break: break-word;
     }
 
     .jc-btn {
@@ -88,7 +88,6 @@ if (!styleTag) {
       border-color: #e2e8f0;
     }
 
-    /* List layout specific */
     .jc-list-layout {
       display: flex;
       flex-direction: row;
@@ -96,15 +95,37 @@ if (!styleTag) {
       gap: 16px;
       padding: 16px 20px;
       flex: 1;
+      min-width: 0;
     }
     .jc-grid-layout {
       display: flex;
       flex-direction: column;
       padding: 24px 24px 28px;
       flex: 1;
+      min-width: 0;
     }
 
-    /* Accent top bar */
+    .jc-grid-footer {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      margin-top: 16px;
+      flex-shrink: 0;
+    }
+
+    .jc-btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      width: 100%;
+    }
+
+    .jc-btn-row .jc-btn {
+      flex: 1 1 calc(50% - 4px);
+      min-width: 0;
+    }
+
     .jc-accent-bar {
       height: 3px;
       background: linear-gradient(90deg, #6366f1, #a5b4fc);
@@ -113,8 +134,17 @@ if (!styleTag) {
     }
     .jc-card:hover .jc-accent-bar { opacity: 1; }
   `;
-  document.head.appendChild(s);
-}
+
+  let styleTag = document.getElementById("jobcard-styles");
+  if (!styleTag) {
+    styleTag = document.createElement("style");
+    styleTag.id = "jobcard-styles";
+    document.head.appendChild(styleTag);
+  }
+  styleTag.textContent = css;
+};
+
+injectJobCardStyles();
 
 /* ─── Avatar color palette based on first letter ─── */
 const avatarGradients = [
@@ -140,6 +170,7 @@ const JobCard = ({ job, layout }) => {
   const isList = layout === "list";
   // First letter of shop/company for avatar (like job cards)
   const initial = (job.companyName || job.jobTitle)?.charAt(0)?.toUpperCase() || "J";
+  const category = getJobCategory(job.jobTitle);
 
   const jobDetailNavigation = () => navigate(`/job-details/${job._id}`);
   const handleApplyJob = () =>
@@ -216,6 +247,11 @@ const JobCard = ({ job, layout }) => {
               gap: 6,
             }}
           >
+            {category && (
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${CATEGORY_COLORS[category] || "bg-gray-100 text-gray-700"}`}>
+                {category}
+              </span>
+            )}
             <span className="jc-badge">
               <MdPlace style={{ color: "#6366f1", fontSize: 13 }} />
               {job.city}, {job.country}
@@ -233,15 +269,19 @@ const JobCard = ({ job, layout }) => {
 
         {/* ── Footer: time + buttons ── */}
         <div
-          style={{
-            display: "flex",
-            flexDirection: isList ? "column" : "row",
-            alignItems: isList ? "flex-end" : "center",
-            justifyContent: isList ? "center" : "space-between",
-            gap: 12,
-            marginTop: isList ? 0 : 16,
-            flexShrink: 0,
-          }}
+          className={isList ? undefined : "jc-grid-footer"}
+          style={
+            isList
+              ? {
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  justifyContent: "center",
+                  gap: 12,
+                  flexShrink: 0,
+                }
+              : undefined
+          }
         >
           {/* Time ago pill */}
           <span
@@ -254,27 +294,20 @@ const JobCard = ({ job, layout }) => {
               borderRadius: 6,
               padding: "3px 8px",
               whiteSpace: "nowrap",
-              alignSelf: isList ? "flex-end" : "auto",
+              alignSelf: isList ? "flex-end" : "flex-start",
             }}
           >
             🕐 {calculateTimeAgo(job.createdAt)}
           </span>
 
           {/* Action buttons */}
-          <div
-            style={{
-              display: "flex",
-              gap: 7,
-              flexDirection: isList ? "column" : "row",
-              width: isList ? "100%" : "auto",
-            }}
-          >
+          <div className={isList ? undefined : "jc-btn-row"} style={isList ? { display: "flex", gap: 7, flexDirection: "column", width: "100%" } : undefined}>
             <button
               className={`jc-btn ${job.alreadyApplied ? "jc-btn-applied" : "jc-btn-apply"}`}
               disabled={job.alreadyApplied}
               aria-label={job.alreadyApplied ? "Already applied" : "Apply to job"}
               onClick={!job.alreadyApplied ? handleApplyJob : undefined}
-              style={{ flex: isList ? 1 : "none" }}
+              style={isList ? { flex: 1 } : undefined}
             >
               {job.alreadyApplied ? "✓ Applied" : "Apply Now"}
             </button>
@@ -290,7 +323,7 @@ const JobCard = ({ job, layout }) => {
               }
               aria-label="View job details"
               onClick={jobDetailNavigation}
-              style={{ flex: isList ? 1 : "none" }}
+              style={isList ? { flex: 1 } : undefined}
             >
               Details →
             </button>

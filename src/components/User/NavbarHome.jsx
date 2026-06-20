@@ -17,7 +17,7 @@ const NavbarHome = () => {
           className="md:text-3xl lg:text-5xl  font-bold text-white cursor-pointer"
           onClick={() => navigate("/")}
         >
-          Nexgen
+          Techpath
         </div>
         {/* Search Bar */}
       </div>

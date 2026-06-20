@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import { motion, AnimatePresence } from "framer-motion";
+import { Helmet } from "react-helmet-async";
+import { KERALA_DISTRICTS } from "@/constants/options";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,22 +17,7 @@ const Register = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const keralaDistricts = [
-    "Alappuzha",
-    "Ernakulam",
-    "Idukki",
-    "Kannur",
-    "Kasaragod",
-    "Kollam",
-    "Kottayam",
-    "Kozhikode",
-    "Malappuram",
-    "Palakkad",
-    "Pathanamthitta",
-    "Thiruvananthapuram",
-    "Thrissur",
-    "Wayanad",
-  ];
+  const keralaDistricts = KERALA_DISTRICTS;
 
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
@@ -142,6 +129,13 @@ const Register = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
+      <Helmet>
+        <title>Post Mobile Repair Jobs | Register as Employer on TechPath</title>
+        <meta
+          name="description"
+          content="Register as an employer on TechPath. Post mobile repair job vacancies, find qualified technicians, and hire chip-level, Android, iPhone experts in Kerala. Quick & easy setup."
+        />
+      </Helmet>
       {/* Left Section */}
       <motion.div
         className="hidden sm:hidden lg:flex lg:w-1/2 w-full bg-primary flex-col justify-center items-center text-center text-white p-6 lg:p-10"
@@ -192,10 +186,10 @@ const Register = () => {
         </motion.h1>
         <div className="w-full max-w-md px-2">
           <motion.h2
-            className="text-3xl font-semibold mb-4 text-center lg:text-left"
+            className="text-2xl sm:text-3xl font-semibold mb-4 text-center lg:text-left"
             variants={itemVariants}
           >
-            Register as an Employer
+            Post Mobile Repair Jobs in Kerala | Hire Top Technicians
           </motion.h2>
           <motion.p
             className="text-gray-500 mb-2 text-center lg:text-left"

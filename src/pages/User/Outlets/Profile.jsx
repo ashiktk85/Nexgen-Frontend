@@ -21,6 +21,7 @@ import {
 import userAxiosInstance from "../../../config/axiosConfig/userAxiosInstance";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { JOB_CATEGORIES, KERALA_DISTRICTS } from "@/constants/options";
 
 /* ─── Inject styles once ─── */
 if (!document.getElementById("pp-styles")) {
@@ -219,6 +220,27 @@ const FormField = ({ label, name, type = "text", placeholder, disabled = false }
             className={`pp-input ${meta.touched && meta.error ? "error" : ""}`}
             disabled={disabled}
           />
+          <ErrorMessage name={name} component="p" className="pp-error" />
+        </>
+      )}
+    </Field>
+  </div>
+);
+
+const FormSelect = ({ label, name, placeholder, children }) => (
+  <div>
+    <label className="pp-label">{label}</label>
+    <Field name={name}>
+      {({ field, meta }) => (
+        <>
+          <select
+            {...field}
+            id={name}
+            className={`pp-input ${meta.touched && meta.error ? "error" : ""}`}
+          >
+            {placeholder && <option value="">{placeholder}</option>}
+            {children}
+          </select>
           <ErrorMessage name={name} component="p" className="pp-error" />
         </>
       )}
@@ -727,7 +749,17 @@ export default function ProfilePage() {
               <FormField label="About" name="about" placeholder="A short bio about yourself" />
               <div className="pp-dialog-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <FormField label="Date of Birth" name="DOB" type="date" />
-                <FormField label="Location" name="location" placeholder="City, Country" />
+                <FormSelect label="Location" name="location" placeholder="Select preferred location">
+                  <optgroup label="Kerala Districts (Preferred)">
+                    {KERALA_DISTRICTS.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Other">
+                    <option value="All India (Remote)">All India (Remote)</option>
+                    <option value="Other Location">Other Location</option>
+                  </optgroup>
+                </FormSelect>
               </div>
               <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
                 <button type="button" className="pp-btn pp-btn-outline" onClick={() => setIsEditDialogOpen(false)}><X size={13} />Cancel</button>
@@ -769,7 +801,11 @@ export default function ProfilePage() {
         >
           {({ isSubmitting }) => (
             <Form style={{ display: "grid", gap: 14, padding: "4px 0" }}>
-              <FormField label="Job Title" name="jobTitle" placeholder="e.g. Frontend Engineer" />
+              <FormSelect label="Job Title" name="jobTitle" placeholder="Select job title">
+                {JOB_CATEGORIES.map((title) => (
+                  <option key={title} value={title}>{title}</option>
+                ))}
+              </FormSelect>
               <FormField label="Company" name="company" placeholder="e.g. Google" />
               <div className="pp-dialog-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <FormField label="Start Year" name="startYear" type="number" placeholder="2020" />

@@ -9,6 +9,8 @@ import { motion } from "framer-motion";
 import { GoogleButton } from "@/components/GoogleButton";
 import { useAuth } from "@/hooks/useAuth";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
+import { Helmet } from "react-helmet-async";
+import { JOB_CATEGORIES, KERALA_DISTRICTS } from "@/constants/options";
 
 // Animation variants
 const containerVariants = {
@@ -66,6 +68,8 @@ const Register = () => {
       email: "",
       password: "",
       confirmPassword: "",
+      jobTitle: "",
+      preferredLocation: "",
     },
     validationSchema: Yup.object({
       firstName: Yup.string()
@@ -99,6 +103,8 @@ const Register = () => {
           email: values.email,
           phone: values.phone,
           password: values.password,
+          ...(values.preferredLocation && { location: values.preferredLocation }),
+          ...(values.jobTitle && { fieldOfStudy: values.jobTitle }),
         };
 
         const { data } = await userAxiosInstance.post("/signup", payload);
@@ -122,6 +128,13 @@ const Register = () => {
       transition={{ duration: 0.8 }}
       className="flex flex-col lg:flex-row h-screen overflow-hidden"
     >
+      <Helmet>
+        <title>Register as Mobile Technician | TechPath Job Platform</title>
+        <meta
+          name="description"
+          content="Register as a mobile phone technician on TechPath. Create your profile, get matched with repair jobs in Kerala, and grow your career. Chip-level, Android, iPhone experts welcome."
+        />
+      </Helmet>
       {/* Left Section (Form) */}
       <motion.div
         variants={containerVariants}
@@ -133,24 +146,23 @@ const Register = () => {
           {/* Logo */}
           <motion.div variants={itemVariants}>
             <Link to="/">
-              <h1 className="text-2xl font-bold text-primary mb-6 text-center lg:text-left cursor-pointer">
+              <span className="text-2xl font-bold text-primary mb-6 text-center lg:text-left cursor-pointer block">
                 Techpath
-              </h1>
+              </span>
             </Link>
           </motion.div>
 
-          {/* Welcome Text */}
-          <motion.h2
+          <motion.h1
             variants={itemVariants}
-            className="text-3xl font-semibold mb-2 text-center lg:text-left"
+            className="text-2xl sm:text-3xl font-semibold mb-2 text-center lg:text-left"
           >
-            Create Your Account
-          </motion.h2>
+            Register as Mobile Technician - Kerala&apos;s Top Job Platform
+          </motion.h1>
           <motion.p
             variants={itemVariants}
             className="text-gray-500 mb-6 text-center lg:text-left"
           >
-            Join Techpath to discover your dream career and connect with top companies.
+            Join Techpath to discover mobile repair careers and connect with top employers in Kerala.
           </motion.p>
 
           {/* Social Login Buttons */}
@@ -206,6 +218,44 @@ const Register = () => {
                 )}
               </motion.div>
             </div>
+
+            <motion.div variants={itemVariants} className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Job Title</label>
+              <select
+                name="jobTitle"
+                value={formik.values.jobTitle}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
+              >
+                <option value="">Select your job title</option>
+                {JOB_CATEGORIES.map((title) => (
+                  <option key={title} value={title}>{title}</option>
+                ))}
+              </select>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Preferred Location</label>
+              <select
+                name="preferredLocation"
+                value={formik.values.preferredLocation}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
+              >
+                <option value="">Select preferred location</option>
+                <optgroup label="Kerala Districts (Preferred)">
+                  {KERALA_DISTRICTS.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Other">
+                  <option value="All India (Remote)">All India (Remote)</option>
+                  <option value="Other Location">Other Location</option>
+                </optgroup>
+              </select>
+            </motion.div>
 
             <motion.div variants={itemVariants} className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Phone Number</label>

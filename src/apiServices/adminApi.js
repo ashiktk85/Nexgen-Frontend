@@ -303,3 +303,21 @@ export const deleteJobTitleAdmin = async (id) => {
     throw error;
   }
 };
+
+export const getPlatformSettings = async () => {
+  try {
+    return await adminAxiosInstance.get("/settings");
+  } catch (error) {
+    console.error("Error fetching platform settings:", error);
+    throw error;
+  }
+};
+
+export const updatePlatformSettings = async (data) => {
+  try {
+    return await adminAxiosInstance.put("/settings", data);
+  } catch (error) {
+    console.error("Error updating platform settings:", error);
+    throw error;
+  }
+};
