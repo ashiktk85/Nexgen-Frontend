@@ -398,9 +398,9 @@ export default function Home() {
               </div>
 
               {Object.keys(user).length < 1 && (
-                <div className="flex flex-row gap-3 w-full max-w-4xl">
+                <div className="flex flex-col sm:flex-row gap-3 w-full max-w-4xl">
                   <Link to="/register" className="group flex-1 min-w-0">
-                    <div className="bg-[#0056b3]/20 backdrop-blur-md border border-white/20 hover:bg-[#0056b3]/30 text-white flex flex-col gap-3 px-4 py-5 sm:py-6 rounded-xl transition-all h-full min-h-[148px] cursor-pointer">
+                    <div className="bg-[#0056b3]/20 backdrop-blur-md border border-white/20 hover:bg-[#0056b3]/30 text-white flex flex-col gap-3 px-4 py-5 sm:py-6 rounded-xl transition-all h-full sm:min-h-[148px] cursor-pointer">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <PersonSearch className="!text-2xl sm:!text-3xl flex-shrink-0 group-hover:scale-110 transition-transform" />
@@ -414,7 +414,7 @@ export default function Home() {
                           className="flex-shrink-0 mt-1 opacity-80 group-hover:translate-x-1 group-hover:opacity-100 transition-all"
                         />
                       </div>
-                      <ul className="space-y-1.5 text-[11px] sm:text-xs text-white/85 pl-0.5">
+                      <ul className="hidden sm:block space-y-1.5 text-[11px] sm:text-xs text-white/85 pl-0.5">
                         <li className="flex items-start gap-2">
                           <span className="mt-1.5 w-1 h-1 rounded-full bg-white/75 flex-shrink-0" />
                           Browse and apply to mobile repair jobs in Kerala
@@ -431,7 +431,7 @@ export default function Home() {
                     </div>
                   </Link>
                   <Link to="/employer/register" className="group flex-1 min-w-0">
-                    <div className="bg-[#2170e4]/20 backdrop-blur-md border border-white/20 hover:bg-[#2170e4]/30 text-white flex flex-col gap-3 px-4 py-5 sm:py-6 rounded-xl transition-all h-full min-h-[148px] cursor-pointer">
+                    <div className="bg-[#2170e4]/20 backdrop-blur-md border border-white/20 hover:bg-[#2170e4]/30 text-white flex flex-col gap-3 px-4 py-5 sm:py-6 rounded-xl transition-all h-full sm:min-h-[148px] cursor-pointer">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <Business className="!text-2xl sm:!text-3xl flex-shrink-0 group-hover:scale-110 transition-transform" />
@@ -445,7 +445,7 @@ export default function Home() {
                           className="flex-shrink-0 mt-1 opacity-80 group-hover:translate-x-1 group-hover:opacity-100 transition-all"
                         />
                       </div>
-                      <ul className="space-y-1.5 text-[11px] sm:text-xs text-white/85 pl-0.5">
+                      <ul className="hidden sm:block space-y-1.5 text-[11px] sm:text-xs text-white/85 pl-0.5">
                         <li className="flex items-start gap-2">
                           <span className="mt-1.5 w-1 h-1 rounded-full bg-white/75 flex-shrink-0" />
                           Add your shop and service center details

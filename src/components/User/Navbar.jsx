@@ -230,21 +230,14 @@ const Navbar = () => {
 
   /* ── Nav background logic ── */
   const onHero = isHomePage && !scrolled;
+  const solidNav = !onHero || mobileMenuOpen || showNotifications;
 
-  const navBg = isHomePage
-    ? scrolled
-      ? "#ffffff"
-      : "transparent"
-    : "#ffffff";
-  const navBorder = scrolled || !isHomePage
-    ? "1px solid #e8edf5"
-    : "none";
-  const navShadow = scrolled
-    ? "0 4px 24px rgba(0,0,0,0.06)"
-    : "none";
+  const navBg = solidNav ? "#ffffff" : "transparent";
+  const navBorder = solidNav ? "1px solid #e8edf5" : "none";
+  const navShadow = solidNav ? "0 4px 24px rgba(0,0,0,0.06)" : "none";
 
-  const linkColor = onHero ? "#e2e8f0" : "#475569";
-  const logoColor = onHero ? "#ffffff" : isHomePage ? "#0950a0" : "#4f46e5";
+  const linkColor = solidNav ? "#475569" : "#e2e8f0";
+  const logoColor = solidNav ? (isHomePage ? "#0950a0" : "#4f46e5") : "#ffffff";
 
   return (
     <>
@@ -333,8 +326,8 @@ const Navbar = () => {
             ].map(({ label, path, icon }) => (
               <span
                 key={path}
-                className={`nav-link ${onHero ? "on-hero" : "on-white"} ${!onHero && isActive(path) ? "active-light" : ""}`}
-                style={{ color: isActive(path) && !onHero ? "#4f46e5" : onHero && isActive(path) ? "#ffffff" : linkColor }}
+                className={`nav-link ${solidNav ? "on-white" : "on-hero"} ${solidNav && isActive(path) ? "active-light" : ""}`}
+                style={{ color: isActive(path) && solidNav ? "#4f46e5" : !solidNav && isActive(path) ? "#ffffff" : linkColor }}
                 onClick={() => navigate(path)}
               >
                 {icon}
@@ -344,8 +337,8 @@ const Navbar = () => {
 
             {/* Profile / Login */}
             <span
-              className={`nav-link ${onHero ? "on-hero" : "on-white"} ${!onHero && isActive(isLoggedIn ? "/profile" : "/login") ? "active-light" : ""}`}
-              style={{ color: linkColor }}
+              className={`nav-link ${solidNav ? "on-white" : "on-hero"} ${solidNav && isActive(isLoggedIn ? "/profile" : "/login") ? "active-light" : ""}`}
+              style={{ color: !solidNav && isActive(isLoggedIn ? "/profile" : "/login") ? "#ffffff" : linkColor }}
               onClick={() => navigate(isLoggedIn ? "/profile" : "/login")}
             >
               <User size={14} />
@@ -358,7 +351,7 @@ const Navbar = () => {
                 style={{
                   width: 1,
                   height: 22,
-                  background: onHero ? "rgba(255,255,255,0.18)" : "#e2e8f0",
+                  background: solidNav ? "#e2e8f0" : "rgba(255,255,255,0.18)",
                   margin: "0 6px",
                 }}
               />
@@ -371,7 +364,7 @@ const Navbar = () => {
                   className="bell-btn"
                   onClick={handleNotificationClick}
                   style={{
-                    background: onHero ? "rgba(255,255,255,0.1)" : "#f1f5f9",
+                    background: solidNav ? "#f1f5f9" : "rgba(255,255,255,0.1)",
                     color: linkColor,
                   }}
                   aria-label="Notifications"
@@ -390,8 +383,8 @@ const Navbar = () => {
                 className="logout-btn"
                 onClick={handleLogout}
                 style={{
-                  background: onHero ? "rgba(239,68,68,0.15)" : "#fef2f2",
-                  color: onHero ? "#fca5a5" : "#ef4444",
+                  background: solidNav ? "#fef2f2" : "rgba(239,68,68,0.15)",
+                  color: solidNav ? "#ef4444" : "#fca5a5",
                   marginLeft: 4,
                 }}
               >
@@ -412,7 +405,7 @@ const Navbar = () => {
                   className="bell-btn"
                   onClick={handleNotificationClick}
                   style={{
-                    background: onHero ? "rgba(255,255,255,0.1)" : "#f1f5f9",
+                    background: solidNav ? "#f1f5f9" : "rgba(255,255,255,0.1)",
                     color: linkColor,
                   }}
                   aria-label="Notifications"
@@ -427,7 +420,7 @@ const Navbar = () => {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               style={{
-                background: onHero ? "rgba(255,255,255,0.1)" : "#f1f5f9",
+                background: solidNav ? "#f1f5f9" : "rgba(255,255,255,0.1)",
                 border: "none",
                 borderRadius: 10,
                 width: 38,
