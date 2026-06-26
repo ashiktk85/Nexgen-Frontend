@@ -2,8 +2,8 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import RouteFallback from "@/components/RouteFallback";
+import User from "./Routes/User";
 
-const User = lazy(() => import("./Routes/User"));
 const Employer = lazy(() => import("./Routes/Employer"));
 const Admin = lazy(() => import("./Routes/Admin"));
 

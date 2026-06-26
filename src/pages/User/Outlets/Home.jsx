@@ -22,14 +22,15 @@ import {
 import { getJobCategory } from "@/constants/options";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { motion } from "framer-motion";
-import bannerImg from "/Images/bannerImg.jpg";
-import employerImg from "/Images/employer-img.jpg";
-import repairImg from "/Images/mob-repair-img1.jpg";
 import { useSelector } from "react-redux";
 import AdBannerCarousel from "@/components/User/adBanner";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 import { Helmet } from "react-helmet-async";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
+
+const HERO_BANNER_SRC = "/Images/bannerImg.jpg";
+const EMPLOYER_IMG_SRC = "/Images/employer-img.jpg";
+const REPAIR_IMG_SRC = "/Images/mob-repair-img1.jpg";
 
 // Scroll-triggered animation config
 const viewportOnce = { once: true, amount: 0.18, margin: "-60px 0px" };
@@ -303,27 +304,24 @@ export default function Home() {
         />
       </Helmet>
       <main className="flex-grow bg-[#f9f9ff]">
-        {/* Hero */}
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          className="relative min-h-screen h-screen flex items-center overflow-hidden"
-        >
+        {/* Hero — no enter animation so banner paints immediately */}
+        <section className="relative min-h-screen h-screen flex items-center overflow-hidden bg-[#141b2b]">
           <div className="absolute inset-0 z-0">
-            <img src={bannerImg || "/placeholder.svg"} alt="Banner" className="w-full h-full object-cover" fetchPriority="high" decoding="async" />
+            <img
+              src={HERO_BANNER_SRC}
+              alt="Mobile repair professionals at work in Kerala"
+              className="w-full h-full object-cover"
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
+            />
             <div
               className="absolute inset-0"
               style={{ background: "linear-gradient(to right, rgba(20, 27, 43, 0.9), rgba(20, 27, 43, 0.4))" }}
             />
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
-            className="relative z-10 w-full max-w-[1280px] mx-auto px-3 sm:px-4 lg:px-5 pt-20 pb-10"
-          >
+          <div className="relative z-10 w-full max-w-[1280px] mx-auto px-3 sm:px-4 lg:px-5 pt-20 pb-10">
             <div className="max-w-2xl text-white">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight tracking-tight">
                 Find Your Dream Mobile Repair Job in Kerala Today
@@ -469,8 +467,8 @@ export default function Home() {
                 </div>
               )}
             </div>
-          </motion.div>
-        </motion.section>
+          </div>
+        </section>
 
         {/* Featured Jobs */}
         <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#f1f3ff]">
@@ -554,7 +552,7 @@ export default function Home() {
             >
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#003f87]/5 rounded-full blur-3xl" />
               <img
-                src={repairImg || "/placeholder.svg"}
+                src={REPAIR_IMG_SRC}
                 alt="Job seeker using laptop"
                 className="rounded-2xl shadow-2xl relative z-10 w-full object-cover aspect-[1.73]"
                 loading="lazy"
@@ -662,7 +660,7 @@ export default function Home() {
             >
               <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#0058be]/5 rounded-full blur-3xl" />
               <img
-                src={employerImg || "/placeholder.svg"}
+                src={EMPLOYER_IMG_SRC}
                 alt="Employer posting a job"
                 className="rounded-2xl shadow-2xl relative z-10 w-full object-cover aspect-[1.5]"
                 loading="lazy"
