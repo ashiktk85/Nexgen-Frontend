@@ -35,25 +35,15 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
 
-          // react + react-dom must stay in the same chunk
+          // Keep the full React runtime in one chunk
           if (isReactPackage(id)) return "react-vendor";
 
-          if (id.includes("@mui/icons-material")) return "mui-icons";
-          if (id.includes("@mui/material") || id.includes("@emotion")) return "mui-core";
-          if (id.includes("@nextui-org")) return "nextui";
-          if (id.includes("antd") || id.includes("@ant-design")) return "antd";
-          if (id.includes("framer-motion")) return "framer-motion";
-          if (id.includes("recharts")) return "recharts";
+          // Only split large, lazy-loaded libraries that are self-contained.
+          // Avoid splitting MUI/emotion/antd/etc. — causes circular init errors.
+          if (id.includes("country-state-city")) return "geo-data";
           if (id.includes("leaflet") || id.includes("react-leaflet")) return "leaflet";
           if (id.includes("lottie-web")) return "lottie";
-          if (id.includes("country-state-city")) return "geo-data";
-          if (id.includes("socket.io-client")) return "socket";
-          if (id.includes("@radix-ui")) return "radix";
-          if (id.includes("@reduxjs") || id.includes("redux-persist")) return "redux";
-          if (id.includes("formik") || id.includes("yup")) return "forms";
-          if (id.includes("axios") || id.includes("date-fns") || id.includes("moment")) return "utils";
-
-          return "vendor";
+          if (id.includes("recharts")) return "recharts";
         },
       },
     },
