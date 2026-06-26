@@ -10,6 +10,7 @@ import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { KERALA_DISTRICTS } from "@/constants/options";
+import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -178,12 +179,9 @@ const Register = () => {
         initial="hidden"
         animate="visible"
       >
-        <motion.h1
-          className="text-2xl font-bold text-primary mb-3 text-center lg:text-left"
-          variants={itemVariants}
-        >
-          Techpath
-        </motion.h1>
+        <motion.div variants={itemVariants} className="mb-3 mx-auto lg:mx-0">
+          <TechpathBrand {...BRAND_SIZES.page} />
+        </motion.div>
         <div className="w-full max-w-md px-2">
           <motion.h2
             className="text-2xl sm:text-3xl font-semibold mb-4 text-center lg:text-left"

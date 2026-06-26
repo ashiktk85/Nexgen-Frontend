@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { logout } from "@/redux/slices/adminSlice";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
+import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -139,14 +140,20 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         className={`text-white bg-zinc-900 shadow-lg h-screen fixed top-0 left-0 overflow-auto z-30 transition-all duration-300 flex flex-col ${getSidebarWidth()}`}
       >
         <div className="flex justify-between items-center px-4 py-4 min-h-[64px] z-20 sticky top-0 border-b border-white/20">
-          {!isCollapsed && (
-            <div className="flex flex-col">
-              <span className="text-xl font-bold whitespace-nowrap overflow-hidden font-poppins">
-                Techpath Admin
-              </span>
-              <p className="text-xs text-indigo-100/80">
-                Control panel & insights
-              </p>
+          {isCollapsed ? (
+            <TechpathBrand
+              {...BRAND_SIZES.compact}
+              showText={false}
+              className="mx-auto"
+            />
+          ) : (
+            <div className="flex flex-col gap-1">
+              <TechpathBrand
+                {...BRAND_SIZES.compact}
+                textColor="#ffffff"
+                className="mb-0.5"
+              />
+              <p className="text-xs text-indigo-100/80 font-medium">Admin</p>
             </div>
           )}
           <button

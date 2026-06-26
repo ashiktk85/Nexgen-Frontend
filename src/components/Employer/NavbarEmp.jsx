@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import { logout } from "@/redux/slices/employer";
+import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -81,10 +82,14 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
       >
         {/* Sidebar Header */}
         <div className="flex justify-between items-center px-4 py-4 min-h-[64px] z-20 sticky top-0 border-b border-white/20">
-          {!isCollapsed && (
-            <h1 className="text-2xl font-bold whitespace-nowrap overflow-hidden">
-              Techpath
-            </h1>
+          {isCollapsed ? (
+            <TechpathBrand
+              {...BRAND_SIZES.compact}
+              showText={false}
+              className="mx-auto"
+            />
+          ) : (
+            <TechpathBrand {...BRAND_SIZES.compact} textColor="#ffffff" />
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { GoogleButton } from "@/components/GoogleButton";
 import { useAuth } from "@/hooks/useAuth";
+import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 // Animation variants for staggered children
 const containerVariants = {
@@ -91,9 +92,7 @@ const LoginPage = () => {
           {/* Logo */}
           <motion.div variants={itemVariants}>
             <Link to="/">
-              <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left cursor-pointer">
-                Techpath
-              </h1>
+              <TechpathBrand {...BRAND_SIZES.page} className="mb-8 mx-auto lg:mx-0" />
             </Link>
           </motion.div>
 

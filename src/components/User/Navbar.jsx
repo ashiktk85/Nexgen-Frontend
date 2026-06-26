@@ -6,6 +6,7 @@ import { Menu, X, Bell, Trash2, Briefcase, Home, BookOpen, User, LogOut } from "
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { toast } from "sonner";
 import io from "socket.io-client";
+import TechpathBrand, { BRAND_SIZES, BRAND_BLUE } from "@/components/TechpathBrand";
 
 const socket = io("http://localhost:3001", { autoConnect: false });
 
@@ -237,7 +238,6 @@ const Navbar = () => {
   const navShadow = solidNav ? "0 4px 24px rgba(0,0,0,0.06)" : "none";
 
   const linkColor = solidNav ? "#475569" : "#e2e8f0";
-  const logoColor = solidNav ? (isHomePage ? "#0950a0" : "#4f46e5") : "#ffffff";
 
   return (
     <>
@@ -296,17 +296,7 @@ const Navbar = () => {
             >
               <Briefcase size={16} color="#fff" />
             </div> */}
-            <span
-              style={{
-                fontSize: 20,
-                fontWeight: 800,
-                color: logoColor,
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-                letterSpacing: "-0.03em",
-              }}
-            >
-              Techpath
-            </span>
+            <TechpathBrand {...BRAND_SIZES.nav} showIcon textColor={BRAND_BLUE} />
           </div>
 
           {/* ── Desktop Nav ── */}

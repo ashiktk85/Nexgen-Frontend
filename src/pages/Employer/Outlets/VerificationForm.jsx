@@ -7,6 +7,7 @@ import employerAxiosInstnce from "@/config/axiosConfig/employerAxiosInstance";
 import { useSelector, useDispatch } from "react-redux";
 import { setEmployer } from "@/redux/slices/employer";
 import { Link, useNavigate } from "react-router-dom";
+import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 /* ─── constants ─── */
 const MAX_FILE_SIZE = 5_000_000;
@@ -442,7 +443,7 @@ export default function VerificationForm({ embedded = false, onComplete }) {
       <div className="w-full max-w-2xl">
         {/* brand */}
         <div className="mb-8">
-          <p className="text-sm font-bold text-blue-600 tracking-widest uppercase mb-3">Techpath</p>
+          <TechpathBrand {...BRAND_SIZES.compact} className="mb-3" />
           <h1 className="text-3xl font-bold text-slate-900 leading-tight">Verify your Account</h1>
           <p className="text-slate-500 mt-2 text-sm">
             Complete the verification steps below to start posting jobs and hiring.

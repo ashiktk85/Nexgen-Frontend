@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import GrapeAnimation from "@/components/GrapeAnimation";
 import useRequest from "@/hooks/useRequestUser";
+import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 const RegisterOtp = () => {
   const OTP_LENGTH = 6;
@@ -98,9 +99,7 @@ const RegisterOtp = () => {
       {/* Right Section */}
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10 font-sans">
         <div className="w-full max-w-md">
-          <h1 className="text-2xl font-bold text-primary mb-8 text-center lg:text-left">
-          Techpath
-          </h1>
+          <TechpathBrand {...BRAND_SIZES.page} className="mb-8 mx-auto lg:mx-0" />
           <h2 className="text-3xl font-bold mb-4 text-center lg:text-left">
             Verify your email
           </h2>

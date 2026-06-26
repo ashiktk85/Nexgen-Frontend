@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { Helmet } from "react-helmet-async";
 import { JOB_CATEGORIES, KERALA_DISTRICTS } from "@/constants/options";
+import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 // Animation variants
 const containerVariants = {
@@ -146,9 +147,7 @@ const Register = () => {
           {/* Logo */}
           <motion.div variants={itemVariants}>
             <Link to="/">
-              <span className="text-2xl font-bold text-primary mb-6 text-center lg:text-left cursor-pointer block">
-                Techpath
-              </span>
+              <TechpathBrand {...BRAND_SIZES.page} className="mb-6 mx-auto lg:mx-0" />
             </Link>
           </motion.div>
 

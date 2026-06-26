@@ -7,6 +7,7 @@ import * as Yup from "yup";
 import { toast } from "sonner";
 import useRequestEmployer from "@/hooks/useRequestEmployer";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
+import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -125,9 +126,7 @@ export default AdminRegister;
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <h1 className="text-2xl font-bold text-primary mb-3 text-center lg:text-left">
-          Techpath
-          </h1>
+          <TechpathBrand {...BRAND_SIZES.page} className="mb-3 mx-auto lg:mx-0" />
 
           {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">

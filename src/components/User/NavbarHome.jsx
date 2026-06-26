@@ -3,6 +3,7 @@ import { TextField, InputAdornment, IconButton, Button } from "@mui/material";
 import { Search, Home, Work, Person } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 const NavbarHome = () => {
   const navigate = useNavigate();
@@ -13,11 +14,8 @@ const NavbarHome = () => {
       {/* Left Section: Logo and Search Bar */}
       <div className="flex items-center space-x-4 ">
         {/* Logo */}
-        <div
-          className="md:text-3xl lg:text-5xl  font-bold text-white cursor-pointer"
-          onClick={() => navigate("/")}
-        >
-          Techpath
+        <div className="cursor-pointer" onClick={() => navigate("/")}>
+          <TechpathBrand {...BRAND_SIZES.nav} />
         </div>
         {/* Search Bar */}
       </div>

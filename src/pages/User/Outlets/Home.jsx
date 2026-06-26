@@ -31,6 +31,7 @@ import AdBannerCarousel from "@/components/User/adBanner";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 import PageLoader from "@/components/PageLoader";
 import { Helmet } from "react-helmet-async";
+import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 // Scroll-triggered animation config
 const viewportOnce = { once: true, amount: 0.18, margin: "-60px 0px" };
@@ -744,7 +745,7 @@ export default function Home() {
       >
         <div className="flex flex-col md:flex-row justify-between items-start py-16 md:py-20 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto gap-12">
           <div className="max-w-xs">
-            <span className="text-2xl font-bold text-[#003f87] block mb-6">Techpath</span>
+            <TechpathBrand {...BRAND_SIZES.page} className="mb-6" />
             <p className="text-[#424752] text-sm leading-relaxed">
               Connecting talented professionals with opportunities that match their skills and ambitions.
             </p>

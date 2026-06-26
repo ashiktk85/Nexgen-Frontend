@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { employerLogin } from "@/redux/actions/EmployerAction";
 import { motion, AnimatePresence } from "framer-motion";
+import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 const EmployerLogin = () => {
   const navigate = useNavigate();
@@ -97,12 +98,9 @@ const EmployerLogin = () => {
       >
         <div className="w-full max-w-md">
           {/* Logo */}
-          <motion.h1
-            className="text-2xl font-bold text-primary mb-8 text-center lg:text-left"
-            variants={itemVariants}
-          >
-            Techpath
-          </motion.h1>
+          <motion.div variants={itemVariants} className="mb-8 mx-auto lg:mx-0">
+            <TechpathBrand {...BRAND_SIZES.page} className="mx-auto lg:mx-0" />
+          </motion.div>
 
           {/* Welcome Text */}
           <motion.h2
