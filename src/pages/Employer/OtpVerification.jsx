@@ -6,6 +6,7 @@ import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import GrapeAnimation from "@/components/GrapeAnimation";
 import useRequest from "@/hooks/useRequestUser";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
+import NextUiShell from "@/components/NextUiShell";
 
 const RegisterOtp = () => {
   const OTP_LENGTH = 6;
@@ -81,6 +82,7 @@ const RegisterOtp = () => {
   };
 
   return (
+    <NextUiShell>
     <div className="flex flex-col lg:flex-row h-screen">
       {/* Left Section */}
       <div className="hidden lg:flex lg:w-1/2 w-full bg-primary flex-col justify-center items-center text-center text-white p-6 lg:p-10">
@@ -156,6 +158,7 @@ const RegisterOtp = () => {
         </div>
       </div>
     </div>
+    </NextUiShell>
   );
 };
 

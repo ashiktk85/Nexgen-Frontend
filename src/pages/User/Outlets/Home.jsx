@@ -18,7 +18,6 @@ import {
   Verified,
   Groups,
   Psychology,
-  RocketLaunch,
 } from "@mui/icons-material";
 import { getJobCategory } from "@/constants/options";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
@@ -29,7 +28,6 @@ import repairImg from "/Images/mob-repair-img1.jpg";
 import { useSelector } from "react-redux";
 import AdBannerCarousel from "@/components/User/adBanner";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
-import PageLoader from "@/components/PageLoader";
 import { Helmet } from "react-helmet-async";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
@@ -284,10 +282,16 @@ export default function Home() {
 
   useEffect(() => {
     fetchJobs();
-    fetchAdBanners(); // Fetch ad banners when component mounts
+    fetchAdBanners();
   }, []);
 
-  if (initialLoading) return <PageLoader />;
+  const JobsSkeleton = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-72 rounded-2xl bg-white border border-[#E2E8F0] animate-pulse" />
+      ))}
+    </div>
+  );
 
   return (
     <>
@@ -307,7 +311,7 @@ export default function Home() {
           className="relative min-h-screen h-screen flex items-center overflow-hidden"
         >
           <div className="absolute inset-0 z-0">
-            <img src={bannerImg || "/placeholder.svg"} alt="Banner" className="w-full h-full object-cover" />
+            <img src={bannerImg || "/placeholder.svg"} alt="Banner" className="w-full h-full object-cover" fetchPriority="high" decoding="async" />
             <div
               className="absolute inset-0"
               style={{ background: "linear-gradient(to right, rgba(20, 27, 43, 0.9), rgba(20, 27, 43, 0.4))" }}
@@ -494,19 +498,23 @@ export default function Home() {
               </Link>
             </motion.div>
 
-            <motion.div
-              variants={scrollContainerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={viewportOnce}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-            >
-              {jobs.slice(0, 6).map((job, index) => (
-                <motion.div key={job._id} variants={scrollFadeUpVariants}>
-                  <FeaturedJobCard job={job} index={index} />
-                </motion.div>
-              ))}
-            </motion.div>
+            {initialLoading ? (
+              <JobsSkeleton />
+            ) : (
+              <motion.div
+                variants={scrollContainerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewportOnce}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              >
+                {jobs.slice(0, 6).map((job, index) => (
+                  <motion.div key={job._id} variants={scrollFadeUpVariants}>
+                    <FeaturedJobCard job={job} index={index} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
 
             {adBanners.length > 0 && (
               <motion.div
@@ -549,6 +557,8 @@ export default function Home() {
                 src={repairImg || "/placeholder.svg"}
                 alt="Job seeker using laptop"
                 className="rounded-2xl shadow-2xl relative z-10 w-full object-cover aspect-[1.73]"
+                loading="lazy"
+                decoding="async"
               />
               <motion.div
                 className="absolute -bottom-6 -right-4 sm:-right-6 bg-white p-5 sm:p-6 rounded-xl shadow-xl z-20 border border-[#E2E8F0] max-w-xs"
@@ -655,6 +665,8 @@ export default function Home() {
                 src={employerImg || "/placeholder.svg"}
                 alt="Employer posting a job"
                 className="rounded-2xl shadow-2xl relative z-10 w-full object-cover aspect-[1.5]"
+                loading="lazy"
+                decoding="async"
               />
               <motion.div
                 className="absolute -top-6 -left-4 sm:-left-6 bg-[#e1e8fd] p-5 sm:p-6 rounded-xl shadow-xl z-20 border border-[#E2E8F0] flex items-center gap-4"
@@ -676,7 +688,11 @@ export default function Home() {
         </section>
 
         {/* Why Choose TechPath */}
-        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#141b2b] text-white">
+        <section
+          id="why-choose-techpath"
+          aria-labelledby="why-choose-techpath-heading"
+          className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#141b2b] text-white"
+        >
           <motion.div
             className="max-w-[1280px] mx-auto text-center mb-16"
             initial="hidden"
@@ -684,9 +700,12 @@ export default function Home() {
             viewport={viewportOnce}
             variants={scrollFadeUpVariants}
           >
-            <h2 className="text-2xl sm:text-3xl font-semibold mb-4">Why Choose TechPath</h2>
+            <h2 id="why-choose-techpath-heading" className="text-2xl sm:text-3xl font-semibold mb-4">
+              Why Choose TechPath 
+            </h2>
             <p className="text-lg text-white/60 max-w-2xl mx-auto">
-              A fresh platform built for modern hiring, connecting high-intent talent with ambitious teams.
+              Kerala&apos;s dedicated job platform for mobile technicians, repair shops, and service
+              centers — connecting chip-level, Android, and iPhone experts with verified employers.
             </p>
           </motion.div>
           <motion.div
@@ -700,23 +719,23 @@ export default function Home() {
               {
                 icon: <Groups className="!text-3xl" />,
                 color: "bg-[#003f87]",
-                title: "High-intent talent, not just traffic",
+                title: "Verified mobile technicians & repair-focused listings",
                 description:
-                  "TechPath curates a growing community of verified professionals and companies. We focus on quality over volume so every profile and job post is relevant and worth your time.",
+                  "TechPath brings together chip-level, Android, iPhone, and service center professionals across Kerala districts. Every profile and job post targets mobile repair roles — so technicians and employers connect on relevant opportunities, not generic job boards.",
               },
               {
                 icon: <Psychology className="!text-3xl" />,
                 color: "bg-[#0058be]",
-                title: "Smart matching that learns from you",
+                title: "Skill-based matching by repair specialty",
                 description:
-                  "Our matching engine looks beyond keywords to understand skills, experience, and preferences on both sides, improving recommendations with every interaction.",
+                  "Get matched to roles by repair expertise — chip-level, Android and iPhone servicing, software, sales, or service center management. Filter by Kerala location, experience level, and job type for personalized recommendations and faster hiring.",
               },
               {
-                icon: <RocketLaunch className="!text-3xl" />,
+                icon: <LocationOn className="!text-3xl" />,
                 color: "bg-[#722b00]",
-                title: "Built for ambitious teams and talent",
+                title: "Built for Kerala's mobile repair industry",
                 description:
-                  "TechPath is designed for fast-growing startups and forward-thinking enterprises, shaping a modern hiring experience together with early users.",
+                  "From Ernakulam and Thrissur to Kozhikode and beyond, TechPath helps repair shops, service centers, and training institutes post mobile repair jobs and hire qualified technicians. Register as a job seeker or employer and grow with Kerala's repair community.",
               },
             ].map((item) => (
               <motion.div

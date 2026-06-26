@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { logout } from "@/redux/slices/userSlice";
+import { useSelector } from "react-redux";
+import { useAuth } from "@/hooks/useAuth";
 import { Menu, X, Bell, Trash2, Briefcase, Home, BookOpen, User, LogOut } from "lucide-react";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { toast } from "sonner";
@@ -140,7 +140,7 @@ const Navbar = () => {
   const notificationRef = useRef(null);
   const bellRef = useRef(null);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { logout: authLogout } = useAuth();
   const location = useLocation();
   const isHomePage = location.pathname === "/";
   const isLoggedIn = user && Object.keys(user).length > 0;
@@ -192,17 +192,16 @@ const Navbar = () => {
     const confirmed = window.confirm("Are you sure you want to log out?");
     if (!confirmed) return;
     try {
-      const response = await userAxiosInstance.post("/logout");
-      if (response.status === 200) {
-        dispatch(logout());
-        toast.success("Logged out successfully");
-        socket.disconnect();
-        setNotifications([]);
-        setNotificationCount(0);
-        navigate("/login");
-      }
+      await userAxiosInstance.post("/logout");
     } catch {
-      toast.error("Failed to logout");
+      // Still clear local session even if the server logout fails
+    } finally {
+      authLogout();
+      toast.success("Logged out successfully");
+      socket.disconnect();
+      setNotifications([]);
+      setNotificationCount(0);
+      navigate("/login");
     }
   };
 
