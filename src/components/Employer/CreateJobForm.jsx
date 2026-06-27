@@ -307,7 +307,7 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
                     loading={titlesLoading}
                     disablePortal
                     renderInput={(params) => (
-                      <TextField {...params} variant="outlined" placeholder="e.g. Frontend Developer"
+                      <TextField {...params} variant="outlined" placeholder="e.g. Mobile Technician"
                         error={formik.touched.jobTitle && Boolean(formik.errors.jobTitle)} />
                     )}
                   />
