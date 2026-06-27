@@ -23,6 +23,11 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { JOB_CATEGORIES, KERALA_DISTRICTS } from "@/constants/options";
 
+function getResumeCount(resume) {
+  const list = Array.isArray(resume) ? resume.filter(Boolean) : resume ? [resume] : [];
+  return list.filter((r) => (typeof r === "string" ? r.trim() : r?.url)).length;
+}
+
 /* ─── Inject styles once ─── */
 if (!document.getElementById("pp-styles")) {
   const s = document.createElement("style");
@@ -520,7 +525,7 @@ export default function ProfilePage() {
                 {[
                   { label: "Education", val: user.education?.length || 0, color: "#6366f1" },
                   { label: "Experience", val: user.experience?.length || 0, color: "#16a34a" },
-                  { label: "Resumes", val: user.resume ? 1 : 0, color: "#f59e0b" },
+                  { label: "Resumes", val: getResumeCount(user.resume), color: "#f59e0b" },
                 ].map(({ label, val, color }) => (
                   <div key={label} style={{ textAlign: "center" }}>
                     <div style={{ fontSize: 22, fontWeight: 800, color, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{val}</div>
