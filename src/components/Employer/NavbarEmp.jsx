@@ -81,35 +81,45 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
         className={`text-white shadow-lg h-screen fixed top-0 left-0 overflow-auto z-10 transition-all duration-300 flex flex-col ${getSidebarWidth()}`}
       >
         {/* Sidebar Header */}
-        <div className="flex justify-between items-center px-4 py-4 min-h-[64px] z-20 sticky top-0 border-b border-white/20">
+        <div
+          className={`flex items-center min-h-[64px] z-20 sticky top-0 border-b border-white/20 ${
+            isCollapsed ? "justify-center px-2 py-3" : "justify-between px-4 py-4"
+          }`}
+        >
           {isCollapsed ? (
-            <TechpathBrand
-              {...BRAND_SIZES.compact}
-              showText={false}
-              className="mx-auto"
-            />
-          ) : (
-            <TechpathBrand {...BRAND_SIZES.compact} textColor="#ffffff" />
-          )}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:block text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+            <button
+              type="button"
+              onClick={() => setIsCollapsed(false)}
+              className="rounded-md p-1 hover:bg-white/10 transition duration-200 focus:outline-none"
+              title="Expand sidebar"
+              aria-label="Expand sidebar"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={isCollapsed ? "M4 6h16M4 12h16M4 18h16" : "M6 18L18 6M6 6l12 12"}
-              />
-            </svg>
-          </button>
+              <TechpathBrand logoHeight={32} showText={false} showIcon />
+            </button>
+          ) : (
+            <>
+              <TechpathBrand {...BRAND_SIZES.compact} textColor="#ffffff" />
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="hidden lg:block text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </>
+          )}
         </div>
 
         <div className="py-4 px-2 xl:px-4 flex-1">
@@ -205,13 +215,45 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
 
         {/* Profile Section at bottom */}
         <div className="p-4 border-t border-white/20 pb-6">
+          {isCollapsed ? (
+            <div className="hidden lg:flex flex-col items-center gap-3">
+              <button
+                onClick={() => setIsCollapsed(false)}
+                className="text-white p-1.5 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none"
+                title="Expand sidebar"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="text-red-300 hover:text-red-400 p-1.5"
+                title="Logout"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            </div>
+          ) : (
             <div className="flex items-center justify-center lg:justify-start gap-3">
               <EmployerNameAvatar
                 name={employerData?.name}
                 size="md"
                 className="border-2 border-white/50"
               />
-            {!isCollapsed && (
               <div className="flex flex-col overflow-hidden">
                 <span className="text-sm font-semibold text-white whitespace-nowrap overflow-hidden text-ellipsis">
                   {employerData?.name && employerData.name
@@ -225,20 +267,8 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
                   Logout
                 </button>
               </div>
-            )}
-            {/* Show just logout icon if collapsed */}
-            {isCollapsed && (
-              <button
-                onClick={confirmLogout}
-                className="hidden lg:flex w-full absolute bottom-2 left-0 right-0 justify-center p-2 text-red-300 hover:text-red-400"
-                title="Logout"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 

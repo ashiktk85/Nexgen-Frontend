@@ -3,7 +3,7 @@ import { FaSearch, FaTh, FaList } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { SlidersHorizontal, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import JobCard from "../../../components/User/JobCard";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
@@ -243,10 +243,11 @@ const FilterPanel = ({
   activeFiltersCount,
   clearAll,
   onClose,
+  onToggleLocation,
 }) => {
-  const toggleLocation = (district) => {
+  const toggleLocation = onToggleLocation || ((district) => {
     setSearchLocation((prev) => (prev === district ? "" : district));
-  };
+  });
 
   const toggleExperience = (level) => {
     setExperienceLevels((prev) => (prev.includes(level) ? prev.filter((v) => v !== level) : [...prev, level]));
@@ -302,8 +303,12 @@ const FilterPanel = ({
 };
 
 const AllJobsPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialLocation = searchParams.get("location") || "";
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchLocation, setSearchLocation] = useState("");
+  const [searchLocation, setSearchLocation] = useState(
+    KERALA_DISTRICTS.includes(initialLocation) ? initialLocation : ""
+  );
   const [jobs, setJobs] = useState([]);
   const [experienceLevels, setExperienceLevels] = useState([]);
   const [timeRange, setTimeRange] = useState("");
@@ -375,9 +380,31 @@ const AllJobsPage = () => {
     setExperienceLevels([]);
     setTimeRange("");
     setCurrentPage(1);
+    const params = new URLSearchParams(searchParams);
+    params.delete("location");
+    setSearchParams(params, { replace: true });
     fetchJobs({ page: 1 });
   };
   const clearSearchTerm = () => { setSearchTerm(""); setCurrentPage(1); fetchJobs({ page: 1, searchOverride: "" }); };
+
+  const handleLocationChange = (district) => {
+    const newLoc = searchLocation === district ? "" : district;
+    setSearchLocation(newLoc);
+    const params = new URLSearchParams(searchParams);
+    if (newLoc) params.set("location", newLoc);
+    else params.delete("location");
+    setSearchParams(params, { replace: true });
+  };
+
+  const pageTitle = searchLocation
+    ? `Mobile Repair Jobs in ${searchLocation}, Kerala | TechPath`
+    : "Mobile Phone Repair Jobs in Kerala | TechPath Job Board";
+  const pageDescription = searchLocation
+    ? `Browse mobile repair jobs in ${searchLocation}, Kerala. Find chip-level technician, Android repair, iPhone repair, software, and management positions on TechPath.`
+    : "Browse mobile repair jobs in Kerala. Find chip-level technician, Android repair, iPhone repair, software, and management positions. Filter by location, job type, experience level.";
+  const pageCanonical = searchLocation
+    ? `https://www.techpath.in/all-jobs?location=${encodeURIComponent(searchLocation)}`
+    : "https://www.techpath.in/all-jobs";
 
   const activeFiltersCount =
     (searchLocation ? 1 : 0) +
@@ -402,16 +429,15 @@ const AllJobsPage = () => {
     setTimeRange,
     activeFiltersCount,
     clearAll,
+    onToggleLocation: handleLocationChange,
   };
 
   return (
     <>
       <Helmet>
-        <title>Mobile Phone Repair Jobs in Kerala | TechPath Job Board</title>
-        <meta
-          name="description"
-          content="Browse mobile repair jobs in Kerala. Find chip-level technician, Android repair, iPhone repair, software, and management positions. Filter by location, job type, experience level."
-        />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={pageCanonical} />
       </Helmet>
       <style>{globalStyle}</style>
 

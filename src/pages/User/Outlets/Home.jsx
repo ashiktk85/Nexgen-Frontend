@@ -783,18 +783,17 @@ export default function Home() {
               <h4 className="font-semibold text-[#141b2b] mb-6">For Job Seekers</h4>
               <ul className="space-y-4">
                 <li><Link to="/all-jobs" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Browse Jobs</Link></li>
-                <li><a href="#" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">My Applications</a></li>
-                <li><a href="#" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Career Advice</a></li>
-                <li><a href="#" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Resume Tips</a></li>
+                <li><Link to="/register" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Register as Technician</Link></li>
+                <li><Link to="/login" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Sign In</Link></li>
+                <li><Link to="/all-jobs?location=Ernakulam" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Jobs in Kochi / Ernakulam</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-[#141b2b] mb-6">For Employers</h4>
               <ul className="space-y-4">
                 <li><Link to="/employer/register" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Post a Job</Link></li>
-                <li><a href="#" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Browse Candidates</a></li>
-                <li><a href="#" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Pricing Plans</a></li>
-                <li><a href="#" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Hiring Resources</a></li>
+                <li><Link to="/employer/employer-login" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Employer Sign In</Link></li>
+                <li><Link to="/all-jobs" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Browse Job Listings</Link></li>
               </ul>
             </div>
             <div className="col-span-2 md:col-span-1">

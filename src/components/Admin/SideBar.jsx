@@ -139,46 +139,52 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         
         className={`text-white bg-zinc-900 shadow-lg h-screen fixed top-0 left-0 overflow-auto z-30 transition-all duration-300 flex flex-col ${getSidebarWidth()}`}
       >
-        <div className="flex justify-between items-center px-4 py-4 min-h-[64px] z-20 sticky top-0 border-b border-white/20">
+        <div
+          className={`flex items-center min-h-[64px] z-20 sticky top-0 border-b border-white/20 ${
+            isCollapsed ? "justify-center px-2 py-3" : "justify-between px-4 py-4"
+          }`}
+        >
           {isCollapsed ? (
-            <TechpathBrand
-              {...BRAND_SIZES.compact}
-              showText={false}
-              className="mx-auto"
-            />
-          ) : (
-            <div className="flex flex-col gap-1">
-              <TechpathBrand
-                {...BRAND_SIZES.compact}
-                textColor="#ffffff"
-                className="mb-0.5"
-              />
-              <p className="text-xs text-indigo-100/80 font-medium">Admin</p>
-            </div>
-          )}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:block text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+            <button
+              type="button"
+              onClick={() => setIsCollapsed(false)}
+              className="rounded-md p-1 hover:bg-white/10 transition duration-200 focus:outline-none"
+              title="Expand sidebar"
+              aria-label="Expand sidebar"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={
-                  isCollapsed
-                    ? "M4 6h16M4 12h16M4 18h16"
-                    : "M6 18L18 6M6 6l12 12"
-                }
-              />
-            </svg>
-          </button>
+              <TechpathBrand logoHeight={32} showText={false} showIcon />
+            </button>
+          ) : (
+            <>
+              <div className="flex flex-col gap-1">
+                <TechpathBrand
+                  {...BRAND_SIZES.compact}
+                  textColor="#ffffff"
+                  className="mb-0.5"
+                />
+                <p className="text-xs text-indigo-100/80 font-medium">Admin</p>
+              </div>
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="hidden lg:block text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </>
+          )}
         </div>
 
         <div className="py-4 px-2 xl:px-4 flex-1">
@@ -219,29 +225,31 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         </div>
 
         <div className="p-4 border-t border-white/20 pb-6">
-          <div className="flex items-center justify-center lg:justify-start gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full border-2 border-white/50 bg-indigo-500 flex items-center justify-center text-white font-semibold">
-              {adminInfo?.name
-                ? adminInfo.name.charAt(0).toUpperCase()
-                : "A"}
-            </div>
-            {!isCollapsed && (
-              <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-semibold text-white whitespace-nowrap overflow-hidden text-ellipsis">
-                  {adminInfo?.name || "Admin"}
-                </span>
-                <button
-                  onClick={confirmLogout}
-                  className="text-xs text-red-300 hover:text-red-400 font-medium text-left mt-1"
+          {isCollapsed ? (
+            <div className="hidden lg:flex flex-col items-center gap-3">
+              <button
+                onClick={() => setIsCollapsed(false)}
+                className="text-white p-1.5 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none"
+                title="Expand sidebar"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  Logout
-                </button>
-              </div>
-            )}
-            {isCollapsed && (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
               <button
                 onClick={confirmLogout}
-                className="hidden lg:flex w-full absolute bottom-2 left-0 right-0 justify-center p-2 text-red-300 hover:text-red-400"
+                className="text-red-300 hover:text-red-400 p-1.5"
                 title="Logout"
               >
                 <svg
@@ -259,8 +267,27 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                   />
                 </svg>
               </button>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center lg:justify-start gap-3">
+              <div className="w-10 h-10 shrink-0 rounded-full border-2 border-white/50 bg-indigo-500 flex items-center justify-center text-white font-semibold">
+                {adminInfo?.name
+                  ? adminInfo.name.charAt(0).toUpperCase()
+                  : "A"}
+              </div>
+              <div className="flex flex-col overflow-hidden">
+                <span className="text-sm font-semibold text-white whitespace-nowrap overflow-hidden text-ellipsis">
+                  {adminInfo?.name || "Admin"}
+                </span>
+                <button
+                  onClick={confirmLogout}
+                  className="text-xs text-red-300 hover:text-red-400 font-medium text-left mt-1"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
