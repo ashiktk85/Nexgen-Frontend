@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
+import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
+import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 const ForgotPassword = () => {
@@ -22,18 +24,11 @@ const ForgotPassword = () => {
     }),
     onSubmit: async (values) => {
       try {
-        const endpoint = userType === "user" 
-          ? "http://localhost:3001/api/user/forgot-password" 
-          : "http://localhost:3001/api/employer/forgot-password";
-          
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: values.email }),
-        });
+        const client = userType === "user" ? userAxiosInstance : employerAxiosInstance;
+        const path = userType === "user" ? "/forgot-password" : "/forgot-password";
+        const response = await client.post(path, { email: values.email });
+        const data = response.data;
 
-        const data = await response.json();
-        
         if (data.status) {
            toast.success("OTP sent to your email");
            navigate("/forgot-password-otp", { state: { email: values.email, userType } });

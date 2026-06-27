@@ -53,7 +53,7 @@ const scrollFadeUpVariants = {
 };
 
 const scrollFadeLeftVariants = {
-  hidden: { opacity: 0, x: -48 },
+  hidden: { opacity: 0, x: -16 },
   visible: {
     opacity: 1,
     x: 0,
@@ -62,7 +62,7 @@ const scrollFadeLeftVariants = {
 };
 
 const scrollFadeRightVariants = {
-  hidden: { opacity: 0, x: 48 },
+  hidden: { opacity: 0, x: 16 },
   visible: {
     opacity: 1,
     x: 0,
@@ -103,7 +103,7 @@ const FeaturedJobCard = ({ job, index = 0 }) => {
     });
 
   return (
-    <article className="bg-white p-8 rounded-xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
+    <article className="bg-white p-6 sm:p-8 rounded-xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow h-full flex flex-col min-w-0">
       <div className="flex justify-between items-start mb-6">
         <div className={`w-12 h-12 ${avatarStyle.bg} rounded-lg flex items-center justify-center`}>
           <span className={`${avatarStyle.text} font-bold text-xl`}>{initial}</span>
@@ -303,9 +303,9 @@ export default function Home() {
           content="Find mobile repair jobs in Kerala. Connect with top employers hiring chip-level technicians, iPhone/Android experts, and service managers. Register as job seeker or employer."
         />
       </Helmet>
-      <main className="flex-grow bg-[#f9f9ff]">
+      <main className="flex-grow bg-[#f9f9ff] w-full overflow-x-hidden">
         {/* Hero — no enter animation so banner paints immediately */}
-        <section className="relative min-h-screen h-screen flex items-center overflow-hidden bg-[#141b2b]">
+        <section className="relative min-h-screen h-screen flex items-center overflow-hidden bg-[#141b2b] w-full">
           <div className="absolute inset-0 z-0">
             <img
               src={HERO_BANNER_SRC}
@@ -321,9 +321,9 @@ export default function Home() {
             />
           </div>
 
-          <div className="relative z-10 w-full max-w-[1280px] mx-auto px-3 sm:px-4 lg:px-5 pt-20 pb-10">
-            <div className="max-w-2xl text-white">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight tracking-tight">
+          <div className="relative z-10 w-full max-w-[1280px] mx-auto px-3 sm:px-4 lg:px-5 pt-20 pb-10 min-w-0">
+            <div className="max-w-2xl text-white min-w-0">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight tracking-tight break-words">
                 Find Your Dream Mobile Repair Job in Kerala Today
               </h1>
               <p className="text-base sm:text-lg mb-10 text-white/80 leading-relaxed">
@@ -471,7 +471,7 @@ export default function Home() {
         </section>
 
         {/* Featured Jobs */}
-        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#f1f3ff]">
+        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#f1f3ff] overflow-hidden w-full">
           <div className="max-w-[1280px] mx-auto">
             <motion.div
               className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6"
@@ -541,16 +541,16 @@ export default function Home() {
         )}
 
         {/* For Job Seekers */}
-        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-          <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden w-full">
+          <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center min-w-0">
             <motion.div
-              className="relative order-1 lg:order-none"
+              className="relative order-1 lg:order-none min-w-0"
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
               variants={scrollFadeLeftVariants}
             >
-              <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#003f87]/5 rounded-full blur-3xl" />
+              <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#003f87]/5 rounded-full blur-3xl pointer-events-none hidden sm:block" />
               <img
                 src={REPAIR_IMG_SRC}
                 alt="Job seeker using laptop"
@@ -559,7 +559,7 @@ export default function Home() {
                 decoding="async"
               />
               <motion.div
-                className="absolute -bottom-6 -right-4 sm:-right-6 bg-white p-5 sm:p-6 rounded-xl shadow-xl z-20 border border-[#E2E8F0] max-w-xs"
+                className="absolute bottom-4 right-4 sm:-bottom-6 sm:-right-6 bg-white p-4 sm:p-6 rounded-xl shadow-xl z-20 border border-[#E2E8F0] max-w-[calc(100%-2rem)] sm:max-w-xs"
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewportOnce}
@@ -615,8 +615,8 @@ export default function Home() {
         </section>
 
         {/* For Employers */}
-        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white">
-          <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden w-full">
+          <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center min-w-0">
             <motion.div
               className="order-2 lg:order-1"
               initial="hidden"
@@ -652,13 +652,13 @@ export default function Home() {
               </Link>
             </motion.div>
             <motion.div
-              className="relative order-1 lg:order-2"
+              className="relative order-1 lg:order-2 min-w-0"
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
               variants={scrollFadeRightVariants}
             >
-              <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#0058be]/5 rounded-full blur-3xl" />
+              <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#0058be]/5 rounded-full blur-3xl pointer-events-none hidden sm:block" />
               <img
                 src={EMPLOYER_IMG_SRC}
                 alt="Employer posting a job"
@@ -667,7 +667,7 @@ export default function Home() {
                 decoding="async"
               />
               <motion.div
-                className="absolute -top-6 -left-4 sm:-left-6 bg-[#e1e8fd] p-5 sm:p-6 rounded-xl shadow-xl z-20 border border-[#E2E8F0] flex items-center gap-4"
+                className="absolute top-4 left-4 sm:-top-6 sm:-left-6 bg-[#e1e8fd] p-4 sm:p-6 rounded-xl shadow-xl z-20 border border-[#E2E8F0] flex items-center gap-3 sm:gap-4 max-w-[calc(100%-2rem)]"
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewportOnce}
@@ -689,7 +689,7 @@ export default function Home() {
         <section
           id="why-choose-techpath"
           aria-labelledby="why-choose-techpath-heading"
-          className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#141b2b] text-white"
+          className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#141b2b] text-white overflow-hidden w-full"
         >
           <motion.div
             className="max-w-[1280px] mx-auto text-center mb-16"
@@ -758,10 +758,10 @@ export default function Home() {
         whileInView="visible"
         viewport={viewportOnce}
         variants={scrollFadeUpVariants}
-        className="bg-[#dce2f7] w-full"
+        className="bg-[#dce2f7] w-full overflow-hidden"
       >
-        <div className="flex flex-col md:flex-row justify-between items-start py-16 md:py-20 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto gap-12">
-          <div className="max-w-xs">
+        <div className="flex flex-col md:flex-row justify-between items-start py-16 md:py-20 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto gap-12 min-w-0">
+          <div className="max-w-xs min-w-0">
             <TechpathBrand {...BRAND_SIZES.page} className="mb-6" />
             <p className="text-[#424752] text-sm leading-relaxed">
               Connecting talented professionals with opportunities that match their skills and ambitions.
@@ -778,7 +778,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-10 flex-1">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-10 flex-1 min-w-0 w-full">
             <div>
               <h4 className="font-semibold text-[#141b2b] mb-6">For Job Seekers</h4>
               <ul className="space-y-4">

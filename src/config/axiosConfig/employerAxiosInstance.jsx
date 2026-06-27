@@ -1,8 +1,8 @@
 import axios from "axios";
-const env = import.meta.env;
+import { resolveApiBaseUrl } from "@/utils/apiUrl";
 
 const employerAxiosInstance = axios.create({
-  baseURL: `${import.meta.env.VITE_BACKEND_URL || 'https://api.techpath.in'}/employer`,
+  baseURL: `${resolveApiBaseUrl()}/employer`,
   withCredentials: true,
 });
 

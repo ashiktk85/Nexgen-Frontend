@@ -5,10 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Menu, X, Bell, Trash2, Briefcase, Home, BookOpen, User, LogOut } from "lucide-react";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { toast } from "sonner";
-import io from "socket.io-client";
+import { getSocket, disconnectSocket } from "@/utils/socket";
 import TechpathBrand, { BRAND_SIZES, BRAND_BLUE } from "@/components/TechpathBrand";
-
-const socket = io("http://localhost:3001", { autoConnect: false });
 
 /* ─── Inline global styles ─── */
 const globalStyle = `
@@ -164,17 +162,26 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    if (user?.userId) {
+    if (!user?.userId) return;
+
+    const socket = getSocket();
+    if (!socket) return;
+
+    fetchNotifications();
+    socket.connect();
+    socket.emit("register", user.userId);
+
+    const onNotification = (data) => {
+      toast.info(data.message || "New notification received!");
       fetchNotifications();
-      socket.connect();
-      socket.emit("register", user.userId);
-      socket.on("notification", (data) => {
-        toast.info(data.message || "New notification received!");
-        fetchNotifications();
-      });
-      return () => { socket.off("notification"); socket.disconnect(); };
-    }
-  }, [user]);
+    };
+
+    socket.on("notification", onNotification);
+    return () => {
+      socket.off("notification", onNotification);
+      disconnectSocket();
+    };
+  }, [user?.userId]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -198,7 +205,7 @@ const Navbar = () => {
     } finally {
       authLogout();
       toast.success("Logged out successfully");
-      socket.disconnect();
+      disconnectSocket();
       setNotifications([]);
       setNotificationCount(0);
       navigate("/login");
@@ -242,7 +249,7 @@ const Navbar = () => {
     <>
       <style>{globalStyle}</style>
       <nav
-        className="navbar-root"
+        className="navbar-root w-full max-w-[100vw] overflow-x-hidden"
         style={{
           position: "fixed",
           top: 0,
@@ -266,35 +273,25 @@ const Navbar = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            width: "100%",
+            minWidth: 0,
+            gap: 8,
           }}
         >
           {/* ── Logo ── */}
           <div
             onClick={() => navigate("/")}
+            className="navbar-logo-wrap"
             style={{
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               gap: 8,
               userSelect: "none",
+              minWidth: 0,
+              flexShrink: 1,
             }}
           >
-            {/* <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 9,
-                background: isHomePage
-                  ? "rgba(255,255,255,0.15)"
-                  : "linear-gradient(135deg, #4f46e5, #6366f1)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <Briefcase size={16} color="#fff" />
-            </div> */}
             <TechpathBrand {...BRAND_SIZES.nav} showIcon textColor={BRAND_BLUE} />
           </div>
 
@@ -385,7 +382,7 @@ const Navbar = () => {
 
           {/* ── Mobile Right ── */}
           <div
-            style={{ display: "flex", alignItems: "center", gap: 8 }}
+            style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}
             className="mobile-right"
           >
             {isLoggedIn && (
@@ -651,6 +648,14 @@ const Navbar = () => {
         @media (max-width: 767px) {
           .desktop-nav { display: none !important; }
           .mobile-right { display: flex !important; }
+          .navbar-logo-wrap img,
+          .navbar-logo-wrap svg {
+            height: 40px !important;
+            width: auto !important;
+          }
+          .navbar-logo-wrap span {
+            font-size: 22px !important;
+          }
         }
       `}</style>
     </>

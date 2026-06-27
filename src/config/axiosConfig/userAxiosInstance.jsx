@@ -1,8 +1,8 @@
 import axios from "axios";
-const env = import.meta.env;
+import { resolveApiBaseUrl } from "@/utils/apiUrl";
 
 const userAxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL || `https://api.techpath.in`,
+  baseURL: resolveApiBaseUrl(),
   withCredentials: true,
 });
 

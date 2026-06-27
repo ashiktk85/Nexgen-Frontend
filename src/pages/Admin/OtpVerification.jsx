@@ -9,7 +9,7 @@ import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 import NextUiShell from "@/components/NextUiShell";
 
 const OtpVerification = () => {
-  const OTP_LENGTH = 6;
+  const OTP_LENGTH = 4;
   const [otp, setOtp] = useState(new Array(OTP_LENGTH).fill(""));
   const inputRefs = useRef([]);
   const location = useLocation();
