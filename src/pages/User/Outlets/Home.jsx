@@ -7,8 +7,8 @@ import {
   ArrowForward,
   CheckCircleOutline,
   Facebook,
-  Twitter,
   LinkedIn,
+  Instagram,
   Mail,
   LocationOn,
   Payments,
@@ -20,6 +20,7 @@ import {
   Psychology,
 } from "@mui/icons-material";
 import { getJobCategory } from "@/constants/options";
+import { TECHPATH_SOCIAL } from "@/constants/socialLinks";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
@@ -767,13 +768,31 @@ export default function Home() {
               Connecting talented professionals with opportunities that match their skills and ambitions.
             </p>
             <div className="flex gap-4 mt-8">
-              <a href="#" className="w-10 h-10 rounded-full bg-[#c2c6d4] flex items-center justify-center hover:bg-[#003f87] hover:text-white transition-all text-[#424752]">
+              <a
+                href={TECHPATH_SOCIAL.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TechPath on Facebook"
+                className="w-10 h-10 rounded-full bg-[#c2c6d4] flex items-center justify-center hover:bg-[#003f87] hover:text-white transition-all text-[#424752]"
+              >
                 <Facebook fontSize="small" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-[#c2c6d4] flex items-center justify-center hover:bg-[#003f87] hover:text-white transition-all text-[#424752]">
-                <Twitter fontSize="small" />
+              <a
+                href={TECHPATH_SOCIAL.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TechPath on Instagram"
+                className="w-10 h-10 rounded-full bg-[#c2c6d4] flex items-center justify-center hover:bg-[#003f87] hover:text-white transition-all text-[#424752]"
+              >
+                <Instagram fontSize="small" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-[#c2c6d4] flex items-center justify-center hover:bg-[#003f87] hover:text-white transition-all text-[#424752]">
+              <a
+                href={TECHPATH_SOCIAL.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TechPath on LinkedIn"
+                className="w-10 h-10 rounded-full bg-[#c2c6d4] flex items-center justify-center hover:bg-[#003f87] hover:text-white transition-all text-[#424752]"
+              >
                 <LinkedIn fontSize="small" />
               </a>
             </div>
