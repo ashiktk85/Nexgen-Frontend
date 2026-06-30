@@ -143,10 +143,19 @@ const Navbar = () => {
   const isHomePage = location.pathname === "/";
   const isLoggedIn = user && Object.keys(user).length > 0;
 
-  /* ── Scroll shadow ── */
+  /* ── Scroll shadow — rAF-throttled, no backdrop-blur (avoids scroll jank) ── */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 48);
+        ticking = false;
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -239,7 +248,7 @@ const Navbar = () => {
   const onHero = isHomePage && !scrolled;
   const solidNav = !onHero || mobileMenuOpen || showNotifications;
 
-  const navBg = solidNav ? "#ffffff" : "transparent";
+  const navBg = solidNav ? "rgba(255, 255, 255, 0.98)" : "transparent";
   const navBorder = solidNav ? "1px solid #e8edf5" : "none";
   const navShadow = solidNav ? "0 4px 24px rgba(0,0,0,0.06)" : "none";
 
@@ -259,9 +268,7 @@ const Navbar = () => {
           background: navBg,
           borderBottom: navBorder,
           boxShadow: navShadow,
-          backdropFilter: scrolled ? "blur(16px)" : "none",
-          WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
-          transition: "all 0.3s ease",
+          transition: "background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease",
           padding: "0 12px",
         }}
       >

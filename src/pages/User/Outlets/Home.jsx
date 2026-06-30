@@ -22,7 +22,7 @@ import {
 import { getJobCategory } from "@/constants/options";
 import { TECHPATH_SOCIAL } from "@/constants/socialLinks";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useSelector } from "react-redux";
 import AdBannerCarousel from "@/components/User/adBanner";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
@@ -33,8 +33,25 @@ const HERO_BANNER_SRC = "/Images/bannerImg.jpg";
 const EMPLOYER_IMG_SRC = "/Images/employer-img.jpg";
 const REPAIR_IMG_SRC = "/Images/mob-repair-img1.jpg";
 
-// Scroll-triggered animation config
-const viewportOnce = { once: true, amount: 0.18, margin: "-60px 0px" };
+// Scroll-triggered animation config — lighter thresholds to avoid scroll jank
+const viewportOnce = { once: true, amount: 0.12, margin: "0px 0px -60px 0px" };
+
+const heroContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.07, delayChildren: 0.04 },
+  },
+};
+
+const heroItemVariants = {
+  hidden: { opacity: 0, y: 18 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+  },
+};
 
 const scrollContainerVariants = {
   hidden: { opacity: 0 },
@@ -45,39 +62,44 @@ const scrollContainerVariants = {
 };
 
 const scrollFadeUpVariants = {
-  hidden: { opacity: 0, y: 40 },
+  hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
 const scrollFadeLeftVariants = {
-  hidden: { opacity: 0, x: -16 },
+  hidden: { opacity: 0, x: -12 },
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
 const scrollFadeRightVariants = {
-  hidden: { opacity: 0, x: 16 },
+  hidden: { opacity: 0, x: 12 },
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
 const scrollScaleVariants = {
-  hidden: { opacity: 0, scale: 0.94 },
+  hidden: { opacity: 0, scale: 0.97 },
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
   },
+};
+
+const reducedMotionFadeVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.25 } },
 };
 
 const FEATURED_AVATAR_STYLES = [
@@ -167,6 +189,12 @@ export default function Home() {
   const user = useSelector((state) => state.user.seekerInfo);
   const [adBanners, setAdBanners] = useState([]);
   const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
+  const fadeUp = reduceMotion ? reducedMotionFadeVariants : scrollFadeUpVariants;
+  const fadeLeft = reduceMotion ? reducedMotionFadeVariants : scrollFadeLeftVariants;
+  const fadeRight = reduceMotion ? reducedMotionFadeVariants : scrollFadeRightVariants;
+  const fadeScale = reduceMotion ? reducedMotionFadeVariants : scrollScaleVariants;
+  const sectionStagger = reduceMotion ? reducedMotionFadeVariants : scrollContainerVariants;
 
   // Fetch ad banners from the same endpoint used in banner-admin
   const fetchAdBanners = async () => {
@@ -304,14 +332,27 @@ export default function Home() {
           content="Find mobile repair jobs in Kerala. Connect with top employers hiring chip-level technicians, iPhone/Android experts, and service managers. Register as job seeker or employer."
         />
       </Helmet>
+      <style>{`
+        @keyframes homeHeroKenBurns {
+          from { transform: scale(1.06); }
+          to { transform: scale(1); }
+        }
+        .home-hero-bg {
+          animation: homeHeroKenBurns 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          will-change: transform;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .home-hero-bg { animation: none; }
+        }
+      `}</style>
       <main className="flex-grow bg-[#f9f9ff] w-full overflow-x-hidden">
-        {/* Hero — no enter animation so banner paints immediately */}
-        <section className="relative min-h-screen h-screen flex items-center overflow-hidden bg-[#141b2b] w-full">
-          <div className="absolute inset-0 z-0">
+        {/* Hero — min-height only so scroll is never trapped on load */}
+        <section className="relative min-h-[100dvh] flex items-center overflow-x-hidden bg-[#141b2b] w-full">
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             <img
               src={HERO_BANNER_SRC}
               alt="Mobile repair professionals at work in Kerala"
-              className="w-full h-full object-cover"
+              className="home-hero-bg w-full h-full object-cover transform-gpu"
               fetchPriority="high"
               loading="eager"
               decoding="async"
@@ -322,18 +363,29 @@ export default function Home() {
             />
           </div>
 
-          <div className="relative z-10 w-full max-w-[1280px] mx-auto px-3 sm:px-4 lg:px-5 pt-20 pb-10 min-w-0">
+          <motion.div
+            className="relative z-10 w-full max-w-[1280px] mx-auto px-3 sm:px-4 lg:px-5 pt-20 pb-10 min-w-0"
+            variants={heroContainerVariants}
+            initial={reduceMotion ? false : "hidden"}
+            animate={reduceMotion ? false : "visible"}
+          >
             <div className="max-w-2xl text-white min-w-0">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight tracking-tight break-words">
+              <motion.h1
+                variants={heroItemVariants}
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight tracking-tight break-words"
+              >
                 Find Your Dream Mobile Repair Job in Kerala Today
-              </h1>
-              <p className="text-base sm:text-lg mb-10 text-white/80 leading-relaxed">
+              </motion.h1>
+              <motion.p
+                variants={heroItemVariants}
+                className="text-base sm:text-lg mb-10 text-white/80 leading-relaxed"
+              >
                 Whether you&apos;re a skilled mobile technician in Kerala or just starting out,
                 TechPath connects you with top employers seeking chip-level, Android,
                 iPhone, and service experts.
-              </p>
+              </motion.p>
 
-              <div className="bg-white p-2 rounded-xl shadow-2xl flex flex-col md:flex-row gap-2 mb-12 relative">
+              <motion.div variants={heroItemVariants} className="bg-white p-2 rounded-xl shadow-2xl flex flex-col md:flex-row gap-2 mb-12 relative">
                 <div className="flex-1 flex items-center px-4 gap-3 min-w-0">
                   <Search className="text-[#727784] flex-shrink-0" />
                   <input
@@ -399,12 +451,15 @@ export default function Home() {
                     )}
                   </div>
                 )}
-              </div>
+              </motion.div>
 
               {Object.keys(user).length < 1 && (
-                <div className="flex flex-col sm:flex-row gap-3 w-full max-w-4xl">
+                <motion.div
+                  variants={heroItemVariants}
+                  className="flex flex-col sm:flex-row gap-3 w-full max-w-4xl"
+                >
                   <Link to="/register" className="group flex-1 min-w-0">
-                    <div className="bg-[#0056b3]/20 backdrop-blur-md border border-white/20 hover:bg-[#0056b3]/30 text-white flex flex-col gap-3 px-4 py-5 sm:py-6 rounded-xl transition-all h-full sm:min-h-[148px] cursor-pointer">
+                    <div className="bg-[#0056b3]/35 border border-white/25 hover:bg-[#0056b3]/45 text-white flex flex-col gap-3 px-4 py-5 sm:py-6 rounded-xl transition-colors h-full sm:min-h-[148px] cursor-pointer">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <PersonSearch className="!text-2xl sm:!text-3xl flex-shrink-0 group-hover:scale-110 transition-transform" />
@@ -435,7 +490,7 @@ export default function Home() {
                     </div>
                   </Link>
                   <Link to="/employer/register" className="group flex-1 min-w-0">
-                    <div className="bg-[#2170e4]/20 backdrop-blur-md border border-white/20 hover:bg-[#2170e4]/30 text-white flex flex-col gap-3 px-4 py-5 sm:py-6 rounded-xl transition-all h-full sm:min-h-[148px] cursor-pointer">
+                    <div className="bg-[#2170e4]/35 border border-white/25 hover:bg-[#2170e4]/45 text-white flex flex-col gap-3 px-4 py-5 sm:py-6 rounded-xl transition-colors h-full sm:min-h-[148px] cursor-pointer">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <Business className="!text-2xl sm:!text-3xl flex-shrink-0 group-hover:scale-110 transition-transform" />
@@ -465,21 +520,21 @@ export default function Home() {
                       </ul>
                     </div>
                   </Link>
-                </div>
+                </motion.div>
               )}
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* Featured Jobs */}
-        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#f1f3ff] overflow-hidden w-full">
+        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#f1f3ff] overflow-x-hidden w-full">
           <div className="max-w-[1280px] mx-auto">
             <motion.div
               className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6"
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
-              variants={scrollFadeUpVariants}
+              variants={fadeUp}
             >
               <div>
                 <h2 className="text-2xl sm:text-3xl font-semibold text-[#141b2b] mb-2">
@@ -501,14 +556,14 @@ export default function Home() {
               <JobsSkeleton />
             ) : (
               <motion.div
-                variants={scrollContainerVariants}
+                variants={sectionStagger}
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewportOnce}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
                 {jobs.slice(0, 6).map((job, index) => (
-                  <motion.div key={job._id} variants={scrollFadeUpVariants}>
+                  <motion.div key={job._id} variants={fadeUp}>
                     <FeaturedJobCard job={job} index={index} />
                   </motion.div>
                 ))}
@@ -521,7 +576,7 @@ export default function Home() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewportOnce}
-                variants={scrollFadeUpVariants}
+                variants={fadeUp}
               >
                 <AdBannerCarousel banners={adBanners} autoSlideInterval={5000} />
               </motion.div>
@@ -535,21 +590,21 @@ export default function Home() {
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
-            variants={scrollFadeUpVariants}
+            variants={fadeUp}
           >
             <AdBannerCarousel banners={adBanners} autoSlideInterval={5000} />
           </motion.div>
         )}
 
         {/* For Job Seekers */}
-        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden w-full">
+        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 overflow-x-hidden w-full">
           <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center min-w-0">
             <motion.div
               className="relative order-1 lg:order-none min-w-0"
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
-              variants={scrollFadeLeftVariants}
+              variants={fadeLeft}
             >
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#003f87]/5 rounded-full blur-3xl pointer-events-none hidden sm:block" />
               <img
@@ -564,7 +619,7 @@ export default function Home() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewportOnce}
-                variants={scrollScaleVariants}
+                variants={fadeScale}
                 transition={{ delay: 0.2 }}
               >
                 <div className="flex items-center gap-4 mb-3">
@@ -583,7 +638,7 @@ export default function Home() {
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
-              variants={scrollFadeRightVariants}
+              variants={fadeRight}
             >
               <span className="text-[#003f87] text-xs font-bold tracking-widest uppercase mb-4 block">For Talent</span>
               <h2 className="text-2xl sm:text-3xl font-semibold text-[#141b2b] mb-6">For Job Seekers</h2>
@@ -616,14 +671,14 @@ export default function Home() {
         </section>
 
         {/* For Employers */}
-        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden w-full">
+        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white overflow-x-hidden w-full">
           <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center min-w-0">
             <motion.div
               className="order-2 lg:order-1"
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
-              variants={scrollFadeLeftVariants}
+              variants={fadeLeft}
             >
               <span className="text-[#0058be] text-xs font-bold tracking-widest uppercase mb-4 block">For Growth</span>
               <h2 className="text-2xl sm:text-3xl font-semibold text-[#141b2b] mb-6">For Employers</h2>
@@ -657,7 +712,7 @@ export default function Home() {
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
-              variants={scrollFadeRightVariants}
+              variants={fadeRight}
             >
               <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#0058be]/5 rounded-full blur-3xl pointer-events-none hidden sm:block" />
               <img
@@ -672,7 +727,7 @@ export default function Home() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewportOnce}
-                variants={scrollScaleVariants}
+                variants={fadeScale}
                 transition={{ delay: 0.2 }}
               >
                 <div className="flex -space-x-3">
@@ -690,14 +745,14 @@ export default function Home() {
         <section
           id="why-choose-techpath"
           aria-labelledby="why-choose-techpath-heading"
-          className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#141b2b] text-white overflow-hidden w-full"
+          className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#141b2b] text-white overflow-x-hidden w-full"
         >
           <motion.div
             className="max-w-[1280px] mx-auto text-center mb-16"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
-            variants={scrollFadeUpVariants}
+            variants={fadeUp}
           >
             <h2 id="why-choose-techpath-heading" className="text-2xl sm:text-3xl font-semibold mb-4">
               Why Choose TechPath 
@@ -708,7 +763,7 @@ export default function Home() {
             </p>
           </motion.div>
           <motion.div
-            variants={scrollContainerVariants}
+            variants={sectionStagger}
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
@@ -739,7 +794,7 @@ export default function Home() {
             ].map((item) => (
               <motion.div
                 key={item.title}
-                variants={scrollFadeUpVariants}
+                variants={fadeUp}
                 className="bg-white/5 border border-white/10 p-8 sm:p-10 rounded-2xl hover:bg-white/10 transition-colors text-left"
               >
                 <div className={`w-14 h-14 ${item.color} rounded-xl flex items-center justify-center mb-8`}>
@@ -758,8 +813,8 @@ export default function Home() {
         initial="hidden"
         whileInView="visible"
         viewport={viewportOnce}
-        variants={scrollFadeUpVariants}
-        className="bg-[#dce2f7] w-full overflow-hidden"
+        variants={fadeUp}
+        className="bg-[#dce2f7] w-full overflow-x-hidden"
       >
         <div className="flex flex-col md:flex-row justify-between items-start py-16 md:py-20 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto gap-12 min-w-0">
           <div className="max-w-xs min-w-0">
