@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/utils/apiError";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 import GrapeAnimation from "@/components/GrapeAnimation";
 import useRequest from "@/hooks/useRequestUser";
@@ -75,9 +76,7 @@ const OtpVerification = () => {
       if (loading) return <p>Loading...</p>;
       if (error) return <p>Error: {error}</p>;
     } catch (err) {
-      console.log(err , "dhinuuu");
-      
-      toast.error(err.response.data.message || "An error occurred");
+      toast.error(getApiErrorMessage(err, "OTP verification failed"));
     }
   };
 

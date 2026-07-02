@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/utils/apiError";
 import { motion } from "framer-motion";
 import { GoogleButton } from "@/components/GoogleButton";
 import { useAuth } from "@/hooks/useAuth";
@@ -115,9 +116,7 @@ const Register = () => {
           navigate("/otp-verification");
         }
       } catch (err) {
-        const message =
-          err?.response?.data?.message || err?.message || "Registration failed";
-        toast.error(message);
+        toast.error(getApiErrorMessage(err, "Registration failed"));
       }
     },
   });

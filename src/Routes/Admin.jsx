@@ -9,6 +9,7 @@ const Users = lazy(() => import("../components/Admin/Users"));
 const Employers = lazy(() => import("../components/Admin/Employers"));
 const Shops = lazy(() => import("../components/Admin/Shops"));
 const Jobs = lazy(() => import("../components/Admin/Jobs"));
+const AdminCreateJob = lazy(() => import("../pages/Admin/Outlets/AdminCreateJob"));
 const JobTitles = lazy(() => import("../components/Admin/JobTitles"));
 const HomeLayout = lazy(() => import("@/pages/Admin/Layout/HomeLayout"));
 const AdminLogin = lazy(() => import("@/pages/Admin/AdminLogin"));
@@ -67,6 +68,14 @@ function Admin() {
             element={
               <AdminProtectedRoute>
                 <Jobs />
+              </AdminProtectedRoute>
+            }
+          />
+          <Route
+            path="/jobs/create"
+            element={
+              <AdminProtectedRoute>
+                <AdminCreateJob />
               </AdminProtectedRoute>
             }
           />

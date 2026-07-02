@@ -1,9 +1,10 @@
 import { createAsyncThunk, isRejectedWithValue } from "@reduxjs/toolkit";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
+import { getApiErrorMessage } from "@/utils/apiError";
 
 export const userLoginAction = createAsyncThunk(
   "user/login",
-  async ({ email, password }, { isRejectedWithValue }) => {
+  async ({ email, password }, { rejectWithValue }) => {
     try {
       const response = await userAxiosInstance.post("/login", {
         email,
@@ -19,7 +20,7 @@ export const userLoginAction = createAsyncThunk(
       }
     } catch (error) {
       console.error("Error in userLoginAction thunk: ", error);
-      throw new Error(error.response?.data?.message || "Login failed");
+      return rejectWithValue(getApiErrorMessage(error, "Login failed"));
     }
   }
 );
@@ -41,7 +42,7 @@ export const userGoogleLoginAction = createAsyncThunk(
       }
     } catch (error) {
       console.error("Error in userGoogleLoginAction thunk: ", error);
-      throw new Error(error.response?.data?.message || "Login failed");
+      return rejectWithValue(getApiErrorMessage(error, "Login failed"));
     }
   }
 );

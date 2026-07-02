@@ -9,6 +9,7 @@ import {
   Clock, Building2, Calendar, CheckCircle2,
   ArrowLeft, Share2, ChevronRight, Star, ExternalLink
 } from 'lucide-react';
+import { buildTelHref, formatPhoneDisplay } from '@/utils/phone';
 
 /* ─── Inject styles once ─── */
 if (!document.getElementById('jd-styles')) {
@@ -41,6 +42,27 @@ if (!document.getElementById('jd-styles')) {
       transition:border-color .18s;
     }
     .jd-info-row:hover { border-color:#c7d2fe; }
+
+    .jd-call-link {
+      text-decoration:none; color:inherit; cursor:pointer;
+    }
+    .jd-call-link:hover { border-color:#86efac; background:#f0fdf4; }
+    .jd-call-link:hover .jd-call-pill { background:#16a34a; color:#fff; }
+
+    .jd-call-pill {
+      margin-left:auto; padding:4px 10px; border-radius:999px;
+      font-size:11px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;
+      background:#dcfce7; color:#16a34a; flex-shrink:0;
+      transition:background .18s,color .18s;
+    }
+
+    .jd-call-inline {
+      display:inline-flex; align-items:center; gap:8px;
+      text-decoration:none; color:inherit; border-radius:8px;
+      transition:color .15s;
+    }
+    .jd-call-inline:hover { color:#16a34a; }
+    .jd-call-inline .jd-call-pill { margin-left:0; }
 
     .jd-req-item {
       display:flex; align-items:flex-start; gap:10px;
@@ -363,20 +385,44 @@ const JobDetails = () => {
                   className="jd-info-grid"
                   style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(210px,1fr))', gap: 10, marginBottom: 24 }}
                 >
-                  {[
-                    { icon: <Mail size={14} />, label: 'Email', value: job.email, color: '#0ea5e9' },
-                    { icon: <Phone size={14} />, label: 'Phone', value: `${job.countryCode} ${job.phone}`, color: '#16a34a' },
-                    { icon: <Calendar size={14} />, label: 'Posted', value: new Date(job.postedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }), color: '#8b5cf6' },
-                    { icon: <MapPin size={14} />, label: 'Country', value: job.country, color: '#f59e0b' },
-                  ].map(({ icon, label, value, color }) => (
-                    <div key={label} className="jd-info-row">
-                      <span style={{ color, flexShrink: 0 }}>{icon}</span>
-                      <div>
-                        <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '.06em', textTransform: 'uppercase', margin: 0 }}>{label}</p>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', margin: '2px 0 0' }}>{value}</p>
-                      </div>
+                  <div className="jd-info-row">
+                    <span style={{ color: '#0ea5e9', flexShrink: 0 }}><Mail size={14} /></span>
+                    <div>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '.06em', textTransform: 'uppercase', margin: 0 }}>Email</p>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', margin: '2px 0 0' }}>{job.email}</p>
                     </div>
-                  ))}
+                  </div>
+
+                  {job.phone && buildTelHref(job.phone, job.countryCode) && (
+                    <a
+                      href={buildTelHref(job.phone, job.countryCode)}
+                      className="jd-info-row jd-call-link"
+                      aria-label={`Call ${formatPhoneDisplay(job.phone, job.countryCode)}`}
+                    >
+                      <span style={{ color: '#16a34a', flexShrink: 0 }}><Phone size={14} /></span>
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '.06em', textTransform: 'uppercase', margin: 0 }}>Phone</p>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', margin: '2px 0 0' }}>{formatPhoneDisplay(job.phone, job.countryCode)}</p>
+                      </div>
+                      <span className="jd-call-pill">Call</span>
+                    </a>
+                  )}
+
+                  <div className="jd-info-row">
+                    <span style={{ color: '#8b5cf6', flexShrink: 0 }}><Calendar size={14} /></span>
+                    <div>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '.06em', textTransform: 'uppercase', margin: 0 }}>Posted</p>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', margin: '2px 0 0' }}>{new Date(job.postedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    </div>
+                  </div>
+
+                  <div className="jd-info-row">
+                    <span style={{ color: '#f59e0b', flexShrink: 0 }}><MapPin size={14} /></span>
+                    <div>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '.06em', textTransform: 'uppercase', margin: 0 }}>Country</p>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', margin: '2px 0 0' }}>{job.country}</p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* CTA row — hidden on mobile (replaced by sticky bar) */}
@@ -456,9 +502,35 @@ const JobDetails = () => {
               </div>
 
               <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <span style={{ color: '#0ea5e9', marginTop: 1, flexShrink: 0 }}><Mail size={13} /></span>
+                  <div>
+                    <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '.06em', textTransform: 'uppercase', margin: 0 }}>Email</p>
+                    <p style={{ fontSize: 13, fontWeight: 500, color: '#1e293b', margin: '2px 0 0', wordBreak: 'break-word' }}>{company.email}</p>
+                  </div>
+                </div>
+
+                {company.phone && buildTelHref(company.phone, job.countryCode) && (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <span style={{ color: '#16a34a', marginTop: 1, flexShrink: 0 }}><Phone size={13} /></span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '.06em', textTransform: 'uppercase', margin: 0 }}>Phone</p>
+                      <a
+                        href={buildTelHref(company.phone, job.countryCode)}
+                        className="jd-call-inline"
+                        aria-label={`Call ${formatPhoneDisplay(company.phone, job.countryCode)}`}
+                        style={{ marginTop: 4 }}
+                      >
+                        <span style={{ fontSize: 13, fontWeight: 500, wordBreak: 'break-word' }}>
+                          {formatPhoneDisplay(company.phone, job.countryCode)}
+                        </span>
+                        <span className="jd-call-pill">Call</span>
+                      </a>
+                    </div>
+                  </div>
+                )}
+
                 {[
-                  { icon: <Mail size={13} />, label: 'Email', value: company.email, color: '#0ea5e9' },
-                  { icon: <Phone size={13} />, label: 'Phone', value: company.phone, color: '#16a34a' },
                   { icon: <MapPin size={13} />, label: 'Location', value: `${job.city}, ${job.state}`, color: '#6366f1' },
                   { icon: <MapPin size={13} />, label: 'Country', value: job.country, color: '#f59e0b' },
                   { icon: <Calendar size={13} />, label: 'Posted', value: new Date(job.postedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }), color: '#8b5cf6' },

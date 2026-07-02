@@ -107,23 +107,29 @@ const injectJobCardStyles = () => {
 
     .jc-grid-footer {
       display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 10px;
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 8px;
       margin-top: 16px;
       flex-shrink: 0;
     }
 
-    .jc-btn-row {
+    .jc-details-col {
       display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      width: 100%;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      min-width: 88px;
     }
 
-    .jc-btn-row .jc-btn {
-      flex: 1 1 calc(50% - 4px);
-      min-width: 0;
+    .jc-posted-time {
+      font-size: 10px;
+      font-weight: 500;
+      color: #94a3b8;
+      white-space: nowrap;
+      line-height: 1;
+      text-align: center;
     }
 
     .jc-accent-bar {
@@ -267,51 +273,35 @@ const JobCard = ({ job, layout }) => {
           </div>
         </div>
 
-        {/* ── Footer: time + buttons ── */}
+        {/* ── Footer: time above Details + buttons ── */}
         <div
           className={isList ? undefined : "jc-grid-footer"}
           style={
             isList
               ? {
                   display: "flex",
-                  flexDirection: "column",
+                  flexDirection: "row",
                   alignItems: "flex-end",
-                  justifyContent: "center",
-                  gap: 12,
+                  gap: 8,
                   flexShrink: 0,
                 }
               : undefined
           }
         >
-          {/* Time ago pill */}
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              color: "#94a3b8",
-              background: "#f8fafc",
-              border: "1px solid #f1f5f9",
-              borderRadius: 6,
-              padding: "3px 8px",
-              whiteSpace: "nowrap",
-              alignSelf: isList ? "flex-end" : "flex-start",
-            }}
+          <button
+            className={`jc-btn ${job.alreadyApplied ? "jc-btn-applied" : "jc-btn-apply"}`}
+            disabled={job.alreadyApplied}
+            aria-label={job.alreadyApplied ? "Already applied" : "Apply to job"}
+            onClick={!job.alreadyApplied ? handleApplyJob : undefined}
+            style={{ flex: 1, minWidth: 0 }}
           >
-            🕐 {calculateTimeAgo(job.createdAt)}
-          </span>
+            {job.alreadyApplied ? "✓ Applied" : "Apply Now"}
+          </button>
 
-          {/* Action buttons */}
-          <div className={isList ? undefined : "jc-btn-row"} style={isList ? { display: "flex", gap: 7, flexDirection: "column", width: "100%" } : undefined}>
-            <button
-              className={`jc-btn ${job.alreadyApplied ? "jc-btn-applied" : "jc-btn-apply"}`}
-              disabled={job.alreadyApplied}
-              aria-label={job.alreadyApplied ? "Already applied" : "Apply to job"}
-              onClick={!job.alreadyApplied ? handleApplyJob : undefined}
-              style={isList ? { flex: 1 } : undefined}
-            >
-              {job.alreadyApplied ? "✓ Applied" : "Apply Now"}
-            </button>
-
+          <div className="jc-details-col">
+            <span className="jc-posted-time">
+              Posted {calculateTimeAgo(job.createdAt)}
+            </span>
             <button
               className={
                 "jc-btn jc-btn-details " +
@@ -323,7 +313,7 @@ const JobCard = ({ job, layout }) => {
               }
               aria-label="View job details"
               onClick={jobDetailNavigation}
-              style={isList ? { flex: 1 } : undefined}
+              style={{ width: "100%" }}
             >
               Details →
             </button>

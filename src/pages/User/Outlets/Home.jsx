@@ -11,15 +11,13 @@ import {
   Instagram,
   Mail,
   LocationOn,
-  Payments,
-  Work,
   PersonSearch,
   Business,
   Verified,
   Groups,
   Psychology,
 } from "@mui/icons-material";
-import { getJobCategory } from "@/constants/options";
+import FeaturedJobCard from "@/components/User/FeaturedJobCard";
 import { TECHPATH_SOCIAL } from "@/constants/socialLinks";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { motion, useReducedMotion } from "framer-motion";
@@ -100,82 +98,6 @@ const scrollScaleVariants = {
 const reducedMotionFadeVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.25 } },
-};
-
-const FEATURED_AVATAR_STYLES = [
-  { bg: "bg-[#003f87]/10", text: "text-[#003f87]" },
-  { bg: "bg-[#722b00]/10", text: "text-[#722b00]" },
-  { bg: "bg-[#0058be]/10", text: "text-[#0058be]" },
-];
-
-const FeaturedJobCard = ({ job, index = 0 }) => {
-  const navigate = useNavigate();
-  const initial = (job.companyName || job.jobTitle)?.charAt(0)?.toUpperCase() || "J";
-  const avatarStyle = FEATURED_AVATAR_STYLES[index % FEATURED_AVATAR_STYLES.length];
-  const category = getJobCategory(job.jobTitle);
-
-  const handleApply = () =>
-    navigate(`/job-application/${job._id}`, {
-      state: {
-        jobTitle: job?.jobTitle,
-        companyName: job?.companyName,
-        phone: job?.phone,
-        companyLocation: `${job?.state}, ${job?.city}`,
-        employerId: job?.employerId,
-      },
-    });
-
-  return (
-    <article className="bg-white p-6 sm:p-8 rounded-xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow h-full flex flex-col min-w-0">
-      <div className="flex justify-between items-start mb-6">
-        <div className={`w-12 h-12 ${avatarStyle.bg} rounded-lg flex items-center justify-center`}>
-          <span className={`${avatarStyle.text} font-bold text-xl`}>{initial}</span>
-        </div>
-        {category && (
-          <span className="bg-[#0058be]/10 text-[#0058be] px-3 py-1 rounded-full text-xs font-bold">
-            {category}
-          </span>
-        )}
-      </div>
-      <h3 className="text-2xl font-semibold text-[#141b2b] mb-2 line-clamp-2">{job.jobTitle}</h3>
-      <p className="text-sm font-semibold text-[#0058be] uppercase tracking-wide mb-4">{job.companyName}</p>
-      <div className="flex flex-wrap gap-4 text-[#424752] text-sm mb-6">
-        <div className="flex items-center gap-1">
-          <LocationOn sx={{ fontSize: 16 }} />
-          {[job.city, job.country].filter(Boolean).join(", ")}
-        </div>
-        {job.salaryRange?.length >= 2 && (
-          <div className="flex items-center gap-1">
-            <Payments sx={{ fontSize: 16 }} />
-            ₹ {job.salaryRange[0]} - {job.salaryRange[job.salaryRange.length - 1]}
-          </div>
-        )}
-        {job.experienceRequired?.length >= 1 && (
-          <div className="flex items-center gap-1">
-            <Work sx={{ fontSize: 16 }} />
-            {job.experienceRequired[0]}–{job.experienceRequired[job.experienceRequired.length - 1]} yrs
-          </div>
-        )}
-      </div>
-      <div className="flex gap-3 mt-auto">
-        <button
-          type="button"
-          onClick={!job.alreadyApplied ? handleApply : undefined}
-          disabled={job.alreadyApplied}
-          className="flex-1 bg-[#0058be] text-white py-3 rounded-lg font-semibold text-sm hover:bg-[#2170e4] transition-colors disabled:bg-slate-200 disabled:text-slate-500"
-        >
-          {job.alreadyApplied ? "Applied" : "Apply Now"}
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate(`/job-details/${job._id}`)}
-          className="px-4 py-3 border border-[#c2c6d4] rounded-lg text-[#141b2b] hover:bg-[#f1f3ff] transition-colors text-sm font-semibold"
-        >
-          Details
-        </button>
-      </div>
-    </article>
-  );
 };
 
 export default function Home() {
@@ -560,11 +482,12 @@ export default function Home() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewportOnce}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                className="grid gap-5 w-full min-w-0"
+                style={{ gridTemplateColumns: "repeat(auto-fill, minmax(min(300px, 100%), 1fr))" }}
               >
                 {jobs.slice(0, 6).map((job, index) => (
-                  <motion.div key={job._id} variants={fadeUp}>
-                    <FeaturedJobCard job={job} index={index} />
+                  <motion.div key={job._id} variants={fadeUp} className="min-w-0 h-full">
+                    <FeaturedJobCard job={job} index={index} compact />
                   </motion.div>
                 ))}
               </motion.div>

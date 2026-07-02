@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/utils/apiError";
 import { useDispatch } from "react-redux";
 import { adminLoginAction } from "@/redux/actions/AdminAction";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,7 +54,7 @@ const AdminLogin = () => {
           toast.error("Login failed");
         }
       } catch (err) {
-        toast.error(err?.message || "An error occurred");
+        toast.error(getApiErrorMessage(err, "Login failed"));
       }
     },
   });

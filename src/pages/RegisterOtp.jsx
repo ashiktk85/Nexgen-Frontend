@@ -3,6 +3,7 @@ import GrapeAnimation from "../components/GrapeAnimation";
 import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/utils/apiError";
 import useRequest from "../hooks/useRequestUser";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
@@ -73,9 +74,7 @@ const RegisterOtp = () => {
       if (loading) return <p>Loading...</p>;
       if (error) return <p>Error: {error}</p>;
     } catch (err) {
-      console.log(err.resposne.data.message);
-      
-      toast.error(err.resposne.data.message || "An error occurred");
+      toast.error(getApiErrorMessage(err, "OTP verification failed"));
     }
   };
 

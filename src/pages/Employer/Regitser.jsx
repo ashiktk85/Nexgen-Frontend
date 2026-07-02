@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
-import { useDispatch } from "react-redux";
+import { getApiErrorMessage } from "@/utils/apiError";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -16,7 +16,6 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const keralaDistricts = KERALA_DISTRICTS;
 
@@ -89,7 +88,7 @@ const Register = () => {
           navigate("/employer/otp");
         }
       } catch (err) {
-        toast.error(err.message || "An error occurred");
+        toast.error(getApiErrorMessage(err, "Registration failed"));
       }
     },
   });

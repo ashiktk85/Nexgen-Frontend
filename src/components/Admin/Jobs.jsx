@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import StatCard from "@/components/ui/StatCard";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Briefcase, CheckCircle2, ListChecks, XCircle } from "lucide-react";
+import { Briefcase, CheckCircle2, ListChecks, XCircle, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import ConfirmModal from "@/components/Admin/ConfirmModal";
 import { getAllJobs, jobListUnList } from "@/apiServices/adminApi";
@@ -18,6 +19,7 @@ import {
 } from "@/components/Admin/adminPageLayout";
 
 const Jobs = () => {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -86,7 +88,7 @@ const Jobs = () => {
     },
     {
       id: "employerName",
-      header: "Employer",
+      header: "Shop / Employer",
       accessor: "employerName",
       sortable: true,
     },
@@ -130,6 +132,14 @@ const Jobs = () => {
           <p className={ADMIN_HEADER_EYEBROW}>Overview</p>
           <h1 className={ADMIN_HEADER_TITLE}>Jobs</h1>
         </div>
+        <button
+          type="button"
+          onClick={() => navigate("/admin/jobs/create")}
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700"
+        >
+          <Plus className="w-4 h-4" />
+          Post job
+        </button>
       </div>
 
       <div className={ADMIN_STAT_GRID}>
@@ -252,8 +262,14 @@ const Jobs = () => {
                     <p className="text-sm font-semibold text-slate-900">{selectedJob.jobTitle}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] font-medium text-slate-500 uppercase">Employer</p>
-                    <p className="text-xs text-slate-800 break-all">{selectedJob.employerName || "—"}</p>
+                    <p className="text-[11px] font-medium text-slate-500 uppercase">Employer / Shop</p>
+                    <p className="text-xs text-slate-800 break-all">
+                      {selectedJob.isAdminJob ? (
+                        <span>{selectedJob.companyName || selectedJob.employerName} <span className="text-indigo-600 font-semibold">(Admin job)</span></span>
+                      ) : (
+                        selectedJob.employerName || "—"
+                      )}
+                    </p>
                   </div>
                 </div>
               </div>

@@ -2,8 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import StatCard from "@/components/ui/StatCard";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Store, Building2, Users, MapPin, Globe, Image as ImageIcon, Share2 } from "lucide-react";
-import { getAllShops } from "@/apiServices/adminApi";
+import { Store, Building2, MapPin, Globe, Image as ImageIcon, Share2, ListChecks, XCircle } from "lucide-react";
+import ConfirmModal from "@/components/Admin/ConfirmModal";
+import { getAllShops, shopListUnList } from "@/apiServices/adminApi";
 import { toast } from "sonner";
 import {
   ADMIN_PAGE,
@@ -37,6 +38,9 @@ const Shops = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedShop, setSelectedShop] = useState(null);
   const [openSheet, setOpenSheet] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingId, setPendingId] = useState(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const rowsPerPage = 20;
@@ -85,7 +89,33 @@ const Shops = () => {
     }
   }
 
+  const handleListUnlist = async (shopId) => {
+    try {
+      const result = await shopListUnList(shopId);
+      if (result?.data?.response) {
+        const { message, response } = result.data;
+        toast.success(message);
+        setShops((prev) =>
+          prev.map((item) =>
+            item._id === shopId ? { ...item, isBlocked: response.isBlocked } : item
+          )
+        );
+        if (selectedShop?._id === shopId) {
+          setSelectedShop((prev) =>
+            prev?._id === shopId ? { ...prev, isBlocked: response.isBlocked } : prev
+          );
+        }
+      }
+    } catch (error) {
+      console.log("Error in handleListUnlist at shops listing component: ", error?.message);
+      toast.error("An unexpected error occurred");
+    }
+  };
+
   const totalShops = shops.length;
+  const listedShops = shops.filter((shop) => !shop.isBlocked).length;
+  const unlistedShops = shops.filter((shop) => shop.isBlocked).length;
+  const pendingShop = shops.find((shop) => shop._id === pendingId);
 
   const columns = [
     { id: "companyName", header: "Shop Name", accessor: "companyName", sortable: true },
@@ -103,6 +133,22 @@ const Shops = () => {
     { id: "email", header: "Email", accessor: "email", sortable: true },
     { id: "phone", header: "Phone", accessor: "phone" },
     { id: "address", header: "Address", accessor: "address" },
+    {
+      id: "listing",
+      header: "Status",
+      accessor: "isBlocked",
+      cell: (row) => (
+        <span
+          className={`inline-flex items-center justify-center min-w-[64px] px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+            row.isBlocked
+              ? "bg-red-100 text-red-700 border border-red-200"
+              : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+          }`}
+        >
+          {row.isBlocked ? "Unlisted" : "Listed"}
+        </span>
+      ),
+    },
   ];
 
   return (
@@ -123,18 +169,18 @@ const Shops = () => {
             shadow="0 8px 24px rgba(99,102,241,.35)"
           />
           <StatCard
-            icon={<Building2 size={20} color="#fff" />}
-            value={totalShops}
-            label="Shops Listed"
+            icon={<ListChecks size={20} color="#fff" />}
+            value={listedShops}
+            label="Listed"
             gradient="linear-gradient(135deg,#059669 0%,#10b981 55%,#34d399 100%)"
             shadow="0 8px 24px rgba(16,185,129,.32)"
           />
           <StatCard
-            icon={<Users size={20} color="#fff" />}
-            value={rowsPerPage}
-            label="Rows / Page"
-            gradient="linear-gradient(135deg,#0369a1 0%,#0ea5e9 55%,#38bdf8 100%)"
-            shadow="0 8px 24px rgba(14,165,233,.3)"
+            icon={<XCircle size={20} color="#fff" />}
+            value={unlistedShops}
+            label="Unlisted"
+            gradient="linear-gradient(135deg,#b91c1c 0%,#ef4444 55%,#f97373 100%)"
+            shadow="0 8px 24px rgba(239,68,68,.32)"
           />
         </div>
 
@@ -169,11 +215,41 @@ const Shops = () => {
               setSelectedShop(row);
               setOpenSheet(true);
             }}
+            onBlock={(row) => {
+              setPendingId(row._id);
+              setConfirmOpen(true);
+            }}
             viewLabel="View"
+            blockLabel={(row) => (row.isBlocked ? "List" : "Unlist")}
             showSno={true}
             rowsPerPage={rowsPerPage}
           />
       </div>
+
+      <ConfirmModal
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={pendingShop?.isBlocked ? "List shop?" : "Unlist shop?"}
+        description={
+          pendingShop?.isBlocked
+            ? "This shop will become visible to users again and all of its jobs will be listed."
+            : "This shop will be hidden from users and all of its jobs will be unlisted."
+        }
+        confirmLabel={pendingShop?.isBlocked ? "List" : "Unlist"}
+        cancelLabel="Cancel"
+        loading={confirmLoading}
+        onConfirm={async () => {
+          if (!pendingId) return;
+          setConfirmLoading(true);
+          try {
+            await handleListUnlist(pendingId);
+            setConfirmOpen(false);
+            setPendingId(null);
+          } finally {
+            setConfirmLoading(false);
+          }
+        }}
+      />
 
       <Sheet open={openSheet} onOpenChange={setOpenSheet}>
         <SheetContent side="right" className="w-full sm:max-w-3xl bg-slate-50 p-0">
@@ -203,6 +279,26 @@ const Shops = () => {
                       <p className="text-[11px] text-slate-500">Shop owner</p>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Listing status */}
+              <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    Listing status
+                  </h3>
+                </div>
+                <div className="px-3 py-3">
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-bold ${
+                      selectedShop.isBlocked
+                        ? "bg-red-100 text-red-700 border border-red-200"
+                        : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                    }`}
+                  >
+                    {selectedShop.isBlocked ? "Unlisted" : "Listed"}
+                  </span>
                 </div>
               </div>
 

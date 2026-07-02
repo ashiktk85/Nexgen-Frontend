@@ -5,7 +5,8 @@ import { SlidersHorizontal, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import JobCard from "../../../components/User/JobCard";
+import FeaturedJobCard from "@/components/User/FeaturedJobCard";
+import JobCard from "@/components/User/JobCard";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { useSelector } from "react-redux";
 import { Helmet } from "react-helmet-async";
@@ -134,8 +135,8 @@ const globalStyle = `
   .ajp-results-badge { display:flex; align-items:center; background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:10px 16px; gap:6px; white-space:nowrap; box-shadow:0 2px 8px rgba(0,0,0,0.04); flex-shrink:0; }
   .ajp-view-toggle { display:flex; background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.04); flex-shrink:0; }
 
-  /* Jobs grid */
-  .ajp-jobs-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(280px,100%), 1fr)); gap:16px; width:100%; min-width:0; }
+  /* Jobs grid — wider tiles */
+  .ajp-jobs-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap:20px; width:100%; min-width:0; }
 
   /* Pagination */
   .ajp-pagination { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:28px; flex-wrap:wrap; }
@@ -495,11 +496,26 @@ const AllJobsPage = () => {
                   <span style={{ fontSize:13, color:"#64748b" }}>jobs found</span>
                 </div>
 
-                {/* Row 1 on mobile: View toggle */}
+                {/* Row 1 on mobile: View toggle — tiles vs list */}
                 <div className="ajp-view-toggle">
-                  {[{mode:"grid",icon:<FaTh/>},{mode:"list",icon:<FaList/>}].map(({mode,icon}) => (
-                    <button key={mode} onClick={() => setViewMode(mode)}
-                      style={{ padding:"10px 14px", border:"none", background:viewMode===mode?"linear-gradient(135deg,#4f46e5,#6366f1)":"transparent", color:viewMode===mode?"#fff":"#94a3b8", cursor:"pointer", fontSize:14, transition:"all 0.2s", display:"flex", alignItems:"center" }}>
+                  {[{ mode: "grid", icon: <FaTh /> }, { mode: "list", icon: <FaList /> }].map(({ mode, icon }) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setViewMode(mode)}
+                      title={mode === "grid" ? "Tile view" : "List view"}
+                      style={{
+                        padding: "10px 14px",
+                        border: "none",
+                        background: viewMode === mode ? "linear-gradient(135deg,#4f46e5,#6366f1)" : "transparent",
+                        color: viewMode === mode ? "#fff" : "#94a3b8",
+                        cursor: "pointer",
+                        fontSize: 14,
+                        transition: "all 0.2s",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
                       {icon}
                     </button>
                   ))}
@@ -540,12 +556,20 @@ const AllJobsPage = () => {
                 </div>
               ) : timeFilteredJobs.length > 0 ? (
                 <>
-                  <motion.div variants={containerVariants} initial="hidden" animate="visible"
-                    className={viewMode==="grid"?"ajp-jobs-grid":""}
-                    style={viewMode==="list"?{display:"flex",flexDirection:"column",gap:12}:{}}>
-                    {timeFilteredJobs.map((job) => (
-                      <motion.div key={job._id} variants={itemVariants} className="job-card-wrap">
-                        <JobCard job={job} layout={viewMode} />
+                  <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className={viewMode === "grid" ? "ajp-jobs-grid" : ""}
+                    style={viewMode === "list" ? { display: "flex", flexDirection: "column", gap: 12 } : undefined}
+                  >
+                    {timeFilteredJobs.map((job, index) => (
+                      <motion.div key={job._id} variants={itemVariants} className="job-card-wrap min-w-0 h-full">
+                        {viewMode === "grid" ? (
+                          <FeaturedJobCard job={job} index={index} compact />
+                        ) : (
+                          <JobCard job={job} layout="list" />
+                        )}
                       </motion.div>
                     ))}
                   </motion.div>

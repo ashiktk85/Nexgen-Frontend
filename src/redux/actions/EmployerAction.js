@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
+import { getApiErrorMessage } from "@/utils/apiError";
 
 export const employerLogin = createAsyncThunk(
     'employer/login',
@@ -15,7 +16,7 @@ export const employerLogin = createAsyncThunk(
             };
         } catch (error) {
             console.error('Error in employerLoginAction thunk:', error);
-            throw new Error(error.response?.data?.message || 'emp reg failed')
+            return rejectWithValue(getApiErrorMessage(error, "Login failed"));
         }
     }
 );
@@ -33,7 +34,7 @@ export const updateEmployer = createAsyncThunk("employer/updateProfile",
             };
         } catch (error) {
             console.error('Error in employer update thunk:', error);
-            return rejectWithValue(error.response?.data?.message || 'Profile update failed')
+            return rejectWithValue(getApiErrorMessage(error, "Profile update failed"));
         }
     }
 )

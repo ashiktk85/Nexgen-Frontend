@@ -474,12 +474,13 @@ function JobList() {
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))",
                   gap: 14,
+                  alignItems: "stretch",
                 }}
               >
                 <AnimatePresence>
                   {paginatedJobs.map((job, index) => (
-                    <motion.div key={job._id} custom={index} variants={cardVariants} initial="hidden" animate="visible" exit="exit">
-                      <JobCard job={job} layout={viewMode} handleEdit={handleEdit} handleStatus={handleStatus} handleDelete={handleDelete} />
+                    <motion.div key={job._id} custom={index} variants={cardVariants} initial="hidden" animate="visible" exit="exit" style={{ height: "100%" }}>
+                      <JobCard job={job} handleEdit={handleEdit} handleStatus={handleStatus} handleDelete={handleDelete} />
                     </motion.div>
                   ))}
                 </AnimatePresence>

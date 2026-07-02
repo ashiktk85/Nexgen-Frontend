@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/utils/apiError";
 import { motion } from "framer-motion";
 import { GoogleButton } from "@/components/GoogleButton";
 import { useAuth } from "@/hooks/useAuth";
@@ -67,9 +68,7 @@ const LoginPage = () => {
         toast.success("Login successful!");
         navigate("/");
       } catch (err) {
-        const message =
-          err?.response?.data?.message || err?.message || "An error occurred";
-        toast.error(message);
+        toast.error(getApiErrorMessage(err, "Login failed"));
       }
     },
   });

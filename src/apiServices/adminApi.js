@@ -195,6 +195,22 @@ export const bulkCreateStudentsService = async (students) => {
     toast.error(errorMessage);
   }
 };
+export const shopListUnList = async (shopId) => {
+  try {
+    const response = await adminAxiosInstance.put(`/changeShopStatus/${shopId}`);
+    return response;
+  } catch (error) {
+    console.error("Error in shopListUnList at admin Api service: ", error);
+    let errorMessage = "An unexpected error occurred";
+    if (error.response) {
+      errorMessage =
+        error.response.data.message ||
+        `Error ${error.response.status}: ${error.response.statusText}`;
+    }
+    toast.error(errorMessage);
+  }
+};
+
 export const employerListUnList = async (employerId) => {
     try {
         const response = await adminAxiosInstance.put(`/changeEmployerStatus/${employerId}`)
@@ -251,6 +267,25 @@ export const jobListUnList = async (jobId) => {
       toast.error(errorMessage)
   }
 }
+
+export const createJobPostAdmin = async (data) => {
+  try {
+    return await adminAxiosInstance.post("/jobs", data);
+  } catch (error) {
+    console.error("Error creating admin job:", error);
+    throw error;
+  }
+};
+
+export const getActiveJobTitlesAdmin = async () => {
+  try {
+    const response = await adminAxiosInstance.get("/job-titles/active");
+    return response?.data?.response || [];
+  } catch (error) {
+    console.error("Error fetching active job titles:", error);
+    return [];
+  }
+};
 
 export const getEmployerVerificationDetails = async (id) => {
   try {

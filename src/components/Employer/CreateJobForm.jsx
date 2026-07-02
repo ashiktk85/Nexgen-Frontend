@@ -5,6 +5,10 @@ import { useFormik } from "formik";
 import validateJobForm from "@/Validations/CreateJob-validation";
 import { employerJobCreation, employerJobUpdate, getCompanyById } from "@/apiServices/userApi";
 import { getActiveJobTitles } from "@/apiServices/employerApi";
+import {
+  createJobPostAdmin,
+  getActiveJobTitlesAdmin,
+} from "@/apiServices/adminApi";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -126,9 +130,17 @@ const FE = ({ msg }) => msg ? (
 ) : null;
 
 /* ══════════════════════════════════════════════ */
-function CreateJobForm({ selectedData = null, page = "create", onClose = null }) {
+function CreateJobForm({
+  selectedData = null,
+  page = "create",
+  onClose = null,
+  mode = "employer",
+}) {
   const Employer = useSelector((state) => state.employer.employer);
   const navigate = useNavigate();
+  const isAdminMode = mode === "admin";
+  const activeEmployerId = isAdminMode ? null : Employer?.employerId;
+  const activeEmployerName = isAdminMode ? null : Employer?.name;
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedRequirements, setSelectedRequirements] = useState(selectedData?.requirements || []);
@@ -141,7 +153,9 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
     const loadJobTitles = async () => {
       setTitlesLoading(true);
       try {
-        const titles = await getActiveJobTitles();
+        const titles = isAdminMode
+          ? await getActiveJobTitlesAdmin()
+          : await getActiveJobTitles();
         let options = (titles || []).map((t) => ({
           title: t.title,
           requirements: t.requirements || [],
@@ -173,19 +187,24 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
       }
     };
     loadJobTitles();
-  }, [selectedData?.jobTitle, selectedData?.requirements]);
+  }, [selectedData?.jobTitle, selectedData?.requirements, isAdminMode]);
 
   useEffect(() => {
+    if (isAdminMode) return;
     const fetchCompanies = async () => {
+      if (!activeEmployerId) {
+        setCompanies([]);
+        return;
+      }
       try {
-        const { data } = await employerAxiosInstance.get(`/company-list/${Employer?.employerId}`);
+        const { data } = await employerAxiosInstance.get(`/company-list/${activeEmployerId}`);
         setCompanies(data || []);
       } catch (err) {
         console.error("Error fetching companies:", err);
       }
     };
-    if (Employer?.employerId) fetchCompanies();
-  }, [Employer?.employerId]);
+    fetchCompanies();
+  }, [activeEmployerId, isAdminMode]);
 
   const formik = useFormik({
     initialValues: {
@@ -196,7 +215,7 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
       country: "IN",
       salaryFrom: selectedData?.salaryRange?.[0] || 0,
       salaryTo: selectedData?.salaryRange?.[1] || 0,
-      state: selectedData?.state || null,
+      state: selectedData?.state ?? "KL",
       city: selectedData?.city || null,
       experienceRequired: [
         selectedData?.experienceRequired?.[0] ?? 0,
@@ -205,25 +224,38 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
       description: selectedData?.description || "",
       requirements: selectedData?.requirements || [],
       companyId: selectedData?.companyId || "",
+      shopName: selectedData?.companyName || "",
     },
     enableReinitialize: true,
     validationSchema: validateJobForm,
     onSubmit: async (values) => {
+      if (isAdminMode) {
+        if (!values.shopName?.trim()) {
+          toast.error("Shop name is required");
+          return;
+        }
+      } else if (!activeEmployerId) {
+        toast.error("Employer session expired");
+        return;
+      }
       try {
         let status;
         if (page === "create") {
-          status = await employerJobCreation(values, Employer?.employerId);
+          status = isAdminMode
+            ? await createJobPostAdmin(values)
+            : await employerJobCreation(values, activeEmployerId);
         } else {
           values._id = selectedData?._id;
-          status = await employerJobUpdate(values, Employer?.employerId);
+          status = await employerJobUpdate(values, activeEmployerId);
         }
-        if (status) {
+        const success = isAdminMode ? status?.data?.status : status;
+        if (success) {
           toast.success(page === "create" ? "Job created!" : "Job updated!");
           if (onClose) onClose();
-          else navigate("/employer/job_list");
+          else navigate(isAdminMode ? "/admin/jobs" : "/employer/job_list");
           return;
         }
-        toast.error(status?.message || "Error saving job post");
+        toast.error(status?.data?.message || status?.message || "Error saving job post");
       } catch (err) {
         toast.error(err.response?.data?.message || err.message || "Unexpected error");
       }
@@ -281,10 +313,10 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
         {/* ── Page heading ── */}
         <motion.div variants={itemVariants} style={{ marginBottom: 28 }}>
           <p style={{ fontSize: 11.5, fontWeight: 700, color: "#94a3b8", letterSpacing: ".09em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-            {Employer?.name?.toUpperCase()}
+            {isAdminMode ? "Admin job listing" : activeEmployerName?.toUpperCase()}
           </p>
           <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-0.02em" }}>
-            {isEdit ? "Edit Job Listing" : "Post a New Job"}
+            {isEdit ? "Edit Job Listing" : isAdminMode ? "Post Admin Job" : "Post a New Job"}
           </h1>
         </motion.div>
 
@@ -296,6 +328,24 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(400px,1fr))", gap: 24 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                {isAdminMode && (
+                  <div>
+                    <FL required>Shop Name</FL>
+                    <input
+                      name="shopName"
+                      type="text"
+                      value={formik.values.shopName}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      placeholder="e.g. NexGen Mobile Service, Ernakulam"
+                      className={`cjf-input ${formik.touched.shopName && !formik.values.shopName?.trim() ? "error" : ""}`}
+                    />
+                    <p style={{ fontSize: 11.5, color: "#64748b", marginTop: 6 }}>
+                      This shop name is shown on the job listing — not linked to any employer account.
+                    </p>
+                  </div>
+                )}
+
                 {/* Job Title */}
                 <div>
                   <FL required>Job Title</FL>
@@ -314,8 +364,8 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
                   <FE msg={formik.touched.jobTitle && formik.errors.jobTitle} />
                 </div>
 
-                {/* Shop Selection */}
-                {companies.length > 0 && (
+                {/* Shop Selection — employer accounts only */}
+                {!isAdminMode && companies.length > 0 && (
                   <div>
                     <FL>Select Shop</FL>
                     <Autocomplete
@@ -532,7 +582,7 @@ function CreateJobForm({ selectedData = null, page = "create", onClose = null })
 
           {/* ── Submit ── */}
           <motion.div variants={itemVariants} style={{ display: "flex", justifyContent: "flex-end", gap: 12, alignItems: "center" }}>
-            <button type="button" onClick={() => onClose ? onClose() : navigate(-1)}
+            <button type="button" onClick={() => onClose ? onClose() : navigate(isAdminMode ? "/admin/jobs" : -1)}
               style={{ padding: "11px 22px", borderRadius: 10, border: "1.5px solid #e2e8f0", background: "#fff", color: "#475569", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all .18s" }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = "#c7d2fe"; e.currentTarget.style.color = "#4f46e5"; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.color = "#475569"; }}

@@ -22,6 +22,9 @@ if (!document.getElementById("ejc-styles")) {
       transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease;
       overflow:hidden;
       width:100%;
+      height:320px;
+      display:flex;
+      flex-direction:column;
     }
     .ejc-card:hover {
       box-shadow:0 8px 28px rgba(79,70,229,.09);
@@ -52,7 +55,45 @@ if (!document.getElementById("ejc-styles")) {
     .ejc-action-btn.primary { background:linear-gradient(135deg,#4f46e5,#6366f1); color:#fff; border-color:transparent; box-shadow:0 3px 8px rgba(99,102,241,.25); }
     .ejc-action-btn.primary:hover { opacity:.9; transform:translateY(-1px); }
 
-    .ejc-meta { display:flex; align-items:center; gap:5px; font-size:12px; color:#64748b; }
+    .ejc-meta { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:#64748b; white-space:nowrap; }
+
+    .ejc-card-body {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      padding:22px 24px;
+    }
+    .ejc-card-header { flex-shrink:0; margin-bottom:12px; }
+    .ejc-card-meta {
+      flex-shrink:0;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .ejc-meta-row {
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:6px;
+      min-height:18px;
+    }
+    .ejc-card-spacer { flex:1; min-height:12px; }
+    .ejc-card-bottom { flex-shrink:0; }
+    .ejc-card-applicants { width:100%; margin-bottom:12px; }
+    .ejc-title {
+      font-size:14.5px;
+      font-weight:700;
+      color:#0f172a;
+      margin:0;
+      letter-spacing:-0.01em;
+      line-height:1.35;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      min-height:2.7em;
+    }
   `;
   document.head.appendChild(s);
 }
@@ -63,19 +104,18 @@ const getGrad = (ch = "A") => {
   return gs[((ch.toUpperCase().charCodeAt(0)-65)%gs.length+gs.length)%gs.length];
 };
 
-const JobCard = ({ job, handleEdit, handleDelete, handleStatus, layout }) => {
+const JobCard = ({ job, handleEdit, handleDelete, handleStatus }) => {
   const navigate = useNavigate();
-  const isList = layout === "list";
   const initial = job.jobTitle?.charAt(0) || "J";
   const isOpen = job?.status === "open";
 
   return (
     <article className="ejc-root ejc-card" aria-label="Job listing card">
       <div className="ejc-accent" />
-      <div style={{ padding: isList ? "14px 18px" : "16px 18px" }}>
+      <div className="ejc-card-body">
 
         {/* ── Top Row ── */}
-        <div style={{ display:"flex", alignItems:"flex-start", gap:12, marginBottom:12 }}>
+        <div className="ejc-card-header" style={{ display:"flex", alignItems:"flex-start", gap:12 }}>
           {/* Avatar */}
           <div style={{
             width:42, height:42, borderRadius:11, flexShrink:0,
@@ -89,15 +129,16 @@ const JobCard = ({ job, handleEdit, handleDelete, handleStatus, layout }) => {
 
           {/* Title + date */}
           <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, flexWrap:"wrap" }}>
-              <h2 style={{ fontSize:14.5, fontWeight:700, color:"#0f172a", margin:0, letterSpacing:"-0.01em", lineHeight:1.3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:220 }}>
+            <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8 }}>
+              <h2 className="ejc-title" title={job.jobTitle}>
                 {job.jobTitle}
               </h2>
               {/* Status pill */}
-              <span className="ejc-badge" style={isOpen
+              <span className="ejc-badge" style={{ ...isOpen
                 ? { background:"#f0fdf4", color:"#16a34a", border:"1px solid #bbf7d0" }
-                : { background:"#f8fafc", color:"#94a3b8", border:"1px solid #e2e8f0" }
-              }>
+                : { background:"#f8fafc", color:"#94a3b8", border:"1px solid #e2e8f0" },
+                flexShrink:0
+              }}>
                 <div style={{ width:5, height:5, borderRadius:"50%", background: isOpen ? "#22c55e" : "#94a3b8" }} />
                 {isOpen ? "Active" : "Closed"}
               </span>
@@ -109,39 +150,43 @@ const JobCard = ({ job, handleEdit, handleDelete, handleStatus, layout }) => {
         </div>
 
         {/* ── Meta chips ── */}
-        <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:12 }}>
-          <span className="ejc-meta"><IoBriefcase style={{ color:"#6366f1", fontSize:12 }} />{job.experienceRequired[0]}–{job.experienceRequired[job.experienceRequired.length-1]} yrs</span>
-          <span style={{ color:"#e2e8f0" }}>·</span>
-          <span className="ejc-meta"><MdPlace style={{ color:"#ec4899", fontSize:13 }} />{job.city}, {job.country}</span>
-          <span style={{ color:"#e2e8f0" }}>·</span>
-          <span className="ejc-meta"><FaIndianRupeeSign style={{ color:"#16a34a", fontSize:11 }} />{job.salaryRange?.join(" – ")}</span>
+        <div className="ejc-card-meta">
+          <div className="ejc-meta-row">
+            <span className="ejc-meta"><IoBriefcase style={{ color:"#6366f1", fontSize:12 }} />{job.experienceRequired[0]}–{job.experienceRequired[job.experienceRequired.length-1]} yrs</span>
+            <span style={{ color:"#e2e8f0" }}>·</span>
+            <span className="ejc-meta"><MdPlace style={{ color:"#ec4899", fontSize:13 }} />{job.city}, {job.country}</span>
+          </div>
+          <div className="ejc-meta-row">
+            <span className="ejc-meta"><FaIndianRupeeSign style={{ color:"#16a34a", fontSize:11 }} />{job.salaryRange?.join(" – ")}</span>
+          </div>
         </div>
 
-        {/* ── Applicants count ── */}
-        <button
-          className="ejc-action-btn primary"
-          style={{ marginBottom:12, fontSize:12 }}
-          onClick={() => navigate(`/employer/applicants/${job?._id}`)}
-        >
-          <TeamOutlined style={{ fontSize:12 }} />
-          {job?.applicantsCount} Applicant{job?.applicantsCount !== 1 ? "s" : ""}
-        </button>
+        <div className="ejc-card-spacer" />
 
-        {/* ── Divider ── */}
-        <div style={{ height:1, background:"#f1f5f9", margin:"0 0 12px" }} />
+        {/* ── Bottom: applicants + actions ── */}
+        <div className="ejc-card-bottom">
+          <button
+            className="ejc-action-btn primary ejc-card-applicants"
+            style={{ fontSize:12, justifyContent:"center" }}
+            onClick={() => navigate(`/employer/applicants/${job?._id}`)}
+          >
+            <TeamOutlined style={{ fontSize:12 }} />
+            {job?.applicantsCount ?? 0} Applicant{(job?.applicantsCount ?? 0) !== 1 ? "s" : ""}
+          </button>
 
-        {/* ── Action buttons ── */}
-        <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-          <button className="ejc-action-btn" onClick={() => handleEdit(job)}>
-            <EditOutlined style={{ fontSize:11 }} /> Edit
-          </button>
-          <button className="ejc-action-btn" onClick={() => handleStatus(job)}>
-            {isOpen ? <EyeInvisibleOutlined style={{ fontSize:11 }} /> : <EyeOutlined style={{ fontSize:11 }} />}
-            {isOpen ? "Close" : "Reopen"}
-          </button>
-          <button className="ejc-action-btn danger" onClick={() => handleDelete(job)}>
-            <DeleteOutlined style={{ fontSize:11 }} /> Delete
-          </button>
+          <div style={{ height:1, background:"#f1f5f9", margin:"0 0 12px" }} />
+          <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+            <button className="ejc-action-btn" onClick={() => handleEdit(job)}>
+              <EditOutlined style={{ fontSize:11 }} /> Edit
+            </button>
+            <button className="ejc-action-btn" onClick={() => handleStatus(job)}>
+              {isOpen ? <EyeInvisibleOutlined style={{ fontSize:11 }} /> : <EyeOutlined style={{ fontSize:11 }} />}
+              {isOpen ? "Close" : "Reopen"}
+            </button>
+            <button className="ejc-action-btn danger" onClick={() => handleDelete(job)}>
+              <DeleteOutlined style={{ fontSize:11 }} /> Delete
+            </button>
+          </div>
         </div>
       </div>
     </article>

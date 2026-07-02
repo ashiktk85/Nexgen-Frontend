@@ -98,22 +98,13 @@ const JobTitles = () => {
     setSaving(true);
     try {
       if (editingId) {
-        const res = await updateJobTitleAdmin(editingId, payload);
-        const updated = res?.data?.response;
-        if (updated) {
-          setJobTitles((prev) =>
-            prev.map((item) => (item._id === editingId ? updated : item))
-          );
-          toast.success("Job title updated");
-        }
+        await updateJobTitleAdmin(editingId, payload);
+        toast.success("Job title updated");
       } else {
-        const res = await createJobTitleAdmin(payload);
-        const created = res?.data?.response;
-        if (created) {
-          toast.success("Job title created");
-          fetchTitles(currentPage, searchTerm);
-        }
+        await createJobTitleAdmin(payload);
+        toast.success("Job title created");
       }
+      await fetchTitles(currentPage, searchTerm);
       setSheetOpen(false);
       setForm(emptyForm);
       setEditingId(null);

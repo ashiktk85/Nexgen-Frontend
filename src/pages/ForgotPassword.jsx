@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/utils/apiError";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
@@ -29,14 +30,16 @@ const ForgotPassword = () => {
         const response = await client.post(path, { email: values.email });
         const data = response.data;
 
-        if (data.status) {
+        if (data.status && data.token) {
            toast.success("OTP sent to your email");
-           navigate("/forgot-password-otp", { state: { email: values.email, userType } });
+           navigate("/forgot-password-otp", {
+             state: { email: values.email, userType, token: data.token },
+           });
         } else {
            toast.error(data.message || "Failed to send OTP");
         }
       } catch (err) {
-        toast.error(err.message || "An error occurred");
+        toast.error(getApiErrorMessage(err, "An error occurred"));
       }
     },
   });

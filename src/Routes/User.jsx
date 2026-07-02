@@ -7,6 +7,7 @@ import HomeLayout from "@/pages/User/Layout/HomeLayout";
 
 const LoginPage = lazy(() => import("./../pages/Login"));
 const ForgotPassword = lazy(() => import("./../pages/ForgotPassword"));
+const ForgotPasswordOtp = lazy(() => import("./../pages/ForgotPasswordOtp"));
 const RegisterOtp = lazy(() => import("./../pages/RegisterOtp"));
 const Register = lazy(() => import("../pages/Register"));
 const AuthCallback = lazy(() => import("../pages/AuthCallback"));
@@ -30,6 +31,7 @@ function User() {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/otp-verification" element={<RegisterOtp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/forgot-password-otp" element={<ForgotPasswordOtp />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
 

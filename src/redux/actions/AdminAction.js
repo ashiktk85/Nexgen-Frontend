@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
+import { getApiErrorMessage } from "@/utils/apiError";
 
 export const adminLoginAction = createAsyncThunk(
     'admin/login',
@@ -17,7 +18,7 @@ export const adminLoginAction = createAsyncThunk(
             }
         } catch (error) {
             console.error('Error in adminLoginAction thunk:', error);
-            throw new Error(error.response?.data?.message || 'admin reg failed')
+            return rejectWithValue(getApiErrorMessage(error, "Login failed"));
         }
     }
 );
