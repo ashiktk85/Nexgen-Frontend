@@ -229,12 +229,7 @@ function CreateJobForm({
     enableReinitialize: true,
     validationSchema: validateJobForm,
     onSubmit: async (values) => {
-      if (isAdminMode) {
-        if (!values.shopName?.trim()) {
-          toast.error("Shop name is required");
-          return;
-        }
-      } else if (!activeEmployerId) {
+      if (!isAdminMode && !activeEmployerId) {
         toast.error("Employer session expired");
         return;
       }
@@ -330,7 +325,7 @@ function CreateJobForm({
               <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                 {isAdminMode && (
                   <div>
-                    <FL required>Shop Name</FL>
+                    <FL>Shop Name <span style={{ fontWeight: 400, color: "#94a3b8" }}>(optional)</span></FL>
                     <input
                       name="shopName"
                       type="text"
@@ -338,10 +333,10 @@ function CreateJobForm({
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                       placeholder="e.g. NexGen Mobile Service, Ernakulam"
-                      className={`cjf-input ${formik.touched.shopName && !formik.values.shopName?.trim() ? "error" : ""}`}
+                      className="cjf-input"
                     />
                     <p style={{ fontSize: 11.5, color: "#64748b", marginTop: 6 }}>
-                      This shop name is shown on the job listing — not linked to any employer account.
+                      Optional — shown on the job listing if provided. Not linked to any employer account.
                     </p>
                   </div>
                 )}
