@@ -29,8 +29,11 @@ if (!document.getElementById("cd-styles")) {
     .cd-section:hover { box-shadow:0 8px 28px rgba(79,70,229,.07); border-color:#c7d2fe; }
 
     .cd-section-header {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:18px 24px; border-bottom:1.5px solid #f1f5f9;
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+      padding:14px 16px; border-bottom:1.5px solid #f1f5f9;
+    }
+    @media (min-width:640px) {
+      .cd-section-header { padding:18px 24px; }
     }
     .cd-section-title {
       display:flex; align-items:center; gap:9px; margin:0;
@@ -201,7 +204,7 @@ export default function CompanyDetails() {
   const initial = employer?.name?.charAt(0) || "E";
 
   return (
-    <div className="cd-root" style={{ background: "#f1f5f9", minHeight: "100vh", padding: "24px" }}>
+    <div className="cd-root" style={{ background: "#f1f5f9", minHeight: "100vh", padding: "16px 12px 40px" }}>
       <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ maxWidth: 1200, margin: "0 auto" }}>
 
         {/* ── Page heading ── */}
@@ -319,7 +322,7 @@ export default function CompanyDetails() {
             </div>
 
             {/* Info grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: "0 32px", marginBottom: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(min(100%,200px),1fr))", gap: "0 24px", marginBottom: 16 }}>
               <div>
                 <IR icon={<Mail size={14} style={{ color: "#0ea5e9" }} />} iconBg="#f0f9ff" label="Email" value={employer.email} />
                 <IR icon={<Phone size={14} style={{ color: "#16a34a" }} />} iconBg="#f0fdf4" label="Phone" value={employer.phone} />
@@ -404,7 +407,7 @@ export default function CompanyDetails() {
           <div style={{ padding: "20px 24px" }}>
             {jobs.length > 0 ? (
               <motion.div
-                style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 12 }}
+                style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(min(100%,200px),1fr))", gap: 12 }}
                 variants={containerVariants} initial="hidden" animate="visible"
               >
                 <AnimatePresence>

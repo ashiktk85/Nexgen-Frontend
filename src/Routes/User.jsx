@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import RouteFallback from "@/components/RouteFallback";
 import { UserProtectedRoute } from "@/services/userProtector";
 import Home from "../pages/User/Outlets/Home";
@@ -34,6 +34,7 @@ function User() {
         <Route path="/forgot-password-otp" element={<ForgotPasswordOtp />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/terms-and-conditions" element={<Navigate to="/terms" replace />} />
 
         <Route element={<HomeLayout />}>
           <Route path="/" element={<Home />} />

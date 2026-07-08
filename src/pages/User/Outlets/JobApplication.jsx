@@ -213,7 +213,9 @@ const JobApplication = () => {
           headers: { "Content-Type": "multipart/form-data" },
         });
         if (data.status) {
-          toast.success("Application submitted successfully!");
+          toast.success(
+            "Your application has been submitted successfully. The shop owner will contact you shortly if your profile matches the job requirements."
+          );
           navigate("/application-submitted");
         }
       } catch (error) {

@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { adminLoginAction } from "@/redux/actions/AdminAction";
 import { motion, AnimatePresence } from "framer-motion";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
+import { AUTH_PANEL_ADMIN } from "@/constants/authPanelCopy";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -249,13 +250,13 @@ const AdminLogin = () => {
             className="text-2xl lg:text-3xl font-semibold mb-4"
             variants={itemVariants}
           >
-            Connecting Talent with Opportunity—Post Jobs, Build Futures.
+            {AUTH_PANEL_ADMIN.title}
           </motion.h2>
           <motion.p
             className="text-base lg:text-lg text-gray-200 mb-4"
             variants={itemVariants}
           >
-            Empowering Careers, One Opportunity at a Time.
+            {AUTH_PANEL_ADMIN.subtitle}
           </motion.p>
           {/* <div className="flex justify-center gap-2">
             <span className="h-2 w-2 bg-white rounded-full"></span>

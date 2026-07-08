@@ -8,6 +8,7 @@ import GrapeAnimation from "@/components/GrapeAnimation";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 import NextUiShell from "@/components/NextUiShell";
 import { getApiErrorMessage } from "@/utils/apiError";
+import { AUTH_PANEL_RESET_PASSWORD } from "@/constants/authPanelCopy";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 
@@ -128,10 +129,10 @@ const ForgotPasswordOtp = () => {
           <div className="max-w-md">
             <GrapeAnimation className="sm:hidden" />
             <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
-              Reset your password
+              {AUTH_PANEL_RESET_PASSWORD.title}
             </h2>
             <p className="text-base lg:text-lg text-gray-200 mb-4">
-              Enter the code we sent to your email, then choose a new password.
+              {AUTH_PANEL_RESET_PASSWORD.subtitle}
             </p>
           </div>
         </div>

@@ -4,6 +4,7 @@ import {
   MdOutlineKeyboardArrowLeft,
 } from "react-icons/md";
 import { FaEye } from "react-icons/fa";
+import Pagination from "@/components/ui/Pagination";
 
 const ListingTable = ({
   users,
@@ -51,12 +52,10 @@ const ListingTable = ({
     </tr>
   );
 
-  const Pagination = () => {
-    const totalPages = Math.ceil(users.length / itemsPerPage);
-    const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const totalPages = Math.max(1, Math.ceil(users.length / itemsPerPage));
 
-    return (
-      <div className="md:flex m-4">
+  const TablePagination = () => (
+      <div className="md:flex m-4 items-center justify-between gap-4">
         <p className="text-sm text-gray-500 flex-1">
           Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
           {Math.min(currentPage * itemsPerPage, users.length)} of {users.length}{" "}
@@ -67,7 +66,10 @@ const ListingTable = ({
           <select
             className="text-sm text-gray-500 border border-gray-400 rounded h-7 mx-4 px-1 outline-none"
             value={itemsPerPage}
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
           >
             {[5, 10, 20, 50, 100].map((value) => (
               <option key={value} value={value}>
@@ -75,39 +77,17 @@ const ListingTable = ({
               </option>
             ))}
           </select>
-          <ul className="flex space-x-1 ml-2">
-            <li
-              className="flex items-center justify-center cursor-pointer bg-blue-100 w-7 h-7 rounded"
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-            >
-              {<MdOutlineKeyboardArrowLeft />}
-            </li>
-            {pages.map((page) => (
-              <li
-                key={page}
-                className={`flex items-center justify-center cursor-pointer text-sm w-7 h-7 rounded ${
-                  currentPage === page
-                    ? "bg-[#007bff] text-white"
-                    : "text-gray-500"
-                }`}
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </li>
-            ))}
-            <li
-              className="flex items-center justify-center cursor-pointer bg-blue-100 w-7 h-7 rounded"
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-              }
-            >
-              {<MdOutlineKeyboardArrowRight />}
-            </li>
-          </ul>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            variant="compact"
+            prevLabel={<MdOutlineKeyboardArrowLeft />}
+            nextLabel={<MdOutlineKeyboardArrowRight />}
+          />
         </div>
       </div>
-    );
-  };
+  );
 
   return (
     <div className="w-full max-w-6xl mx-auto">
@@ -139,7 +119,7 @@ const ListingTable = ({
               ))}
           </tbody>
         </table>
-        <Pagination />
+        <TablePagination />
       </div>
     </div>
   );

@@ -1,10 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MdPlace } from "react-icons/md";
-import { FaIndianRupeeSign } from "react-icons/fa6";
 import { IoBriefcase } from "react-icons/io5";
 import { calculateTimeAgo } from "@/utils/dateFormation";
 import { CATEGORY_COLORS, getJobCategory } from "@/constants/options";
+import { formatSalary } from "@/utils/formatSalary";
+import { formatJobLocation } from "@/utils/formatLocation";
+import JobShareButton from "@/components/common/JobShareButton";
+import JobWhatsAppButton from "@/components/common/JobWhatsAppButton";
 
 /* ─── Inline styles injected once ─── */
 const injectJobCardStyles = () => {
@@ -26,18 +29,6 @@ const injectJobCardStyles = () => {
       box-shadow: 0 12px 40px rgba(79,70,229,0.1);
       transform: translateY(-3px);
       border-color: #c7d2fe;
-    }
-
-    .jc-avatar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 800;
-      color: #fff;
-      border-radius: 12px;
-      flex-shrink: 0;
-      user-select: none;
     }
 
     .jc-badge {
@@ -118,9 +109,16 @@ const injectJobCardStyles = () => {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       flex-shrink: 0;
-      min-width: 88px;
+      min-width: auto;
+    }
+    
+    .jc-details-col > div {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+      justify-content: flex-end;
     }
 
     .jc-posted-time {
@@ -152,31 +150,15 @@ const injectJobCardStyles = () => {
 
 injectJobCardStyles();
 
-/* ─── Avatar color palette based on first letter ─── */
-const avatarGradients = [
-  "linear-gradient(135deg, #6366f1, #818cf8)",
-  "linear-gradient(135deg, #0ea5e9, #38bdf8)",
-  "linear-gradient(135deg, #f59e0b, #fbbf24)",
-  "linear-gradient(135deg, #10b981, #34d399)",
-  "linear-gradient(135deg, #ec4899, #f472b6)",
-  "linear-gradient(135deg, #8b5cf6, #a78bfa)",
-  "linear-gradient(135deg, #ef4444, #f87171)",
-  "linear-gradient(135deg, #14b8a6, #2dd4bf)",
-];
-const getAvatarGradient = (letter = "J") => {
-  const idx = (letter.toUpperCase().charCodeAt(0) - 65) % avatarGradients.length;
-  return avatarGradients[Math.max(0, idx)];
-};
-
 /* ═══════════════════════════════════════════
    JobCard
 ═══════════════════════════════════════════ */
 const JobCard = ({ job, layout }) => {
   const navigate = useNavigate();
   const isList = layout === "list";
-  // First letter of shop/company for avatar (like job cards)
-  const initial = (job.companyName || job.jobTitle)?.charAt(0)?.toUpperCase() || "J";
   const category = getJobCategory(job.jobTitle);
+  const salaryText = formatSalary(job);
+  const locationText = formatJobLocation(job);
 
   const jobDetailNavigation = () => navigate(`/job-details/${job._id}`);
   const handleApplyJob = () =>
@@ -196,21 +178,6 @@ const JobCard = ({ job, layout }) => {
       <div className="jc-accent-bar" style={{ flexShrink: 0 }} />
 
       <div className={isList ? "jc-list-layout" : "jc-grid-layout"} >
-
-        {/* ── Avatar ── */}
-        <div
-          className="jc-avatar"
-          style={{
-            width: isList ? 52 : 48,
-            height: isList ? 52 : 48,
-            fontSize: isList ? 20 : 18,
-            background: getAvatarGradient(initial),
-            marginBottom: isList ? 0 : 14,
-            boxShadow: "0 4px 12px rgba(99,102,241,0.2)",
-          }}
-        >
-          {initial}
-        </div>
 
         {/* ── Main Info ── */}
         <div style={{ flex: 1, minWidth: 0, marginBottom: isList ? 0 : 14 }}>
@@ -260,11 +227,10 @@ const JobCard = ({ job, layout }) => {
             )}
             <span className="jc-badge">
               <MdPlace style={{ color: "#6366f1", fontSize: 13 }} />
-              {job.city}, {job.country}
+              {locationText}
             </span>
             <span className="jc-badge">
-              <FaIndianRupeeSign style={{ color: "#16a34a", fontSize: 11 }} />
-              {job.salaryRange?.join(" – ")}
+              {salaryText}
             </span>
             <span className="jc-badge">
               <IoBriefcase style={{ color: "#f59e0b", fontSize: 12 }} />
@@ -302,7 +268,16 @@ const JobCard = ({ job, layout }) => {
             <span className="jc-posted-time">
               Posted {calculateTimeAgo(job.createdAt)}
             </span>
-            <button
+            <div style={{ display: "flex", gap: 6, width: "100%", alignItems: "center" }}>
+              <JobWhatsAppButton
+                phone={job.phone}
+                countryCode={job.countryCode}
+                jobTitle={job.jobTitle}
+                companyName={job.companyName}
+                size={34}
+              />
+              <JobShareButton job={job} compact iconOnly />
+              <button
               className={
                 "jc-btn jc-btn-details " +
                 "bg-gradient-to-r from-indigo-950 via-indigo-900 to-indigo-800 " +
@@ -313,10 +288,11 @@ const JobCard = ({ job, layout }) => {
               }
               aria-label="View job details"
               onClick={jobDetailNavigation}
-              style={{ width: "100%" }}
+              style={{ padding: "6px 12px", fontSize: 12, flex: "0 0 auto" }}
             >
-              Details →
+              View
             </button>
+            </div>
           </div>
         </div>
 

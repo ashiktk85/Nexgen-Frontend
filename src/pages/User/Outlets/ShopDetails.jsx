@@ -5,6 +5,9 @@ import userAxiosInstance from '@/config/axiosConfig/userAxiosInstance';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import JobCard from '@/components/User/JobCard';
+import Pagination from '@/components/ui/Pagination';
+import { JOB_GRID_PAGE_SIZE } from '@/constants/pagination';
+import { getSafePage } from '@/utils/pagination';
 import {
     MapPin, Mail, Phone, Globe, Info,
     ArrowLeft, Building2, ShieldCheck, Linkedin,
@@ -40,6 +43,7 @@ const ShopDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const user = useSelector((state) => state.user.seekerInfo);
+    const isLoggedIn = Boolean(user?.userId);
     const [shop, setShop] = useState(null);
     const [employer, setEmployer] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -117,9 +121,9 @@ const ShopDetails = () => {
         };
     }, [loading, shop]);
 
-    const JOBS_PER_PAGE = 6;
+    const JOBS_PER_PAGE = JOB_GRID_PAGE_SIZE;
     const totalJobPages = Math.max(1, Math.ceil(shopJobs.length / JOBS_PER_PAGE));
-    const safeJobsPage = Math.min(jobsPage, totalJobPages);
+    const safeJobsPage = getSafePage(jobsPage, totalJobPages);
     const jobsStartIdx = (safeJobsPage - 1) * JOBS_PER_PAGE;
     const visibleShopJobs = shopJobs.slice(jobsStartIdx, jobsStartIdx + JOBS_PER_PAGE);
 
@@ -277,7 +281,7 @@ const ShopDetails = () => {
 
                         {/* Quick contact chips */}
                         <div className="flex flex-col gap-2 flex-shrink-0">
-                            {shop.email && (
+                            {shop.email && !isLoggedIn && (
                                 <a
                                     href={`mailto:${shop.email}`}
                                     className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-violet-50 border border-violet-100 text-slate-600 text-sm font-medium hover:bg-violet-100 hover:text-slate-900 transition-all no-underline whitespace-nowrap"
@@ -404,7 +408,7 @@ const ShopDetails = () => {
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-3">
-                                    {shop.email && (
+                                    {shop.email && !isLoggedIn && (
                                         <div className="flex items-center gap-3 p-3 rounded-xl bg-violet-50 border border-violet-100">
                                             <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center flex-shrink-0">
                                                 <Mail size={15} className="text-violet-600" />
@@ -472,38 +476,12 @@ const ShopDetails = () => {
                                 </div>
 
                                 {shopJobs.length > JOBS_PER_PAGE && (
-                                    <div className="flex items-center justify-center gap-2 mt-6">
-                                        <button
-                                            onClick={() => setJobsPage((p) => Math.max(1, p - 1))}
-                                            disabled={safeJobsPage === 1}
-                                            className="px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold text-slate-600 disabled:text-slate-300 disabled:border-slate-100 disabled:cursor-not-allowed bg-white hover:bg-slate-50 transition-colors"
-                                        >
-                                            Prev
-                                        </button>
-                                        {Array.from({ length: totalJobPages }).map((_, idx) => {
-                                            const page = idx + 1;
-                                            const isActive = page === safeJobsPage;
-                                            return (
-                                                <button
-                                                    key={page}
-                                                    onClick={() => setJobsPage(page)}
-                                                    className={`w-8 h-8 rounded-lg text-xs font-semibold ${
-                                                        isActive
-                                                            ? "bg-gradient-to-r from-violet-600 to-indigo-500 text-white shadow-md border-none"
-                                                            : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-                                                    }`}
-                                                >
-                                                    {page}
-                                                </button>
-                                            );
-                                        })}
-                                        <button
-                                            onClick={() => setJobsPage((p) => Math.min(totalJobPages, p + 1))}
-                                            disabled={safeJobsPage === totalJobPages}
-                                            className="px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold text-slate-600 disabled:text-slate-300 disabled:border-slate-100 disabled:cursor-not-allowed bg-white hover:bg-slate-50 transition-colors"
-                                        >
-                                            Next
-                                        </button>
+                                    <div className="mt-6">
+                                        <Pagination
+                                            currentPage={safeJobsPage}
+                                            totalPages={totalJobPages}
+                                            onPageChange={setJobsPage}
+                                        />
                                     </div>
                                 )}
                             </>

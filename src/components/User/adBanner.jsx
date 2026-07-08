@@ -60,7 +60,7 @@ export default function AdBannerCarousel({
     <div className="relative w-full overflow-hidden">
       <div
         ref={carouselRef}
-        className="relative overflow-hidden w-full aspect-[16/9] sm:aspect-[4/1] max-h-[420px] sm:max-h-[300px]"
+        className="relative overflow-hidden w-full aspect-[2.2/1] sm:aspect-[4/1] max-h-[220px] sm:max-h-[300px]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

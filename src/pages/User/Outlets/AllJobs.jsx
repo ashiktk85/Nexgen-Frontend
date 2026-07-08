@@ -10,7 +10,10 @@ import JobCard from "@/components/User/JobCard";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { useSelector } from "react-redux";
 import { Helmet } from "react-helmet-async";
-import { KERALA_DISTRICTS } from "@/constants/options";
+import { Country, State, City } from "country-state-city";
+import { getCountryName, getStateName } from "@/utils/formatLocation";
+import Pagination from "@/components/ui/Pagination";
+import { JOB_GRID_PAGE_SIZE } from "@/constants/pagination";
 
 /* ─── Google Fonts ─── */
 if (!document.getElementById("ajp-font-link")) {
@@ -113,6 +116,10 @@ const globalStyle = `
   .tf-close-btn { background:none; border:none; color:#64748b; cursor:pointer; display:flex; align-items:center; padding:4px; border-radius:6px; }
   .tf-close-btn:hover { background:#dde6f0; color:#121A2D; }
   .tf-count { background:#0950a0; color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px; min-width:18px; text-align:center; }
+  .tf-field-label { display:block; font-size:11px; font-weight:600; color:#64748b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.06em; }
+  .tf-select { width:100%; padding:8px 10px; border:1.5px solid #c5d0dc; border-radius:8px; font-size:13px; background:#fff; margin-bottom:10px; font-family:'DM Sans',sans-serif; color:#334155; }
+  .tf-select:focus { outline:none; border-color:#0950a0; box-shadow:0 0 0 2px rgba(9,80,160,0.12); }
+  .tf-select:disabled { opacity:0.55; cursor:not-allowed; }
 
   /* Drawer */
   .ajp-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.45); z-index:40; backdrop-filter:blur(2px); }
@@ -135,8 +142,14 @@ const globalStyle = `
   .ajp-results-badge { display:flex; align-items:center; background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:10px 16px; gap:6px; white-space:nowrap; box-shadow:0 2px 8px rgba(0,0,0,0.04); flex-shrink:0; }
   .ajp-view-toggle { display:flex; background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.04); flex-shrink:0; }
 
-  /* Jobs grid — wider tiles */
-  .ajp-jobs-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap:20px; width:100%; min-width:0; }
+  /* Jobs grid — 3 columns on desktop = 4 rows per page (12 jobs) */
+  .ajp-jobs-grid { display:grid; grid-template-columns:repeat(1, minmax(0, 1fr)); gap:20px; width:100%; min-width:0; }
+  @media (min-width:640px) {
+    .ajp-jobs-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width:960px) {
+    .ajp-jobs-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+  }
 
   /* Pagination */
   .ajp-pagination { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:28px; flex-wrap:wrap; }
@@ -145,7 +158,7 @@ const globalStyle = `
   @media (max-width:900px) {
     .ajp-sidebar { display:none; }
     .ajp-filter-toggle { display:inline-flex; }
-    .ajp-jobs-grid { grid-template-columns:repeat(auto-fill, minmax(min(240px,100%), 1fr)); }
+    .ajp-jobs-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
   }
 
   /* Mobile */
@@ -234,9 +247,81 @@ const CollapsibleSection = ({ label, defaultOpen = true, children }) => {
   );
 };
 
+const LocationFilter = ({
+  filterCountry,
+  setFilterCountry,
+  filterState,
+  setFilterState,
+  filterCity,
+  setFilterCity,
+}) => {
+  const countries = useMemo(() => Country.getAllCountries(), []);
+  const states = useMemo(
+    () => (filterCountry ? State.getStatesOfCountry(filterCountry) : []),
+    [filterCountry]
+  );
+  const cities = useMemo(
+    () => (filterCountry && filterState ? City.getCitiesOfState(filterCountry, filterState) : []),
+    [filterCountry, filterState]
+  );
+
+  return (
+    <div>
+      <label className="tf-field-label">Country</label>
+      <select
+        className="tf-select"
+        value={filterCountry}
+        onChange={(e) => {
+          setFilterCountry(e.target.value);
+          setFilterState("");
+          setFilterCity("");
+        }}
+      >
+        <option value="">All countries</option>
+        {countries.map((c) => (
+          <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
+        ))}
+      </select>
+
+      <label className="tf-field-label">State / Province</label>
+      <select
+        className="tf-select"
+        value={filterState}
+        disabled={!filterCountry}
+        onChange={(e) => {
+          setFilterState(e.target.value);
+          setFilterCity("");
+        }}
+      >
+        <option value="">All states</option>
+        {states.map((s) => (
+          <option key={s.isoCode} value={s.isoCode}>{s.name}</option>
+        ))}
+      </select>
+
+      <label className="tf-field-label">City</label>
+      <select
+        className="tf-select"
+        value={filterCity}
+        disabled={!filterState}
+        onChange={(e) => setFilterCity(e.target.value)}
+      >
+        <option value="">All cities</option>
+        {cities.map((c) => (
+          <option key={c.name} value={c.name}>{c.name}</option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
 const FilterPanel = ({
-  searchLocation,
-  setSearchLocation,
+  filterCountry,
+  setFilterCountry,
+  filterState,
+  setFilterState,
+  filterCity,
+  setFilterCity,
   experienceLevels,
   setExperienceLevels,
   timeRange,
@@ -244,11 +329,7 @@ const FilterPanel = ({
   activeFiltersCount,
   clearAll,
   onClose,
-  onToggleLocation,
 }) => {
-  const toggleLocation = onToggleLocation || ((district) => {
-    setSearchLocation((prev) => (prev === district ? "" : district));
-  });
 
   const toggleExperience = (level) => {
     setExperienceLevels((prev) => (prev.includes(level) ? prev.filter((v) => v !== level) : [...prev, level]));
@@ -271,10 +352,13 @@ const FilterPanel = ({
 
       <div className="tf-body">
         <CollapsibleSection label="Location" defaultOpen>
-          <CheckboxGroup
-            options={KERALA_DISTRICTS.map((d) => ({ id: d, label: d }))}
-            selected={searchLocation ? [searchLocation] : []}
-            onToggle={toggleLocation}
+          <LocationFilter
+            filterCountry={filterCountry}
+            setFilterCountry={setFilterCountry}
+            filterState={filterState}
+            setFilterState={setFilterState}
+            filterCity={filterCity}
+            setFilterCity={setFilterCity}
           />
         </CollapsibleSection>
 
@@ -305,11 +389,10 @@ const FilterPanel = ({
 
 const AllJobsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialLocation = searchParams.get("location") || "";
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchLocation, setSearchLocation] = useState(
-    KERALA_DISTRICTS.includes(initialLocation) ? initialLocation : ""
-  );
+  const [filterCountry, setFilterCountry] = useState(searchParams.get("country") || "");
+  const [filterState, setFilterState] = useState(searchParams.get("state") || "");
+  const [filterCity, setFilterCity] = useState(searchParams.get("city") || "");
   const [jobs, setJobs] = useState([]);
   const [experienceLevels, setExperienceLevels] = useState([]);
   const [timeRange, setTimeRange] = useState("");
@@ -320,7 +403,7 @@ const AllJobsPage = () => {
   const { searchInput } = location.state || {};
   const user = useSelector((state) => state.user.seekerInfo);
   const [currentPage, setCurrentPage] = useState(1);
-  const jobsPerPage = 6;
+  const jobsPerPage = JOB_GRID_PAGE_SIZE;
   const [serverTotalPages, setServerTotalPages] = useState(1);
   const skipLocationFetch = useRef(true);
 
@@ -354,7 +437,7 @@ const AllJobsPage = () => {
     }
     setCurrentPage(1);
     fetchJobs({ page: 1 });
-  }, [searchLocation]);
+  }, [filterCountry, filterState, filterCity]);
 
   const fetchJobs = async ({ page = 1, searchOverride } = {}) => {
     try {
@@ -365,7 +448,9 @@ const AllJobsPage = () => {
           page,
           limit: jobsPerPage,
           search: (searchOverride ?? searchTerm)?.trim() || undefined,
-          city: searchLocation || undefined,
+          country: filterCountry || undefined,
+          state: filterState || undefined,
+          city: filterCity || undefined,
         },
       });
       const serverJobs = data?.jobs || data?.jobPosts || [];
@@ -377,38 +462,43 @@ const AllJobsPage = () => {
   };
 
   const clearAll = () => {
-    setSearchLocation("");
+    setFilterCountry("");
+    setFilterState("");
+    setFilterCity("");
     setExperienceLevels([]);
     setTimeRange("");
     setCurrentPage(1);
-    const params = new URLSearchParams(searchParams);
-    params.delete("location");
-    setSearchParams(params, { replace: true });
+    setSearchParams({}, { replace: true });
     fetchJobs({ page: 1 });
   };
   const clearSearchTerm = () => { setSearchTerm(""); setCurrentPage(1); fetchJobs({ page: 1, searchOverride: "" }); };
 
-  const handleLocationChange = (district) => {
-    const newLoc = searchLocation === district ? "" : district;
-    setSearchLocation(newLoc);
-    const params = new URLSearchParams(searchParams);
-    if (newLoc) params.set("location", newLoc);
-    else params.delete("location");
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filterCountry) params.set("country", filterCountry);
+    if (filterState) params.set("state", filterState);
+    if (filterCity) params.set("city", filterCity);
     setSearchParams(params, { replace: true });
-  };
+  }, [filterCountry, filterState, filterCity, setSearchParams]);
 
-  const pageTitle = searchLocation
-    ? `Mobile Repair Jobs in ${searchLocation}, Kerala | TechPath`
-    : "Mobile Phone Repair Jobs in Kerala | TechPath Job Board";
-  const pageDescription = searchLocation
-    ? `Browse mobile repair jobs in ${searchLocation}, Kerala. Find chip-level technician, Android repair, iPhone repair, software, and management positions on TechPath.`
-    : "Browse mobile repair jobs in Kerala. Find chip-level technician, Android repair, iPhone repair, software, and management positions. Filter by location, job type, experience level.";
-  const pageCanonical = searchLocation
-    ? `https://www.techpath.in/all-jobs?location=${encodeURIComponent(searchLocation)}`
+  const locationLabel = [filterCity, getStateName(filterCountry, filterState), getCountryName(filterCountry)]
+    .filter(Boolean)
+    .join(", ");
+
+  const pageTitle = locationLabel
+    ? `Mobile Repair Jobs in ${locationLabel} | TechPath`
+    : "Mobile Phone Repair Jobs Worldwide | TechPath Job Board";
+  const pageDescription = locationLabel
+    ? `Browse mobile repair jobs in ${locationLabel}. Find chip-level technician, Android repair, iPhone repair, software, and management positions on TechPath.`
+    : "Browse mobile repair jobs worldwide. Find chip-level technician, Android repair, iPhone repair, software, and management positions. Filter by country, state, city, job type, and experience level.";
+  const pageCanonical = locationLabel
+    ? `https://www.techpath.in/all-jobs?${new URLSearchParams({ ...(filterCountry && { country: filterCountry }), ...(filterState && { state: filterState }), ...(filterCity && { city: filterCity }) }).toString()}`
     : "https://www.techpath.in/all-jobs";
 
   const activeFiltersCount =
-    (searchLocation ? 1 : 0) +
+    (filterCountry ? 1 : 0) +
+    (filterState ? 1 : 0) +
+    (filterCity ? 1 : 0) +
     experienceLevels.length +
     (timeRange ? 1 : 0);
 
@@ -422,15 +512,18 @@ const AllJobsPage = () => {
   const totalPages = serverTotalPages;
 
   const filterProps = {
-    searchLocation,
-    setSearchLocation,
+    filterCountry,
+    setFilterCountry,
+    filterState,
+    setFilterState,
+    filterCity,
+    setFilterCity,
     experienceLevels,
     setExperienceLevels,
     timeRange,
     setTimeRange,
     activeFiltersCount,
     clearAll,
-    onToggleLocation: handleLocationChange,
   };
 
   return (
@@ -459,7 +552,7 @@ const AllJobsPage = () => {
             <motion.div initial={{ opacity:0,y:-10 }} animate={{ opacity:1,y:0 }} transition={{ duration:0.5 }}>
               <p style={{ color:"#a5b4fc", fontSize:13, fontWeight:500, marginBottom:6, letterSpacing:"0.05em", textTransform:"uppercase" }}>Discover opportunities</p>
               <h1 style={{ color:"#fff", fontSize:"clamp(20px,4vw,32px)", fontWeight:800, margin:0, letterSpacing:"-0.02em" }}>
-                Mobile Repair Jobs Available in {searchLocation || "Kerala"}
+                Mobile Repair Jobs{locationLabel ? ` in ${locationLabel}` : " Worldwide"}
               </h1>
               <p style={{ color:"#c7d2fe", fontSize:14, marginTop:8, fontWeight:400 }}>
                 {timeFilteredJobs.length} positions available — Chip-level, Android, iPhone, &amp; Management Roles
@@ -575,23 +668,13 @@ const AllJobsPage = () => {
                   </motion.div>
                   {totalPages > 1 && (
                     <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.3}} className="ajp-pagination">
-                      <button className="page-btn" disabled={currentPage===1} onClick={()=>setCurrentPage(p=>p-1)}
-                        style={{ padding:"8px 16px", borderRadius:10, border:"1.5px solid #e2e8f0", background:currentPage===1?"#f8fafc":"#fff", color:currentPage===1?"#cbd5e1":"#4f46e5", fontWeight:600, fontSize:14, cursor:currentPage===1?"not-allowed":"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-                        ← Prev
-                      </button>
-                      {[...Array(totalPages)].map((_,i) => {
-                        const page=i+1, isActive=currentPage===page;
-                        return (
-                          <button key={i} data-num={page} className="page-btn" onClick={()=>setCurrentPage(page)}
-                            style={{ width:38, height:38, borderRadius:10, cursor:"pointer", border:isActive?"none":"1.5px solid #e2e8f0", background:isActive?"linear-gradient(135deg,#4f46e5,#6366f1)":"#fff", color:isActive?"#fff":"#475569", fontWeight:isActive?700:500, fontSize:14, boxShadow:isActive?"0 4px 12px rgba(99,102,241,0.3)":"none", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-                            {page}
-                          </button>
-                        );
-                      })}
-                      <button className="page-btn" disabled={currentPage===totalPages} onClick={()=>setCurrentPage(p=>p+1)}
-                        style={{ padding:"8px 16px", borderRadius:10, border:"1.5px solid #e2e8f0", background:currentPage===totalPages?"#f8fafc":"#fff", color:currentPage===totalPages?"#cbd5e1":"#4f46e5", fontWeight:600, fontSize:14, cursor:currentPage===totalPages?"not-allowed":"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-                        Next →
-                      </button>
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        prevLabel="← Prev"
+                        nextLabel="Next →"
+                      />
                     </motion.div>
                   )}
                 </>

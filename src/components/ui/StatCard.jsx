@@ -1,13 +1,17 @@
 import React from "react";
 
-const StatCard = ({ icon, value, label, gradient, shadow }) => {
+const StatCard = ({ icon, value, label, gradient, shadow, onClick }) => {
     return (
         <div
-            className="ejl-stat-card relative p-4 rounded-[14px] overflow-hidden transition-all duration-300 hover:-translate-y-1"
+            className={`ejl-stat-card relative p-4 rounded-[14px] overflow-hidden transition-all duration-300 hover:-translate-y-1 ${onClick ? "cursor-pointer" : ""}`}
             style={{
                 background: gradient,
                 boxShadow: shadow || "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
             }}
+            onClick={onClick}
+            onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") onClick(e); } : undefined}
+            role={onClick ? "button" : undefined}
+            tabIndex={onClick ? 0 : undefined}
         >
             {/* Background blobs */}
             <div
@@ -25,14 +29,14 @@ const StatCard = ({ icon, value, label, gradient, shadow }) => {
                     {icon}
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
                      {/* Value */}
                 <p className="text-[22px] font-extrabold text-white m-0 pb-[2px] leading-none font-sans">
                     {value}
                 </p>
 
                 {/* Label */}
-                <p className="text-md font-semibold text-white m-0">
+                <p className="text-sm sm:text-md font-semibold text-white m-0 leading-snug">
                     {label}
                 </p>
                 </div>

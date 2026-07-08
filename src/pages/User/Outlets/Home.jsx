@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  Search,
   ArrowForward,
   CheckCircleOutline,
   Facebook,
@@ -23,6 +22,7 @@ import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { motion, useReducedMotion } from "framer-motion";
 import { useSelector } from "react-redux";
 import AdBannerCarousel from "@/components/User/adBanner";
+import MobileBanner from "@/components/User/MobileBanner";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 import { Helmet } from "react-helmet-async";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
@@ -103,14 +103,8 @@ const reducedMotionFadeVariants = {
 export default function Home() {
   const [jobs, setJobs] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [showSearchResults, setShowSearchResults] = useState(false);
-  const searchDebounceRef = useRef(null);
   const user = useSelector((state) => state.user.seekerInfo);
   const [adBanners, setAdBanners] = useState([]);
-  const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
   const fadeUp = reduceMotion ? reducedMotionFadeVariants : scrollFadeUpVariants;
   const fadeLeft = reduceMotion ? reducedMotionFadeVariants : scrollFadeLeftVariants;
@@ -144,67 +138,6 @@ export default function Home() {
       setAdBanners([]);
     }
   };
-
-  const runSearch = useCallback(
-    async (query) => {
-      const trimmed = query.trim();
-      if (!trimmed) {
-        setSearchResults([]);
-        setShowSearchResults(false);
-        return;
-      }
-
-      setSearchLoading(true);
-      setShowSearchResults(true);
-      try {
-        const { data } = await userAxiosInstance.get("/getJobPosts", {
-          params: {
-            userId: user?.userId,
-            page: 1,
-            limit: 10,
-            search: trimmed,
-          },
-        });
-        setSearchResults(data?.jobs || data?.jobPosts || []);
-      } catch (error) {
-        console.error("Hero search failed:", error);
-        setSearchResults([]);
-      } finally {
-        setSearchLoading(false);
-      }
-    },
-    [user?.userId]
-  );
-
-  const handleSearch = (e) => {
-    if (e.key === "Enter" || e.type === "click") {
-      e.preventDefault?.();
-      runSearch(searchTerm);
-    }
-  };
-
-  const handleJobSelect = (jobId) => {
-    setShowSearchResults(false);
-    navigate(`/job-details/${jobId}`);
-  };
-
-  useEffect(() => {
-    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-
-    if (!searchTerm.trim()) {
-      setSearchResults([]);
-      setShowSearchResults(false);
-      return;
-    }
-
-    searchDebounceRef.current = setTimeout(() => {
-      runSearch(searchTerm);
-    }, 400);
-
-    return () => {
-      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-    };
-  }, [searchTerm, runSearch]);
 
   const fetchJobs = async () => {
     setInitialLoading(true);
@@ -307,72 +240,13 @@ export default function Home() {
                 iPhone, and service experts.
               </motion.p>
 
-              <motion.div variants={heroItemVariants} className="bg-white p-2 rounded-xl shadow-2xl flex flex-col md:flex-row gap-2 mb-12 relative">
-                <div className="flex-1 flex items-center px-4 gap-3 min-w-0">
-                  <Search className="text-[#727784] flex-shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Search mobile repair jobs, Android, iPhone, chip-level technician, Kerala..."
-                    className="w-full border-none focus:ring-0 text-[#424752] bg-transparent py-4 text-sm outline-none"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyDown={handleSearch}
-                    onFocus={() => {
-                      if (searchTerm.trim() && searchResults.length) setShowSearchResults(true);
-                    }}
-                    aria-label="Search jobs"
-                    aria-expanded={showSearchResults}
-                    aria-controls="hero-search-results"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSearch}
-                  className="bg-[#0058be] text-white px-8 md:px-10 py-4 rounded-lg font-semibold text-sm hover:shadow-lg transition-all active:scale-[0.98]"
+              <motion.div variants={heroItemVariants} className="flex flex-col sm:flex-row gap-3 mb-12">
+                <Link
+                  to="/all-jobs"
+                  className="inline-flex items-center justify-center gap-2 bg-[#0058be] text-white px-8 py-4 rounded-lg font-semibold text-sm hover:shadow-lg transition-all active:scale-[0.98]"
                 >
-                  Search
-                </button>
-
-                {showSearchResults && (
-                  <div
-                    id="hero-search-results"
-                    className="absolute left-0 right-0 top-full mt-2 rounded-xl bg-white shadow-2xl border border-[#E2E8F0] text-left overflow-hidden z-20"
-                  >
-                    {searchLoading ? (
-                      <div className="px-4 py-6 text-center text-sm text-slate-500">Searching jobs...</div>
-                    ) : searchResults.length > 0 ? (
-                      <ul className="max-h-72 overflow-y-auto divide-y divide-slate-100">
-                        {searchResults.map((job) => (
-                          <li key={job._id}>
-                            <button
-                              type="button"
-                              onClick={() => handleJobSelect(job._id)}
-                              className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors"
-                            >
-                              <p className="text-sm font-semibold text-slate-900 line-clamp-1">{job.jobTitle}</p>
-                              <p className="text-xs font-medium text-[#0058be] mt-0.5 line-clamp-1">{job.companyName}</p>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="px-4 py-6 text-center text-sm text-slate-500">
-                        No jobs found for &quot;{searchTerm.trim()}&quot;
-                      </div>
-                    )}
-                    {!searchLoading && searchResults.length > 0 && (
-                      <div className="px-4 py-2 border-t border-slate-100 bg-slate-50">
-                        <button
-                          type="button"
-                          onClick={() => navigate("/all-jobs", { state: { searchInput: searchTerm.trim() } })}
-                          className="text-xs font-semibold text-[#003f87] hover:underline"
-                        >
-                          View all results on job board →
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  Browse Jobs <ArrowForward fontSize="small" />
+                </Link>
               </motion.div>
 
               {Object.keys(user).length < 1 && (
@@ -448,6 +322,10 @@ export default function Home() {
           </motion.div>
         </section>
 
+        {adBanners.length > 0 && (
+          <MobileBanner banners={adBanners} className="md:hidden" />
+        )}
+
         {/* Featured Jobs */}
         <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#f1f3ff] overflow-x-hidden w-full">
           <div className="max-w-[1280px] mx-auto">
@@ -493,17 +371,6 @@ export default function Home() {
               </motion.div>
             )}
 
-            {adBanners.length > 0 && (
-              <motion.div
-                className="mt-10 md:hidden"
-                initial="hidden"
-                whileInView="visible"
-                viewport={viewportOnce}
-                variants={fadeUp}
-              >
-                <AdBannerCarousel banners={adBanners} autoSlideInterval={5000} />
-              </motion.div>
-            )}
           </div>
         </section>
 
@@ -552,7 +419,7 @@ export default function Home() {
                   <p className="font-semibold text-[#141b2b] text-sm">Verified Expert</p>
                 </div>
                 <p className="text-sm text-[#424752] italic">
-                  &quot;Found my current role within 2 weeks. The matching was incredibly accurate.&quot;
+                  &quot;Found a chip-level repair role in Ernakulam within two weeks — right here on TechPath.&quot;
                 </p>
               </motion.div>
             </motion.div>
@@ -566,14 +433,14 @@ export default function Home() {
               <span className="text-[#003f87] text-xs font-bold tracking-widest uppercase mb-4 block">For Talent</span>
               <h2 className="text-2xl sm:text-3xl font-semibold text-[#141b2b] mb-6">For Job Seekers</h2>
               <p className="text-lg text-[#424752] mb-10">
-                Discover your next career move with our extensive job listings
-                and personalized recommendations.
+                Discover mobile repair careers across Kerala — browse listings,
+                build your technician profile, and apply to verified shops and service centers.
               </p>
               <ul className="space-y-6 mb-12">
                 {[
-                  "Access thousands of job listings",
-                  "Create a standout profile",
-                  "Get personalized job recommendations",
+                  "Browse chip-level, Android, and iPhone repair jobs",
+                  "Create a profile with resume, education, and experience",
+                  "Filter by Kerala district, skill, and experience level",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-4">
                     <span className="text-[#003f87] bg-[#003f87]/10 p-1 rounded-full flex items-center">
@@ -606,14 +473,14 @@ export default function Home() {
               <span className="text-[#0058be] text-xs font-bold tracking-widest uppercase mb-4 block">For Growth</span>
               <h2 className="text-2xl sm:text-3xl font-semibold text-[#141b2b] mb-6">For Employers</h2>
               <p className="text-lg text-[#424752] mb-10">
-                Find the perfect candidates quickly and efficiently with our
-                advanced recruiting tools.
+                Hire qualified mobile technicians with job posts, shop profiles,
+                and application tools built for Kerala&apos;s repair industry.
               </p>
               <ul className="space-y-6 mb-12">
                 {[
-                  "Post jobs and manage applications",
-                  "Search our extensive candidate database",
-                  "Use AI-powered matching technology",
+                  "Post jobs and manage applications in one place",
+                  "Showcase your repair shop with location and contact details",
+                  "Schedule go-live dates and reach interested technicians",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-4">
                     <span className="text-[#0058be] bg-[#0058be]/10 p-1 rounded-full flex items-center">
@@ -703,9 +570,9 @@ export default function Home() {
               {
                 icon: <Psychology className="!text-3xl" />,
                 color: "bg-[#0058be]",
-                title: "Skill-based matching by repair specialty",
+                title: "Skill-based search by repair specialty",
                 description:
-                  "Get matched to roles by repair expertise — chip-level, Android and iPhone servicing, software, sales, or service center management. Filter by Kerala location, experience level, and job type for personalized recommendations and faster hiring.",
+                  "Find roles by repair specialty — chip-level, Android and iPhone servicing, software, sales, or service center management. Filter by Kerala location, experience level, and job type to connect with the right opportunities faster.",
               },
               {
                 icon: <LocationOn className="!text-3xl" />,
@@ -816,7 +683,7 @@ export default function Home() {
         <div className="border-t border-[#c2c6d4]/30 py-8 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-[#424752]">© Techpath. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
-            <a href="/terms" className="text-[#424752] hover:text-[#003f87] transition-colors">Terms of Service</a>
+            <a href="/terms" className="text-[#424752] hover:text-[#003f87] transition-colors">Terms &amp; Conditions</a>
             <a href="/privacy" className="text-[#424752] hover:text-[#003f87] transition-colors">Privacy Policy</a>
             <a href="#" className="text-[#424752] hover:text-[#003f87] transition-colors">Cookie Settings</a>
             <a href="#" className="text-[#424752] hover:text-[#003f87] transition-colors">Accessibility</a>

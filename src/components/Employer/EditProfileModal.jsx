@@ -37,8 +37,11 @@ const EditProfileModal = ({ employer = {}, open, close, onSave }) => {
           transform: "translate(-50%, -50%)",
           bgcolor: "background.paper",
           boxShadow: 24,
-          width: 400,
-          p: 4,
+          width: { xs: "92vw", sm: 400 },
+          maxWidth: "95vw",
+          maxHeight: "90vh",
+          overflowY: "auto",
+          p: { xs: 3, sm: 4 },
         }}
       >
         <IconButton

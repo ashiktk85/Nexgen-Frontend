@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { TextField, Autocomplete, Box, Slider } from "@mui/material";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { TextField, Autocomplete, Box, Slider, createFilterOptions } from "@mui/material";
 import { Country, State, City } from "country-state-city";
 import { useFormik } from "formik";
 import validateJobForm from "@/Validations/CreateJob-validation";
 import { employerJobCreation, employerJobUpdate, getCompanyById } from "@/apiServices/userApi";
-import { getActiveJobTitles } from "@/apiServices/employerApi";
+import { getActiveJobTitles, getCustomCities, saveCustomCity } from "@/apiServices/employerApi";
 import {
   createJobPostAdmin,
+  updateJobPostAdmin,
   getActiveJobTitlesAdmin,
+  getCustomCitiesAdmin,
+  saveCustomCityAdmin,
 } from "@/apiServices/adminApi";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import { toast } from "sonner";
@@ -103,6 +106,20 @@ if (!document.getElementById("cjf-styles")) {
     .cjf-root .MuiSlider-root { color:#6366f1 !important; }
     .cjf-root .MuiSlider-thumb { box-shadow:0 0 0 6px rgba(99,102,241,.16) !important; }
     .cjf-root .MuiSlider-rail { background:#e2e8f0 !important; }
+
+    .cjf-grid-2 { display:grid; grid-template-columns:1fr; gap:24px; }
+    @media (min-width:768px) { .cjf-grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    .cjf-grid-auto { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr)); gap:16px; }
+    .cjf-grid-auto-wide { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:16px; }
+    .cjf-form-actions { display:flex; flex-direction:column-reverse; gap:10px; align-items:stretch; }
+    @media (min-width:640px) {
+      .cjf-form-actions { flex-direction:row; justify-content:flex-end; align-items:center; }
+    }
+    @media (max-width:639px) {
+      .cjf-root { padding:12px 12px 32px !important; }
+      .cjf-section { padding:16px; }
+      .cjf-form-actions button, .cjf-submit-btn { width:100%; justify-content:center; }
+    }
   `;
   document.head.appendChild(s);
 }
@@ -129,6 +146,12 @@ const FE = ({ msg }) => msg ? (
   <p className="cjf-error"><X size={11} />{msg}</p>
 ) : null;
 
+import { parseSalaryFromJob } from "@/utils/formatSalary";
+
+const cityFilter = createFilterOptions({ stringify: (option) => (typeof option === "string" ? option : option?.name || "") });
+
+const getCityLabel = (option) => (typeof option === "string" ? option : option?.name || "");
+
 /* ══════════════════════════════════════════════ */
 function CreateJobForm({
   selectedData = null,
@@ -143,6 +166,7 @@ function CreateJobForm({
   const activeEmployerName = isAdminMode ? null : Employer?.name;
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
+  const [customCities, setCustomCities] = useState([]);
   const [selectedRequirements, setSelectedRequirements] = useState(selectedData?.requirements || []);
   const [availableRequirements, setAvailableRequirements] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -212,10 +236,12 @@ function CreateJobForm({
       email: selectedData?.email || "",
       phone: selectedData?.phone || "",
       countryCode: "+91",
-      country: "IN",
-      salaryFrom: selectedData?.salaryRange?.[0] || 0,
-      salaryTo: selectedData?.salaryRange?.[1] || 0,
-      state: selectedData?.state ?? "KL",
+      country: selectedData?.country || "",
+      ...(() => {
+        const { from, to } = parseSalaryFromJob(selectedData);
+        return { salaryFrom: from, salaryTo: to };
+      })(),
+      state: selectedData?.state || null,
       city: selectedData?.city || null,
       experienceRequired: [
         selectedData?.experienceRequired?.[0] ?? 0,
@@ -225,6 +251,22 @@ function CreateJobForm({
       requirements: selectedData?.requirements || [],
       companyId: selectedData?.companyId || "",
       shopName: selectedData?.companyName || "",
+
+      // Job post form improvements
+      roomAvailable: selectedData?.roomAvailable ?? "",
+      foodAvailable: selectedData?.foodAvailable ?? "",
+      incentive: selectedData?.incentive ?? "",
+      workingTime: selectedData?.workingTime ?? "",
+      workingDays: selectedData?.workingDays ?? "",
+      holiday: selectedData?.holiday ?? "",
+      probationPeriod: selectedData?.probationPeriod ?? "",
+
+      scheduledLiveAt: selectedData?.scheduledLiveAt
+        ? new Date(selectedData.scheduledLiveAt).toISOString().slice(0, 16)
+        : "",
+      expiresAt: selectedData?.expiresAt
+        ? new Date(selectedData.expiresAt).toISOString().slice(0, 16)
+        : "",
     },
     enableReinitialize: true,
     validationSchema: validateJobForm,
@@ -234,14 +276,33 @@ function CreateJobForm({
         return;
       }
       try {
+        const payload = {
+          ...values,
+          // Dropdown fields: convert empty string to `null` for backend enum/null handling
+          roomAvailable: values.roomAvailable || null,
+          foodAvailable: values.foodAvailable || null,
+          incentive: values.incentive || null,
+          workingTime: values.workingTime || null,
+          workingDays: values.workingDays || null,
+          holiday: values.holiday || null,
+          probationPeriod: values.probationPeriod || null,
+          scheduledLiveAt: values.scheduledLiveAt
+            ? new Date(values.scheduledLiveAt).toISOString()
+            : null,
+          expiresAt: values.expiresAt
+            ? new Date(values.expiresAt).toISOString()
+            : null,
+        };
         let status;
         if (page === "create") {
           status = isAdminMode
-            ? await createJobPostAdmin(values)
-            : await employerJobCreation(values, activeEmployerId);
+            ? await createJobPostAdmin(payload)
+            : await employerJobCreation(payload, activeEmployerId);
         } else {
-          values._id = selectedData?._id;
-          status = await employerJobUpdate(values, activeEmployerId);
+          payload._id = selectedData?._id;
+          status = isAdminMode
+            ? await updateJobPostAdmin(selectedData?._id, payload)
+            : await employerJobUpdate(payload, activeEmployerId);
         }
         const success = isAdminMode ? status?.data?.status : status;
         if (success) {
@@ -276,9 +337,72 @@ function CreateJobForm({
     else setCities([]);
   }, [formik.values.state, formik.values.country]);
 
+  useEffect(() => {
+    const loadCustomCities = async () => {
+      if (!formik.values.state) {
+        setCustomCities([]);
+        return;
+      }
+      try {
+        const fetchFn = isAdminMode ? getCustomCitiesAdmin : getCustomCities;
+        const list = await fetchFn({
+          state: formik.values.state,
+          country: formik.values.country,
+        });
+        setCustomCities(list || []);
+      } catch (err) {
+        console.error("Error fetching custom cities:", err);
+      }
+    };
+    loadCustomCities();
+  }, [formik.values.state, formik.values.country, isAdminMode]);
+
+  const cityOptions = useMemo(() => {
+    const seen = new Set();
+    const merged = [];
+    const addCity = (name, isCustom = false) => {
+      const key = name.toLowerCase();
+      if (!name || seen.has(key)) return;
+      seen.add(key);
+      merged.push({ name, isCustom });
+    };
+    cities.forEach((c) => addCity(c.name, false));
+    customCities.forEach((c) => addCity(c.name, true));
+    if (formik.values.city) addCity(formik.values.city.trim(), true);
+    return merged.sort((a, b) => a.name.localeCompare(b.name));
+  }, [cities, customCities, formik.values.city]);
+
+  const persistCustomCity = useCallback(async (cityName) => {
+    const trimmed = cityName?.trim();
+    if (!trimmed || !formik.values.state) return;
+
+    const exists =
+      cities.some((c) => c.name.toLowerCase() === trimmed.toLowerCase()) ||
+      customCities.some((c) => c.name.toLowerCase() === trimmed.toLowerCase());
+    if (exists) return;
+
+    try {
+      const saveFn = isAdminMode ? saveCustomCityAdmin : saveCustomCity;
+      const saved = await saveFn({
+        name: trimmed,
+        state: formik.values.state,
+        country: formik.values.country,
+      });
+      if (saved) {
+        setCustomCities((prev) => {
+          if (prev.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) return prev;
+          return [...prev, saved];
+        });
+      }
+    } catch (err) {
+      console.error("Failed to save custom city:", err);
+    }
+  }, [cities, customCities, formik.values.state, formik.values.country, isAdminMode]);
+
   const handleJobTitleChange = (_, newValue) => {
     const title = newValue?.title || "";
     formik.setFieldValue("jobTitle", title);
+    formik.setFieldTouched("jobTitle", true, false);
     if (newValue) {
       setAvailableRequirements(newValue.requirements || []);
       setSelectedRequirements([]);
@@ -286,6 +410,53 @@ function CreateJobForm({
       setAvailableRequirements([]);
       setSelectedRequirements([]);
     }
+  };
+
+  const handleCityChange = async (_, value) => {
+    const cityName = typeof value === "string" ? value.trim() : value?.name?.trim() || "";
+    formik.setFieldValue("city", cityName || null);
+    formik.setFieldTouched("city", true, false);
+    if (cityName) await persistCustomCity(cityName);
+  };
+
+  const filterCityOptions = (options, params) => {
+    const filtered = cityFilter(options, params);
+    const input = params.inputValue.trim();
+    if (input && !options.some((o) => getCityLabel(o).toLowerCase() === input.toLowerCase())) {
+      filtered.push({ name: input, isCustom: true, isNew: true });
+    }
+    return filtered;
+  };
+
+  const touchAllFields = () => {
+    formik.setTouched({
+      jobTitle: true,
+      email: true,
+      phone: true,
+      country: true,
+      state: true,
+      city: true,
+      salaryFrom: true,
+      salaryTo: true,
+      description: true,
+      requirements: true,
+    });
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    touchAllFields();
+    const errors = await formik.validateForm();
+    if (Object.keys(errors).length > 0) {
+      const firstError = Object.values(errors)[0];
+      toast.error(typeof firstError === "string" ? firstError : "Please fix the highlighted fields");
+      return;
+    }
+    if (!jobTitleOptions.some((j) => j.title === formik.values.jobTitle)) {
+      toast.error("Please select a valid job title from the list.");
+      return;
+    }
+    formik.submitForm();
   };
 
   const handleRequirementToggle = (req) => {
@@ -297,8 +468,12 @@ function CreateJobForm({
   };
 
   const selectedJob = jobTitleOptions.find((j) => j.title === formik.values.jobTitle) || null;
+  const countries = useMemo(() => Country.getAllCountries(), []);
+  const selectedCountry = countries.find((c) => c.isoCode === formik.values.country) || null;
   const selectedState = states.find(s => s.isoCode === formik.values.state) || null;
-  const selectedCity = cities.find(c => c.name === formik.values.city) || null;
+  const selectedCity = formik.values.city
+    ? (cityOptions.find((c) => c.name.toLowerCase() === formik.values.city.toLowerCase()) || formik.values.city)
+    : null;
   const isEdit = page === "update";
 
   return (
@@ -315,13 +490,13 @@ function CreateJobForm({
           </h1>
         </motion.div>
 
-        <form onSubmit={formik.handleSubmit}>
+        <form onSubmit={handleFormSubmit}>
 
           {/* ══ Section 1: Job Info ══ */}
           <motion.div variants={itemVariants} className="cjf-section">
             <SH icon={<Briefcase size={16} style={{ color: "#6366f1" }} />} title="Job Information" iconBg="#eef2ff" />
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(400px,1fr))", gap: 24 }}>
+            <div className="cjf-grid-2">
               <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                 {isAdminMode && (
                   <div>
@@ -349,6 +524,8 @@ function CreateJobForm({
                     getOptionLabel={o => o.title}
                     value={selectedJob}
                     onChange={handleJobTitleChange}
+                    onBlur={() => formik.setFieldTouched("jobTitle", true)}
+                    isOptionEqualToValue={(option, value) => option.title === value.title}
                     loading={titlesLoading}
                     disablePortal
                     renderInput={(params) => (
@@ -437,7 +614,7 @@ function CreateJobForm({
           <motion.div variants={itemVariants} className="cjf-section">
             <SH icon={<Mail size={16} style={{ color: "#0ea5e9" }} />} title="Contact Information" iconBg="#f0f9ff" />
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 16 }}>
+            <div className="cjf-grid-auto">
               {/* Email */}
               <div>
                 <FL required>Contact Email</FL>
@@ -473,16 +650,32 @@ function CreateJobForm({
           <motion.div variants={itemVariants} className="cjf-section">
             <SH icon={<MapPin size={16} style={{ color: "#ec4899" }} />} title="Location" iconBg="#fdf4ff" />
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: 16 }}>
+            <div className="cjf-grid-auto">
               {/* Country */}
               <div>
-                <FL>Country</FL>
-                <input value="India" readOnly disabled className="cjf-input" />
+                <FL required>Country</FL>
+                <Autocomplete
+                  options={countries}
+                  getOptionLabel={(o) => o.name}
+                  value={selectedCountry}
+                  onChange={(_, v) => {
+                    formik.setFieldValue("country", v ? v.isoCode : "");
+                    formik.setFieldValue("state", null);
+                    formik.setFieldValue("city", null);
+                  }}
+                  onBlur={() => formik.setFieldTouched("country", true)}
+                  disablePortal
+                  renderInput={(params) => (
+                    <TextField {...params} variant="outlined" placeholder="Select country"
+                      error={formik.touched.country && Boolean(formik.errors.country)} />
+                  )}
+                />
+                <FE msg={formik.touched.country && formik.errors.country} />
               </div>
 
               {/* State */}
               <div>
-                <FL required>State</FL>
+                <FL required>State / Province</FL>
                 <Autocomplete
                   options={states}
                   getOptionLabel={o => o.name}
@@ -502,14 +695,22 @@ function CreateJobForm({
               <div>
                 <FL required>City</FL>
                 <Autocomplete
-                  options={cities}
-                  getOptionLabel={o => o.name}
+                  freeSolo
+                  options={cityOptions}
+                  getOptionLabel={getCityLabel}
                   value={selectedCity}
                   disabled={!formik.values.state}
-                  onChange={(_, v) => formik.setFieldValue("city", v ? v.name : null)}
+                  onChange={handleCityChange}
+                  onBlur={() => formik.setFieldTouched("city", true)}
+                  filterOptions={filterCityOptions}
                   disablePortal
+                  renderOption={(props, option) => (
+                    <li {...props} key={option.isNew ? `new-${option.name}` : option.name}>
+                      {option.isNew ? `Add "${option.name}"` : option.name}
+                    </li>
+                  )}
                   renderInput={(params) => (
-                    <TextField {...params} variant="outlined" placeholder="Select city"
+                    <TextField {...params} variant="outlined" placeholder="Search or type a city"
                       error={formik.touched.city && Boolean(formik.errors.city)} />
                   )}
                 />
@@ -523,29 +724,29 @@ function CreateJobForm({
             <SH icon={<IndianRupee size={16} style={{ color: "#16a34a" }} />} title="Compensation & Experience" iconBg="#f0fdf4" />
 
             {/* Salary */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 16, marginBottom: 24 }}>
+            <div className="cjf-grid-auto" style={{ marginBottom: 24 }}>
               <div>
-                <FL required>Salary From (₹)</FL>
+                <FL>Salary (optional range)</FL>
                 <div className="cjf-salary-wrap">
                   <span className="cjf-salary-prefix">₹</span>
                   <input
-                    name="salaryFrom" type="number"
+                    name="salaryFrom" type="text"
                     value={formik.values.salaryFrom} onChange={formik.handleChange} onBlur={formik.handleBlur}
                     className={`cjf-input cjf-salary-input ${formik.touched.salaryFrom && formik.errors.salaryFrom ? "error" : ""}`}
-                    placeholder="e.g. 30000"
+                    placeholder="e.g. 2000 or 10K"
                   />
                 </div>
                 <FE msg={formik.touched.salaryFrom && formik.errors.salaryFrom} />
               </div>
               <div>
-                <FL required>Salary To (₹)</FL>
+                <FL>Salary To (optional)</FL>
                 <div className="cjf-salary-wrap">
                   <span className="cjf-salary-prefix">₹</span>
                   <input
-                    name="salaryTo" type="number"
+                    name="salaryTo" type="text"
                     value={formik.values.salaryTo} onChange={formik.handleChange} onBlur={formik.handleBlur}
                     className={`cjf-input cjf-salary-input ${formik.touched.salaryTo && formik.errors.salaryTo ? "error" : ""}`}
-                    placeholder="e.g. 60000"
+                    placeholder="e.g. 20K (leave empty for single amount)"
                   />
                 </div>
                 <FE msg={formik.touched.salaryTo && formik.errors.salaryTo} />
@@ -573,10 +774,158 @@ function CreateJobForm({
                 </div>
               </div>
             </div>
+
+            {/* Additional job details */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: 16,
+                marginBottom: 8,
+              }}
+            >
+              <div>
+                <FL>Room Available</FL>
+                <select
+                  name="roomAvailable"
+                  value={formik.values.roomAvailable || ""}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="cjf-input"
+                >
+                  <option value="">Select</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+
+              <div>
+                <FL>Food Available</FL>
+                <select
+                  name="foodAvailable"
+                  value={formik.values.foodAvailable || ""}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="cjf-input"
+                >
+                  <option value="">Select</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+
+              <div>
+                <FL>Incentive</FL>
+                <select
+                  name="incentive"
+                  value={formik.values.incentive || ""}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="cjf-input"
+                >
+                  <option value="">Select</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+
+              <div>
+                <FL>Working Time</FL>
+                <select
+                  name="workingTime"
+                  value={formik.values.workingTime || ""}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="cjf-input"
+                >
+                  <option value="">Select</option>
+                  <option value="9:00 AM – 6:00 PM">9:00 AM – 6:00 PM</option>
+                  <option value="10:00 AM – 10:00 PM">10:00 AM – 10:00 PM</option>
+                </select>
+              </div>
+
+              <div>
+                <FL>Working Days</FL>
+                <select
+                  name="workingDays"
+                  value={formik.values.workingDays || ""}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="cjf-input"
+                >
+                  <option value="">Select</option>
+                  <option value="Monday – Saturday">Monday – Saturday</option>
+                  <option value="Monday – Friday">Monday – Friday</option>
+                </select>
+              </div>
+
+              <div>
+                <FL>Holiday</FL>
+                <select
+                  name="holiday"
+                  value={formik.values.holiday || ""}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="cjf-input"
+                >
+                  <option value="">Select</option>
+                  <option value="Sunday Leave">Sunday Leave</option>
+                  <option value="Saturday Leave">Saturday Leave</option>
+                  <option value="Monthly Leave (2 Days / 4 Days)">Monthly Leave (2 Days / 4 Days)</option>
+                </select>
+              </div>
+
+              <div>
+                <FL>Probation Period</FL>
+                <select
+                  name="probationPeriod"
+                  value={formik.values.probationPeriod || ""}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="cjf-input"
+                >
+                  <option value="">Select</option>
+                  <option value="No Probation">No Probation</option>
+                  <option value="1 Month">1 Month</option>
+                  <option value="3 Months">3 Months</option>
+                  <option value="6 Months">6 Months</option>
+                </select>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ── Job scheduling (optional) ── */}
+          <motion.div variants={itemVariants} className="cjf-section">
+            <SH icon={<Send size={16} style={{ color: "#6366f1" }} />} title="Job Live Schedule" iconBg="#eef2ff" />
+            <p style={{ fontSize: 12, color: "#64748b", margin: "0 0 16px" }}>
+              Optionally schedule when this job goes live and when it expires. Leave blank to publish immediately.
+            </p>
+            <div className="cjf-grid-auto-wide">
+              <div>
+                <FL>Go Live At</FL>
+                <input
+                  type="datetime-local"
+                  name="scheduledLiveAt"
+                  value={formik.values.scheduledLiveAt}
+                  onChange={formik.handleChange}
+                  className="cjf-input"
+                />
+              </div>
+              <div>
+                <FL>Expires At</FL>
+                <input
+                  type="datetime-local"
+                  name="expiresAt"
+                  value={formik.values.expiresAt}
+                  onChange={formik.handleChange}
+                  className="cjf-input"
+                />
+              </div>
+            </div>
           </motion.div>
 
           {/* ── Submit ── */}
-          <motion.div variants={itemVariants} style={{ display: "flex", justifyContent: "flex-end", gap: 12, alignItems: "center" }}>
+          <motion.div variants={itemVariants} className="cjf-form-actions">
             <button type="button" onClick={() => onClose ? onClose() : navigate(isAdminMode ? "/admin/jobs" : -1)}
               style={{ padding: "11px 22px", borderRadius: 10, border: "1.5px solid #e2e8f0", background: "#fff", color: "#475569", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all .18s" }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = "#c7d2fe"; e.currentTarget.style.color = "#4f46e5"; }}

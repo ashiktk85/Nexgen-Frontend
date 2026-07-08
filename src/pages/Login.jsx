@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { GoogleButton } from "@/components/GoogleButton";
 import { useAuth } from "@/hooks/useAuth";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
+import { AUTH_PANEL_JOB_SEEKER } from "@/constants/authPanelCopy";
 
 // Animation variants for staggered children
 const containerVariants = {
@@ -106,8 +107,8 @@ const LoginPage = () => {
             variants={itemVariants}
             className="text-gray-500 mb-6 text-center lg:text-left"
           >
-            Log in to browse personalized job matches and connect with top
-            companies. Your next adventure awaits!
+            Log in to browse mobile repair jobs in Kerala, manage your profile,
+            and apply to verified repair shops and service centers.
           </motion.p>
 
           {/* Social Login Buttons */}
@@ -274,15 +275,14 @@ const LoginPage = () => {
             variants={itemVariants}
             className="text-2xl lg:text-3xl font-semibold mb-4"
           >
-            Find Jobs for Mobile Technicians
+            {AUTH_PANEL_JOB_SEEKER.title}
           </motion.h2>
 
           <motion.p
             variants={itemVariants}
             className="text-base lg:text-lg text-gray-200 mb-4"
           >
-            Discover the best opportunities and connect with employers who value
-            your skills.
+            {AUTH_PANEL_JOB_SEEKER.subtitle}
           </motion.p>
         </div>
       </motion.div>

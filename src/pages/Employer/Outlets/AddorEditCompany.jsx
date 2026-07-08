@@ -11,7 +11,7 @@ const AddorEditCompany = () => {
   const isEdit = Boolean(company);
 
   return (
-    <div style={{ background: "#f1f5f9", minHeight: "100vh", padding: "24px", fontFamily: "'DM Sans',sans-serif" }}>
+    <div style={{ background: "#f1f5f9", minHeight: "100vh", padding: "16px 12px 40px", fontFamily: "'DM Sans',sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap');`}</style>
 
       <motion.div

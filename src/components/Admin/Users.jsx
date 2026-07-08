@@ -27,13 +27,16 @@ import {
 } from "@/components/ui/dialog";
 
 import {
-  getAllUsersSerive,
+  getAllUsersUnified,
+  exportAllUsersXlsx,
   userChangeStatusService,
-  // PRIORITY VISIBILITY FEATURE — admin APIs for user role & bulk student creation
+  employerListUnList,
   changeUserRoleService,
   bulkCreateStudentsService,
 } from "@/apiServices/adminApi";
 import UserTypePill from "@/components/Admin/UserTypePill";
+import { AdminFilterBar, AdminFilterSelect } from "@/components/Admin/AdminListFilters";
+import moment from "moment";
 import {
   ADMIN_PAGE,
   ADMIN_HEADER_EYEBROW,
@@ -69,11 +72,23 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    role: "all",
+    status: "all",
+    registeredFrom: "",
+    registeredTo: "",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+  const [exporting, setExporting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [openSheet, setOpenSheet] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingId, setPendingId] = useState(null);
+  const [pendingRow, setPendingRow] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
   // PRIORITY VISIBILITY FEATURE — CSV upload + role update loading
   const [csvUploading, setCsvUploading] = useState(false);
@@ -83,34 +98,81 @@ const Users = () => {
   const rowsPerPage = 20;
 
   useEffect(() => {
-    fetchUsers(currentPage, searchTerm);
-  }, [currentPage, searchTerm]);
+    fetchUsers(currentPage, searchTerm, filters);
+  }, [currentPage, searchTerm, filters]);
 
-  async function fetchUsers(page, search) {
+  const updateFilter = (key, value) => {
+    setCurrentPage(1);
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  async function fetchUsers(page, search, activeFilters) {
+    setLoading(true);
     try {
-      const result = await getAllUsersSerive(page, rowsPerPage, search);
+      const result = await getAllUsersUnified(page, rowsPerPage, {
+        search,
+        ...activeFilters,
+      });
       if (result?.data?.response) {
-        const { users, totalPages } = result.data.response;
-        setUsers(users);
-        setTotalPages(totalPages);
+        const { users: list, totalPages: pages, totalCount: count } = result.data.response;
+        setUsers(list || []);
+        setTotalPages(pages ?? 1);
+        setTotalCount(count ?? 0);
       }
     } catch (error) {
       console.log("Error in user listing component: ", error.message);
       toast.error("An unexpected error occured");
+    } finally {
+      setLoading(false);
     }
   }
 
-  const handleBlockUnblock = async (userId) => {
+  const handleExport = async () => {
     try {
-      const result = await userChangeStatusService(userId);
+      setExporting(true);
+      const result = await exportAllUsersXlsx({ search: searchTerm, ...filters });
+      if (!result?.data) return;
+      const url = URL.createObjectURL(new Blob([result.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `techpath-users-${Date.now()}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success("Users exported successfully");
+    } catch (_) {
+      /* toast in API */
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleBlockUnblock = async (row) => {
+    try {
+      let result;
+      if (row.source === "employer") {
+        result = await employerListUnList(row.sourceId);
+      } else if (row.source === "user") {
+        result = await userChangeStatusService(row.sourceId);
+      } else {
+        toast.error("Admin accounts must be managed from the Admins page");
+        return;
+      }
       if (result?.data?.response) {
         const { message, response } = result.data;
-        toast.success(message);
+        toast.success(message || "Status updated");
+        const blocked = response.isBlocked;
         setUsers((prev) =>
           prev.map((item) =>
-            item._id === userId ? { ...item, isBlocked: response.isBlocked } : item
+            item.sourceId === row.sourceId && item.source === row.source
+              ? { ...item, isBlocked: blocked, status: blocked ? "blocked" : "active" }
+              : item
           )
         );
+        if (selectedUser?.sourceId === row.sourceId) {
+          setSelectedUser((prev) =>
+            prev ? { ...prev, isBlocked: blocked, status: blocked ? "blocked" : "active" } : prev
+          );
+        }
       }
     } catch (error) {
       console.log("Error in handleBlockUnblock at user listing component: ", error.message);
@@ -206,26 +268,58 @@ const Users = () => {
     fileInputRef.current?.click();
   };
 
-  const totalUsers = users.length;
-  const activeUsers = users.filter((u) => !u.isBlocked).length;
-  const blockedUsers = users.filter((u) => u.isBlocked).length;
+  const activeUsers = users.filter((u) => u.status === "active").length;
+  const blockedUsers = users.filter((u) => u.status === "blocked").length;
   const noPhoneUsers = users.filter((u) => !u.phone).length;
+
+  const roleLabel = (role) => {
+    const map = {
+      student: "Student",
+      public: "User",
+      employer: "Employer",
+      shop_owner: "Shop Owner",
+      admin: "Admin",
+    };
+    return map[role] || role;
+  };
 
   const columns = [
     {
       id: "name",
       header: "Name",
-      accessor: (row) =>
-        displayValue(`${row.firstName || ""} ${row.lastName || ""}`.trim()),
+      accessor: "name",
       sortable: true,
     },
+    { id: "phone", header: "Mobile", accessor: (row) => displayValue(row.phone) },
     { id: "email", header: "Email", accessor: "email", sortable: true },
-    { id: "phone", header: "Mobile", accessor: "phone" },
     {
-      id: "type",
-      header: "Type",
+      id: "role",
+      header: "Role",
       cell: (row) => (
-        <UserTypePill role={row.role} isInstituteStudent={row.isInstituteStudent} />
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 capitalize">
+          {roleLabel(row.role)}
+        </span>
+      ),
+    },
+    {
+      id: "registeredAt",
+      header: "Registration Date",
+      accessor: (row) =>
+        row.registeredAt ? moment(row.registeredAt).format("DD MMM YYYY") : "—",
+    },
+    {
+      id: "status",
+      header: "Status",
+      cell: (row) => (
+        <span
+          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+            row.status === "blocked"
+              ? "bg-red-100 text-red-700 border border-red-200"
+              : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+          }`}
+        >
+          {row.status === "blocked" ? "Blocked" : "Active"}
+        </span>
       ),
     },
   ];
@@ -235,14 +329,14 @@ const Users = () => {
       <div className="flex items-end justify-between flex-wrap gap-2">
         <div>
           <p className={ADMIN_HEADER_EYEBROW}>Overview</p>
-          <h1 className={ADMIN_HEADER_TITLE}>Users</h1>
+          <h1 className={ADMIN_HEADER_TITLE}>User Management</h1>
         </div>
       </div>
 
       <div className={ADMIN_STAT_GRID}>
           <StatCard
             icon={<UsersIcon size={20} color="#fff" />}
-            value={totalUsers}
+            value={totalCount || users.length}
             label="Total Users"
             gradient="linear-gradient(135deg,#4f46e5 0%,#6366f1 55%,#818cf8 100%)"
             shadow="0 8px 24px rgba(99,102,241,.35)"
@@ -279,13 +373,21 @@ const Users = () => {
               setCurrentPage(1);
               setSearchTerm(e.target.value);
             }}
-            placeholder="Search by name or email…"
+            placeholder="Search by name, email, or phone…"
             className={ADMIN_SEARCH_INPUT}
           />
         </div>
 
-          {/* PRIORITY VISIBILITY FEATURE — upload CSV to bulk-create institute students */}
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            disabled={exporting}
+            onClick={handleExport}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
+          >
+            <Download className="w-3.5 h-3.5" />
+            {exporting ? "Exporting…" : "Export Excel"}
+          </button>
             <input
               ref={fileInputRef}
               type="file"
@@ -305,12 +407,75 @@ const Users = () => {
           </div>
         </div>
 
+      <AdminFilterBar>
+        <AdminFilterSelect
+          label="Role"
+          value={filters.role}
+          onChange={(e) => updateFilter("role", e.target.value)}
+          options={[
+            { value: "all", label: "All roles" },
+            { value: "public", label: "Users" },
+            { value: "student", label: "Students" },
+            { value: "employer", label: "Employers" },
+            { value: "shop_owner", label: "Shop Owners" },
+            { value: "admin", label: "Admins" },
+          ]}
+        />
+        <AdminFilterSelect
+          label="Status"
+          value={filters.status}
+          onChange={(e) => updateFilter("status", e.target.value)}
+          options={[
+            { value: "all", label: "All statuses" },
+            { value: "active", label: "Active" },
+            { value: "blocked", label: "Blocked" },
+          ]}
+        />
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Registered from</label>
+          <input
+            type="date"
+            value={filters.registeredFrom}
+            onChange={(e) => updateFilter("registeredFrom", e.target.value)}
+            className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Registered to</label>
+          <input
+            type="date"
+            value={filters.registeredTo}
+            onChange={(e) => updateFilter("registeredTo", e.target.value)}
+            className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white"
+          />
+        </div>
+        <AdminFilterSelect
+          label="Sort by"
+          value={filters.sortBy}
+          onChange={(e) => updateFilter("sortBy", e.target.value)}
+          options={[
+            { value: "createdAt", label: "Registration date" },
+            { value: "name", label: "Name" },
+            { value: "role", label: "Role" },
+          ]}
+        />
+        <AdminFilterSelect
+          label="Order"
+          value={filters.sortOrder}
+          onChange={(e) => updateFilter("sortOrder", e.target.value)}
+          options={[
+            { value: "desc", label: "Descending" },
+            { value: "asc", label: "Ascending" },
+          ]}
+        />
+      </AdminFilterBar>
+
       <div className={ADMIN_TABLE_WRAP}>
           <DataTable
             title="Users"
             columns={columns}
             data={users}
-            loading={!users.length && totalPages === 1}
+            loading={loading}
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
@@ -322,11 +487,16 @@ const Users = () => {
               setOpenSheet(true);
             }}
             onBlock={(row) => {
-              setPendingId(row._id);
+              if (row.source === "admin") {
+                toast.error("Manage admin accounts from the Admins page");
+                return;
+              }
+              setPendingId(row.id);
+              setPendingRow(row);
               setConfirmOpen(true);
             }}
             viewLabel="View"
-            blockLabel={(row) => (row.isBlocked ? "Unblock" : "Block")}
+            blockLabel={(row) => (row.status === "blocked" ? "Unblock" : "Block")}
             showSno={true}
             rowsPerPage={rowsPerPage}
           />
@@ -335,22 +505,23 @@ const Users = () => {
       <ConfirmModal
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={users.find((u) => u._id === pendingId)?.isBlocked ? "Unblock user?" : "Block user?"}
+        title={pendingRow?.status === "blocked" ? "Unblock user?" : "Block user?"}
         description={
-          users.find((u) => u._id === pendingId)?.isBlocked
+          pendingRow?.status === "blocked"
             ? "This user will be able to access the platform again."
             : "This user will be blocked from accessing the platform."
         }
-        confirmLabel={users.find((u) => u._id === pendingId)?.isBlocked ? "Unblock" : "Block"}
+        confirmLabel={pendingRow?.status === "blocked" ? "Unblock" : "Block"}
         cancelLabel="Cancel"
         loading={confirmLoading}
         onConfirm={async () => {
-          if (!pendingId) return;
+          if (!pendingRow) return;
           setConfirmLoading(true);
           try {
-            await handleBlockUnblock(pendingId);
+            await handleBlockUnblock(pendingRow);
             setConfirmOpen(false);
             setPendingId(null);
+            setPendingRow(null);
           } finally {
             setConfirmLoading(false);
           }
@@ -462,11 +633,11 @@ const Users = () => {
                 <div className="px-3 py-2 space-y-2">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 font-bold text-lg flex items-center justify-center border border-blue-200">
-                      {(selectedUser.firstName || selectedUser.name || "U").charAt(0).toUpperCase()}
+                      {(selectedUser.name || "U").charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-slate-900 truncate">
-                        {selectedUser.firstName} {selectedUser.lastName}
+                        {selectedUser.name}
                       </p>
                       <p className="text-xs text-slate-500 truncate">{selectedUser.email}</p>
                     </div>
@@ -477,9 +648,15 @@ const Users = () => {
                       <p className="text-xs text-slate-800">{displayValue(selectedUser.phone)}</p>
                     </div>
                     <div>
-                      <p className="text-[11px] font-medium text-slate-500 uppercase">Location</p>
+                      <p className="text-[11px] font-medium text-slate-500 uppercase">Role</p>
+                      <p className="text-xs text-slate-800 capitalize">{roleLabel(selectedUser.role)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-slate-500 uppercase">Registered</p>
                       <p className="text-xs text-slate-800">
-                        {displayValue(selectedUser.location || selectedUser.city)}
+                        {selectedUser.registeredAt
+                          ? moment(selectedUser.registeredAt).format("DD MMM YYYY")
+                          : "—"}
                       </p>
                     </div>
                   </div>
@@ -490,27 +667,30 @@ const Users = () => {
                       </p>
                       <p
                         className={`text-xs font-semibold ${
-                          selectedUser.isBlocked
+                          selectedUser.status === "blocked"
                             ? "text-red-600"
                             : "text-emerald-600"
                         }`}
                       >
-                        {selectedUser.isBlocked ? "Blocked" : "Active"}
+                        {selectedUser.status === "blocked" ? "Blocked" : "Active"}
                       </p>
                     </div>
+                    {selectedUser.source !== "admin" && (
                     <button
-                      onClick={() => handleBlockUnblock(selectedUser._id)}
+                      onClick={() => handleBlockUnblock(selectedUser)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${
-                        selectedUser.isBlocked
+                        selectedUser.status === "blocked"
                           ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
                           : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
                       }`}
                     >
-                      {selectedUser.isBlocked ? "Unblock" : "Block"}
+                      {selectedUser.status === "blocked" ? "Unblock" : "Block"}
                     </button>
+                    )}
                   </div>
 
-                  {/* PRIORITY VISIBILITY FEATURE — user type (public / student) */}
+                  {/* PRIORITY VISIBILITY FEATURE — user type (public / student) — job seekers only */}
+                  {selectedUser.source === "user" && (
                   <div className="mt-3">
                     <p className="text-[11px] font-medium text-slate-500 uppercase">
                       User type
@@ -525,7 +705,7 @@ const Users = () => {
                           try {
                             setRoleUpdating(true);
                             const res = await changeUserRoleService(
-                              selectedUser._id,
+                              selectedUser.sourceId,
                               {
                                 role: nextRole,
                                 isInstituteStudent:
@@ -542,7 +722,7 @@ const Users = () => {
                             }));
                             setUsers((prev) =>
                               prev.map((u) =>
-                                u._id === updated._id
+                                u.sourceId === selectedUser.sourceId && u.source === "user"
                                   ? {
                                       ...u,
                                       role: updated.role,
@@ -574,9 +754,12 @@ const Users = () => {
                       )}
                     </div>
                   </div>
+                  )}
                 </div>
               </div>
 
+              {selectedUser.source === "user" && (
+              <>
               {/* Education */}
               <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
                 <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60">
@@ -736,6 +919,8 @@ const Users = () => {
                     </p>
                   </div>
                 </div>
+              )}
+              </>
               )}
             </div>
           )}

@@ -13,6 +13,7 @@ import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { Helmet } from "react-helmet-async";
 import { JOB_CATEGORIES, KERALA_DISTRICTS } from "@/constants/options";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
+import { AUTH_PANEL_JOB_SEEKER } from "@/constants/authPanelCopy";
 
 // Animation variants
 const containerVariants = {
@@ -372,15 +373,14 @@ const Register = () => {
             variants={itemVariants}
             className="text-2xl lg:text-3xl font-semibold mb-4"
           >
-            Find Jobs for Mobile Technicians
+            {AUTH_PANEL_JOB_SEEKER.title}
           </motion.h2>
 
           <motion.p
             variants={itemVariants}
             className="text-base lg:text-lg text-gray-200 mb-4"
           >
-            Discover the best opportunities and connect with employers who value
-            your skills.
+            {AUTH_PANEL_JOB_SEEKER.subtitle}
           </motion.p>
         </div>
       </motion.div>

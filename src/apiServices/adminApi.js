@@ -29,6 +29,50 @@ export const getAllUsersSerive = async (page, limit, search = "") => {
   }
 };
 
+export const getAllUsersUnified = async (page, limit, filters = {}) => {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (filters.search) params.append("search", filters.search);
+    if (filters.role && filters.role !== "all") params.append("role", filters.role);
+    if (filters.status && filters.status !== "all") params.append("status", filters.status);
+    if (filters.registeredFrom) params.append("registeredFrom", filters.registeredFrom);
+    if (filters.registeredTo) params.append("registeredTo", filters.registeredTo);
+    if (filters.sortBy) params.append("sortBy", filters.sortBy);
+    if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
+
+    const response = await adminAxiosInstance.get(`/all-users?${params.toString()}`);
+    return response;
+  } catch (error) {
+    console.error("Error in getAllUsersUnified:", error);
+    toast.error(error.response?.data?.message || "Failed to fetch users");
+  }
+};
+
+export const exportAllUsersXlsx = async (filters = {}) => {
+  try {
+    const params = new URLSearchParams();
+    if (filters.search) params.append("search", filters.search);
+    if (filters.role && filters.role !== "all") params.append("role", filters.role);
+    if (filters.status && filters.status !== "all") params.append("status", filters.status);
+    if (filters.registeredFrom) params.append("registeredFrom", filters.registeredFrom);
+    if (filters.registeredTo) params.append("registeredTo", filters.registeredTo);
+    if (filters.sortBy) params.append("sortBy", filters.sortBy);
+    if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
+
+    const response = await adminAxiosInstance.get(`/all-users/export?${params.toString()}`, {
+      responseType: "blob",
+    });
+    return response;
+  } catch (error) {
+    console.error("Error in exportAllUsersXlsx:", error);
+    toast.error(error.response?.data?.message || "Failed to export users");
+    throw error;
+  }
+};
+
 export const userChangeStatusService = async (userId) => {
   try {
     const response = await adminAxiosInstance.put(`/changeStatus/${userId}`);
@@ -155,13 +199,16 @@ export const getAllEmployers = async (page, limit, search = "") => {
   }
 };
 
-export const getAllShops = async (page, limit, search = "") => {
+export const getAllShops = async (page, limit, filters = {}) => {
   try {
     const params = new URLSearchParams({
       page: String(page),
       limit: String(limit),
     });
-    if (search) params.append("search", search);
+    if (filters.search) params.append("search", filters.search);
+    if (filters.listing && filters.listing !== "all") params.append("listing", filters.listing);
+    if (filters.sortBy) params.append("sortBy", filters.sortBy);
+    if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
     const response = await adminAxiosInstance.get(
       `/getShops?${params.toString()}`
     );
@@ -211,6 +258,60 @@ export const shopListUnList = async (shopId) => {
   }
 };
 
+export const trashShopAdmin = async (shopId) => {
+  try {
+    const response = await adminAxiosInstance.patch(`/shops/${shopId}/trash`);
+    return response;
+  } catch (error) {
+    console.error("Error in trashShopAdmin:", error);
+    toast.error(error.response?.data?.message || "Failed to move shop to trash");
+    throw error;
+  }
+};
+
+export const restoreShopAdmin = async (shopId) => {
+  try {
+    const response = await adminAxiosInstance.patch(`/shops/${shopId}/restore`);
+    return response;
+  } catch (error) {
+    console.error("Error in restoreShopAdmin:", error);
+    toast.error(error.response?.data?.message || "Failed to restore shop");
+    throw error;
+  }
+};
+
+export const deleteShopAdmin = async (shopId) => {
+  try {
+    const response = await adminAxiosInstance.delete(`/shops/${shopId}`);
+    return response;
+  } catch (error) {
+    console.error("Error in deleteShopAdmin:", error);
+    toast.error(error.response?.data?.message || "Failed to delete shop");
+    throw error;
+  }
+};
+
+export const getJobApplicationsAdmin = async (page, limit, search = "") => {
+  try {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (search) params.append("search", search);
+    return await adminAxiosInstance.get(`/job-applications?${params.toString()}`);
+  } catch (error) {
+    console.error("Error in getJobApplicationsAdmin:", error);
+    toast.error(error.response?.data?.message || "Failed to fetch applications");
+  }
+};
+
+export const getJobApplicantsByJobAdmin = async (jobId) => {
+  try {
+    return await adminAxiosInstance.get(`/job-applications/${jobId}`);
+  } catch (error) {
+    console.error("Error in getJobApplicantsByJobAdmin:", error);
+    toast.error(error.response?.data?.message || "Failed to fetch applicants");
+    throw error;
+  }
+};
+
 export const employerListUnList = async (employerId) => {
     try {
         const response = await adminAxiosInstance.put(`/changeEmployerStatus/${employerId}`)
@@ -225,16 +326,19 @@ export const employerListUnList = async (employerId) => {
     }
 }
 
-export const getAllJobs = async (page, limit, search = "") => {
+export const getAllJobs = async (page, limit, filters = {}) => {
   try {
     const params = new URLSearchParams({
       page: String(page),
       limit: String(limit),
     });
 
-    if (search) {
-      params.append("search", search);
-    }
+    if (filters.search) params.append("search", filters.search);
+    if (filters.listing && filters.listing !== "all") params.append("listing", filters.listing);
+    if (filters.status && filters.status !== "all") params.append("status", filters.status);
+    if (filters.jobType && filters.jobType !== "all") params.append("jobType", filters.jobType);
+    if (filters.sortBy) params.append("sortBy", filters.sortBy);
+    if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
 
     const response = await adminAxiosInstance.get(
       `/getJobs?${params.toString()}`
@@ -250,7 +354,19 @@ export const getAllJobs = async (page, limit, search = "") => {
     }
     toast.error(errorMessage);
   }
-}
+};
+
+export const deleteJobAdmin = async (jobId) => {
+  try {
+    return await adminAxiosInstance.delete(`/jobs/${jobId}`);
+  } catch (error) {
+    console.error("Error deleting job at admin Api service: ", error);
+    let errorMessage =
+      error.response?.data?.message || "An unexpected error occurred";
+    toast.error(errorMessage);
+    throw error;
+  }
+};
 
 
 
@@ -277,6 +393,15 @@ export const createJobPostAdmin = async (data) => {
   }
 };
 
+export const updateJobPostAdmin = async (jobId, data) => {
+  try {
+    return await adminAxiosInstance.put(`/jobs/${jobId}`, data);
+  } catch (error) {
+    console.error("Error updating admin job:", error);
+    throw error;
+  }
+};
+
 export const getActiveJobTitlesAdmin = async () => {
   try {
     const response = await adminAxiosInstance.get("/job-titles/active");
@@ -285,6 +410,23 @@ export const getActiveJobTitlesAdmin = async () => {
     console.error("Error fetching active job titles:", error);
     return [];
   }
+};
+
+export const getCustomCitiesAdmin = async ({ state, country = "IN", search = "" }) => {
+  try {
+    const params = new URLSearchParams({ state, country });
+    if (search) params.append("search", search);
+    const response = await adminAxiosInstance.get(`/cities?${params.toString()}`);
+    return response?.data?.response || [];
+  } catch (error) {
+    console.error("Error fetching custom cities:", error);
+    return [];
+  }
+};
+
+export const saveCustomCityAdmin = async ({ name, state, country = "IN" }) => {
+  const response = await adminAxiosInstance.post("/cities", { name, state, country });
+  return response?.data?.response;
 };
 
 export const getEmployerVerificationDetails = async (id) => {

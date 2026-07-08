@@ -4,7 +4,8 @@ import StatCard from "@/components/ui/StatCard";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Store, Building2, MapPin, Globe, Image as ImageIcon, Share2, ListChecks, XCircle } from "lucide-react";
 import ConfirmModal from "@/components/Admin/ConfirmModal";
-import { getAllShops, shopListUnList } from "@/apiServices/adminApi";
+import { AdminFilterBar, AdminFilterSelect } from "@/components/Admin/AdminListFilters";
+import { getAllShops, shopListUnList, trashShopAdmin, restoreShopAdmin, deleteShopAdmin } from "@/apiServices/adminApi";
 import { toast } from "sonner";
 import {
   ADMIN_PAGE,
@@ -41,6 +42,19 @@ const Shops = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingId, setPendingId] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [trashConfirmOpen, setTrashConfirmOpen] = useState(false);
+  const [pendingTrashId, setPendingTrashId] = useState(null);
+  const [restoreConfirmOpen, setRestoreConfirmOpen] = useState(false);
+  const [pendingRestoreId, setPendingRestoreId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [shopStats, setShopStats] = useState({ total: 0, listed: 0, unlisted: 0, trashed: 0 });
+  const [filters, setFilters] = useState({
+    listing: "all",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const rowsPerPage = 20;
@@ -72,20 +86,32 @@ const Shops = () => {
   }, [openSheet, selectedShop?._id, selectedShop?.location?.lat, selectedShop?.location?.lng]);
 
   useEffect(() => {
-    fetchShops(currentPage, searchTerm);
-  }, [currentPage, searchTerm]);
+    fetchShops(currentPage, searchTerm, filters);
+  }, [currentPage, searchTerm, filters]);
 
-  async function fetchShops(page, search) {
+  const updateFilter = (key, value) => {
+    setCurrentPage(1);
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  async function fetchShops(page, search, activeFilters) {
+    setLoading(true);
     try {
-      const result = await getAllShops(page, rowsPerPage, search);
+      const result = await getAllShops(page, rowsPerPage, {
+        search,
+        ...activeFilters,
+      });
       if (result?.data?.response) {
-        const { shops: list, totalPages: pages } = result.data.response;
+        const { shops: list, totalPages: pages, stats } = result.data.response;
         setShops(list || []);
         setTotalPages(pages ?? 1);
+        if (stats) setShopStats(stats);
       }
     } catch (error) {
       console.log("Error in shops listing component: ", error?.message);
       toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -105,6 +131,7 @@ const Shops = () => {
             prev?._id === shopId ? { ...prev, isBlocked: response.isBlocked } : prev
           );
         }
+        fetchShops(currentPage, searchTerm, filters);
       }
     } catch (error) {
       console.log("Error in handleListUnlist at shops listing component: ", error?.message);
@@ -112,25 +139,67 @@ const Shops = () => {
     }
   };
 
-  const totalShops = shops.length;
-  const listedShops = shops.filter((shop) => !shop.isBlocked).length;
-  const unlistedShops = shops.filter((shop) => shop.isBlocked).length;
+  const handleTrash = async (shopId) => {
+    try {
+      const result = await trashShopAdmin(shopId);
+      if (result?.data) {
+        toast.success(result.data.message || "Shop moved to trash");
+        setShops((prev) => prev.filter((item) => item._id !== shopId));
+        if (selectedShop?._id === shopId) {
+          setOpenSheet(false);
+          setSelectedShop(null);
+        }
+        fetchShops(currentPage, searchTerm, filters);
+      }
+    } catch (_) { /* toast handled in API */ }
+  };
+
+  const handleRestore = async (shopId) => {
+    try {
+      const result = await restoreShopAdmin(shopId);
+      if (result?.data) {
+        toast.success(result.data.message || "Shop restored");
+        setShops((prev) => prev.filter((item) => item._id !== shopId));
+        fetchShops(currentPage, searchTerm, filters);
+      }
+    } catch (_) { /* toast handled in API */ }
+  };
+
+  const handlePermanentDelete = async (shopId) => {
+    try {
+      const result = await deleteShopAdmin(shopId);
+      if (result?.data) {
+        toast.success(result.data.message || "Shop permanently deleted");
+        setShops((prev) => prev.filter((item) => item._id !== shopId));
+        if (selectedShop?._id === shopId) {
+          setOpenSheet(false);
+          setSelectedShop(null);
+        }
+        fetchShops(currentPage, searchTerm, filters);
+      }
+    } catch (_) { /* toast handled in API */ }
+  };
+
+  const isTrashView = filters.listing === "trash";
   const pendingShop = shops.find((shop) => shop._id === pendingId);
+  const pendingTrashShop = shops.find((shop) => shop._id === pendingTrashId);
+  const pendingDeleteShop = shops.find((shop) => shop._id === pendingDeleteId);
+  const pendingRestoreShop = shops.find((shop) => shop._id === pendingRestoreId);
 
   const columns = [
-    { id: "companyName", header: "Shop Name", accessor: "companyName", sortable: true },
+    { id: "companyName", header: "Shop Name", accessor: "companyName" },
     {
       id: "employerName",
       header: "Employer",
       accessor: "employerName",
-      sortable: true,
+      sortable: false,
       cell: (row) => (
         <span className="inline-flex items-center justify-center min-w-[100px] max-w-[120px] h-7 px-2 rounded border border-slate-200 bg-slate-50 text-blue-600 font-bold text-[11px] truncate" title={displayValue(row.employerName, "")}>
           {displayValue(row.employerName)}
         </span>
       ),
     },
-    { id: "email", header: "Email", accessor: "email", sortable: true },
+    { id: "email", header: "Email", accessor: "email" },
     { id: "phone", header: "Phone", accessor: "phone" },
     { id: "address", header: "Address", accessor: "address" },
     {
@@ -163,24 +232,27 @@ const Shops = () => {
       <div className={ADMIN_STAT_GRID}>
           <StatCard
             icon={<Store size={20} color="#fff" />}
-            value={totalShops}
+            value={shopStats.total}
             label="Total Shops"
             gradient="linear-gradient(135deg,#4f46e5 0%,#6366f1 55%,#818cf8 100%)"
             shadow="0 8px 24px rgba(99,102,241,.35)"
+            onClick={() => updateFilter("listing", "all")}
           />
           <StatCard
             icon={<ListChecks size={20} color="#fff" />}
-            value={listedShops}
+            value={shopStats.listed}
             label="Listed"
             gradient="linear-gradient(135deg,#059669 0%,#10b981 55%,#34d399 100%)"
             shadow="0 8px 24px rgba(16,185,129,.32)"
+            onClick={() => updateFilter("listing", "listed")}
           />
           <StatCard
             icon={<XCircle size={20} color="#fff" />}
-            value={unlistedShops}
+            value={shopStats.unlisted}
             label="Unlisted"
             gradient="linear-gradient(135deg,#b91c1c 0%,#ef4444 55%,#f97373 100%)"
             shadow="0 8px 24px rgba(239,68,68,.32)"
+            onClick={() => updateFilter("listing", "unlisted")}
           />
         </div>
 
@@ -193,18 +265,52 @@ const Shops = () => {
               setCurrentPage(1);
               setSearchTerm(e.target.value);
             }}
-            placeholder="Search by shop name…"
+            placeholder="Search by shop, employer, email…"
             className={ADMIN_SEARCH_INPUT}
           />
         </div>
       </div>
+
+      <AdminFilterBar>
+        <AdminFilterSelect
+          label="Listing"
+          value={filters.listing}
+          onChange={(e) => updateFilter("listing", e.target.value)}
+          options={[
+            { value: "all", label: "All listings" },
+            { value: "listed", label: "Listed" },
+            { value: "unlisted", label: "Unlisted" },
+            { value: "trash", label: "Trash" },
+          ]}
+        />
+        <AdminFilterSelect
+          label="Sort by"
+          value={filters.sortBy}
+          onChange={(e) => updateFilter("sortBy", e.target.value)}
+          options={[
+            { value: "createdAt", label: "Date created" },
+            { value: "companyName", label: "Shop name" },
+            { value: "employerName", label: "Employer name" },
+            { value: "listing", label: "Listing status" },
+          ]}
+        />
+        <AdminFilterSelect
+          label="Order"
+          value={filters.sortOrder}
+          onChange={(e) => updateFilter("sortOrder", e.target.value)}
+          options={[
+            { value: "desc", label: "Descending" },
+            { value: "asc", label: "Ascending" },
+          ]}
+        />
+      </AdminFilterBar>
 
       <div className={ADMIN_TABLE_WRAP}>
           <DataTable
             title="Shops"
             columns={columns}
             data={shops}
-            loading={!shops.length && totalPages === 1}
+            loading={loading}
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
@@ -215,12 +321,25 @@ const Shops = () => {
               setSelectedShop(row);
               setOpenSheet(true);
             }}
-            onBlock={(row) => {
+            onBlock={!isTrashView ? (row) => {
               setPendingId(row._id);
               setConfirmOpen(true);
+            } : undefined}
+            onDelete={isTrashView ? (row) => {
+              setPendingDeleteId(row._id);
+              setDeleteConfirmOpen(true);
+            } : (row) => {
+              setPendingTrashId(row._id);
+              setTrashConfirmOpen(true);
             }}
+            onOthers={isTrashView ? (row) => {
+              setPendingRestoreId(row._id);
+              setRestoreConfirmOpen(true);
+            } : undefined}
             viewLabel="View"
             blockLabel={(row) => (row.isBlocked ? "List" : "Unlist")}
+            deleteLabel={isTrashView ? "Delete" : "Trash"}
+            othersLabel={isTrashView ? "Restore" : undefined}
             showSno={true}
             rowsPerPage={rowsPerPage}
           />
@@ -245,6 +364,81 @@ const Shops = () => {
             await handleListUnlist(pendingId);
             setConfirmOpen(false);
             setPendingId(null);
+          } finally {
+            setConfirmLoading(false);
+          }
+        }}
+      />
+
+      <ConfirmModal
+        open={trashConfirmOpen}
+        onOpenChange={setTrashConfirmOpen}
+        title="Move shop to trash?"
+        description={
+          pendingTrashShop
+            ? `"${pendingTrashShop.companyName}" will be moved to trash, unlisted, and its jobs will be closed. You can restore it later.`
+            : "This shop will be moved to trash."
+        }
+        confirmLabel="Move to Trash"
+        cancelLabel="Cancel"
+        loading={confirmLoading}
+        onConfirm={async () => {
+          if (!pendingTrashId) return;
+          setConfirmLoading(true);
+          try {
+            await handleTrash(pendingTrashId);
+            setTrashConfirmOpen(false);
+            setPendingTrashId(null);
+          } finally {
+            setConfirmLoading(false);
+          }
+        }}
+      />
+
+      <ConfirmModal
+        open={restoreConfirmOpen}
+        onOpenChange={setRestoreConfirmOpen}
+        title="Restore shop?"
+        description={
+          pendingRestoreShop
+            ? `"${pendingRestoreShop.companyName}" will be restored from trash.`
+            : "This shop will be restored from trash."
+        }
+        confirmLabel="Restore"
+        cancelLabel="Cancel"
+        loading={confirmLoading}
+        onConfirm={async () => {
+          if (!pendingRestoreId) return;
+          setConfirmLoading(true);
+          try {
+            await handleRestore(pendingRestoreId);
+            setRestoreConfirmOpen(false);
+            setPendingRestoreId(null);
+          } finally {
+            setConfirmLoading(false);
+          }
+        }}
+      />
+
+      <ConfirmModal
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Permanently delete shop?"
+        description={
+          pendingDeleteShop
+            ? `"${pendingDeleteShop.companyName}" and all associated jobs will be permanently deleted. This cannot be undone.`
+            : "This shop will be permanently deleted."
+        }
+        confirmLabel="Delete Permanently"
+        cancelLabel="Cancel"
+        loading={confirmLoading}
+        onConfirm={async () => {
+          if (!pendingDeleteId) return;
+          setConfirmLoading(true);
+          try {
+            await handlePermanentDelete(pendingDeleteId);
+            setDeleteConfirmOpen(false);
+            setPendingDeleteId(null);
           } finally {
             setConfirmLoading(false);
           }

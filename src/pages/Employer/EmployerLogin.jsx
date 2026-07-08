@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { employerLogin } from "@/redux/actions/EmployerAction";
 import { motion, AnimatePresence } from "framer-motion";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
+import { AUTH_PANEL_EMPLOYER } from "@/constants/authPanelCopy";
 
 const EmployerLogin = () => {
   const navigate = useNavigate();
@@ -283,13 +284,13 @@ const EmployerLogin = () => {
             className="text-2xl lg:text-3xl font-semibold mb-4"
             variants={itemVariants}
           >
-            Connecting Talent with Opportunity—Post Jobs, Build Futures.
+            {AUTH_PANEL_EMPLOYER.title}
           </motion.h2>
           <motion.p
             className="text-base lg:text-lg text-gray-200 mb-4"
             variants={itemVariants}
           >
-            Empowering Careers, One Opportunity at a Time.
+            {AUTH_PANEL_EMPLOYER.subtitle}
           </motion.p>
         </div>
       </motion.div>

@@ -7,6 +7,7 @@ import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import GrapeAnimation from "@/components/GrapeAnimation";
 import useRequest from "@/hooks/useRequestUser";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
+import { AUTH_PANEL_OTP_EMPLOYER } from "@/constants/authPanelCopy";
 import NextUiShell from "@/components/NextUiShell";
 
 const RegisterOtp = () => {
@@ -88,11 +89,10 @@ const RegisterOtp = () => {
         <div className="max-w-md">
           <GrapeAnimation className="sm:hidden" />
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
-            Find Jobs Tailored for Mobile Technicians
+            {AUTH_PANEL_OTP_EMPLOYER.title}
           </h2>
           <p className="text-base lg:text-lg text-gray-200 mb-4">
-            Discover the best opportunities and connect with employers who value
-            your skills.
+            {AUTH_PANEL_OTP_EMPLOYER.subtitle}
           </p>
         </div>
       </div>

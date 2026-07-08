@@ -89,6 +89,11 @@ const JobTitles = () => {
       .map((line) => line.trim())
       .filter(Boolean);
 
+    if (requirements.length === 0) {
+      toast.error("Add at least one requirement");
+      return;
+    }
+
     const payload = {
       title,
       requirements,
@@ -264,7 +269,7 @@ const JobTitles = () => {
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                Requirements (one per line)
+                Requirements * <span className="font-normal text-slate-400">(one per line, at least one required)</span>
               </label>
               <textarea
                 value={form.requirementsText}
@@ -272,6 +277,7 @@ const JobTitles = () => {
                   setForm((f) => ({ ...f, requirementsText: e.target.value }))
                 }
                 rows={10}
+                required
                 className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
                 placeholder={"Normal Works - Android Only\nChip-Level Work - Android & iPhone"}
               />

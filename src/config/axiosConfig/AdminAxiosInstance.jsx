@@ -1,33 +1,67 @@
 import axios from "axios";
-const env = import.meta.env;
+import { store } from "@/redux/store";
+import { logout } from "@/redux/slices/adminSlice";
 
 const AdminAxiosInstance = axios.create({
-  baseURL: `${import.meta.env.VITE_BACKEND_URL || 'https://api.techpath.in'}/admin`,
+  baseURL: `${import.meta.env.VITE_BACKEND_URL || "https://api.techpath.in"}/admin`,
   withCredentials: true,
 });
 
-AdminAxiosInstance.interceptors.request.use(
-  (config) => {
-    // Build the full URL
-    const fullUrl = `${config.baseURL || ""}${config.url}`;
-    console.log("Full URL:", fullUrl);
+let isLoggingOut = false;
 
-    // You can add additional configurations or modifications here if needed
-    return config;
-  },
-  (error) => {
-    console.error("Request error:", error);
-    return Promise.reject(error);
+const forceAdminLogout = async (message) => {
+  if (isLoggingOut) return;
+  if (window.location.pathname.includes("/admin-login")) return;
+
+  isLoggingOut = true;
+  try {
+    await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL || "https://api.techpath.in"}/admin/logout`,
+      {},
+      { withCredentials: true }
+    );
+  } catch (_) {
+    /* ignore */
   }
+
+  store.dispatch(logout());
+  if (message) {
+    try {
+      const { toast } = await import("sonner");
+      toast.warning(message);
+    } catch (_) {
+      /* optional */
+    }
+  }
+  window.location.href = "/admin/admin-login";
+};
+
+AdminAxiosInstance.interceptors.request.use(
+  (config) => config,
+  (error) => Promise.reject(error)
 );
 
 AdminAxiosInstance.interceptors.response.use(
-  (response) => {
-    console.log("response reached");
-    return response;
-  },
-  (error) => {
-    console.error("Axios error:", error.response || error.message);
+  (response) => response,
+  async (error) => {
+    const status = error?.response?.status;
+    const data = error?.response?.data;
+    const message = data?.message || "";
+
+    const shouldLogout =
+      status === 401 &&
+      (data?.logout === true ||
+        data?.code === "AUTH_LOGOUT" ||
+        /refresh token/i.test(message) ||
+        /please login again/i.test(message) ||
+        /access denied/i.test(message));
+
+    if (shouldLogout) {
+      await forceAdminLogout(
+        message || "Session expired. Please login again."
+      );
+    }
+
     return Promise.reject(error);
   }
 );

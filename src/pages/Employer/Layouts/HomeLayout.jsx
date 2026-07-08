@@ -18,16 +18,16 @@ const HomeLayout = () => {
     employer?.isVerified || (hasVerificationDocs ? "Requested" : "NotVerified");
 
   return (
-    <div className="relative bg-[#f7f6f9] h-full min-h-screen font-[sans-serif]">
+    <div className="relative bg-[#f7f6f9] h-full min-h-screen font-[sans-serif] overflow-x-hidden">
       <div className="flex items-start">
-        <section className="main-content w-full px-4 lg:px-10">
+        <section className="main-content w-full min-w-0 px-3 sm:px-4 lg:px-10">
           <NavbarEmp isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-          <div className={`transition-all duration-300 pt-8 ${isCollapsed ? 'lg:ml-[80px]' : 'lg:ml-[250px]'}`}>
+          <div className={`panel-main-content transition-all duration-300 lg:pt-8 min-w-0 ${isCollapsed ? 'lg:ml-[80px]' : 'lg:ml-[250px]'}`}>
             {employer && verificationStatus !== "Verified" && (
-              <div className="flex justify-end mb-3">
+              <div className="flex justify-stretch sm:justify-end mb-3">
                 <Link
                   to="/employer/account"
-                  className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium shadow-sm transition-colors ${
+                  className={`inline-flex items-center gap-2 rounded-xl border px-3 sm:px-4 py-2.5 text-sm font-medium shadow-sm transition-colors w-full sm:w-auto justify-between sm:justify-start ${
                     verificationStatus === "Requested"
                       ? "border-sky-200 bg-sky-50/90 text-sky-800 hover:bg-sky-100/90 hover:border-sky-300"
                       : verificationStatus === "Rejected"

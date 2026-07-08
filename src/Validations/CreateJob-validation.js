@@ -2,37 +2,33 @@ import * as Yup from 'yup';
 
 const validateJobForm = Yup.object({
   jobTitle: Yup.string()
-    .matches(/^[a-zA-Z\s&\-',"/,_]*$/, 'Must contain only letters and symbols')
+    .trim()
+    .required('Job title is required')
     .min(2, 'Must contain at least 2 characters')
-    .required('Job title is required'),
+    .matches(/^[a-zA-Z\s&\-',"/,_]*$/, 'Must contain only letters and symbols'),
   email: Yup.string()
     .email('Enter a valid email')
     .required('Email is required'),
   phone: Yup.string()
     .matches(/^[0-9]{10}$/, 'Mobile number must be 10 digits')
     .required('Mobile number is required'),
+  country: Yup.string()
+    .required('Country is required'),
   state: Yup.string()
-    .required('State is required'),
+    .required('State/Province is required'),
   city: Yup.string()
-    .required('City is required'),
-  salaryFrom: Yup.number()
-    .typeError('Salary must be a number')
-    .min(0, 'Salary cannot be negative')
-    .required('Starting salary is required')
-    .test('is-less-than-to', 'Starting salary must be less than ending salary',
-      function (value) {
-        const { salaryTo } = this.parent;
-        return !salaryTo || value === undefined || value <= salaryTo;
-      }),
-  salaryTo: Yup.number()
-    .typeError('Salary must be a number')
-    .min(0, 'Salary cannot be negative')
-    .required('Ending salary is required')
-    .test('is-greater-than-from', 'Ending salary must be greater than starting salary',
-      function (value) {
-        const { salaryFrom } = this.parent;
-        return !salaryFrom || value === undefined || value >= salaryFrom;
-      }),
+    .trim()
+    .required('City is required')
+    .min(2, 'City must be at least 2 characters'),
+  salaryFrom: Yup.string()
+    .trim()
+    .test('at-least-one-salary', 'Enter a salary amount', function (value) {
+      const { salaryTo } = this.parent;
+      return Boolean(value?.trim() || salaryTo?.trim());
+    }),
+  salaryTo: Yup.string()
+    .trim()
+    .nullable(),
   description: Yup.string()
     .min(10, 'Enter minimum 10 characters')
     .max(4000, 'Description cannot exceed 4000 characters')

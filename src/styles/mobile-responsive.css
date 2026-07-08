@@ -1,0 +1,149 @@
+/* Shared mobile responsiveness fixes across panels + public pages */
+
+.panel-main-content {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+@media (max-width: 1023px) {
+  .panel-main-content {
+    padding-top: 3.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .employer-page-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    padding-right: 0 !important;
+  }
+
+  .employer-page-header-actions {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .employer-page-header-actions > a,
+  .employer-page-header-actions > button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ejl-add-btn-mobile {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-sidebar-nav a,
+  .admin-sidebar-nav button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 767px) {
+  .mobile-menu-panel {
+    max-height: calc(100dvh - 80px);
+    overflow-y: auto;
+  }
+
+  .jd-li-mobile-cta {
+    padding-left: 12px;
+    padding-right: 12px;
+    gap: 8px;
+  }
+
+  .data-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cjf-root {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .ajp-main {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Prevent horizontal page scroll */
+  html,
+  body,
+  #root {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Job cards: wrap action row cleanly */
+  .jc-grid-footer {
+    flex-wrap: wrap;
+  }
+
+  .jc-list-layout {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .jc-details-col {
+    width: 100%;
+    min-width: 0 !important;
+    align-items: stretch !important;
+  }
+
+  .jc-details-col > div {
+    width: 100%;
+  }
+
+  /* Admin filter bars stack on small screens */
+  .admin-filter-bar,
+  [class*="AdminFilterBar"] {
+    flex-wrap: wrap;
+  }
+
+  /* Stat cards: avoid overflow */
+  .admin-stat-grid,
+  [class*="ADMIN_STAT"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* Forms: full-width controls */
+  .cjf-grid-2,
+  .cjf-grid-auto,
+  .cjf-grid-auto-wide {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Sheets / dialogs don't overflow viewport */
+  [data-radix-dialog-content],
+  [role="dialog"] {
+    max-width: calc(100vw - 1rem) !important;
+  }
+
+  /* Touch-friendly primary buttons */
+  .jc-btn,
+  .ejl-add-btn,
+  .ja-submit-btn {
+    min-height: 44px;
+  }
+
+  /* Share / WhatsApp action icons spacing */
+  .jc-posted-time {
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-stat-grid > *,
+  .ejl-root [style*="minmax"] {
+    min-width: 0;
+  }
+
+  /* Stack job card apply + details */
+  .jc-grid-footer .jc-btn {
+    width: 100%;
+  }
+}

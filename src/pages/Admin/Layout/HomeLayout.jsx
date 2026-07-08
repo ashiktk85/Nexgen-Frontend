@@ -6,12 +6,12 @@ function HomeLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="relative bg-[#f7f6f9] min-h-screen font-[sans-serif]">
+    <div className="relative bg-[#f7f6f9] min-h-screen font-[sans-serif] overflow-x-hidden">
       <div className="flex items-start">
-        <section className="main-content w-full px-10 lg:px-24">
+        <section className="main-content w-full min-w-0 px-3 sm:px-6 lg:px-24">
           <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
           <div
-            className={`transition-all duration-300 pt-3 pb-4 ${
+            className={`panel-main-content transition-all duration-300 pb-6 lg:pb-4 lg:pt-3 ${
               isCollapsed ? "lg:ml-[80px]" : "lg:ml-[250px]"
             }`}
           >

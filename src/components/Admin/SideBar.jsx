@@ -40,17 +40,30 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   const handleLogout = async () => {
     try {
-      const response = await adminAxiosInstance.post("/logout");
-      if (response.status === 200) {
-        dispatch(logout());
-        toast.success("Logged out");
-        navigate("/admin/admin-login");
-      }
+      await adminAxiosInstance.post("/logout");
     } catch (err) {
       console.error("error", err);
-      toast.error("Failed to logout");
+    } finally {
+      dispatch(logout());
+      toast.success("Logged out");
+      navigate("/admin/admin-login");
     }
   };
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isSidebarOpen) return undefined;
+    const mq = window.matchMedia("(max-width: 1023px)");
+    if (!mq.matches) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isSidebarOpen]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -69,7 +82,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   }, [isSidebarOpen]);
 
   const getSidebarWidth = () => {
-    if (isSidebarOpen) return "w-[280px] opacity-100";
+    if (isSidebarOpen) return "w-[min(280px,88vw)] opacity-100";
     return `w-0 opacity-0 lg:opacity-100 ${
       isCollapsed ? "lg:w-[80px]" : "lg:w-[250px]"
     }`;
@@ -107,6 +120,12 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       icon: <Briefcase className="w-4 h-4" />,
     },
     {
+      id: "applied-students",
+      label: "Applied Students",
+      url: "/admin/applied-students",
+      icon: <Users className="w-4 h-4" />,
+    },
+    {
       id: "job-titles",
       label: "Job Titles",
       url: "/admin/job-titles",
@@ -134,10 +153,19 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   return (
     <>
+      {isSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close menu"
+          className="lg:hidden fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-[2px]"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <div
         ref={sidebarRef}
         
-        className={`text-white bg-zinc-900 shadow-lg h-screen fixed top-0 left-0 overflow-auto z-30 transition-all duration-300 flex flex-col ${getSidebarWidth()}`}
+        className={`text-white bg-zinc-900 shadow-lg h-screen fixed top-0 left-0 overflow-auto z-50 lg:z-30 transition-all duration-300 flex flex-col ${getSidebarWidth()}`}
       >
         <div
           className={`flex items-center min-h-[64px] z-20 sticky top-0 border-b border-white/20 ${
@@ -156,7 +184,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
             </button>
           ) : (
             <>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 min-w-0">
                 <TechpathBrand
                   {...BRAND_SIZES.compact}
                   textColor="#ffffff"
@@ -165,8 +193,10 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                 <p className="text-xs text-indigo-100/80 font-medium">Admin</p>
               </div>
               <button
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden lg:block text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none"
+                type="button"
+                onClick={() => (isSidebarOpen ? setSidebarOpen(false) : setIsCollapsed(!isCollapsed))}
+                className="text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none shrink-0"
+                aria-label={isSidebarOpen ? "Close menu" : "Collapse sidebar"}
               >
                 <svg
                   className="w-6 h-6"
@@ -291,18 +321,22 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         </div>
       </div>
 
-      <div className="lg:hidden fixed top-4 right-4 z-[60]">
+      <div className="lg:hidden fixed top-3 left-3 z-[60]">
         <button
+          type="button"
           onClick={() => setSidebarOpen((prev) => !prev)}
-          className="bg-white p-2 text-gray-800 rounded-lg shadow-md border hover:bg-gray-50 focus:outline-none"
+          className="bg-white p-2.5 text-gray-800 rounded-xl shadow-md border hover:bg-gray-50 focus:outline-none flex items-center justify-center w-11 h-11"
+          aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
         >
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-              clipRule="evenodd"
-            ></path>
-          </svg>
+          {isSidebarOpen ? (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+              <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+            </svg>
+          )}
         </button>
       </div>
 

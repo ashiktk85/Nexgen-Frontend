@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import useRequestEmployer from "@/hooks/useRequestEmployer";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
+import { AUTH_PANEL_ADMIN } from "@/constants/authPanelCopy";
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -106,12 +107,11 @@ export default AdminRegister;
           <GrapeAnimation className="sm:hidden" />
 
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
-            Find Jobs Tailored for Mobile Technicians
+            {AUTH_PANEL_ADMIN.title}
           </h2>
 
           <p className="text-base lg:text-lg text-gray-200 mb-4">
-            Discover the best opportunities and connect with employers who value
-            your skills.
+            {AUTH_PANEL_ADMIN.subtitle}
           </p>
 
           {/* <div className="flex justify-center gap-2">

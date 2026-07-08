@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Calendar, Clock, Briefcase, CheckCircle2, XCircle, Loader2, AlertCircle } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 
 /* ─── Styles ─── */
 const styleTag = document.getElementById("jah-styles");
@@ -458,81 +459,15 @@ export default function JobApplicationHistory() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.3 }}
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: 6,
-                        marginTop: 28,
-                      }}
+                      style={{ marginTop: 28 }}
                     >
-                      <button
-                        className="jah-page-btn"
-                        disabled={currentPage === 1}
-                        onClick={() => setCurrentPage((p) => p - 1)}
-                        style={{
-                          padding: "8px 16px",
-                          borderRadius: 10,
-                          border: "1.5px solid #e2e8f0",
-                          background: currentPage === 1 ? "#f8fafc" : "#fff",
-                          color: currentPage === 1 ? "#cbd5e1" : "#4f46e5",
-                          fontWeight: 600,
-                          fontSize: 14,
-                          cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                          fontFamily: "'Plus Jakarta Sans', sans-serif",
-                          transition: "all 0.18s ease"
-                        }}
-                      >
-                        ← Prev
-                      </button>
-
-                      {[...Array(totalPages)].map((_, i) => {
-                        const page = i + 1;
-                        const isActive = currentPage === page;
-                        return (
-                          <button
-                            key={i}
-                            className="jah-page-btn"
-                            onClick={() => setCurrentPage(page)}
-                            style={{
-                              width: 38,
-                              height: 38,
-                              borderRadius: 10,
-                              border: isActive ? "none" : "1.5px solid #e2e8f0",
-                              background: isActive ? "linear-gradient(135deg, #4f46e5, #6366f1)" : "#fff",
-                              color: isActive ? "#fff" : "#475569",
-                              fontWeight: isActive ? 700 : 500,
-                              fontSize: 14,
-                              cursor: "pointer",
-                              boxShadow: isActive ? "0 4px 12px rgba(99,102,241,0.3)" : "none",
-                              fontFamily: "'Plus Jakarta Sans', sans-serif",
-                              transition: "all 0.18s ease"
-                            }}
-                          >
-                            {page}
-                          </button>
-                        );
-                      })}
-
-                      <button
-                        className="jah-page-btn"
-                        disabled={currentPage === totalPages}
-                        onClick={() => setCurrentPage((p) => p + 1)}
-                        style={{
-                          padding: "8px 16px",
-                          borderRadius: 10,
-                          border: "1.5px solid #e2e8f0",
-                          background: currentPage === totalPages ? "#f8fafc" : "#fff",
-                          color: currentPage === totalPages ? "#cbd5e1" : "#4f46e5",
-                          fontWeight: 600,
-                          fontSize: 14,
-                          cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-                          fontFamily: "'Plus Jakarta Sans', sans-serif",
-                          transition: "all 0.18s ease"
-                        }}
-                      >
-                        Next →
-                      </button>
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        prevLabel="← Prev"
+                        nextLabel="Next →"
+                      />
                     </motion.div>
                   )}
                 </motion.div>

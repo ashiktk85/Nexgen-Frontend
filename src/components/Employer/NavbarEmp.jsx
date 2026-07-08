@@ -29,6 +29,8 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
 
   const confirmLogout = () => setIsLogoutDialogOpen(true);
 
+  const closeSidebar = () => setSidebarOpen(false);
+
   const handleLogout = async () => {
     try {
       const response = await employerAxiosInstance.post("/logout");
@@ -44,9 +46,22 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
     }
   };
 
-  const toggleSubmenu = (id) => {
-    setOpenMenus((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
+  // Close mobile drawer on route change
+  useEffect(() => {
+    closeSidebar();
+  }, [location.pathname]);
+
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    if (!isSidebarOpen) return undefined;
+    const mq = window.matchMedia("(max-width: 1023px)");
+    if (!mq.matches) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isSidebarOpen]);
 
   // Close sidebar when clicking outside
   useEffect(() => {
@@ -67,18 +82,28 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
 
   // Adjust sidebar width based on mobile + desktop collapse state
   const getSidebarWidth = () => {
-    if (isSidebarOpen) return "w-[250px] opacity-100"; // mobile open state
-    // desktop states
-    return `w-0 opacity-0 lg:opacity-100 ${isCollapsed ? "lg:w-[80px]" : "lg:w-[250px]"
-      }`;
+    if (isSidebarOpen) return "w-[min(280px,88vw)] opacity-100";
+    return `w-0 opacity-0 lg:opacity-100 ${isCollapsed ? "lg:w-[80px]" : "lg:w-[250px]"}`;
   };
+
+  const showNavLabels = isSidebarOpen || !isCollapsed;
 
   return (
     <>
+      {/* Mobile backdrop */}
+      {isSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close menu"
+          className="lg:hidden fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-[2px]"
+          onClick={closeSidebar}
+        />
+      )}
+
       <div
         ref={sidebarRef}
         style={{ background: "linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4338ca 100%)" }}
-        className={`text-white shadow-lg h-screen fixed top-0 left-0 overflow-auto z-10 transition-all duration-300 flex flex-col ${getSidebarWidth()}`}
+        className={`text-white shadow-lg h-screen fixed top-0 left-0 overflow-auto z-50 lg:z-10 transition-all duration-300 flex flex-col ${getSidebarWidth()}`}
       >
         {/* Sidebar Header */}
         <div
@@ -86,7 +111,7 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
             isCollapsed ? "justify-center px-2 py-3" : "justify-between px-4 py-4"
           }`}
         >
-          {isCollapsed ? (
+          {isCollapsed && !isSidebarOpen ? (
             <button
               type="button"
               onClick={() => setIsCollapsed(false)}
@@ -100,8 +125,10 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
             <>
               <TechpathBrand {...BRAND_SIZES.compact} textColor="#ffffff" />
               <button
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden lg:block text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none"
+                type="button"
+                onClick={() => (isSidebarOpen ? closeSidebar() : setIsCollapsed(!isCollapsed))}
+                className="text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none"
+                aria-label={isSidebarOpen ? "Close menu" : "Collapse sidebar"}
               >
                 <svg
                   className="w-6 h-6"
@@ -193,15 +220,16 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
                 ? item.matchUrls.some((u) => location.pathname.includes(u))
                 : location.pathname.includes(item.url);
               return (
-                <li key={item.id} title={isCollapsed ? item.label : ""}>
+                <li key={item.id} title={!showNavLabels ? item.label : ""}>
                   <Link
                     to={item.url}
+                    onClick={closeSidebar}
                     className={`flex items-center text-white rounded-md transition-all duration-300 ${isActive ? "bg-white/20 font-semibold" : "hover:bg-white/10"
-                      } ${isCollapsed ? "justify-center px-1 py-3" : "px-3 py-2.5 space-x-3"
+                      } ${showNavLabels ? "px-3 py-2.5 space-x-3" : "justify-center px-1 py-3"
                       }`}
                   >
                     {item.icon}
-                    {!isCollapsed && (
+                    {showNavLabels && (
                       <span className="text-sm overflow-hidden text-ellipsis whitespace-nowrap">
                         {item.label}
                       </span>
@@ -215,7 +243,7 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
 
         {/* Profile Section at bottom */}
         <div className="p-4 border-t border-white/20 pb-6">
-          {isCollapsed ? (
+          {isCollapsed && !isSidebarOpen ? (
             <div className="hidden lg:flex flex-col items-center gap-3">
               <button
                 onClick={() => setIsCollapsed(false)}
@@ -272,18 +300,22 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
         </div>
       </div>
 
-      <div className="lg:hidden fixed top-4 right-4 z-[60]">
+      <div className="lg:hidden fixed top-3 left-3 z-[60]">
         <button
+          type="button"
           onClick={() => setSidebarOpen((prev) => !prev)}
-          className="bg-white p-2 text-gray-800 rounded-lg shadow-md border hover:bg-gray-50 focus:outline-none"
+          className="bg-white p-2.5 text-gray-800 rounded-xl shadow-md border hover:bg-gray-50 focus:outline-none flex items-center justify-center w-11 h-11"
+          aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
         >
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-              clipRule="evenodd"
-            ></path>
-          </svg>
+          {isSidebarOpen ? (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+              <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+            </svg>
+          )}
         </button>
       </div>
 

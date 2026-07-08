@@ -9,13 +9,14 @@ import { FaTh, FaList } from "react-icons/fa";
 import { employerJobDelete, employerJobStatusChange } from "@/apiServices/userApi";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Briefcase, AlertTriangle, TrendingUp, CheckCircle2, XCircle, Users, ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { Plus, Briefcase, AlertTriangle, TrendingUp, CheckCircle2, XCircle, Users, ChevronDown, Pencil, Trash2, MapPin, ExternalLink } from "lucide-react";
 import { DataTable } from "@/components/ui/DataTable";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import CreateJobForm from "@/components/Employer/CreateJobForm";
-
-
-
+import { formatSalary } from "@/utils/formatSalary";
+import Pagination from "@/components/ui/Pagination";
+import { JOB_GRID_PAGE_SIZE } from "@/constants/pagination";
+import { getSafePage } from "@/utils/pagination";
 /* ─── Inject styles once ─── */
 if (!document.getElementById("ejl-styles")) {
   const s = document.createElement("style");
@@ -92,6 +93,24 @@ if (!document.getElementById("ejl-styles")) {
     .ejl-del-confirm:hover { opacity:.9; transform:translateY(-1px); }
     .ejl-del-cancel  { background:#f1f5f9; color:#475569; }
     .ejl-del-cancel:hover { background:#e2e8f0; }
+
+    .ejl-jobs-grid {
+      display:grid;
+      grid-template-columns:repeat(1, minmax(0, 1fr));
+      gap:14px;
+      align-items:stretch;
+    }
+    @media (min-width:640px) {
+      .ejl-jobs-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width:960px) {
+      .ejl-jobs-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+    }
+
+    .ejl-view-toggle { display:none; }
+    @media (min-width:768px) {
+      .ejl-view-toggle { display:flex; }
+    }
   `;
   document.head.appendChild(s);
 }
@@ -154,8 +173,10 @@ function JobList() {
   const navigate = useNavigate();
 
   const [editingJob, setEditingJob] = useState(null);
+  const [viewingJob, setViewingJob] = useState(null);
 
   const handleEdit = (job) => job && setEditingJob(job);
+  const handleView = (job) => job && setViewingJob(job);
   const handleDelete = (job) => { if (job) { setSelectedJob(job); setIsDialogOpen(true); } };
 
   const handleStatus = (job) => {
@@ -184,6 +205,14 @@ function JobList() {
     } catch (err) { toast.error(err.response?.data?.message || "Unexpected error"); }
     finally { setIsDialogOpen(false); }
   };
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const onChange = (e) => { if (e.matches) setViewMode("grid"); };
+    mq.addEventListener("change", onChange);
+    if (mq.matches) setViewMode("grid");
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -216,7 +245,7 @@ function JobList() {
     {
       id: "salary",
       header: "Salary",
-      cell: (row) => <span style={{ fontSize: 13, color: "#16a34a", fontWeight: 600 }}>₹{row.salaryRange?.join(" - ")}</span>
+      cell: (row) => <span style={{ fontSize: 13, color: "#16a34a", fontWeight: 600 }}>{formatSalary(row)}</span>
     },
     {
       id: "applicants",
@@ -261,7 +290,7 @@ function JobList() {
   ];
 
   // ─── Search & Pagination helpers ───
-  const JOBS_PER_PAGE = 6;
+  const JOBS_PER_PAGE = JOB_GRID_PAGE_SIZE;
 
   const filteredJobs = jobs.filter((job) => {
     // text search
@@ -299,7 +328,7 @@ function JobList() {
   });
 
   const totalPages = Math.max(1, Math.ceil(filteredJobs.length / JOBS_PER_PAGE));
-  const safePage = Math.min(currentPage, totalPages);
+  const safePage = getSafePage(currentPage, totalPages);
   const startIdx = (safePage - 1) * JOBS_PER_PAGE;
   const paginatedJobs = filteredJobs.slice(startIdx, startIdx + JOBS_PER_PAGE);
 
@@ -318,6 +347,7 @@ function JobList() {
           {/* ── Page heading ── */}
           <motion.div
             variants={itemVariants}
+            className="employer-page-header"
             style={{
               display: "flex",
               alignItems: "flex-start",
@@ -335,7 +365,7 @@ function JobList() {
                 Job Listing
               </h1>
             </div>
-            <button className="ejl-add-btn" onClick={() => navigate("/employer/create_job")}>
+            <button className="ejl-add-btn ejl-add-btn-mobile" onClick={() => navigate("/employer/create_job")}>
               <Plus size={14} /> Post New Job
             </button>
           </motion.div>
@@ -345,7 +375,7 @@ function JobList() {
             variants={itemVariants}
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))",
+              gridTemplateColumns: "repeat(auto-fill,minmax(min(100%,140px),1fr))",
               gap: 14,
               marginBottom: 24,
             }}
@@ -386,16 +416,7 @@ function JobList() {
               All Listings
               <span style={{ fontSize: 12.5, fontWeight: 500, color: "#94a3b8", marginLeft: 7 }}>({filteredJobs.length})</span>
             </h2>
-            <div
-              style={{
-                display: "flex",
-                background: "#fff",
-                border: "1.5px solid #e2e8f0",
-                borderRadius: 10,
-                overflow: "hidden",
-                marginLeft: "auto",
-              }}
-            >
+            <div className="ejl-view-toggle" style={{ background: "#fff", border: "1.5px solid #e2e8f0", borderRadius: 10, overflow: "hidden", marginLeft: "auto" }}>
               <button className={`ejl-view-btn ${viewMode === "grid" ? "active" : "inactive"}`} onClick={() => setViewMode("grid")}><FaTh /></button>
               <button className={`ejl-view-btn ${viewMode === "list" ? "active" : "inactive"}`} onClick={() => setViewMode("list")}><FaList /></button>
             </div>
@@ -412,7 +433,8 @@ function JobList() {
             <div
               style={{
                 flex: 1,
-                minWidth: 220,
+                minWidth: 0,
+                width: "100%",
                 display: "flex",
                 alignItems: "center",
                 background: "#fff",
@@ -470,17 +492,12 @@ function JobList() {
             viewMode === "grid" ? (
               <motion.div
                 variants={containerVariants}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))",
-                  gap: 14,
-                  alignItems: "stretch",
-                }}
+                className="ejl-jobs-grid"
               >
                 <AnimatePresence>
                   {paginatedJobs.map((job, index) => (
                     <motion.div key={job._id} custom={index} variants={cardVariants} initial="hidden" animate="visible" exit="exit" style={{ height: "100%" }}>
-                      <JobCard job={job} handleEdit={handleEdit} handleStatus={handleStatus} handleDelete={handleDelete} />
+                      <JobCard job={job} handleEdit={handleEdit} handleStatus={handleStatus} handleDelete={handleDelete} handleView={handleView} />
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -495,13 +512,7 @@ function JobList() {
                   overflow: "hidden",
                 }}
               >
-                <div
-                  style={{
-                    width: "100%",
-                    overflowX: "auto",
-                  }}
-                >
-                  <div style={{ minWidth: 640 }}>
+                <div style={{ width: "100%", overflowX: "auto" }}>
                     <DataTable
                       columns={columns}
                       data={filteredJobs}
@@ -509,12 +520,18 @@ function JobList() {
                       showActions={true}
                       compact={false}
                       showSno={true}
+                      responsiveCards
+                      onView={handleView}
                       onEdit={handleEdit}
                       onBlock={handleStatus}
                       onDelete={handleDelete}
                       blockLabel={<AlertTriangle size={14} />}
+                      currentPage={safePage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                      rowsPerPage={JOBS_PER_PAGE}
+                      clientSidePagination
                     />
-                  </div>
                 </div>
               </motion.div>
             )
@@ -532,77 +549,14 @@ function JobList() {
             </motion.div>
           )}
 
-          {/* ── Pagination (grid view only) ── */}
+          {/* ── Pagination (grid view) ── */}
           {!loading && filteredJobs.length > JOBS_PER_PAGE && viewMode === "grid" && (
-            <motion.div
-              variants={itemVariants}
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 6,
-                marginTop: 22,
-              }}
-            >
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={safePage === 1}
-                style={{
-                  padding: "7px 14px",
-                  borderRadius: 999,
-                  border: "1.5px solid #e2e8f0",
-                  background: safePage === 1 ? "#f8fafc" : "#fff",
-                  color: safePage === 1 ? "#cbd5e1" : "#4f46e5",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: safePage === 1 ? "not-allowed" : "pointer",
-                  fontFamily: "'Plus Jakarta Sans',sans-serif",
-                }}
-              >
-                Prev
-              </button>
-              {[...Array(totalPages)].map((_, idx) => {
-                const page = idx + 1;
-                const isActive = page === safePage;
-                return (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    style={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: 10,
-                      border: isActive ? "none" : "1.5px solid #e2e8f0",
-                      background: isActive ? "linear-gradient(135deg,#4f46e5,#6366f1)" : "#fff",
-                      color: isActive ? "#fff" : "#475569",
-                      fontSize: 13,
-                      fontWeight: isActive ? 700 : 500,
-                      cursor: "pointer",
-                      boxShadow: isActive ? "0 4px 12px rgba(99,102,241,0.3)" : "none",
-                      fontFamily: "'Plus Jakarta Sans',sans-serif",
-                    }}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-              <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={safePage === totalPages}
-                style={{
-                  padding: "7px 14px",
-                  borderRadius: 999,
-                  border: "1.5px solid #e2e8f0",
-                  background: safePage === totalPages ? "#f8fafc" : "#fff",
-                  color: safePage === totalPages ? "#cbd5e1" : "#4f46e5",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: safePage === totalPages ? "not-allowed" : "pointer",
-                  fontFamily: "'Plus Jakarta Sans',sans-serif",
-                }}
-              >
-                Next
-              </button>
+            <motion.div variants={itemVariants} style={{ marginTop: 22 }}>
+              <Pagination
+                currentPage={safePage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </motion.div>
           )}
 
@@ -675,6 +629,81 @@ function JobList() {
           </Dialog>
         )}
       </AnimatePresence>
+
+      {/* ── View job sheet ── */}
+      <Sheet open={!!viewingJob} onOpenChange={(open) => { if (!open) setViewingJob(null); }}>
+        <SheetContent className="sm:max-w-md" style={{ overflowY: "auto" }}>
+          {viewingJob && (
+            <>
+              <SheetHeader>
+                <SheetTitle style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 18 }}>
+                  {viewingJob.jobTitle}
+                </SheetTitle>
+              </SheetHeader>
+              <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 14, fontFamily: "'DM Sans',sans-serif" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#475569" }}>
+                  <MapPin size={14} color="#6366f1" />
+                  {viewingJob.city}, {viewingJob.state}, {viewingJob.country}
+                </div>
+                <div style={{ fontSize: 13, color: "#16a34a", fontWeight: 600 }}>
+                  Salary: {formatSalary(viewingJob)}
+                </div>
+                <div style={{ fontSize: 13, color: "#475569" }}>
+                  Experience: {viewingJob.experienceRequired?.[0]}–{viewingJob.experienceRequired?.[viewingJob.experienceRequired?.length - 1]} yrs
+                </div>
+                <div>
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 9px", borderRadius: 999,
+                    fontSize: 11, fontWeight: 700,
+                    background: viewingJob.status === "open" ? "#f0fdf4" : "#f1f5f9",
+                    color: viewingJob.status === "open" ? "#16a34a" : "#64748b",
+                  }}>
+                    {viewingJob.status === "open" ? "Active" : "Closed"}
+                  </span>
+                </div>
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", margin: "0 0 6px" }}>Description</p>
+                  <p style={{ fontSize: 13, color: "#475569", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{viewingJob.description}</p>
+                </div>
+                {viewingJob.requirements?.length > 0 && (
+                  <div>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", margin: "0 0 6px" }}>Requirements</p>
+                    <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: "#475569" }}>
+                      {viewingJob.requirements.map((r, i) => <li key={i}>{r}</li>)}
+                    </ul>
+                  </div>
+                )}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+                  <button
+                    className="ejl-add-btn"
+                    style={{ width: "100%", justifyContent: "center" }}
+                    onClick={() => navigate(`/employer/applicants/${viewingJob._id}`)}
+                  >
+                    <Users size={14} /> View Applicants ({viewingJob.applicantsCount || 0})
+                  </button>
+                  <button
+                    style={{
+                      display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      padding: "9px 18px", borderRadius: 10, border: "1.5px solid #e2e8f0", background: "#fff",
+                      fontSize: 13, fontWeight: 600, color: "#4f46e5", cursor: "pointer",
+                    }}
+                    onClick={() => window.open(`/job-details/${viewingJob._id}`, "_blank")}
+                  >
+                    <ExternalLink size={14} /> Preview Public Page
+                  </button>
+                  <button
+                    className="ejc-action-btn"
+                    style={{ width: "100%", justifyContent: "center" }}
+                    onClick={() => { setViewingJob(null); handleEdit(viewingJob); }}
+                  >
+                    <Pencil size={14} /> Edit Job
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* ── Edit job sheet ── */}
       <Sheet open={!!editingJob} onOpenChange={(open) => { if (!open) setEditingJob(null); }}>

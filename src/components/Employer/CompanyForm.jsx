@@ -88,6 +88,16 @@ if (!document.getElementById("cf-styles")) {
     }
     .cf-submit-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(168,85,247,.45); }
     .cf-submit-btn:disabled { opacity:.6; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    .cf-grid-2 { display:grid; grid-template-columns:1fr; gap:24px; }
+    @media (min-width:768px) { .cf-grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    .cf-grid-auto { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr)); gap:16px; }
+    .cf-form-actions { display:flex; flex-direction:column-reverse; gap:10px; }
+    @media (min-width:640px) { .cf-form-actions { flex-direction:row; justify-content:flex-end; } }
+    @media (max-width:639px) {
+      .cf-section { padding:16px; }
+      .cf-form-actions button, .cf-submit-btn { width:100%; }
+    }
   `;
   document.head.appendChild(s);
 }
@@ -248,7 +258,7 @@ const CompanyForm = ({ company = null }) => {
       <motion.div variants={itemVariants} className="cf-section">
         <SH icon={<Building2 size={16} style={{ color: "#a855f7" }} />} title="Basic Information" iconBg="#faf5ff" />
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(350px,1fr))", gap: 24 }}>
+        <div className="cf-grid-2">
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div>
               <FL required>Shop Name</FL>
@@ -319,7 +329,7 @@ const CompanyForm = ({ company = null }) => {
       <motion.div variants={itemVariants} className="cf-section">
         <SH icon={<Mail size={16} style={{ color: "#0ea5e9" }} />} title="Contact Details" iconBg="#f0f9ff" />
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(350px,1fr))", gap: 24 }}>
+        <div className="cf-grid-2">
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div>
               <FL required>Email Address</FL>
@@ -361,7 +371,7 @@ const CompanyForm = ({ company = null }) => {
       <motion.div variants={itemVariants} className="cf-section">
         <SH icon={<ImageIcon size={16} style={{ color: "#ec4899" }} />} title="Media & Documents" iconBg="#fdf4ff" />
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 16 }}>
+        <div className="cf-grid-auto">
           {/* Certificate */}
           <div>
             <FL>Shop Certificate <span style={{ fontWeight: 400, textTransform: "none", color: "#94a3b8" }}>(PDF only)</span></FL>
@@ -566,7 +576,7 @@ const CompanyForm = ({ company = null }) => {
       </motion.div>
 
       {/* ── Actions ── */}
-      <motion.div variants={itemVariants} style={{ display: "flex", gap: 12 }}>
+      <motion.div variants={itemVariants} className="cf-form-actions">
         <button type="button" onClick={() => navigate(-1)}
           style={{ padding: "13px 24px", borderRadius: 12, border: "1.5px solid #e2e8f0", background: "#fff", color: "#475569", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all .18s", flex: 1 }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = "#c7d2fe"; e.currentTarget.style.color = "#4f46e5"; }}

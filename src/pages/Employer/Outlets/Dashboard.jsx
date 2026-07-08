@@ -33,8 +33,12 @@ if (!document.getElementById("edb-styles")) {
       overflow:hidden; transition:box-shadow .2s,border-color .2s;
     }
     .edb-card:hover { box-shadow:0 8px 28px rgba(79,70,229,.07); border-color:#c7d2fe; }
-    .edb-card-header { padding:20px 24px 0; }
-    .edb-card-body   { padding:20px 24px 24px; }
+    .edb-card-header { padding:16px 16px 0; }
+    .edb-card-body   { padding:16px 16px 20px; }
+    @media (min-width:640px) {
+      .edb-card-header { padding:20px 24px 0; }
+      .edb-card-body   { padding:20px 24px 24px; }
+    }
 
     /* Chart title */
     .edb-chart-title { font-size:15px; font-weight:700; color:#0f172a; margin:0 0 3px; }
@@ -189,11 +193,11 @@ export default function Dashboard() {
   const chartColors = { applications: "#6366f1", jobs: "#10b981", shortlist: "#f59e0b" };
 
   return (
-    <div className="edb-root" style={{ background: "#f1f5f9", minHeight: "100vh", padding: "32px 24px 56px" }}>
+    <div className="edb-root" style={{ background: "#f1f5f9", minHeight: "100vh", padding: "16px 12px 48px" }}>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
 
         {/* ── Page heading ── */}
-        <motion.div variants={itemVariants} style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 28 }}>
+        <motion.div variants={itemVariants} className="employer-page-header" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 28 }}>
           <div>
             <p style={{ fontSize: 11.5, fontWeight: 700, color: "#94a3b8", letterSpacing: ".09em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
               Employer Dashboard
@@ -202,7 +206,7 @@ export default function Dashboard() {
               Recruitment Analytics
             </h1>
           </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <div className="employer-page-header-actions" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <Link to="/employer/job_list" className="edb-btn-outline">
               <LayoutList size={14} /> View Jobs
             </Link>
@@ -213,7 +217,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* ── Stat cards ── */}
-        <motion.div variants={itemVariants} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 14, marginBottom: 24 }}>
+        <motion.div variants={itemVariants} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(min(100%,140px),1fr))", gap: 12, marginBottom: 24 }}>
           <StatCard
             icon={<Briefcase size={20} color="#fff" />}
             label="Total Applications"
@@ -258,8 +262,8 @@ export default function Dashboard() {
               </div>
             ) : (
               <>
-                <ResponsiveContainer width="100%" height={280}>
-                  <LineChart data={applicationData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                <ResponsiveContainer width="100%" height={240}>
+                  <LineChart data={applicationData} margin={{ top: 5, right: 4, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                     <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 11.5, fill: "#94a3b8", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600 }} />
                     <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11.5, fill: "#94a3b8", fontFamily: "'Plus Jakarta Sans',sans-serif" }} />
@@ -306,6 +310,7 @@ export default function Dashboard() {
                 showActions={true}
                 compact={false}
                 showSno={true}
+                responsiveCards
                 currentPage={1}
                 totalPages={1}
                 onPageChange={() => { }}

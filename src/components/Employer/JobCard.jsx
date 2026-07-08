@@ -1,6 +1,6 @@
 import React from "react";
 import { MdPlace } from "react-icons/md";
-import { FaIndianRupeeSign } from "react-icons/fa6";
+import { formatSalary } from "@/utils/formatSalary";
 import { IoBriefcase } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { EditOutlined, EyeInvisibleOutlined, DeleteOutlined, EyeOutlined, TeamOutlined } from "@ant-design/icons";
@@ -22,7 +22,9 @@ if (!document.getElementById("ejc-styles")) {
       transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease;
       overflow:hidden;
       width:100%;
-      height:320px;
+      width:100%;
+      min-height:280px;
+      height:auto;
       display:flex;
       flex-direction:column;
     }
@@ -44,11 +46,17 @@ if (!document.getElementById("ejc-styles")) {
 
     .ejc-action-btn {
       display:inline-flex; align-items:center; gap:5px;
-      padding:6px 12px; border-radius:8px; border:1.5px solid #e2e8f0;
-      font-size:12px; font-weight:600; cursor:pointer;
+      padding:8px 10px; border-radius:8px; border:1.5px solid #e2e8f0;
+      font-size:11.5px; font-weight:600; cursor:pointer;
       font-family:'Plus Jakarta Sans',sans-serif;
       background:#fff; color:#475569;
       transition:all .18s ease; white-space:nowrap;
+      flex:1 1 calc(50% - 4px);
+      justify-content:center;
+      min-width:0;
+    }
+    @media (min-width:480px) {
+      .ejc-action-btn { flex:0 1 auto; padding:6px 12px; font-size:12px; }
     }
     .ejc-action-btn:hover { background:#f8fafc; border-color:#c7d2fe; color:#4f46e5; }
     .ejc-action-btn.danger:hover { background:#fef2f2; border-color:#fecaca; color:#ef4444; }
@@ -62,7 +70,10 @@ if (!document.getElementById("ejc-styles")) {
       display:flex;
       flex-direction:column;
       min-height:0;
-      padding:22px 24px;
+      padding:16px 18px;
+    }
+    @media (min-width:640px) {
+      .ejc-card-body { padding:22px 24px; }
     }
     .ejc-card-header { flex-shrink:0; margin-bottom:12px; }
     .ejc-card-meta {
@@ -104,7 +115,7 @@ const getGrad = (ch = "A") => {
   return gs[((ch.toUpperCase().charCodeAt(0)-65)%gs.length+gs.length)%gs.length];
 };
 
-const JobCard = ({ job, handleEdit, handleDelete, handleStatus }) => {
+const JobCard = ({ job, handleEdit, handleDelete, handleStatus, handleView }) => {
   const navigate = useNavigate();
   const initial = job.jobTitle?.charAt(0) || "J";
   const isOpen = job?.status === "open";
@@ -157,7 +168,7 @@ const JobCard = ({ job, handleEdit, handleDelete, handleStatus }) => {
             <span className="ejc-meta"><MdPlace style={{ color:"#ec4899", fontSize:13 }} />{job.city}, {job.country}</span>
           </div>
           <div className="ejc-meta-row">
-            <span className="ejc-meta"><FaIndianRupeeSign style={{ color:"#16a34a", fontSize:11 }} />{job.salaryRange?.join(" – ")}</span>
+            <span className="ejc-meta">{formatSalary(job)}</span>
           </div>
         </div>
 
@@ -176,6 +187,11 @@ const JobCard = ({ job, handleEdit, handleDelete, handleStatus }) => {
 
           <div style={{ height:1, background:"#f1f5f9", margin:"0 0 12px" }} />
           <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+            {handleView && (
+              <button className="ejc-action-btn" onClick={() => handleView(job)}>
+                <EyeOutlined style={{ fontSize:11 }} /> View
+              </button>
+            )}
             <button className="ejc-action-btn" onClick={() => handleEdit(job)}>
               <EditOutlined style={{ fontSize:11 }} /> Edit
             </button>

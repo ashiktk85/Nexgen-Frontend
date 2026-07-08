@@ -8,6 +8,7 @@ import { getApiErrorMessage } from "@/utils/apiError";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
+import { AUTH_PANEL_FORGOT_PASSWORD } from "@/constants/authPanelCopy";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -52,12 +53,11 @@ const ForgotPassword = () => {
           <GrapeAnimation className="sm:hidden" />
 
           <h2 className="text-2xl lg:text-3xl font-semibold mb-4">
-            Find Jobs for Mobile Technicians
+            {AUTH_PANEL_FORGOT_PASSWORD.title}
           </h2>
 
           <p className="text-base lg:text-lg text-gray-200 mb-4">
-            Discover the best opportunities and connect with employers who value
-            your skills.
+            {AUTH_PANEL_FORGOT_PASSWORD.subtitle}
           </p>
         </div>
       </div>

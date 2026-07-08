@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
-import { Ban, Edit, Trash2, ChevronLeft, ChevronRight, Ticket, MoreHorizontal } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { Ban, Edit, Trash2, Ticket, MoreHorizontal } from "lucide-react";
 import { SearchInput } from "./SearchInput";
 import { displayValue } from "@/utils/tableValue";
+import Pagination from "./Pagination";
 
 function getCellValue(item, column) {
     if (column.cell) return column.cell(item);
@@ -49,12 +50,27 @@ export function DataTable({
     blockLabel,
     showSno = false,
     rowsPerPage = 10,
+    clientSidePagination = false,
+    responsiveCards = false,
 }) {
     const [sortDescriptor, setSortDescriptor] = useState({
         column: columns[0]?.id || "",
         direction: "ascending",
     });
     const [selectedRows, setSelectedRows] = useState(new Set());
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== "undefined" ? window.innerWidth < 768 : false
+    );
+
+    useEffect(() => {
+        const mq = window.matchMedia("(max-width: 767px)");
+        const onChange = (e) => setIsMobile(e.matches);
+        mq.addEventListener("change", onChange);
+        setIsMobile(mq.matches);
+        return () => mq.removeEventListener("change", onChange);
+    }, []);
+
+    const showCardLayout = responsiveCards && isMobile;
 
     const sortedItems = useMemo(() => {
         if (!sortDescriptor.column || !data) return data || [];
@@ -90,6 +106,18 @@ export function DataTable({
         });
     }, [data, sortDescriptor, columns]);
 
+    const paginatedItems = useMemo(() => {
+        if (!onPageChange || !clientSidePagination) return sortedItems;
+        const start = (currentPage - 1) * rowsPerPage;
+        return sortedItems.slice(start, start + rowsPerPage);
+    }, [sortedItems, onPageChange, clientSidePagination, currentPage, rowsPerPage]);
+
+    const displayItems = paginatedItems;
+
+    const effectiveTotalPages = clientSidePagination
+        ? Math.max(1, Math.ceil(sortedItems.length / rowsPerPage))
+        : totalPages;
+
     const handleSort = (columnId) => {
         const column = columns.find((col) => col.id === columnId);
         if (!column?.sortable) return;
@@ -124,7 +152,7 @@ export function DataTable({
         <div className="w-full rounded-xl border border-slate-200 bg-white overflow-hidden">
             {(title || badge || onSearchChange || filterComponents) && (
                 <>
-                    <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2.5 bg-slate-50/80">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 px-3 sm:px-4 py-2.5 bg-slate-50/80">
                         <div className="flex items-center gap-2">
                             {title && <h3 className="text-base font-semibold text-slate-900">{title}</h3>}
                             {badge && (
@@ -139,7 +167,7 @@ export function DataTable({
                                 value={searchValue}
                                 onSearch={onSearchChange}
                                 placeholder={searchPlaceholder}
-                                className="w-56"
+                                className="w-full sm:w-56"
                                 inputClassName="pl-8"
                             />
                         )}
@@ -153,6 +181,96 @@ export function DataTable({
                 </>
             )}
 
+            {showCardLayout ? (
+                <div className="divide-y divide-slate-200 bg-white">
+                    {loading ? (
+                        Array.from({ length: 4 }).map((_, rowIndex) => (
+                            <div key={`card-skeleton-${rowIndex}`} className="p-4 space-y-3 animate-pulse">
+                                <div className="h-4 w-1/3 rounded bg-gray-200" />
+                                <div className="h-3 w-2/3 rounded bg-gray-200" />
+                                <div className="h-3 w-1/2 rounded bg-gray-200" />
+                            </div>
+                        ))
+                    ) : displayItems.length > 0 ? (
+                        displayItems.map((item, index) => {
+                            const rowId = getRowId(item);
+                            return (
+                                <div key={rowId} className="p-4 space-y-2.5">
+                                    {showSno && (
+                                        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
+                                            #{(currentPage - 1) * rowsPerPage + index + 1}
+                                        </p>
+                                    )}
+                                    {columns.map((column) => (
+                                        <div key={column.id} className="flex items-start justify-between gap-3 text-sm">
+                                            <span className="text-slate-500 font-medium shrink-0">{column.header}</span>
+                                            <span className="text-slate-800 text-right break-words min-w-0">{getCellValue(item, column)}</span>
+                                        </div>
+                                    ))}
+                                    {showActions && (
+                                        <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+                                            {onViewDetails && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onViewDetails(item); }}
+                                                    className="cursor-pointer rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                                                >
+                                                    {viewDetailsLabel}
+                                                </button>
+                                            )}
+                                            {onView && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onView(item); }}
+                                                    className="cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700"
+                                                >
+                                                    {viewLabel}
+                                                </button>
+                                            )}
+                                            {onEdit && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onEdit(item); }}
+                                                    className="p-1.5 rounded-md text-blue-600 hover:bg-blue-50"
+                                                    title={editLabel || "Edit"}
+                                                >
+                                                    {editLabel || <Edit className="h-4 w-4" />}
+                                                </button>
+                                            )}
+                                            {onDelete && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onDelete(item); }}
+                                                    className="p-1.5 rounded-md text-red-600 hover:bg-red-50"
+                                                    title={deleteLabel || "Delete"}
+                                                >
+                                                    {deleteLabel || <Trash2 className="h-4 w-4" />}
+                                                </button>
+                                            )}
+                                            {onBlock && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onBlock(item); }}
+                                                    className="px-3 py-1.5 text-xs rounded-lg font-semibold text-white bg-amber-500 hover:bg-amber-600"
+                                                >
+                                                    {getBlockLabel(item)}
+                                                </button>
+                                            )}
+                                            {onOthers && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onOthers(item); }}
+                                                    className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
+                                                >
+                                                    {othersLabel || <MoreHorizontal className="h-4 w-4" />}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })
+                    ) : (
+                        <div className="px-4 py-8 text-center text-sm text-slate-500 bg-slate-50">
+                            No records found
+                        </div>
+                    )}
+                </div>
+            ) : (
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead className="border-b border-slate-200 bg-slate-50/80">
@@ -218,8 +336,8 @@ export function DataTable({
                                     )}
                                 </tr>
                             ))
-                        ) : sortedItems.length > 0 ? (
-                            sortedItems.map((item, index) => {
+                        ) : displayItems.length > 0 ? (
+                            displayItems.map((item, index) => {
                                 const rowId = getRowId(item);
                                 return (
                                     <tr key={rowId} className="hover:bg-slate-50/60 transition-colors">
@@ -328,63 +446,21 @@ export function DataTable({
                     </tbody>
                 </table>
             </div>
+            )}
 
             {onPageChange && (
-                <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/50 px-4 py-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-slate-200 bg-slate-50/50 px-3 sm:px-4 py-3">
                     <div className="text-xs text-slate-500">
-                        Page {currentPage} of {totalPages}
+                        Page {currentPage} of {effectiveTotalPages}
                     </div>
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={() => onPageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className={`rounded-lg px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors flex items-center gap-1 border ${currentPage === 1
-                                ? "border-slate-200 text-slate-400 cursor-not-allowed bg-slate-50"
-                                : "border-slate-300 text-slate-700 hover:bg-slate-50 bg-white"
-                                }`}
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                            Previous
-                        </button>
-
-                        <div className="hidden sm:flex items-center gap-1 mx-2">
-                            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                                // Simple logic to show current window of pages
-                                let pageNum = i + 1;
-                                if (totalPages > 5) {
-                                    if (currentPage > 3) {
-                                        pageNum = currentPage - 2 + i;
-                                    }
-                                    if (pageNum > totalPages) return null;
-                                }
-
-                                return (
-                                    <button
-                                        key={pageNum}
-                                        onClick={() => onPageChange(pageNum)}
-                                        className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${pageNum === currentPage
-                                            ? "bg-indigo-600 text-white"
-                                            : "text-slate-600 hover:bg-slate-100 bg-white border border-slate-200"
-                                            }`}
-                                    >
-                                        {pageNum}
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        <button
-                            onClick={() => onPageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                            className={`rounded-lg px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors flex items-center gap-1 border ${currentPage === totalPages
-                                ? "border-slate-200 text-slate-400 cursor-not-allowed bg-slate-50"
-                                : "border-slate-300 text-slate-700 hover:bg-slate-50 bg-white"
-                                }`}
-                        >
-                            Next
-                            <ChevronRight className="h-4 w-4" />
-                        </button>
-                    </div>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={effectiveTotalPages}
+                        onPageChange={onPageChange}
+                        variant="compact"
+                        prevLabel="Previous"
+                        nextLabel="Next"
+                    />
                 </div>
             )}
         </div>

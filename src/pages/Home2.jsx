@@ -70,7 +70,7 @@ export default function JobPortalLanding() {
         {/* Job Cards Section */}
         <div className="py-16 bg-gray-50">
           <h2 className="text-2xl font-bold text-primary px-4 lg:px-10 text-center">
-            Jobs Recommended for You
+            Latest Mobile Repair Jobs
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 lg:px-10 mt-6">
             {jobs.map((jobs, index) => (
@@ -97,14 +97,14 @@ export default function JobPortalLanding() {
             <div>
               <h2 className="text-3xl font-bold mb-4">For Job Seekers</h2>
               <p className="text-gray-700 mb-6">
-                Discover your next career move with our extensive job listings
-                and personalized recommendations.
+                Discover mobile repair careers across Kerala — browse listings,
+                build your technician profile, and apply to verified shops.
               </p>
               <ul className="space-y-2 mb-4">
                 {[
-                  "Access thousands of job listings",
-                  "Create a standout profile",
-                  "Get personalized job recommendations",
+                  "Browse chip-level, Android, and iPhone repair jobs",
+                  "Create a profile with resume, education, and experience",
+                  "Filter by Kerala district, skill, and experience level",
                 ].map((item, index) => (
                   <li key={index} className="flex items-center">
                     <CheckCircleOutline className="text-green-500 mr-2" />
@@ -139,14 +139,14 @@ export default function JobPortalLanding() {
             <div>
               <h2 className="text-3xl font-bold mb-4">For Employers</h2>
               <p className="text-gray-700 mb-6">
-                Find the perfect candidates quickly and efficiently with our
-                advanced recruiting tools.
+                Hire qualified mobile technicians with job posts, shop profiles,
+                and application tools built for Kerala&apos;s repair industry.
               </p>
               <ul className="space-y-2 mb-4">
                 {[
-                  "Post jobs and manage applications",
-                  "Search our extensive candidate database",
-                  "Use AI-powered matching technology",
+                  "Post jobs and manage applications in one place",
+                  "Showcase your repair shop with location and contact details",
+                  "Schedule go-live dates and reach interested technicians",
                 ].map((item, index) => (
                   <li key={index} className="flex items-center">
                     <CheckCircleOutline className="text-green-500 mr-2" />
@@ -169,16 +169,16 @@ export default function JobPortalLanding() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4 lg:px-16">
             {[
               {
-                text: "JobConnect helped me find my dream job in just two weeks. The platform is user-friendly and the job recommendations were spot-on!",
-                author: "Sarah T. - Software Developer",
+                text: "TechPath helped me find a chip-level repair role in Ernakulam within two weeks.",
+                author: "Arun K. - Chip-Level Technician",
               },
               {
-                text: "As an employer, I've been impressed with the quality of candidates we've found through JobConnect. It's streamlined our hiring process significantly.",
-                author: "Mark R. - HR Manager",
+                text: "Posting jobs and reviewing applications on TechPath made hiring technicians for our service center much easier.",
+                author: "Sreejith M. - Repair Shop Owner",
               },
               {
-                text: "The AI-powered matching on JobConnect is a game-changer. I've never had such relevant job recommendations before!",
-                author: "Emily L. - Marketing Specialist",
+                text: "I could filter Android and iPhone repair jobs by district and experience — exactly what I needed.",
+                author: "Anjali P. - Mobile Technician",
               },
             ].map((testimonial, index) => (
               <div key={index} className="p-4 border rounded-lg">
@@ -236,7 +236,7 @@ export default function JobPortalLanding() {
       {/* Footer */}
       <footer className="py-4 bg-gray-200 text-center">
         <p className="text-gray-600 text-sm">
-          © 2024 JobConnect. All rights reserved.
+          © TechPath. All rights reserved.
         </p>
         <div className="space-x-4">
           <button className="text-blue-600 hover:underline">

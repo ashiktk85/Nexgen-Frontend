@@ -253,7 +253,7 @@ function Applicants() {
   const safePage = Math.min(currentPage, totalPages);
 
   return (
-    <div className="ejl-root" style={{ background: "#f1f5f9", minHeight: "100vh", padding: "32px 24px 48px" }}>
+    <div className="ejl-root" style={{ background: "#f1f5f9", minHeight: "100vh", padding: "16px 12px 40px" }}>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
 
         {/* ── Page heading ── */}
@@ -271,7 +271,7 @@ function Applicants() {
         {/* ── Gradient stat cards ── */}
         <motion.div
           variants={itemVariants}
-          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(190px,1fr))", gap: 14, marginBottom: 32 }}
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(min(100%,140px),1fr))", gap: 12, marginBottom: 24 }}
         >
           {getStats(applications).map(({ label, value, icon, gradient, shadow }) => (
             <StatCard
@@ -290,18 +290,17 @@ function Applicants() {
           variants={itemVariants}
           style={{
             display: "flex",
-            flexWrap: "wrap",
+            flexDirection: "column",
             gap: 12,
             alignItems: "stretch",
-            justifyContent: "space-between",
             marginBottom: 16,
           }}
         >
           {/* Search box */}
           <div
             style={{
-              flex: 1,
-              minWidth: 220,
+              width: "100%",
+              minWidth: 0,
               display: "flex",
               alignItems: "center",
               background: "#fff",
@@ -335,6 +334,7 @@ function Applicants() {
           {/* Status filter */}
           <div
             style={{
+              width: "100%",
               display: "flex",
               alignItems: "center",
               gap: 8,
@@ -392,10 +392,12 @@ function Applicants() {
               showActions={true}
               viewLabel="View Details"
               showSno={true}
+              responsiveCards
               currentPage={safePage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
               rowsPerPage={ROWS_PER_PAGE}
+              clientSidePagination
             />
           </div>
         </motion.div>

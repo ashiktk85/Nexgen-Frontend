@@ -6,9 +6,12 @@ import { Briefcase, CheckCircle2, ListChecks, XCircle, Plus } from "lucide-react
 import { useNavigate } from "react-router-dom";
 
 import ConfirmModal from "@/components/Admin/ConfirmModal";
-import { getAllJobs, jobListUnList } from "@/apiServices/adminApi";
+import { AdminFilterBar, AdminFilterSelect } from "@/components/Admin/AdminListFilters";
+import { getAllJobs, jobListUnList, deleteJobAdmin } from "@/apiServices/adminApi";
 import { toast } from "sonner";
 import moment from "moment";
+import { formatSalary } from "@/utils/formatSalary";
+import CreateJobForm from "@/components/Employer/CreateJobForm";
 import {
   ADMIN_PAGE,
   ADMIN_HEADER_EYEBROW,
@@ -18,37 +21,64 @@ import {
   ADMIN_SEARCH_INPUT,
 } from "@/components/Admin/adminPageLayout";
 
+const defaultFilters = {
+  listing: "all",
+  status: "all",
+  jobType: "all",
+  sortBy: "createdAt",
+  sortOrder: "desc",
+};
+
 const Jobs = () => {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [editingJob, setEditingJob] = useState(null);
   const [openSheet, setOpenSheet] = useState(false);
+  const [openEditSheet, setOpenEditSheet] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState(defaultFilters);
+  const [loading, setLoading] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingId, setPendingId] = useState(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const rowsPerPage = 20;
 
   useEffect(() => {
-    fetchJobs(currentPage, searchTerm);
-  }, [currentPage, searchTerm]);
+    fetchJobs(currentPage, searchTerm, filters);
+  }, [currentPage, searchTerm, filters]);
 
-  async function fetchJobs(page, search) {
+  async function fetchJobs(page, search, activeFilters) {
+    setLoading(true);
     try {
-      const result = await getAllJobs(page, rowsPerPage, search);
+      const result = await getAllJobs(page, rowsPerPage, {
+        search,
+        ...activeFilters,
+      });
 
       if (result?.data?.response) {
-        const { jobs, totalPages } = result.data.response;
-        setJobs(jobs);
-        setTotalPages(totalPages);
+        const { jobs: list, totalPages: pages } = result.data.response;
+        setJobs(list || []);
+        setTotalPages(pages ?? 1);
       }
     } catch (error) {
       console.log("Error in jobs listing component: ", error.message);
       toast.error("An unexpected error occured");
+    } finally {
+      setLoading(false);
     }
   }
+
+  const refreshJobs = () => fetchJobs(currentPage, searchTerm, filters);
+
+  const updateFilter = (key, value) => {
+    setCurrentPage(1);
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleListUnlist = async (jobId) => {
     try {
@@ -74,47 +104,84 @@ const Jobs = () => {
     }
   };
 
+  const handleHardDelete = async (jobId) => {
+    try {
+      const result = await deleteJobAdmin(jobId);
+      if (result?.data) {
+        toast.success(result.data.message || "Job deleted permanently");
+        setJobs((prev) => prev.filter((item) => item._id !== jobId));
+        if (selectedJob?._id === jobId) {
+          setOpenSheet(false);
+          setSelectedJob(null);
+        }
+        await fetchJobs(currentPage, searchTerm, filters);
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to delete job");
+    }
+  };
+
   const totalJobs = jobs.length;
   const listedJobs = jobs.filter((j) => !j.isBlocked).length;
   const unlistedJobs = jobs.filter((j) => j.isBlocked).length;
   const openJobs = jobs.filter((j) => j.status === "open").length;
+  const pendingJob = jobs.find((j) => j._id === pendingId);
+  const pendingDeleteJob = jobs.find((j) => j._id === pendingDeleteId);
+  const handleEdit = (row) => {
+    setEditingJob(row);
+    setOpenEditSheet(true);
+  };
 
   const columns = [
     {
       id: "jobTitle",
       header: "Job Title",
       accessor: "jobTitle",
-      sortable: true,
     },
     {
       id: "employerName",
       header: "Shop / Employer",
       accessor: "employerName",
-      sortable: true,
     },
     {
       id: "createdAt",
       header: "Posted on",
       accessor: (row) =>
         row.createdAt ? moment(row.createdAt).format("DD/MM/YYYY") : "—",
-      sortable: true,
+    },
+    {
+      id: "listing",
+      header: "Listing",
+      cell: (row) => (
+        <span
+          className={`inline-flex items-center justify-center min-w-[64px] px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+            row.isBlocked
+              ? "bg-red-100 text-red-700 border border-red-200"
+              : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+          }`}
+        >
+          {row.isBlocked ? "Unlisted" : "Listed"}
+        </span>
+      ),
     },
     {
       id: "status",
-      header: "Open/Close",
+      header: "Status",
       accessor: "status",
       cell: (row) => {
         const s = (row.status || "open").toLowerCase();
+        const isScheduled = s === "scheduled";
         const isOpen = s === "open";
-        const isPaused = s === "paused";
-        const label = (row.status || "open").charAt(0).toUpperCase() + (row.status || "open").slice(1);
+        const label = isScheduled
+          ? "Scheduled"
+          : (row.status || "open").charAt(0).toUpperCase() + (row.status || "open").slice(1);
         return (
           <span
             className={`inline-flex items-center justify-center min-w-[52px] px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-              isOpen
-                ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                : isPaused
-                  ? "bg-amber-100 text-amber-700 border border-amber-200"
+              isScheduled
+                ? "bg-violet-100 text-violet-700 border border-violet-200"
+                : isOpen
+                  ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
                   : "bg-red-100 text-red-700 border border-red-200"
             }`}
           >
@@ -173,7 +240,7 @@ const Jobs = () => {
           />
         </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
         <div className="flex-1 min-w-[200px] max-w-sm">
           <input
             type="text"
@@ -182,18 +249,73 @@ const Jobs = () => {
               setCurrentPage(1);
               setSearchTerm(e.target.value);
             }}
-            placeholder="Search by title or employer…"
+            placeholder="Search by title, shop, city…"
             className={ADMIN_SEARCH_INPUT}
           />
         </div>
       </div>
+
+      <AdminFilterBar>
+        <AdminFilterSelect
+          label="Listing"
+          value={filters.listing}
+          onChange={(e) => updateFilter("listing", e.target.value)}
+          options={[
+            { value: "all", label: "All listings" },
+            { value: "listed", label: "Listed" },
+            { value: "unlisted", label: "Unlisted" },
+          ]}
+        />
+        <AdminFilterSelect
+          label="Status"
+          value={filters.status}
+          onChange={(e) => updateFilter("status", e.target.value)}
+          options={[
+            { value: "all", label: "All statuses" },
+            { value: "open", label: "Open" },
+            { value: "closed", label: "Closed" },
+            { value: "paused", label: "Paused" },
+          ]}
+        />
+        <AdminFilterSelect
+          label="Type"
+          value={filters.jobType}
+          onChange={(e) => updateFilter("jobType", e.target.value)}
+          options={[
+            { value: "all", label: "All types" },
+            { value: "admin", label: "Admin jobs" },
+            { value: "employer", label: "Employer jobs" },
+          ]}
+        />
+        <AdminFilterSelect
+          label="Sort by"
+          value={filters.sortBy}
+          onChange={(e) => updateFilter("sortBy", e.target.value)}
+          options={[
+            { value: "createdAt", label: "Date posted" },
+            { value: "jobTitle", label: "Job title" },
+            { value: "status", label: "Status" },
+            { value: "listing", label: "Listing" },
+            { value: "city", label: "City" },
+          ]}
+        />
+        <AdminFilterSelect
+          label="Order"
+          value={filters.sortOrder}
+          onChange={(e) => updateFilter("sortOrder", e.target.value)}
+          options={[
+            { value: "desc", label: "Descending" },
+            { value: "asc", label: "Ascending" },
+          ]}
+        />
+      </AdminFilterBar>
 
       <div className={ADMIN_TABLE_WRAP}>
           <DataTable
             title="Jobs"
             columns={columns}
             data={jobs}
-            loading={!jobs.length && totalPages === 1}
+            loading={loading}
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
@@ -204,12 +326,19 @@ const Jobs = () => {
               setSelectedJob(row);
               setOpenSheet(true);
             }}
+            onEdit={(row) => handleEdit(row)}
             onBlock={(row) => {
               setPendingId(row._id);
               setConfirmOpen(true);
             }}
+            onDelete={(row) => {
+              setPendingDeleteId(row._id);
+              setDeleteConfirmOpen(true);
+            }}
             viewLabel="View"
+            editLabel="Edit"
             blockLabel={(row) => (row.isBlocked ? "List" : "Unlist")}
+            deleteLabel="Delete"
             showSno={true}
             rowsPerPage={rowsPerPage}
           />
@@ -218,13 +347,13 @@ const Jobs = () => {
       <ConfirmModal
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={jobs.find((j) => j._id === pendingId)?.isBlocked ? "List job?" : "Unlist job?"}
+        title={pendingJob?.isBlocked ? "List job?" : "Unlist job?"}
         description={
-          jobs.find((j) => j._id === pendingId)?.isBlocked
+          pendingJob?.isBlocked
             ? "This job will become visible to users again."
             : "This job will be hidden from users."
         }
-        confirmLabel={jobs.find((j) => j._id === pendingId)?.isBlocked ? "List" : "Unlist"}
+        confirmLabel={pendingJob?.isBlocked ? "List" : "Unlist"}
         cancelLabel="Cancel"
         loading={confirmLoading}
         onConfirm={async () => {
@@ -240,7 +369,32 @@ const Jobs = () => {
         }}
       />
 
-      {/* View sheet - same design as Employers */}
+      <ConfirmModal
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        variant="danger"
+        title="Permanently delete job?"
+        description={
+          pendingDeleteJob
+            ? `"${pendingDeleteJob.jobTitle}" will be removed from the database along with its applications. This cannot be undone.`
+            : "This job will be permanently removed from the database. This cannot be undone."
+        }
+        confirmLabel="Delete permanently"
+        cancelLabel="Cancel"
+        loading={confirmLoading}
+        onConfirm={async () => {
+          if (!pendingDeleteId) return;
+          setConfirmLoading(true);
+          try {
+            await handleHardDelete(pendingDeleteId);
+            setDeleteConfirmOpen(false);
+            setPendingDeleteId(null);
+          } finally {
+            setConfirmLoading(false);
+          }
+        }}
+      />
+
       <Sheet open={openSheet} onOpenChange={setOpenSheet}>
         <SheetContent side="right" className="sm:max-w-lg bg-slate-50 p-0">
           <SheetHeader className="px-4 pt-4 pb-2 border-b border-slate-200 bg-white">
@@ -299,8 +453,9 @@ const Jobs = () => {
                     </p>
                   </div>
                 </div>
-                <div className="px-3 pb-3">
+                <div className="px-3 pb-3 space-y-2">
                   <button
+                    type="button"
                     onClick={() => {
                       handleListUnlist(selectedJob._id);
                       setOpenSheet(false);
@@ -309,9 +464,137 @@ const Jobs = () => {
                   >
                     {selectedJob.isBlocked ? "List" : "Unlist"}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPendingDeleteId(selectedJob._id);
+                      setDeleteConfirmOpen(true);
+                    }}
+                    className="w-full px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors"
+                  >
+                    Delete permanently
+                  </button>
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    Shop Location
+                  </h3>
+                </div>
+                <div className="px-3 py-3 space-y-2">
+                  <p className="text-[11px] font-medium text-slate-500 uppercase">Area</p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {[selectedJob.city, selectedJob.state].filter(Boolean).join(", ") || "—"}
+                  </p>
+                  <p className="text-[11px] font-medium text-slate-500 uppercase">Country</p>
+                  <p className="text-sm text-slate-900">{selectedJob.country || "—"}</p>
+                </div>
+              </div>
+
+              {/* Core job details */}
+              <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    Job Details
+                  </h3>
+                </div>
+                <div className="px-3 py-3 space-y-2">
+                  <p className="text-[11px] font-medium text-slate-500 uppercase">Salary</p>
+                  <p className="text-sm font-semibold text-emerald-600">{formatSalary(selectedJob)}</p>
+
+                  <p className="text-[11px] font-medium text-slate-500 uppercase">Experience</p>
+                  <p className="text-sm text-slate-900">
+                    {selectedJob.experienceRequired?.[0]}–{selectedJob.experienceRequired?.[selectedJob.experienceRequired?.length - 1]} years
+                  </p>
+
+                  {selectedJob.workingTime && (
+                    <p className="text-[11px] font-medium text-slate-500 uppercase">
+                      Working Time
+                      <span className="block text-sm font-semibold text-slate-900 normal-case">{selectedJob.workingTime}</span>
+                    </p>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[11px] font-medium text-slate-500 uppercase">Room</p>
+                      <p className="text-sm font-semibold text-slate-900">{selectedJob.roomAvailable || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-slate-500 uppercase">Food</p>
+                      <p className="text-sm font-semibold text-slate-900">{selectedJob.foodAvailable || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-slate-500 uppercase">Incentive</p>
+                      <p className="text-sm font-semibold text-slate-900">{selectedJob.incentive || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-slate-500 uppercase">Probation</p>
+                      <p className="text-sm font-semibold text-slate-900">{selectedJob.probationPeriod || "—"}</p>
+                    </div>
+                  </div>
+
+                  {selectedJob.workingDays && (
+                    <p className="text-[11px] font-medium text-slate-500 uppercase">
+                      Working Days
+                      <span className="block text-sm font-semibold text-slate-900 normal-case">{selectedJob.workingDays}</span>
+                    </p>
+                  )}
+
+                  {selectedJob.holiday && (
+                    <p className="text-[11px] font-medium text-slate-500 uppercase">
+                      Holiday
+                      <span className="block text-sm font-semibold text-slate-900 normal-case">{selectedJob.holiday}</span>
+                    </p>
+                  )}
+
+                  <p className="text-[11px] font-medium text-slate-500 uppercase">Description</p>
+                  <p className="text-sm text-slate-900 whitespace-pre-wrap">{selectedJob.description || "—"}</p>
+
+                  {selectedJob.requirements?.length > 0 && (
+                    <>
+                      <p className="text-[11px] font-medium text-slate-500 uppercase">Requirements</p>
+                      <ul className="list-disc pl-5 text-sm text-slate-900">
+                        {selectedJob.requirements.map((r, idx) => (
+                          <li key={idx}>{r}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* ── Edit job sheet ── */}
+      <Sheet
+        open={openEditSheet}
+        onOpenChange={(open) => {
+          if (!open) {
+            setOpenEditSheet(false);
+            setEditingJob(null);
+          }
+        }}
+      >
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-3xl bg-slate-50 p-0"
+        >
+          {editingJob && (
+            <CreateJobForm
+              mode="admin"
+              page="update"
+              selectedData={editingJob}
+              onClose={() => {
+                setOpenEditSheet(false);
+                setEditingJob(null);
+                refreshJobs();
+              }}
+            />
           )}
         </SheetContent>
       </Sheet>
@@ -320,4 +603,3 @@ const Jobs = () => {
 };
 
 export default Jobs;
-

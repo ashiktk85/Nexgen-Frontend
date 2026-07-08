@@ -25,7 +25,7 @@ function LegalFooter() {
                 to="/terms"
                 className="text-gray-600 underline-offset-4 hover:text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
-                Terms of Service
+                Terms &amp; Conditions
               </Link>
             </li>
           </ul>
