@@ -563,7 +563,7 @@ const JobDetails = () => {
         <div className="jd-li-hero-glow-1" />
         <div className="jd-li-hero-glow-2" />
         <div className="jd-li-hero-inner">
-          <button type="button" className="jd-li-hero-back" onClick={() => navigate(-1)}>
+          <button type="button" className="jd-li-hero-back" onClick={() => navigate("/all-jobs")}>
             <ArrowLeft size={16} /> Back to jobs
           </button>
           <motion.div
@@ -743,27 +743,29 @@ const JobDetails = () => {
             </div>
 
             {/* About the job */}
-            <div className="jd-li-card">
-              <h2 className="jd-li-section-title">About the job</h2>
-              <p className="jd-li-description">{descriptionText}</p>
-              {isLongDesc && (
-                <button
-                  type="button"
-                  className="jd-li-show-more"
-                  onClick={() => setDescExpanded((e) => !e)}
-                >
-                  {descExpanded ? (
-                    <>
-                      Show less <ChevronUp size={16} />
-                    </>
-                  ) : (
-                    <>
-                      Show more <ChevronDown size={16} />
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
+            {job.description && (
+              <div className="jd-li-card">
+                <h2 className="jd-li-section-title">About the job</h2>
+                <p className="jd-li-description">{descriptionText}</p>
+                {isLongDesc && (
+                  <button
+                    type="button"
+                    className="jd-li-show-more"
+                    onClick={() => setDescExpanded((e) => !e)}
+                  >
+                    {descExpanded ? (
+                      <>
+                        Show less <ChevronUp size={16} />
+                      </>
+                    ) : (
+                      <>
+                        Show more <ChevronDown size={16} />
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* Requirements */}
             {job.requirements?.length > 0 && (

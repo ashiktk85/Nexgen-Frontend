@@ -147,12 +147,8 @@ const Dashboard = () => {
   });
   const [publicDelayHours, setPublicDelayHours] = useState("1");
   const [savedDelayMinutes, setSavedDelayMinutes] = useState(60);
-  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
-  const [whatsappNumber, setWhatsappNumber] = useState("");
-  const [whatsappMessage, setWhatsappMessage] = useState("Hello! I have a question about TechPath.");
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
-  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
 
   const fetchSettings = async () => {
     setSettingsLoading(true);
@@ -161,11 +157,6 @@ const Dashboard = () => {
       const minutes = res?.data?.settings?.publicJobDelayMinutes ?? 60;
       setSavedDelayMinutes(minutes);
       setPublicDelayHours(String(minutes / 60));
-      setWhatsappEnabled(Boolean(res?.data?.settings?.whatsappEnabled));
-      setWhatsappNumber(res?.data?.settings?.whatsappNumber || "");
-      setWhatsappMessage(
-        res?.data?.settings?.whatsappMessage || "Hello! I have a question about TechPath."
-      );
     } catch {
       toast.error("Failed to load job visibility settings");
     } finally {
@@ -192,26 +183,6 @@ const Dashboard = () => {
       toast.error("Failed to save job visibility settings");
     } finally {
       setSavingSettings(false);
-    }
-  };
-
-  const handleSaveWhatsapp = async () => {
-    if (whatsappEnabled && String(whatsappNumber).replace(/\D/g, "").length < 10) {
-      toast.error("Enter a valid WhatsApp number (at least 10 digits)");
-      return;
-    }
-    setSavingWhatsapp(true);
-    try {
-      await updatePlatformSettings({
-        whatsappEnabled,
-        whatsappNumber,
-        whatsappMessage,
-      });
-      toast.success("WhatsApp settings saved");
-    } catch {
-      toast.error("Failed to save WhatsApp settings");
-    } finally {
-      setSavingWhatsapp(false);
     }
   };
 
@@ -388,69 +359,6 @@ const Dashboard = () => {
                   {savingSettings ? "Saving..." : "Save Settings"}
                 </button>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── WhatsApp icon settings ── */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-4 pt-4 pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-emerald-600" />
-              <h2 className="text-base font-semibold text-slate-900">WhatsApp Icon</h2>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Configure the floating WhatsApp chat button on the public website
-            </p>
-          </div>
-          <div className="p-4 space-y-4">
-            {settingsLoading ? (
-              <Skeleton className="h-24 w-full" />
-            ) : (
-              <>
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={whatsappEnabled}
-                    onChange={(e) => setWhatsappEnabled(e.target.checked)}
-                    className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                  />
-                  Show WhatsApp icon on website
-                </label>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                    WhatsApp number (with country code, digits only)
-                  </label>
-                  <input
-                    type="text"
-                    value={whatsappNumber}
-                    onChange={(e) => setWhatsappNumber(e.target.value)}
-                    placeholder="e.g. 919876543210"
-                    className="w-full sm:max-w-md px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                    Pre-filled message (optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={whatsappMessage}
-                    onChange={(e) => setWhatsappMessage(e.target.value)}
-                    placeholder="Hello! I have a question about TechPath."
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSaveWhatsapp}
-                  disabled={savingWhatsapp}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  {savingWhatsapp ? "Saving..." : "Save WhatsApp Settings"}
-                </button>
-              </>
             )}
           </div>
         </div>

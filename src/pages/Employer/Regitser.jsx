@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import GrapeAnimation from "../../components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
@@ -9,16 +9,20 @@ import { getApiErrorMessage } from "@/utils/apiError";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import { KERALA_DISTRICTS } from "@/constants/options";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 import { AUTH_PANEL_EMPLOYER } from "@/constants/authPanelCopy";
+import { Autocomplete, TextField } from "@mui/material";
+import { Country, State, City } from "country-state-city";
+import { getCountryName, getStateName } from "@/utils/formatLocation";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
   const navigate = useNavigate();
 
-  const keralaDistricts = KERALA_DISTRICTS;
+  const countries = useMemo(() => Country.getAllCountries(), []);
 
   const showPasswordFunction = () => {
     var x = document.getElementById("password");
@@ -49,7 +53,9 @@ const Register = () => {
       email: "",
       password: "",
       confirmPassword: "",
-      district: "",
+      country: "",
+      state: "",
+      city: "",
     },
     validationSchema: Yup.object({
       name: Yup.string()
@@ -72,13 +78,23 @@ const Register = () => {
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password"), null], "Passwords must match")
         .required("Confirm password is required"),
-      district: Yup.string().required("District is required"),
+      country: Yup.string().required("Country is required"),
+      state: Yup.string().required("State / Province is required"),
+      city: Yup.string().trim().required("City is required"),
     }),
     onSubmit: async (values) => {
       try {
+        const location = [
+          values.city,
+          getStateName(values.country, values.state),
+          getCountryName(values.country),
+        ]
+          .filter(Boolean)
+          .join(", ");
+
         const payload = {
           name: values.name,
-          location: values.district,
+          location,
           email: values.email,
           password: values.password,
           phone: values.phone,
@@ -93,6 +109,33 @@ const Register = () => {
       }
     },
   });
+
+  useEffect(() => {
+    if (formik.values.country) {
+      setStates(State.getStatesOfCountry(formik.values.country));
+    } else {
+      setStates([]);
+    }
+  }, [formik.values.country]);
+
+  useEffect(() => {
+    if (formik.values.country && formik.values.state) {
+      setCities(City.getCitiesOfState(formik.values.country, formik.values.state));
+    } else {
+      setCities([]);
+    }
+  }, [formik.values.country, formik.values.state]);
+
+  const selectedCountry =
+    countries.find((c) => c.isoCode === formik.values.country) || null;
+  const selectedState =
+    states.find((s) => s.isoCode === formik.values.state) || null;
+  const selectedCity =
+    cities.find((c) => c.name === formik.values.city) ||
+    (formik.values.city ? formik.values.city : null);
+
+  const inputClass =
+    "mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none";
 
   // Animation variants
   const containerVariants = {
@@ -123,6 +166,22 @@ const Register = () => {
     visible: { opacity: 1, y: 0, transition: { duration: 0.2 } },
   };
 
+  const FieldError = ({ name }) => (
+    <AnimatePresence>
+      {formik.touched[name] && formik.errors[name] && (
+        <motion.div
+          className="text-red-500 text-[13px]"
+          variants={errorVariants}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+        >
+          {formik.errors[name]}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <motion.div
       className="flex flex-col lg:flex-row h-screen"
@@ -134,7 +193,7 @@ const Register = () => {
         <title>Post Mobile Repair Jobs | Register as Employer on TechPath</title>
         <meta
           name="description"
-          content="Register as an employer on TechPath. Post mobile repair job vacancies, find qualified technicians, and hire chip-level, Android, iPhone experts in Kerala. Quick & easy setup."
+          content="Register as an employer on TechPath. Post mobile repair job vacancies, find qualified technicians, and hire chip-level, Android, iPhone experts worldwide. Quick & easy setup."
         />
       </Helmet>
       {/* Left Section */}
@@ -174,7 +233,7 @@ const Register = () => {
 
       {/* Right Section */}
       <motion.div
-        className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10"
+        className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10 overflow-y-auto"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -187,7 +246,7 @@ const Register = () => {
             className="text-2xl sm:text-3xl font-semibold mb-4 text-center lg:text-left"
             variants={itemVariants}
           >
-            Post Mobile Repair Jobs in Kerala | Hire Top Technicians
+            Post Mobile Repair Jobs Worldwide | Hire Top Technicians
           </motion.h2>
           <motion.p
             className="text-gray-500 mb-2 text-center lg:text-left"
@@ -208,7 +267,7 @@ const Register = () => {
                 <input
                   type="text"
                   id="name"
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
+                  className={inputClass}
                   placeholder="Enter your company name"
                   aria-required="true"
                   value={formik.values.name}
@@ -216,57 +275,101 @@ const Register = () => {
                   onBlur={formik.handleBlur}
                   name="name"
                 />
-                <AnimatePresence>
-                  {formik.touched.name && formik.errors.name && (
-                    <motion.div
-                      className="text-red-500 text-[13px]"
-                      variants={errorVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="hidden"
-                    >
-                      {formik.errors.name}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <FieldError name="name" />
               </div>
             </motion.div>
 
-            <motion.div className="mb-3" variants={itemVariants}>
-              <label
-                htmlFor="district"
-                className="block text-sm font-medium text-gray-700"
-              >
-                District
-              </label>
-              <select
-                id="district"
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
-                value={formik.values.district}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                name="district"
-              >
-                <option value="">Select a district</option>
-                {keralaDistricts.map((district) => (
-                  <option key={district} value={district}>
-                    {district}
-                  </option>
-                ))}
-              </select>
-              <AnimatePresence>
-                {formik.touched.district && formik.errors.district && (
-                  <motion.div
-                    className="text-red-500 text-[13px]"
-                    variants={errorVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                  >
-                    {formik.errors.district}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            {/* Worldwide location */}
+            <motion.div className="mb-3 space-y-3" variants={itemVariants}>
+              <p className="block text-sm font-medium text-gray-700">Location</p>
+
+              <div>
+                <label htmlFor="country" className="block text-xs text-gray-500 mb-1">
+                  Country
+                </label>
+                <Autocomplete
+                  id="country"
+                  options={countries}
+                  getOptionLabel={(o) => o.name}
+                  value={selectedCountry}
+                  onChange={(_, v) => {
+                    formik.setFieldValue("country", v ? v.isoCode : "");
+                    formik.setFieldValue("state", "");
+                    formik.setFieldValue("city", "");
+                  }}
+                  onBlur={() => formik.setFieldTouched("country", true)}
+                  disablePortal
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      placeholder="Select country"
+                      error={formik.touched.country && Boolean(formik.errors.country)}
+                    />
+                  )}
+                />
+                <FieldError name="country" />
+              </div>
+
+              <div>
+                <label htmlFor="state" className="block text-xs text-gray-500 mb-1">
+                  State / Province
+                </label>
+                <Autocomplete
+                  id="state"
+                  options={states}
+                  getOptionLabel={(o) => o.name}
+                  value={selectedState}
+                  disabled={!formik.values.country}
+                  onChange={(_, v) => {
+                    formik.setFieldValue("state", v ? v.isoCode : "");
+                    formik.setFieldValue("city", "");
+                  }}
+                  onBlur={() => formik.setFieldTouched("state", true)}
+                  disablePortal
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      placeholder={formik.values.country ? "Select state" : "Select country first"}
+                      error={formik.touched.state && Boolean(formik.errors.state)}
+                    />
+                  )}
+                />
+                <FieldError name="state" />
+              </div>
+
+              <div>
+                <label htmlFor="city" className="block text-xs text-gray-500 mb-1">
+                  City
+                </label>
+                <Autocomplete
+                  id="city"
+                  freeSolo
+                  options={cities}
+                  getOptionLabel={(o) => (typeof o === "string" ? o : o.name)}
+                  value={selectedCity}
+                  disabled={!formik.values.state}
+                  onChange={(_, v) => {
+                    const name = typeof v === "string" ? v.trim() : v?.name || "";
+                    formik.setFieldValue("city", name);
+                  }}
+                  onInputChange={(_, value, reason) => {
+                    if (reason === "input") formik.setFieldValue("city", value);
+                  }}
+                  onBlur={() => formik.setFieldTouched("city", true)}
+                  disablePortal
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      placeholder={formik.values.state ? "Search or type a city" : "Select state first"}
+                      error={formik.touched.city && Boolean(formik.errors.city)}
+                    />
+                  )}
+                />
+                <FieldError name="city" />
+              </div>
             </motion.div>
 
             <motion.div className="mb-3" variants={itemVariants}>
@@ -279,7 +382,7 @@ const Register = () => {
               <input
                 type="tel"
                 id="phone"
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
+                className={inputClass}
                 placeholder="Enter your phone number"
                 aria-required="true"
                 value={formik.values.phone}
@@ -287,19 +390,7 @@ const Register = () => {
                 onBlur={formik.handleBlur}
                 name="phone"
               />
-              <AnimatePresence>
-                {formik.touched.phone && formik.errors.phone && (
-                  <motion.div
-                    className="text-red-500 text-[13px]"
-                    variants={errorVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                  >
-                    {formik.errors.phone}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <FieldError name="phone" />
             </motion.div>
 
             <motion.div className="mb-3" variants={itemVariants}>
@@ -312,7 +403,7 @@ const Register = () => {
               <input
                 type="email"
                 id="email"
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
+                className={inputClass}
                 placeholder="Enter your email"
                 aria-required="true"
                 value={formik.values.email}
@@ -320,19 +411,7 @@ const Register = () => {
                 onBlur={formik.handleBlur}
                 name="email"
               />
-              <AnimatePresence>
-                {formik.touched.email && formik.errors.email && (
-                  <motion.div
-                    className="text-red-500 text-[13px]"
-                    variants={errorVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                  >
-                    {formik.errors.email}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <FieldError name="email" />
             </motion.div>
 
             <motion.div className="mb-3" variants={itemVariants}>
@@ -346,7 +425,7 @@ const Register = () => {
                 <input
                   type="password"
                   id="password"
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
+                  className={inputClass}
                   placeholder="Enter your password"
                   aria-required="true"
                   value={formik.values.password}
@@ -369,19 +448,7 @@ const Register = () => {
                   )}
                 </motion.button>
               </div>
-              <AnimatePresence>
-                {formik.touched.password && formik.errors.password && (
-                  <motion.div
-                    className="text-red-500 text-[13px]"
-                    variants={errorVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                  >
-                    {formik.errors.password}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <FieldError name="password" />
             </motion.div>
 
             <motion.div className="mb-3" variants={itemVariants}>
@@ -395,7 +462,7 @@ const Register = () => {
                 <input
                   type="password"
                   id="confirm-password"
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
+                  className={inputClass}
                   placeholder="Re-enter your password"
                   aria-required="true"
                   value={formik.values.confirmPassword}
@@ -418,19 +485,7 @@ const Register = () => {
                   )}
                 </motion.button>
               </div>
-              <AnimatePresence>
-                {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-                  <motion.div
-                    className="text-red-500 text-[13px]"
-                    variants={errorVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                  >
-                    {formik.errors.confirmPassword}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <FieldError name="confirmPassword" />
             </motion.div>
 
             <motion.button

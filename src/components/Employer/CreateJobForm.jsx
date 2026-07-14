@@ -278,6 +278,10 @@ function CreateJobForm({
       try {
         const payload = {
           ...values,
+          description: values.description?.trim() || null,
+          country: values.country || null,
+          state: values.state || null,
+          city: values.city?.trim() || null,
           // Dropdown fields: convert empty string to `null` for backend enum/null handling
           roomAvailable: values.roomAvailable || null,
           foodAvailable: values.foodAvailable || null,
@@ -589,21 +593,21 @@ function CreateJobForm({
 
               <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                 {/* Description */}
-                <FL required>Job Description</FL>
+                <FL>Job Description</FL>
                 <textarea
                   name="description"
                   value={formik.values.description}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  placeholder="Describe the role, responsibilities, and ideal candidate…"
+                  placeholder="Optional — describe the role, responsibilities, and ideal candidate…"
                   className={`cjf-textarea ${formik.touched.description && formik.errors.description ? "error" : ""}`}
                   style={{ flex: 1 }}
                   maxLength={4000}
                 />
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
                   <FE msg={formik.touched.description && formik.errors.description} />
-                  <span style={{ fontSize: 11, fontWeight: 600, color: formik.values.description.length >= 4000 ? "#ef4444" : "#94a3b8", marginLeft: "auto" }}>
-                    {formik.values.description.length} / 4000 characters
+                  <span style={{ fontSize: 11, fontWeight: 600, color: (formik.values.description || "").length >= 4000 ? "#ef4444" : "#94a3b8", marginLeft: "auto" }}>
+                    {(formik.values.description || "").length} / 4000 characters
                   </span>
                 </div>
               </div>
@@ -648,12 +652,12 @@ function CreateJobForm({
 
           {/* ══ Section 3: Location ══ */}
           <motion.div variants={itemVariants} className="cjf-section">
-            <SH icon={<MapPin size={16} style={{ color: "#ec4899" }} />} title="Location" iconBg="#fdf4ff" />
+            <SH icon={<MapPin size={16} style={{ color: "#ec4899" }} />} title="Location (optional)" iconBg="#fdf4ff" />
 
             <div className="cjf-grid-auto">
               {/* Country */}
               <div>
-                <FL required>Country</FL>
+                <FL>Country</FL>
                 <Autocomplete
                   options={countries}
                   getOptionLabel={(o) => o.name}
@@ -666,7 +670,7 @@ function CreateJobForm({
                   onBlur={() => formik.setFieldTouched("country", true)}
                   disablePortal
                   renderInput={(params) => (
-                    <TextField {...params} variant="outlined" placeholder="Select country"
+                    <TextField {...params} variant="outlined" placeholder="Select country (optional)"
                       error={formik.touched.country && Boolean(formik.errors.country)} />
                   )}
                 />
@@ -675,7 +679,7 @@ function CreateJobForm({
 
               {/* State */}
               <div>
-                <FL required>State / Province</FL>
+                <FL>State / Province</FL>
                 <Autocomplete
                   options={states}
                   getOptionLabel={o => o.name}
@@ -684,7 +688,7 @@ function CreateJobForm({
                   onChange={(_, v) => { formik.setFieldValue("state", v ? v.isoCode : null); formik.setFieldValue("city", null); }}
                   disablePortal
                   renderInput={(params) => (
-                    <TextField {...params} variant="outlined" placeholder="Select state"
+                    <TextField {...params} variant="outlined" placeholder="Select state (optional)"
                       error={formik.touched.state && Boolean(formik.errors.state)} />
                   )}
                 />
@@ -693,7 +697,7 @@ function CreateJobForm({
 
               {/* City */}
               <div>
-                <FL required>City</FL>
+                <FL>City</FL>
                 <Autocomplete
                   freeSolo
                   options={cityOptions}
@@ -710,7 +714,7 @@ function CreateJobForm({
                     </li>
                   )}
                   renderInput={(params) => (
-                    <TextField {...params} variant="outlined" placeholder="Search or type a city"
+                    <TextField {...params} variant="outlined" placeholder="Search or type a city (optional)"
                       error={formik.touched.city && Boolean(formik.errors.city)} />
                   )}
                 />

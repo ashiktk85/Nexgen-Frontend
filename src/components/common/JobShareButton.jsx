@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 import { Share2, Link2, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -51,19 +52,12 @@ function IconInstagram({ size = 18 }) {
   );
 }
 
-/**
- * How app handoff works:
- * - Mobile: navigator.share() opens the OS share sheet → user picks Instagram/WhatsApp/etc.
- * - Desktop fallback: platform URL schemes / universal links (wa.me, LinkedIn share, etc.).
- * - Instagram has no public web "share this URL" API — copy link + open Instagram, or use native share.
- */
 const PLATFORMS = [
   {
     id: "whatsapp",
     label: "WhatsApp",
     color: "#25D366",
     Icon: IconWhatsApp,
-    // Universal link — opens WhatsApp app when installed, else WhatsApp Web
     buildUrl: (url, text) => `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`,
   },
   {
@@ -103,7 +97,6 @@ const PLATFORMS = [
     label: "Instagram",
     color: "#E4405F",
     Icon: IconInstagram,
-    // No official share-to-feed URL — copy then try to open the app
     copyThenOpen: "instagram://app",
   },
   {
@@ -151,13 +144,55 @@ export default function JobShareButton({
 }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, width: 240 });
+  const [isNarrow, setIsNarrow] = useState(false);
+  const btnRef = useRef(null);
   const menuRef = useRef(null);
   const id = jobId || job?._id;
+
+  const updateMenuPosition = useCallback(() => {
+    if (!btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    const narrow = window.innerWidth < 640;
+    setIsNarrow(narrow);
+
+    if (narrow) return;
+
+    const menuWidth = 240;
+    const gap = 8;
+    let left = rect.right - menuWidth;
+    left = Math.max(12, Math.min(left, window.innerWidth - menuWidth - 12));
+
+    // Prefer opening below the button; flip above if not enough space
+    const estimatedHeight = 420;
+    const spaceBelow = window.innerHeight - rect.bottom - gap;
+    const openBelow = spaceBelow >= Math.min(estimatedHeight, 280) || spaceBelow >= rect.top;
+
+    const top = openBelow
+      ? rect.bottom + gap
+      : Math.max(12, rect.top - gap - Math.min(estimatedHeight, spaceBelow > 120 ? estimatedHeight : rect.top - 24));
+
+    setMenuPos({ top, left, width: menuWidth, openBelow });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    updateMenuPosition();
+    const onScrollOrResize = () => updateMenuPosition();
+    window.addEventListener("resize", onScrollOrResize);
+    window.addEventListener("scroll", onScrollOrResize, true);
+    return () => {
+      window.removeEventListener("resize", onScrollOrResize);
+      window.removeEventListener("scroll", onScrollOrResize, true);
+    };
+  }, [open, updateMenuPosition]);
 
   useEffect(() => {
     if (!open) return;
     const handleClick = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setOpen(false);
+      if (btnRef.current?.contains(e.target)) return;
+      if (menuRef.current?.contains(e.target)) return;
+      setOpen(false);
     };
     const handleKey = (e) => {
       if (e.key === "Escape") setOpen(false);
@@ -191,7 +226,6 @@ export default function JobShareButton({
   const preferNative = canUseNativeShare() && isMobileLike();
 
   const openPlatformUrl = (shareUrl) => {
-    // Prefer navigating so mobile OS can hand off to installed apps (universal links)
     const a = document.createElement("a");
     a.href = shareUrl;
     a.target = "_blank";
@@ -210,7 +244,6 @@ export default function JobShareButton({
       }
       await navigator.share(payload);
     } catch (err) {
-      // User cancelled — don't show fallback noise
       if (err?.name === "AbortError") return;
       setOpen(true);
     }
@@ -236,7 +269,6 @@ export default function JobShareButton({
         url,
         "Link copied — paste it in Instagram (Story, DM, or bio)."
       );
-      // Best-effort open Instagram app; browsers may ignore custom schemes
       try {
         window.location.href = platform.copyThenOpen;
       } catch {
@@ -246,8 +278,7 @@ export default function JobShareButton({
       return;
     }
 
-    const shareUrl = platform.buildUrl(url, text);
-    openPlatformUrl(shareUrl);
+    openPlatformUrl(platform.buildUrl(url, text));
     setOpen(false);
   };
 
@@ -257,50 +288,44 @@ export default function JobShareButton({
 
   const iconSize = compact || iconOnly ? 14 : 16;
 
-  return (
-    <div className={`relative ${className}`} ref={menuRef}>
-      <button
-        type="button"
-        className={buttonClassName || defaultBtnClass}
-        onClick={handleShareClick}
-        aria-label="Share job"
-        aria-expanded={open}
-        aria-haspopup="menu"
-      >
-        <Share2 size={iconSize} />
-        {!iconOnly && label}
-      </button>
-
-      {open && (
+  const menu = open
+    ? createPortal(
         <>
-          {/* Mobile bottom sheet backdrop */}
           <div
-            className="fixed inset-0 z-40 bg-black/40 sm:hidden"
+            className="fixed inset-0 z-[9998] bg-black/40 sm:bg-transparent"
             aria-hidden
             onClick={() => setOpen(false)}
           />
-
           <div
-            className={
-              "z-50 bg-white overflow-hidden " +
-              /* Mobile: native-feeling bottom sheet */
-              "fixed inset-x-0 bottom-0 rounded-t-2xl shadow-2xl " +
-              "pb-[max(12px,env(safe-area-inset-bottom))] " +
-              /* Desktop: anchored dropdown */
-              "sm:absolute sm:inset-x-auto sm:bottom-full sm:right-0 sm:mb-2 " +
-              "sm:min-w-[220px] sm:rounded-xl sm:border sm:border-slate-200 sm:shadow-lg sm:pb-0"
-            }
+            ref={menuRef}
             role="menu"
+            className={
+              "z-[9999] bg-white overflow-hidden shadow-2xl border border-slate-200 " +
+              (isNarrow
+                ? "fixed inset-x-0 bottom-0 rounded-t-2xl pb-[max(12px,env(safe-area-inset-bottom))]"
+                : "fixed rounded-xl")
+            }
+            style={
+              isNarrow
+                ? undefined
+                : {
+                    top: menuPos.top,
+                    left: menuPos.left,
+                    width: menuPos.width,
+                    maxHeight: "min(70vh, 440px)",
+                  }
+            }
           >
-            <div className="sm:hidden flex justify-center pt-2.5 pb-1">
-              <span className="block w-10 h-1 rounded-full bg-slate-300" aria-hidden />
-            </div>
+            {isNarrow && (
+              <div className="flex justify-center pt-2.5 pb-1">
+                <span className="block w-10 h-1 rounded-full bg-slate-300" aria-hidden />
+              </div>
+            )}
 
-            <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 sm:pt-2.5">
+            <p className="px-4 pt-2.5 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               Share job
             </p>
 
-            {/* Prefer native share when available even on desktop Chrome/Edge */}
             {canUseNativeShare() && (
               <button
                 type="button"
@@ -335,12 +360,12 @@ export default function JobShareButton({
                       aria-hidden
                     >
                       {platform.id === "copy" && copied ? (
-                        <Check size={18} />
+                        <Check size={18} color="#fff" />
                       ) : (
                         <Icon size={18} />
                       )}
                     </span>
-                    <span className="font-medium">
+                    <span className="font-medium text-slate-800">
                       {platform.id === "copy" && copied ? "Copied!" : platform.label}
                     </span>
                   </button>
@@ -348,8 +373,26 @@ export default function JobShareButton({
               })}
             </div>
           </div>
-        </>
-      )}
+        </>,
+        document.body
+      )
+    : null;
+
+  return (
+    <div className={`relative inline-flex ${className}`}>
+      <button
+        ref={btnRef}
+        type="button"
+        className={buttonClassName || defaultBtnClass}
+        onClick={handleShareClick}
+        aria-label="Share job"
+        aria-expanded={open}
+        aria-haspopup="menu"
+      >
+        <Share2 size={iconSize} />
+        {!iconOnly && label}
+      </button>
+      {menu}
     </div>
   );
 }

@@ -113,8 +113,14 @@ const globalStyle = `
   .tf-radio.checked::after { content:''; width:7px; height:7px; border-radius:50%; background:#0950a0; }
   .tf-clear-btn { width:100%; margin-top:22px; padding:11px 14px; border:1.5px solid #c5d0dc; background:transparent; color:#121A2D; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; font-family:'DM Sans',monospace,sans-serif; transition:all 0.15s ease; }
   .tf-clear-btn:hover { border-color:#0950a0; color:#0950a0; background:#fff; }
-  .tf-close-btn { background:none; border:none; color:#64748b; cursor:pointer; display:flex; align-items:center; padding:4px; border-radius:6px; }
-  .tf-close-btn:hover { background:#dde6f0; color:#121A2D; }
+  .tf-close-btn {
+    background:#fff; border:1.5px solid #c5d0dc; color:#121A2D; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:36px; height:36px; padding:0; border-radius:10px; flex-shrink:0;
+    box-shadow:0 1px 3px rgba(15,23,42,0.08);
+  }
+  .tf-close-btn:hover { background:#dde6f0; border-color:#0950a0; color:#0950a0; }
+  .tf-header.sticky-close { position:sticky; top:0; z-index:2; background:#eef3f8; }
   .tf-count { background:#0950a0; color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px; min-width:18px; text-align:center; }
   .tf-field-label { display:block; font-size:11px; font-weight:600; color:#64748b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.06em; }
   .tf-select { width:100%; padding:8px 10px; border:1.5px solid #c5d0dc; border-radius:8px; font-size:13px; background:#fff; margin-bottom:10px; font-family:'DM Sans',sans-serif; color:#334155; }
@@ -169,13 +175,14 @@ const globalStyle = `
     /* Row 1: Filters | badge | view-toggle  (order 1)
        Row 2: search bar full-width          (order 2) */
     .ajp-search-row     { gap:8px; }
-    .ajp-filter-toggle  { order:1; }
-    .ajp-results-badge  { order:1; flex:1; justify-content:center; }
+    .ajp-filter-toggle  { order:1; padding:9px 12px; font-size:11px; }
+    .ajp-results-badge  { order:1; flex:1; justify-content:center; padding:8px 10px; min-width:0; }
     .ajp-view-toggle    { order:1; }
     .ajp-search-bar-wrap { order:2; flex:1 1 100%; width:100%; }
 
-    .ajp-jobs-grid { grid-template-columns:1fr; gap:10px; }
+    .ajp-jobs-grid { grid-template-columns:1fr; gap:12px; }
     .ajp-pagination { gap:4px; margin-top:20px; }
+    .job-card-wrap { width:100%; min-width:0; max-width:100%; }
   }
 
   /* Very small */
@@ -337,7 +344,7 @@ const FilterPanel = ({
 
   return (
     <div className="tf-panel">
-      <div className="tf-header">
+      <div className={`tf-header${onClose ? " sticky-close" : ""}`}>
         <div className="tf-header-title">
           <SlidersHorizontal size={16} strokeWidth={2.2} />
           <span>Technical Filters</span>
@@ -345,7 +352,7 @@ const FilterPanel = ({
         </div>
         {onClose && (
           <button type="button" className="tf-close-btn" onClick={onClose} aria-label="Close filters">
-            <RxCross2 size={18} />
+            <RxCross2 size={20} />
           </button>
         )}
       </div>

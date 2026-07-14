@@ -7,7 +7,7 @@ import { formatJobLocation } from "@/utils/formatLocation";
 import JobShareButton from "@/components/common/JobShareButton";
 import JobWhatsAppButton from "@/components/common/JobWhatsAppButton";
 
-const COMPACT_CARD_HEIGHT = "h-[272px]";
+const COMPACT_CARD_HEIGHT = "min-h-[240px] sm:h-[272px]";
 
 /** Tile card — fixed-size grid layout (Home + All Jobs grid view) */
 const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
@@ -35,7 +35,7 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
   if (!compact) {
     return (
       <article className="bg-white p-6 sm:p-8 rounded-xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow h-full min-h-[320px] flex flex-col min-w-0 w-full">
-        <div className="flex justify-between items-start mb-4 shrink-0">
+        <div className="flex justify-between items-start gap-2 mb-4 shrink-0">
           {category ? (
             <span className="bg-[#0058be]/10 text-[#0058be] px-2.5 py-0.5 rounded-full text-xs font-bold max-w-full truncate">
               {category}
@@ -43,11 +43,12 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
           ) : (
             <span className="h-5" aria-hidden />
           )}
+          <JobShareButton job={job} compact iconOnly />
         </div>
-        <h3 className="text-2xl font-semibold text-[#141b2b] mb-2 line-clamp-2 min-h-[3.25rem]">{job.jobTitle}</h3>
-        <p className="text-sm font-semibold text-[#0058be] uppercase tracking-wide line-clamp-1 h-5 mb-4">{job.companyName}</p>
-        <div className="flex flex-col gap-1.5 text-sm text-[#424752] h-12 mb-6 overflow-hidden shrink-0">
-          <MetaLine icon={<LocationOn sx={{ fontSize: 16 }} />} text={locationText} />
+        <h3 className="text-2xl font-semibold text-[#141b2b] mb-2 break-words leading-snug">{job.jobTitle}</h3>
+        <p className="text-sm font-semibold text-[#0058be] uppercase tracking-wide break-words mb-4">{job.companyName}</p>
+        <div className="flex flex-col gap-1.5 text-sm text-[#424752] mb-6 overflow-hidden shrink-0">
+          {locationText ? <MetaLine icon={<LocationOn sx={{ fontSize: 16 }} />} text={locationText} /> : null}
           <MetaLine
             icon={<Payments sx={{ fontSize: 16 }} />}
             text={[salaryText, expText].filter(Boolean).join(" · ")}
@@ -66,25 +67,28 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
 
   return (
     <article
-      className={`bg-white rounded-xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow min-w-0 w-full flex flex-col p-4 sm:p-5 ${COMPACT_CARD_HEIGHT}`}
+      className={`bg-white rounded-xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow min-w-0 w-full flex flex-col p-4 sm:p-5 overflow-hidden ${COMPACT_CARD_HEIGHT}`}
     >
-      <div className="flex justify-end items-start mb-2 shrink-0 h-6">
+      <div className="flex justify-between items-start gap-2 mb-2 shrink-0 min-h-[24px]">
         {category ? (
-          <span className="bg-[#0058be]/10 text-[#0058be] px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold max-w-full truncate leading-5">
+          <span className="bg-[#0058be]/10 text-[#0058be] px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold max-w-[70%] truncate leading-5">
             {category}
           </span>
-        ) : null}
+        ) : (
+          <span aria-hidden />
+        )}
+        <JobShareButton job={job} compact iconOnly />
       </div>
 
-      <h3 className="text-base sm:text-lg font-semibold text-[#141b2b] line-clamp-2 min-h-[2.75rem] leading-snug mb-1 shrink-0">
+      <h3 className="text-base sm:text-lg font-semibold text-[#141b2b] line-clamp-2 leading-snug mb-1 shrink-0 break-words">
         {job.jobTitle}
       </h3>
-      <p className="text-xs font-semibold text-[#0058be] uppercase tracking-wide line-clamp-1 h-4 mb-3 shrink-0">
+      <p className="text-xs font-semibold text-[#0058be] uppercase tracking-wide line-clamp-1 mb-3 shrink-0">
         {job.companyName || "\u00A0"}
       </p>
 
-      <div className="flex flex-col gap-1 text-xs text-[#424752] h-9 mb-3 overflow-hidden shrink-0">
-        <MetaLine icon={<LocationOn sx={{ fontSize: 14 }} />} text={locationText} />
+      <div className="flex flex-col gap-1 text-xs text-[#424752] mb-3 overflow-hidden shrink-0 min-w-0">
+        {locationText ? <MetaLine icon={<LocationOn sx={{ fontSize: 14 }} />} text={locationText} /> : null}
         <MetaLine
           icon={<Payments sx={{ fontSize: 14 }} />}
           text={[salaryText, expText].filter(Boolean).join(" · ")}
@@ -115,15 +119,15 @@ function CardActions({ job, onApply, onDetails, large = false, postedText }) {
   const iconSize = large ? 36 : 28;
 
   return (
-    <div className="mt-auto shrink-0">
+    <div className="mt-auto shrink-0 w-full min-w-0 flex flex-col gap-1.5">
       {postedText && (
-        <div className="text-right mb-1">
+        <div className="text-right">
           <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium leading-none">
             Posted {postedText}
           </span>
         </div>
       )}
-      <div className={`flex gap-1.5 items-center ${large ? "sm:gap-2" : ""}`}>
+      <div className={`flex gap-1.5 items-center w-full min-w-0 ${large ? "sm:gap-2" : ""}`}>
         <button
           type="button"
           onClick={!job.alreadyApplied ? onApply : undefined}
@@ -133,16 +137,13 @@ function CardActions({ job, onApply, onDetails, large = false, postedText }) {
           {job.alreadyApplied ? "Applied" : "Apply Now"}
         </button>
 
-        <div className="flex gap-1 items-center shrink-0">
-          <JobWhatsAppButton
-            phone={job.phone}
-            countryCode={job.countryCode}
-            jobTitle={job.jobTitle}
-            companyName={job.companyName}
-            size={iconSize}
-          />
-          <JobShareButton job={job} compact iconOnly />
-        </div>
+        <JobWhatsAppButton
+          phone={job.phone}
+          countryCode={job.countryCode}
+          jobTitle={job.jobTitle}
+          companyName={job.companyName}
+          size={iconSize}
+        />
 
         <button
           type="button"

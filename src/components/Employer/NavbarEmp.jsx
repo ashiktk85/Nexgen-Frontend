@@ -82,8 +82,8 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
 
   // Adjust sidebar width based on mobile + desktop collapse state
   const getSidebarWidth = () => {
-    if (isSidebarOpen) return "w-[min(280px,88vw)] opacity-100";
-    return `w-0 opacity-0 lg:opacity-100 ${isCollapsed ? "lg:w-[80px]" : "lg:w-[250px]"}`;
+    if (isSidebarOpen) return "w-[min(280px,88vw)] opacity-100 pointer-events-auto translate-x-0";
+    return `w-0 opacity-0 -translate-x-full pointer-events-none lg:pointer-events-auto lg:translate-x-0 lg:opacity-100 ${isCollapsed ? "lg:w-[80px]" : "lg:w-[250px]"}`;
   };
 
   const showNavLabels = isSidebarOpen || !isCollapsed;
@@ -103,13 +103,14 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
       <div
         ref={sidebarRef}
         style={{ background: "linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4338ca 100%)" }}
-        className={`text-white shadow-lg h-screen fixed top-0 left-0 overflow-auto z-50 lg:z-10 transition-all duration-300 flex flex-col ${getSidebarWidth()}`}
+        className={`text-white shadow-lg h-screen fixed top-0 left-0 overflow-hidden z-50 lg:z-10 transition-all duration-300 flex flex-col ${getSidebarWidth()}`}
       >
         {/* Sidebar Header */}
         <div
-          className={`flex items-center min-h-[64px] z-20 sticky top-0 border-b border-white/20 ${
+          className={`flex items-center min-h-[64px] z-20 shrink-0 border-b border-white/20 ${
             isCollapsed ? "justify-center px-2 py-3" : "justify-between px-4 py-4"
           }`}
+          style={{ background: "linear-gradient(135deg,#1e1b4b 0%,#2a2670 100%)" }}
         >
           {isCollapsed && !isSidebarOpen ? (
             <button
@@ -123,12 +124,26 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
             </button>
           ) : (
             <>
-              <TechpathBrand {...BRAND_SIZES.compact} textColor="#ffffff" />
+              <div className="min-w-0 flex-1 pr-2">
+                <TechpathBrand {...BRAND_SIZES.compact} textColor="#ffffff" />
+              </div>
+              {/* Mobile: close drawer (right side, not over logo) */}
               <button
                 type="button"
-                onClick={() => (isSidebarOpen ? closeSidebar() : setIsCollapsed(!isCollapsed))}
-                className="text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none"
-                aria-label={isSidebarOpen ? "Close menu" : "Collapse sidebar"}
+                onClick={closeSidebar}
+                className="lg:hidden inline-flex items-center justify-center text-white p-2 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none shrink-0"
+                aria-label="Close menu"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              {/* Desktop: collapse sidebar */}
+              <button
+                type="button"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="hidden lg:inline-flex text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none shrink-0"
+                aria-label="Collapse sidebar"
               >
                 <svg
                   className="w-6 h-6"
@@ -149,7 +164,7 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
           )}
         </div>
 
-        <div className="py-4 px-2 xl:px-4 flex-1">
+        <div className="py-4 px-2 xl:px-4 flex-1 overflow-y-auto min-h-0">
           <ul className="space-y-2">
             {[
               {
@@ -242,7 +257,10 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
         </div>
 
         {/* Profile Section at bottom */}
-        <div className="p-4 border-t border-white/20 pb-6">
+        <div
+          className="p-4 border-t border-white/20 pb-6 shrink-0"
+          style={{ background: "linear-gradient(135deg,#1e1b4b 0%,#2a2670 100%)" }}
+        >
           {isCollapsed && !isSidebarOpen ? (
             <div className="hidden lg:flex flex-col items-center gap-3">
               <button
@@ -300,24 +318,21 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
         </div>
       </div>
 
-      <div className="lg:hidden fixed top-3 left-3 z-[60]">
-        <button
-          type="button"
-          onClick={() => setSidebarOpen((prev) => !prev)}
-          className="bg-white p-2.5 text-gray-800 rounded-xl shadow-md border hover:bg-gray-50 focus:outline-none flex items-center justify-center w-11 h-11"
-          aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
-        >
-          {isSidebarOpen ? (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
+      {/* Mobile open button — hidden while drawer is open (close is inside sidebar) */}
+      {!isSidebarOpen && (
+        <div className="lg:hidden fixed top-3 left-3 z-[60]">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="bg-white p-2.5 text-gray-800 rounded-xl shadow-md border hover:bg-gray-50 focus:outline-none flex items-center justify-center w-11 h-11"
+            aria-label="Open menu"
+          >
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
               <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
             </svg>
-          )}
-        </button>
-      </div>
+          </button>
+        </div>
+      )}
 
       <AlertDialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
         <AlertDialogContent className="bg-white rounded-xl">

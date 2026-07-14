@@ -82,8 +82,8 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   }, [isSidebarOpen]);
 
   const getSidebarWidth = () => {
-    if (isSidebarOpen) return "w-[min(280px,88vw)] opacity-100";
-    return `w-0 opacity-0 lg:opacity-100 ${
+    if (isSidebarOpen) return "w-[min(280px,88vw)] opacity-100 pointer-events-auto translate-x-0";
+    return `w-0 opacity-0 -translate-x-full pointer-events-none lg:pointer-events-auto lg:translate-x-0 lg:opacity-100 ${
       isCollapsed ? "lg:w-[80px]" : "lg:w-[250px]"
     }`;
   };
@@ -165,10 +165,10 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       <div
         ref={sidebarRef}
         
-        className={`text-white bg-zinc-900 shadow-lg h-screen fixed top-0 left-0 overflow-auto z-50 lg:z-30 transition-all duration-300 flex flex-col ${getSidebarWidth()}`}
+        className={`text-white bg-zinc-900 shadow-lg h-screen fixed top-0 left-0 overflow-hidden z-50 lg:z-30 transition-all duration-300 flex flex-col ${getSidebarWidth()}`}
       >
         <div
-          className={`flex items-center min-h-[64px] z-20 sticky top-0 border-b border-white/20 ${
+          className={`flex items-center min-h-[64px] z-20 shrink-0 bg-zinc-900 border-b border-white/20 ${
             isCollapsed ? "justify-center px-2 py-3" : "justify-between px-4 py-4"
           }`}
         >
@@ -184,7 +184,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
             </button>
           ) : (
             <>
-              <div className="flex flex-col gap-1 min-w-0">
+              <div className="flex flex-col gap-1 min-w-0 flex-1 pr-2">
                 <TechpathBrand
                   {...BRAND_SIZES.compact}
                   textColor="#ffffff"
@@ -192,11 +192,23 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                 />
                 <p className="text-xs text-indigo-100/80 font-medium">Admin</p>
               </div>
+              {/* Mobile: close drawer (right side, not over logo) */}
               <button
                 type="button"
-                onClick={() => (isSidebarOpen ? setSidebarOpen(false) : setIsCollapsed(!isCollapsed))}
-                className="text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none shrink-0"
-                aria-label={isSidebarOpen ? "Close menu" : "Collapse sidebar"}
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden inline-flex items-center justify-center text-white p-2 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none shrink-0"
+                aria-label="Close menu"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              {/* Desktop: collapse sidebar */}
+              <button
+                type="button"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="hidden lg:inline-flex text-white p-1 hover:bg-white/10 rounded-md transition duration-200 focus:outline-none shrink-0"
+                aria-label="Collapse sidebar"
               >
                 <svg
                   className="w-6 h-6"
@@ -217,7 +229,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
           )}
         </div>
 
-        <div className="py-4 px-2 xl:px-4 flex-1">
+        <div className="py-4 px-2 xl:px-4 flex-1 overflow-y-auto min-h-0">
           <ul className="space-y-2">
             {navItems.map((item) => {
               const isActive = location.pathname.startsWith(item.url);
@@ -254,7 +266,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
           </ul>
         </div>
 
-        <div className="p-4 border-t border-white/20 pb-6">
+        <div className="p-4 border-t border-white/20 pb-6 shrink-0 bg-zinc-900">
           {isCollapsed ? (
             <div className="hidden lg:flex flex-col items-center gap-3">
               <button
@@ -321,24 +333,21 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         </div>
       </div>
 
-      <div className="lg:hidden fixed top-3 left-3 z-[60]">
-        <button
-          type="button"
-          onClick={() => setSidebarOpen((prev) => !prev)}
-          className="bg-white p-2.5 text-gray-800 rounded-xl shadow-md border hover:bg-gray-50 focus:outline-none flex items-center justify-center w-11 h-11"
-          aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
-        >
-          {isSidebarOpen ? (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
+      {/* Mobile open button — hidden while drawer is open (close is inside sidebar) */}
+      {!isSidebarOpen && (
+        <div className="lg:hidden fixed top-3 left-3 z-[60]">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="bg-white p-2.5 text-gray-800 rounded-xl shadow-md border hover:bg-gray-50 focus:outline-none flex items-center justify-center w-11 h-11"
+            aria-label="Open menu"
+          >
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
               <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
             </svg>
-          )}
-        </button>
-      </div>
+          </button>
+        </div>
+      )}
 
       <AlertDialog
         open={isLogoutDialogOpen}

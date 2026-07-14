@@ -12,14 +12,16 @@ const validateJobForm = Yup.object({
   phone: Yup.string()
     .matches(/^[0-9]{10}$/, 'Mobile number must be 10 digits')
     .required('Mobile number is required'),
-  country: Yup.string()
-    .required('Country is required'),
-  state: Yup.string()
-    .required('State/Province is required'),
+  country: Yup.string().nullable().trim().optional(),
+  state: Yup.string().nullable().trim().optional(),
   city: Yup.string()
+    .nullable()
     .trim()
-    .required('City is required')
-    .min(2, 'City must be at least 2 characters'),
+    .optional()
+    .test('city-min', 'City must be at least 2 characters', (value) => {
+      if (!value) return true;
+      return value.length >= 2;
+    }),
   salaryFrom: Yup.string()
     .trim()
     .test('at-least-one-salary', 'Enter a salary amount', function (value) {
@@ -30,9 +32,14 @@ const validateJobForm = Yup.object({
     .trim()
     .nullable(),
   description: Yup.string()
-    .min(10, 'Enter minimum 10 characters')
-    .max(4000, 'Description cannot exceed 4000 characters')
-    .required('Description is required'),
+    .nullable()
+    .trim()
+    .optional()
+    .test('desc-min', 'Enter minimum 10 characters', (value) => {
+      if (!value) return true;
+      return value.length >= 10;
+    })
+    .max(4000, 'Description cannot exceed 4000 characters'),
   requirements: Yup.array()
     .of(Yup.string())
     .min(1, "At least one requirement must be selected"),

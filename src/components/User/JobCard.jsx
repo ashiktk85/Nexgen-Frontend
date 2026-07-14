@@ -98,28 +98,72 @@ const injectJobCardStyles = () => {
 
     .jc-grid-footer {
       display: flex;
-      flex-direction: row;
-      align-items: flex-end;
-      gap: 8px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
       margin-top: 16px;
       flex-shrink: 0;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .jc-list-footer {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      flex-shrink: 0;
+      min-width: 0;
+      width: 100%;
+    }
+
+    @media (min-width: 640px) {
+      .jc-list-footer {
+        flex-direction: row;
+        align-items: flex-end;
+      }
+      .jc-list-footer .jc-btn-apply {
+        flex: 1;
+      }
     }
 
     .jc-details-col {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      flex-shrink: 0;
-      min-width: auto;
+      align-items: stretch;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+      width: 100%;
     }
-    
-    .jc-details-col > div {
+
+    .jc-action-row {
       display: flex;
-      gap: 3px;
       align-items: center;
-      justify-content: flex-end;
+      gap: 6px;
+      width: 100%;
+      min-width: 0;
     }
+
+    .jc-btn-details {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 10px !important;
+      font-size: 12px !important;
+    }
+
+    .jc-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      white-space: normal;
+    }
+    .jc-title.list { font-size: 15px; }
 
     .jc-posted-time {
       font-size: 10px;
@@ -127,7 +171,19 @@ const injectJobCardStyles = () => {
       color: #94a3b8;
       white-space: nowrap;
       line-height: 1;
-      text-align: center;
+      text-align: right;
+    }
+
+    @media (max-width: 639px) {
+      .jc-list-layout {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px;
+        padding: 14px 14px;
+      }
+      .jc-grid-layout {
+        padding: 16px 14px 18px;
+      }
     }
 
     .jc-accent-bar {
@@ -181,35 +237,30 @@ const JobCard = ({ job, layout }) => {
 
         {/* ── Main Info ── */}
         <div style={{ flex: 1, minWidth: 0, marginBottom: isList ? 0 : 14 }}>
-          {/* Title + company */}
-          <div style={{ marginBottom: 8 }}>
-            <h2
-              style={{
-                fontSize: isList ? 15 : 16,
-                fontWeight: 700,
-                color: "#0f172a",
-                margin: 0,
-                lineHeight: 1.3,
-                letterSpacing: "-0.01em",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {job.jobTitle}
-            </h2>
-            <p
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "#6366f1",
-                margin: "3px 0 0",
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-              }}
-            >
-              {job.companyName}
-            </p>
+          {/* Title + share */}
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h2 className={`jc-title${isList ? " list" : ""}`}>
+                {job.jobTitle}
+              </h2>
+              <p
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "#6366f1",
+                  margin: "3px 0 0",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  overflowWrap: "anywhere",
+                  wordBreak: "break-word",
+                }}
+              >
+                {job.companyName}
+              </p>
+            </div>
+            <div style={{ flexShrink: 0, marginTop: 2 }}>
+              <JobShareButton job={job} compact iconOnly />
+            </div>
           </div>
 
           {/* Badges */}
@@ -225,10 +276,12 @@ const JobCard = ({ job, layout }) => {
                 {category}
               </span>
             )}
-            <span className="jc-badge">
-              <MdPlace style={{ color: "#6366f1", fontSize: 13 }} />
-              {locationText}
-            </span>
+            {locationText && (
+              <span className="jc-badge">
+                <MdPlace style={{ color: "#6366f1", fontSize: 13 }} />
+                {locationText}
+              </span>
+            )}
             <span className="jc-badge">
               {salaryText}
             </span>
@@ -239,27 +292,14 @@ const JobCard = ({ job, layout }) => {
           </div>
         </div>
 
-        {/* ── Footer: time above Details + buttons ── */}
-        <div
-          className={isList ? undefined : "jc-grid-footer"}
-          style={
-            isList
-              ? {
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "flex-end",
-                  gap: 8,
-                  flexShrink: 0,
-                }
-              : undefined
-          }
-        >
+        {/* ── Footer: Apply + WhatsApp + Details ── */}
+        <div className={isList ? "jc-list-footer" : "jc-grid-footer"}>
           <button
             className={`jc-btn ${job.alreadyApplied ? "jc-btn-applied" : "jc-btn-apply"}`}
             disabled={job.alreadyApplied}
             aria-label={job.alreadyApplied ? "Already applied" : "Apply to job"}
             onClick={!job.alreadyApplied ? handleApplyJob : undefined}
-            style={{ flex: 1, minWidth: 0 }}
+            style={{ width: "100%" }}
           >
             {job.alreadyApplied ? "✓ Applied" : "Apply Now"}
           </button>
@@ -268,7 +308,7 @@ const JobCard = ({ job, layout }) => {
             <span className="jc-posted-time">
               Posted {calculateTimeAgo(job.createdAt)}
             </span>
-            <div style={{ display: "flex", gap: 6, width: "100%", alignItems: "center" }}>
+            <div className="jc-action-row">
               <JobWhatsAppButton
                 phone={job.phone}
                 countryCode={job.countryCode}
@@ -276,22 +316,21 @@ const JobCard = ({ job, layout }) => {
                 companyName={job.companyName}
                 size={34}
               />
-              <JobShareButton job={job} compact iconOnly />
               <button
-              className={
-                "jc-btn jc-btn-details " +
-                "bg-gradient-to-r from-indigo-950 via-indigo-900 to-indigo-800 " +
-                "text-white border border-indigo-900/60 shadow-md " +
-                "hover:bg-gradient-to-r hover:from-indigo-600 hover:via-indigo-500 hover:to-indigo-400 " +
-                "hover:shadow-lg hover:-translate-y-0.5 " +
-                "transition-all duration-150"
-              }
-              aria-label="View job details"
-              onClick={jobDetailNavigation}
-              style={{ padding: "6px 12px", fontSize: 12, flex: "0 0 auto" }}
-            >
-              View
-            </button>
+                type="button"
+                className={
+                  "jc-btn jc-btn-details " +
+                  "bg-gradient-to-r from-indigo-950 via-indigo-900 to-indigo-800 " +
+                  "text-white border border-indigo-900/60 shadow-md " +
+                  "hover:bg-gradient-to-r hover:from-indigo-600 hover:via-indigo-500 hover:to-indigo-400 " +
+                  "hover:shadow-lg hover:-translate-y-0.5 " +
+                  "transition-all duration-150"
+                }
+                aria-label="View job details"
+                onClick={jobDetailNavigation}
+              >
+                Details →
+              </button>
             </div>
           </div>
         </div>

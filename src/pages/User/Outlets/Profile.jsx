@@ -121,6 +121,15 @@ if (!document.getElementById("pp-styles")) {
     .pp-avatar-wrap:hover .pp-cam-icon { opacity:1; }
     .pp-cam-icon { opacity:0; transition:opacity .2s; color:#fff; }
 
+    /* Profile dialogs: visible close on purple header */
+    .pp-styled-dialog > button {
+      color: #fff !important;
+      opacity: 0.95;
+      top: 18px;
+      right: 16px;
+    }
+    .pp-styled-dialog > button:hover { opacity: 1; background: rgba(255,255,255,0.15) !important; }
+
     /* Resume file card */
     .pp-resume-card { display:flex; align-items:center; gap:14px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:14px 18px; transition:border-color .2s; }
     .pp-resume-card:hover { border-color:#c7d2fe; }
@@ -134,23 +143,59 @@ if (!document.getElementById("pp-styles")) {
 
     /* ─── Responsive tweaks ─── */
     @media (max-width: 640px) {
+      .pp-root { overflow-x: hidden; }
+      .pp-hero {
+        padding: 88px 16px 56px !important;
+      }
       .pp-header-row {
         flex-direction: column;
         align-items: flex-start;
+        gap: 12px !important;
       }
       .pp-header-row > div {
         width: 100%;
+        min-width: 0 !important;
       }
       .pp-header-row button.pp-btn {
-        margin-top: 8px;
+        margin-top: 4px;
+        width: 100%;
+        justify-content: center;
       }
       .pp-header-stats {
         width: 100%;
-        justify-content: flex-start;
-        gap: 24px;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 0 4px;
+        border-top: 1.5px solid #f1f5f9;
+      }
+      .pp-header-stats > div {
+        flex: 1;
+        min-width: 0;
       }
       .pp-dialog-grid-2 {
         grid-template-columns: 1fr !important;
+      }
+      .pp-card {
+        padding: 14px;
+      }
+      .pp-info-cell {
+        padding: 12px;
+        min-width: 0;
+      }
+      .pp-info-cell p {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .pp-resume-card {
+        flex-wrap: wrap;
+        padding: 12px;
+        gap: 10px;
+      }
+      .pp-empty {
+        padding: 32px 16px;
+      }
+      .pp-btn {
+        max-width: 100%;
       }
       /* Mobile tabs as settings-style list */
       .pp-tab {
@@ -159,6 +204,7 @@ if (!document.getElementById("pp-styles")) {
         border-radius: 12px !important;
         background: #fff !important;
         border: 1.5px solid #e2e8f0 !important;
+        padding: 12px 14px !important;
       }
       .pp-tab + .pp-tab {
         margin-top: 6px;
@@ -166,6 +212,7 @@ if (!document.getElementById("pp-styles")) {
       .pp-tab[data-state="active"] {
         background: linear-gradient(135deg,#4f46e5,#6366f1) !important;
         color: #fff !important;
+        border-color: transparent !important;
       }
       /* Back-to-top button on mobile */
       .pp-back-top-mobile {
@@ -181,6 +228,32 @@ if (!document.getElementById("pp-styles")) {
         padding: 6px 12px;
         border: none;
         cursor: pointer;
+      }
+      .pp-tab-content-pad {
+        padding: 18px 14px !important;
+      }
+      .pp-section-head {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .pp-section-head .pp-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .pp-dialog-actions {
+        flex-direction: column-reverse !important;
+        align-items: stretch !important;
+      }
+      .pp-dialog-actions .pp-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .pp-year-pill {
+        white-space: normal;
+        text-align: left;
       }
     }
   `;
@@ -458,7 +531,7 @@ export default function ProfilePage() {
     >
 
       {/* ── Header Banner ── */}
-      <div style={{ background: "linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4338ca 100%)", padding: "110px 24px 72px", position: "relative", overflow: "hidden" }}>
+      <div className="pp-hero" style={{ background: "linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4338ca 100%)", padding: "110px 24px 72px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -40, right: -40, width: 220, height: 220, borderRadius: "50%", background: "rgba(99,102,241,.22)", filter: "blur(55px)" }} />
         <div style={{ position: "absolute", bottom: -20, left: "30%", width: 140, height: 140, borderRadius: "50%", background: "rgba(167,139,250,.15)", filter: "blur(40px)" }} />
         <div style={{ maxWidth: 1260, margin: "0 auto", position: "relative", zIndex: 1 }}>
@@ -569,7 +642,7 @@ export default function ProfilePage() {
 
               {/* ── Tab Content ── */}
               {(!isMobile || isMobileDetail) && (
-                <div style={{ background: "#fff", borderRadius: "0 0 20px 20px", border: "1.5px solid #e8edf5", borderTop: "none", padding: "28px" }}>
+                <div className="pp-tab-content-pad" style={{ background: "#fff", borderRadius: "0 0 20px 20px", border: "1.5px solid #e8edf5", borderTop: "none", padding: "28px" }}>
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={activeTab}
@@ -629,7 +702,7 @@ export default function ProfilePage() {
 
                       {/* ── EDUCATION ── */}
                       <TabsContent value="education" className="mt-0">
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                      <div className="pp-section-head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
                         <SectionHeader title="Education" />
                         <button className="pp-btn pp-btn-primary" style={{ fontSize: 12 }} onClick={() => openEducationDialog()}>
                           <Plus size={13} /> Add Education
@@ -690,7 +763,7 @@ export default function ProfilePage() {
 
                       {/* ── EXPERIENCE ── */}
                       <TabsContent value="experience" className="mt-0">
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                      <div className="pp-section-head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
                         <SectionHeader title="Work Experience" />
                         <button className="pp-btn pp-btn-primary" style={{ fontSize: 12 }} onClick={() => openExperienceDialog()}>
                           <Plus size={13} /> Add Experience
@@ -700,13 +773,13 @@ export default function ProfilePage() {
                         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                           {user.experience.map((exp, i) => (
                             <motion.div key={i} className="pp-card" initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * .07 }}>
-                              <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                              <div style={{ display: "flex", alignItems: "flex-start", gap: 14, flexWrap: "wrap" }}>
                                 <div style={{ width: 40, height: 40, borderRadius: 10, background: "linear-gradient(135deg,#f0fdf4,#dcfce7)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                                   <Briefcase size={18} style={{ color: "#16a34a" }} />
                                 </div>
-                                <div style={{ flex: 1 }}>
-                                  <h4 style={{ fontSize: 15, fontWeight: 700, color: "#0f172a", margin: "0 0 2px" }}>{exp.jobTitle}</h4>
-                                  <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 8px" }}>{exp.company}</p>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <h4 style={{ fontSize: 15, fontWeight: 700, color: "#0f172a", margin: "0 0 2px", overflowWrap: "anywhere" }}>{exp.jobTitle}</h4>
+                                  <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 8px", overflowWrap: "anywhere" }}>{exp.company}</p>
                                   <span className="pp-year-pill" style={{ background: "#f0fdf4", color: "#16a34a" }}>🗓️ {exp.startYear} – {exp.endYear || "Present"}</span>
                                 </div>
                                 <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
@@ -766,7 +839,7 @@ export default function ProfilePage() {
                   </optgroup>
                 </FormSelect>
               </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
+              <div className="pp-dialog-actions" style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
                 <button type="button" className="pp-btn pp-btn-outline" onClick={() => setIsEditDialogOpen(false)}><X size={13} />Cancel</button>
                 <button type="submit" className="pp-btn pp-btn-primary" disabled={isSubmitting}><Check size={13} />{isSubmitting ? "Saving…" : "Save Changes"}</button>
               </div>
@@ -789,7 +862,7 @@ export default function ProfilePage() {
                 <FormField label="Start Year" name="startYear" type="number" placeholder="2018" />
                 <FormField label="End Year (blank = Present)" name="endYear" type="number" placeholder="2022" />
               </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
+              <div className="pp-dialog-actions" style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
                 <button type="button" className="pp-btn pp-btn-outline" onClick={() => setIsEducationDialogOpen(false)}><X size={13} />Cancel</button>
                 <button type="submit" className="pp-btn pp-btn-primary" disabled={isSubmitting}><Check size={13} />{isSubmitting ? "Saving…" : educationIndex !== null ? "Update" : "Add"}</button>
               </div>
@@ -816,7 +889,7 @@ export default function ProfilePage() {
                 <FormField label="Start Year" name="startYear" type="number" placeholder="2020" />
                 <FormField label="End Year (blank = Present)" name="endYear" type="number" placeholder="2023" />
               </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
+              <div className="pp-dialog-actions" style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
                 <button type="button" className="pp-btn pp-btn-outline" onClick={() => setIsExperienceDialogOpen(false)}><X size={13} />Cancel</button>
                 <button type="submit" className="pp-btn pp-btn-primary" disabled={isSubmitting}><Check size={13} />{isSubmitting ? "Saving…" : experienceIndex !== null ? "Update" : "Add"}</button>
               </div>
@@ -833,7 +906,7 @@ export default function ProfilePage() {
             <AvatarFallback style={{ background: getGrad(initial), color: "#fff", fontSize: 32, fontWeight: 800 }}>{initial}</AvatarFallback>
           </Avatar>
         </div>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
+        <div className="pp-dialog-actions" style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
           <button className="pp-btn pp-btn-outline" onClick={cancelImageUpload}><X size={13} />Cancel</button>
           <button className="pp-btn pp-btn-green" onClick={confirmImageUpload}><Check size={13} />Use this photo</button>
         </div>
@@ -850,7 +923,7 @@ export default function ProfilePage() {
             <p style={{ fontSize: 12, color: "#94a3b8", margin: "3px 0 0" }}>{selectedResumeFile ? `${(selectedResumeFile.size / 1024 / 1024).toFixed(2)} MB · PDF` : ""}</p>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
+        <div className="pp-dialog-actions" style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
           <button className="pp-btn pp-btn-outline" onClick={() => { setIsResumeConfirmationOpen(false); setSelectedResumeFile(null); }}><X size={13} />Cancel</button>
           <button className="pp-btn pp-btn-primary" onClick={confirmResumeUpload}><Upload size={13} />Upload</button>
         </div>
@@ -874,7 +947,7 @@ export default function ProfilePage() {
             <p style={{ fontSize: 12, color: "#94a3b8", margin: "3px 0 0" }}>PDF Document</p>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
+        <div className="pp-dialog-actions" style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
           <button className="pp-btn pp-btn-outline" onClick={cancelRemoveResume}><X size={13} />Cancel</button>
           <button className="pp-btn" style={{ background: "#ef4444", color: "#fff", border: "1px solid #ef4444" }} onClick={confirmRemoveResume}>
             <Trash2 size={13} />Delete
@@ -897,12 +970,23 @@ function SectionHeader({ title }) {
 function StyledDialog({ open, onOpenChange, title, description, children }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent style={{ borderRadius: 18, border: "1.5px solid #e0e7ff", padding: 0, overflow: "hidden", maxWidth: 540, fontFamily: "'DM Sans',sans-serif" }}>
-        <div style={{ background: "linear-gradient(135deg,#312e81,#4f46e5)", padding: "20px 24px" }}>
-          <DialogTitle style={{ color: "#fff", fontSize: 17, fontWeight: 700, margin: 0, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{title}</DialogTitle>
+      <DialogContent
+        className="pp-styled-dialog"
+        style={{
+          borderRadius: 18,
+          border: "1.5px solid #e0e7ff",
+          padding: 0,
+          overflow: "hidden",
+          maxWidth: "min(540px, calc(100vw - 1.5rem))",
+          width: "100%",
+          fontFamily: "'DM Sans',sans-serif",
+        }}
+      >
+        <div style={{ background: "linear-gradient(135deg,#312e81,#4f46e5)", padding: "20px 48px 20px 24px", position: "relative" }}>
+          <DialogTitle style={{ color: "#fff", fontSize: 17, fontWeight: 700, margin: 0, fontFamily: "'Plus Jakarta Sans',sans-serif", paddingRight: 8 }}>{title}</DialogTitle>
           {description && <DialogDescription style={{ color: "#c7d2fe", fontSize: 13, margin: "4px 0 0" }}>{description}</DialogDescription>}
         </div>
-        <div style={{ padding: "20px 24px" }}>{children}</div>
+        <div style={{ padding: "16px 20px 20px" }}>{children}</div>
       </DialogContent>
     </Dialog>
   );
