@@ -3,6 +3,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import StatCard from "@/components/ui/StatCard";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Store, Building2, MapPin, Globe, Image as ImageIcon, Share2, ListChecks, XCircle, Download } from "lucide-react";
+import { FaTrash } from "react-icons/fa";
 import ConfirmModal from "@/components/Admin/ConfirmModal";
 import { AdminFilterBar, AdminFilterSelect } from "@/components/Admin/AdminListFilters";
 import { getAllShops, shopListUnList, trashShopAdmin, restoreShopAdmin, deleteShopAdmin, exportAllShopsXlsx } from "@/apiServices/adminApi";
@@ -370,7 +371,7 @@ const Shops = () => {
             } : undefined}
             viewLabel="View"
             blockLabel={(row) => (row.isBlocked ? "List" : "Unlist")}
-            deleteLabel={isTrashView ? "Delete" : "Trash"}
+            deleteLabel={<FaTrash size={12} color="#fff" />}
             othersLabel={isTrashView ? "Restore" : undefined}
             showSno={true}
             rowsPerPage={rowsPerPage}

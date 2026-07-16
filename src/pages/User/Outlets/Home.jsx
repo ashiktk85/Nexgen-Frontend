@@ -645,7 +645,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-10 flex-1 min-w-0 w-full">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 flex-1 min-w-0 w-full">
             <div>
               <h4 className="font-semibold text-[#141b2b] mb-6">For Job Seekers</h4>
               <ul className="space-y-4">
@@ -661,6 +661,21 @@ export default function Home() {
                 <li><Link to="/employer/register" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Post a Job</Link></li>
                 <li><Link to="/employer/employer-login" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Employer Sign In</Link></li>
                 <li><Link to="/all-jobs" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">Browse Job Listings</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-[#141b2b] mb-6">Legal</h4>
+              <ul className="space-y-4">
+                <li>
+                  <Link to="/terms" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">
+                    Terms &amp; Conditions
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/privacy" className="text-sm text-[#424752] hover:text-[#0058be] transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
               </ul>
             </div>
             <div className="col-span-2 md:col-span-1">
@@ -686,10 +701,8 @@ export default function Home() {
         <div className="border-t border-[#c2c6d4]/30 py-8 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-[#424752]">© Techpath. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
-            <a href="/terms" className="text-[#424752] hover:text-[#003f87] transition-colors">Terms &amp; Conditions</a>
-            <a href="/privacy" className="text-[#424752] hover:text-[#003f87] transition-colors">Privacy Policy</a>
-            <a href="#" className="text-[#424752] hover:text-[#003f87] transition-colors">Cookie Settings</a>
-            <a href="#" className="text-[#424752] hover:text-[#003f87] transition-colors">Accessibility</a>
+            <Link to="/terms" className="text-[#424752] hover:text-[#003f87] transition-colors">Terms &amp; Conditions</Link>
+            <Link to="/privacy" className="text-[#424752] hover:text-[#003f87] transition-colors">Privacy Policy</Link>
           </div>
         </div>
       </motion.footer>

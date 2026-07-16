@@ -100,6 +100,16 @@ const AppliedStudents = () => {
 
   const columns = [
     {
+      id: "jobCode",
+      header: "Job ID",
+      accessor: (row) => row.jobCode || "—",
+      cell: (row) => (
+        <span className="font-mono text-[11px] font-semibold text-indigo-700">
+          {row.jobCode || "—"}
+        </span>
+      ),
+    },
+    {
       id: "jobTitle",
       header: "Job Title",
       accessor: "jobTitle",
@@ -189,7 +199,7 @@ const AppliedStudents = () => {
               setCurrentPage(1);
               setSearchTerm(e.target.value);
             }}
-            placeholder="Search by job title…"
+            placeholder="Search by job ID or title…"
             className={ADMIN_SEARCH_INPUT}
           />
         </div>
@@ -234,6 +244,11 @@ const AppliedStudents = () => {
                   {selectedJob?.jobTitle}
                 </SheetTitle>
                 <p className="text-xs text-slate-500 mt-1">
+                  {selectedJob?.jobCode && (
+                    <span className="font-mono font-semibold text-indigo-700 mr-1.5">
+                      {selectedJob.jobCode}
+                    </span>
+                  )}
                   {selectedJob?.companyName || selectedJob?.employerName} ·{" "}
                   {selectedJob?.applicantCount || 0} applicant(s)
                 </p>

@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
-import { Ban, Edit, Trash2, Ticket, MoreHorizontal } from "lucide-react";
+import { Ban, Edit, Ticket, MoreHorizontal } from "lucide-react";
+import { FaTrash } from "react-icons/fa";
 import { SearchInput } from "./SearchInput";
 import { displayValue } from "@/utils/tableValue";
 import Pagination from "./Pagination";
@@ -240,7 +241,7 @@ export function DataTable({
                                                     className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-600 text-white hover:bg-red-700 shadow-sm"
                                                     title="Delete"
                                                 >
-                                                    {deleteLabel || <Trash2 className="h-3.5 w-3.5" />}
+                                                    {deleteLabel || <FaTrash size={12} color="#fff" />}
                                                 </button>
                                             )}
                                             {onBlock && (
@@ -406,7 +407,7 @@ export function DataTable({
                                                             className={`inline-flex items-center justify-center ${compact ? "p-1" : "p-1.5"} rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors cursor-pointer shadow-sm`}
                                                             title="Delete"
                                                         >
-                                                            {deleteLabel || <Trash2 className="h-3.5 w-3.5" />}
+                                                            {deleteLabel || <FaTrash size={12} color="#fff" />}
                                                         </button>
                                                     )}
                                                     {onBlock && (

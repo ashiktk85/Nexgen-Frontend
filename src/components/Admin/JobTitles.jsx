@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import ConfirmModal from "@/components/Admin/ConfirmModal";
 import {
   Sheet,
@@ -176,10 +177,10 @@ const JobTitles = () => {
           <button
             type="button"
             onClick={() => openEdit(row)}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100"
+            className="inline-flex items-center justify-center p-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+            title="Edit"
           >
-            <Pencil className="w-3.5 h-3.5" />
-            Edit
+            <FaEdit size={12} color="#fff" />
           </button>
           <button
             type="button"
@@ -187,10 +188,10 @@ const JobTitles = () => {
               setPendingDeleteId(row._id);
               setConfirmOpen(true);
             }}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold text-red-600 bg-red-50 hover:bg-red-100"
+            className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-600 text-white hover:bg-red-700 shadow-sm"
+            title="Delete"
           >
-            <Trash2 className="w-3.5 h-3.5" />
-            Delete
+            <FaTrash size={12} color="#fff" />
           </button>
         </div>
       ),
