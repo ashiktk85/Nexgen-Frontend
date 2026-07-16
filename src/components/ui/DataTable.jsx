@@ -228,19 +228,19 @@ export function DataTable({
                                             {onEdit && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onEdit(item); }}
-                                                    className="p-1.5 rounded-md text-blue-600 hover:bg-blue-50"
-                                                    title={editLabel || "Edit"}
+                                                    className="inline-flex items-center justify-center p-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+                                                    title="Edit"
                                                 >
-                                                    {editLabel || <Edit className="h-4 w-4" />}
+                                                    {editLabel || <Edit className="h-3.5 w-3.5" />}
                                                 </button>
                                             )}
                                             {onDelete && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onDelete(item); }}
-                                                    className="p-1.5 rounded-md text-red-600 hover:bg-red-50"
-                                                    title={deleteLabel || "Delete"}
+                                                    className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-600 text-white hover:bg-red-700 shadow-sm"
+                                                    title="Delete"
                                                 >
-                                                    {deleteLabel || <Trash2 className="h-4 w-4" />}
+                                                    {deleteLabel || <Trash2 className="h-3.5 w-3.5" />}
                                                 </button>
                                             )}
                                             {onBlock && (
@@ -394,19 +394,19 @@ export function DataTable({
                                                     {onEdit && (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); onEdit(item); }}
-                                                            className={`${compact ? "p-1" : "p-1.5"} rounded-md text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer`}
-                                                            title={editLabel || "Edit"}
+                                                            className={`inline-flex items-center justify-center ${compact ? "p-1" : "p-1.5"} rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer shadow-sm`}
+                                                            title="Edit"
                                                         >
-                                                            {editLabel || <Edit className="h-4 w-4" />}
+                                                            {editLabel || <Edit className="h-3.5 w-3.5" />}
                                                         </button>
                                                     )}
                                                     {onDelete && (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); onDelete(item); }}
-                                                            className={`${compact ? "p-1" : "p-1.5"} rounded-md text-red-600 hover:bg-red-50 transition-colors cursor-pointer`}
-                                                            title={deleteLabel || "Delete"}
+                                                            className={`inline-flex items-center justify-center ${compact ? "p-1" : "p-1.5"} rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors cursor-pointer shadow-sm`}
+                                                            title="Delete"
                                                         >
-                                                            {deleteLabel || <Trash2 className="h-4 w-4" />}
+                                                            {deleteLabel || <Trash2 className="h-3.5 w-3.5" />}
                                                         </button>
                                                     )}
                                                     {onBlock && (

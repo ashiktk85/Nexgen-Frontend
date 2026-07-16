@@ -3,6 +3,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import StatCard from "@/components/ui/StatCard";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Briefcase, CheckCircle2, ListChecks, XCircle, Plus, Download } from "lucide-react";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 import ConfirmModal from "@/components/Admin/ConfirmModal";
@@ -379,9 +380,9 @@ const Jobs = () => {
               setDeleteConfirmOpen(true);
             }}
             viewLabel="View"
-            editLabel="Edit"
+            editLabel={<FaEdit size={12} color="#fff" />}
             blockLabel={(row) => (row.isBlocked ? "List" : "Unlist")}
-            deleteLabel="Delete"
+            deleteLabel={<FaTrash size={12} color="#fff" />}
             showSno={true}
             rowsPerPage={rowsPerPage}
           />
@@ -632,7 +633,7 @@ const Jobs = () => {
       >
         <SheetContent
           side="right"
-          className="w-full sm:max-w-3xl bg-slate-50 p-0"
+          className="w-full sm:max-w-3xl h-full bg-slate-50 p-0 overflow-y-auto overscroll-contain"
         >
           {editingJob && (
             <CreateJobForm
