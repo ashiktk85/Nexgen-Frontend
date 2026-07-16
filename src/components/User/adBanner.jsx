@@ -65,73 +65,73 @@ export default function AdBannerCarousel({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-          <div
-            className="flex h-full transition-transform duration-500 ease-out"
-            style={{
-              transform: `translateX(-${currentIndex * 100}%)`,
-            }}
-          >
-            {banners.map((banner) => (
-              <div
-                key={banner.id}
-                className="h-full w-full flex-shrink-0 flex items-center justify-center"
+        <div
+          className="flex h-full transition-transform duration-500 ease-out"
+          style={{
+            transform: `translateX(-${currentIndex * 100}%)`,
+          }}
+        >
+          {banners.map((banner) => (
+            <div
+              key={banner.id}
+              className="h-full w-full flex-shrink-0 flex items-center justify-center"
+            >
+              <a
+                href={banner.link || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full h-full"
               >
-                <a
-                  href={banner.link || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full h-full"
-                >
-                  <img
-                    src={banner.imageUrl || "/placeholder.svg"}
-                    alt={banner.altText || "Banner"}
-                    className="w-full h-full object-cover"
-                  />
-                </a>
-              </div>
+                <img
+                  src={banner.imageUrl || "/placeholder.svg"}
+                  alt={banner.altText || "Banner"}
+                  className="w-full h-full object-cover"
+                />
+              </a>
+            </div>
+          ))}
+        </div>
+
+        {showNav && (
+          <>
+            <button
+              type="button"
+              onClick={goToPrevious}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 transition-all"
+              aria-label="Previous banner"
+            >
+              <ChevronLeft className="h-6 w-6 text-white" />
+            </button>
+            <button
+              type="button"
+              onClick={goToNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 transition-all"
+              aria-label="Next banner"
+            >
+              <ChevronRight className="h-6 w-6 text-white" />
+            </button>
+          </>
+        )}
+
+        {showNav && (
+          <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
+            {banners.map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => goToSlide(index)}
+                className={cn(
+                  "h-2 rounded-full transition-all",
+                  currentIndex === index
+                    ? "bg-blue-500 w-5"
+                    : "bg-white/80 hover:bg-white w-2"
+                )}
+                aria-label={`Go to slide ${index + 1}`}
+              />
             ))}
           </div>
-
-          {showNav && (
-            <>
-              <button
-                type="button"
-                onClick={goToPrevious}
-                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 transition-all"
-                aria-label="Previous banner"
-              >
-                <ChevronLeft className="h-6 w-6 text-white" />
-              </button>
-              <button
-                type="button"
-                onClick={goToNext}
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 transition-all"
-                aria-label="Next banner"
-              >
-                <ChevronRight className="h-6 w-6 text-white" />
-              </button>
-            </>
-          )}
-
-          {showNav && (
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
-              {banners.map((_, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => goToSlide(index)}
-                  className={cn(
-                    "h-2 rounded-full transition-all",
-                    currentIndex === index
-                      ? "bg-blue-500 w-5"
-                      : "bg-white/80 hover:bg-white w-2"
-                  )}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
+    </div>
   );
 }

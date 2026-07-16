@@ -2,10 +2,10 @@ import { useEffect, useState, useRef } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import StatCard from "@/components/ui/StatCard";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Store, Building2, MapPin, Globe, Image as ImageIcon, Share2, ListChecks, XCircle } from "lucide-react";
+import { Store, Building2, MapPin, Globe, Image as ImageIcon, Share2, ListChecks, XCircle, Download } from "lucide-react";
 import ConfirmModal from "@/components/Admin/ConfirmModal";
 import { AdminFilterBar, AdminFilterSelect } from "@/components/Admin/AdminListFilters";
-import { getAllShops, shopListUnList, trashShopAdmin, restoreShopAdmin, deleteShopAdmin } from "@/apiServices/adminApi";
+import { getAllShops, shopListUnList, trashShopAdmin, restoreShopAdmin, deleteShopAdmin, exportAllShopsXlsx } from "@/apiServices/adminApi";
 import { toast } from "sonner";
 import {
   ADMIN_PAGE,
@@ -49,6 +49,7 @@ const Shops = () => {
   const [restoreConfirmOpen, setRestoreConfirmOpen] = useState(false);
   const [pendingRestoreId, setPendingRestoreId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [shopStats, setShopStats] = useState({ total: 0, listed: 0, unlisted: 0, trashed: 0 });
   const [filters, setFilters] = useState({
     listing: "all",
@@ -180,6 +181,25 @@ const Shops = () => {
     } catch (_) { /* toast handled in API */ }
   };
 
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+      const result = await exportAllShopsXlsx({ search: searchTerm, ...filters });
+      if (!result?.data) return;
+      const url = URL.createObjectURL(new Blob([result.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `techpath-shops-${Date.now()}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success("Shops exported successfully");
+    } catch (_) {
+      /* toast in API */
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const isTrashView = filters.listing === "trash";
   const pendingShop = shops.find((shop) => shop._id === pendingId);
   const pendingTrashShop = shops.find((shop) => shop._id === pendingTrashId);
@@ -268,6 +288,18 @@ const Shops = () => {
             placeholder="Search by shop, employer, email…"
             className={ADMIN_SEARCH_INPUT}
           />
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            disabled={exporting}
+            onClick={handleExport}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
+          >
+            <Download className="w-3.5 h-3.5" />
+            {exporting ? "Exporting…" : "Export Excel"}
+          </button>
         </div>
       </div>
 

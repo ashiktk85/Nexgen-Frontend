@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Users, Briefcase, ChevronRight } from "lucide-react";
-import { getJobApplicationsAdmin, getJobApplicantsByJobAdmin } from "@/apiServices/adminApi";
+import { Users, Briefcase, ChevronRight, Download } from "lucide-react";
+import { getJobApplicationsAdmin, getJobApplicantsByJobAdmin, exportJobApplicationsXlsx } from "@/apiServices/adminApi";
 import { toast } from "sonner";
 import moment from "moment";
 import {
@@ -24,6 +24,8 @@ const AppliedStudents = () => {
   const [applicants, setApplicants] = useState([]);
   const [applicantsLoading, setApplicantsLoading] = useState(false);
   const [openSheet, setOpenSheet] = useState(false);
+  const [exportingAll, setExportingAll] = useState(false);
+  const [exportingJob, setExportingJob] = useState(false);
   const rowsPerPage = 20;
 
   useEffect(() => {
@@ -45,6 +47,39 @@ const AppliedStudents = () => {
       setLoading(false);
     }
   }
+
+  const handleExport = async (jobId = null) => {
+    try {
+      if (jobId) {
+        setExportingJob(true);
+        const result = await exportJobApplicationsXlsx({ jobId });
+        if (!result?.data) return;
+        const url = URL.createObjectURL(new Blob([result.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `techpath-job-${jobId}-applicants-${Date.now()}.xlsx`;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast.success("Applicants exported successfully");
+      } else {
+        setExportingAll(true);
+        const result = await exportJobApplicationsXlsx({ search: searchTerm });
+        if (!result?.data) return;
+        const url = URL.createObjectURL(new Blob([result.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `techpath-applied-students-${Date.now()}.xlsx`;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast.success("Applied students exported successfully");
+      }
+    } catch (_) {
+      /* toast in API */
+    } finally {
+      if (jobId) setExportingJob(false);
+      else setExportingAll(false);
+    }
+  };
 
   const openApplicants = async (job) => {
     setSelectedJob(job);
@@ -158,6 +193,18 @@ const AppliedStudents = () => {
             className={ADMIN_SEARCH_INPUT}
           />
         </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            disabled={exportingAll}
+            onClick={() => handleExport()}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
+          >
+            <Download className="w-3.5 h-3.5" />
+            {exportingAll ? "Exporting…" : "Export Excel"}
+          </button>
+        </div>
       </div>
 
       <div className={ADMIN_TABLE_WRAP}>
@@ -180,14 +227,29 @@ const AppliedStudents = () => {
       <Sheet open={openSheet} onOpenChange={setOpenSheet}>
         <SheetContent side="right" className="w-full sm:max-w-2xl bg-slate-50 p-0">
           <SheetHeader className="px-4 pt-4 pb-2 border-b border-slate-200 bg-white">
-            <SheetTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Briefcase size={16} className="text-indigo-600" />
-              {selectedJob?.jobTitle}
-            </SheetTitle>
-            <p className="text-xs text-slate-500 px-4 pb-2">
-              {selectedJob?.companyName || selectedJob?.employerName} ·{" "}
-              {selectedJob?.applicantCount || 0} applicant(s)
-            </p>
+            <div className="flex items-center justify-between pr-8">
+              <div>
+                <SheetTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Briefcase size={16} className="text-indigo-600" />
+                  {selectedJob?.jobTitle}
+                </SheetTitle>
+                <p className="text-xs text-slate-500 mt-1">
+                  {selectedJob?.companyName || selectedJob?.employerName} ·{" "}
+                  {selectedJob?.applicantCount || 0} applicant(s)
+                </p>
+              </div>
+              {selectedJob?.applicantCount > 0 && (
+                <button
+                  type="button"
+                  disabled={exportingJob}
+                  onClick={() => handleExport(selectedJob._id)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  <Download className="w-3 h-3" />
+                  {exportingJob ? "Exporting…" : "Export Applicants"}
+                </button>
+              )}
+            </div>
           </SheetHeader>
           <div className="p-4 overflow-y-auto max-h-[calc(100vh-100px)]">
             {applicantsLoading ? (

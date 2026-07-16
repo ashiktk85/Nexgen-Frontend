@@ -66,14 +66,15 @@
     @apply border-border;
   }
 
-  html,
-  body,
-  #root {
-    @apply overflow-x-hidden;
-    max-width: 100%;
+  html {
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   body {
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
     @apply bg-background text-foreground;
   }
 }

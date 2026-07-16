@@ -27,7 +27,7 @@ const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, trans
 const itemVariants = { hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } } };
 
 const EXPERIENCE_OPTIONS = [
-  { id: "0", label: "Fresher" },
+  { id: "0", label: "Fresher"  },
   { id: "1", label: "1+ years" },
   { id: "2", label: "2+ years" },
   { id: "3", label: "3+ years" },
@@ -113,6 +113,8 @@ const globalStyle = `
   .tf-radio.checked::after { content:''; width:7px; height:7px; border-radius:50%; background:#0950a0; }
   .tf-clear-btn { width:100%; margin-top:22px; padding:11px 14px; border:1.5px solid #c5d0dc; background:transparent; color:#121A2D; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; font-family:'DM Sans',monospace,sans-serif; transition:all 0.15s ease; }
   .tf-clear-btn:hover { border-color:#0950a0; color:#0950a0; background:#fff; }
+  .tf-close-bottom-btn { width:100%; margin-top:10px; padding:11px 14px; border:1.5px solid #121A2D; background:#121A2D; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; font-family:'DM Sans',monospace,sans-serif; transition:all 0.15s ease; text-align:center; }
+  .tf-close-bottom-btn:hover { background:#0950a0; border-color:#0950a0; }
   .tf-close-btn {
     background:#fff; border:1.5px solid #c5d0dc; color:#121A2D; cursor:pointer;
     display:inline-flex; align-items:center; justify-content:center;
@@ -389,6 +391,12 @@ const FilterPanel = ({
         <button type="button" className="tf-clear-btn" onClick={clearAll}>
           Clear All Filters
         </button>
+
+        {onClose && (
+          <button type="button" className="tf-close-bottom-btn" onClick={onClose}>
+            Close Filters
+          </button>
+        )}
       </div>
     </div>
   );

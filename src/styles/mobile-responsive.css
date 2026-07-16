@@ -71,11 +71,14 @@
   }
 
   /* Prevent horizontal page scroll */
-  html,
-  body,
-  #root {
+  html {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  body {
     max-width: 100%;
     overflow-x: hidden;
+    overflow-y: auto;
   }
 
   /* Job cards: wrap action row cleanly */

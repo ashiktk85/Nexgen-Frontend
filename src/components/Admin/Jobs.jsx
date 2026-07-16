@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import StatCard from "@/components/ui/StatCard";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Briefcase, CheckCircle2, ListChecks, XCircle, Plus } from "lucide-react";
+import { Briefcase, CheckCircle2, ListChecks, XCircle, Plus, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import ConfirmModal from "@/components/Admin/ConfirmModal";
 import { AdminFilterBar, AdminFilterSelect } from "@/components/Admin/AdminListFilters";
-import { getAllJobs, jobListUnList, deleteJobAdmin } from "@/apiServices/adminApi";
+import { getAllJobs, jobListUnList, deleteJobAdmin, exportAllJobsXlsx } from "@/apiServices/adminApi";
 import { toast } from "sonner";
 import moment from "moment";
 import { formatSalary } from "@/utils/formatSalary";
@@ -41,6 +41,7 @@ const Jobs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState(defaultFilters);
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingId, setPendingId] = useState(null);
@@ -118,6 +119,25 @@ const Jobs = () => {
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to delete job");
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+      const result = await exportAllJobsXlsx({ search: searchTerm, ...filters });
+      if (!result?.data) return;
+      const url = URL.createObjectURL(new Blob([result.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `techpath-jobs-${Date.now()}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success("Jobs exported successfully");
+    } catch (_) {
+      /* toast in API */
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -252,6 +272,18 @@ const Jobs = () => {
             placeholder="Search by title, shop, city…"
             className={ADMIN_SEARCH_INPUT}
           />
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            disabled={exporting}
+            onClick={handleExport}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
+          >
+            <Download className="w-3.5 h-3.5" />
+            {exporting ? "Exporting…" : "Export Excel"}
+          </button>
         </div>
       </div>
 

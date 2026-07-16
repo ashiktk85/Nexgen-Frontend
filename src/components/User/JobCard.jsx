@@ -121,6 +121,7 @@ const injectJobCardStyles = () => {
       .jc-list-footer {
         flex-direction: row;
         align-items: flex-end;
+        width: 360px;
       }
       .jc-list-footer .jc-btn-apply {
         flex: 1;

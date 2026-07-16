@@ -545,7 +545,7 @@ export default function Home() {
             variants={fadeUp}
           >
             <h2 id="why-choose-techpath-heading" className="text-2xl sm:text-3xl font-semibold mb-4">
-              Why Choose TechPath 
+              Why Choose TechPath
             </h2>
             <p className="text-lg text-white/60 max-w-2xl mx-auto">
               Kerala&apos;s dedicated job platform for mobile technicians, repair shops, and service
@@ -603,7 +603,10 @@ export default function Home() {
         initial="hidden"
         whileInView="visible"
         viewport={viewportOnce}
-        variants={fadeUp}
+        variants={{
+          hidden: { opacity: 0 },
+          visible: { opacity: 1, transition: { duration: 0.55, ease: "easeOut" } }
+        }}
         className="bg-[#dce2f7] w-full overflow-x-hidden"
       >
         <div className="flex flex-col md:flex-row justify-between items-start py-16 md:py-20 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto gap-12 min-w-0">

@@ -10,13 +10,18 @@ import {
   Dialog, DialogContent, DialogDescription,
   DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Edit, Plus, FileText, Trash2, Check, X,
   User, GraduationCap, Briefcase, MapPin,
   Phone, Mail, Calendar, Camera, Upload,
-  ChevronLeft,
 } from "lucide-react";
 import userAxiosInstance from "../../../config/axiosConfig/userAxiosInstance";
 import { toast } from "sonner";
@@ -141,42 +146,142 @@ if (!document.getElementById("pp-styles")) {
     /* Empty state */
     .pp-empty { text-align:center; padding:48px 24px; border:2px dashed #e2e8f0; border-radius:16px; }
 
+    /* Profile Card Layout Structure */
+    .pp-profile-card {
+      background: #fff;
+      border: 1.5px solid #e8edf5;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.01);
+    }
+    .pp-header-section {
+      padding: 20px 24px 0;
+    }
+    .pp-tabs-list-wrapper {
+      padding: 0 24px;
+    }
+    .pp-tab-content-pad {
+      padding: 28px 24px;
+    }
+
+    /* Tabs list base */
+    .pp-tabs-list {
+      display: flex !important;
+      gap: 4px !important;
+      background: transparent !important;
+      padding: 12px 0 0 !important;
+      border-bottom: none !important;
+      width: 100% !important;
+      justify-content: flex-start !important;
+      flex-wrap: wrap !important;
+    }
+
+    /* Avatar container base */
+    .pp-avatar-container {
+      position: relative;
+      margin-top: -52px;
+    }
+
+    /* Avatar element base */
+    .pp-avatar-el {
+      width: 96px !important;
+      height: 96px !important;
+      border: 4px solid #fff !important;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.15) !important;
+    }
+
+    /* Edit profile button base */
+    .pp-edit-profile-btn {
+      font-size: 12px !important;
+    }
+
     /* ─── Responsive tweaks ─── */
     @media (max-width: 640px) {
       .pp-root { overflow-x: hidden; }
       .pp-hero {
-        padding: 88px 16px 56px !important;
+        padding: 64px 16px 56px !important;
+      }
+      .pp-profile-card-container {
+        margin-top: -32px !important;
+      }
+      .pp-header-section {
+        padding: 20px 16px 0 !important;
+      }
+      .pp-tabs-list-wrapper {
+        padding: 0 16px !important;
       }
       .pp-header-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 16px !important;
       }
-      .pp-header-row > div {
-        width: 100%;
-        min-width: 0 !important;
+      .pp-avatar-container {
+        margin-top: -38px !important;
+        flex-shrink: 0 !important;
       }
-      .pp-header-row button.pp-btn {
-        margin-top: 4px;
-        width: 100%;
-        justify-content: center;
+      .pp-avatar-el {
+        width: 76px !important;
+        height: 76px !important;
+        border-width: 3px !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+      }
+      .pp-name-container {
+        flex: 1 !important;
+        min-width: 150px !important;
+        padding-bottom: 0 !important;
+      }
+      .pp-name-container h1 {
+        font-size: 19px !important;
+      }
+      .pp-edit-profile-btn {
+        font-size: 11px !important;
+        padding: 6px 12px !important;
+        margin-top: 4px !important;
+        display: inline-flex !important;
+        width: auto !important;
       }
       .pp-header-stats {
-        width: 100%;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 10px 0 4px;
-        border-top: 1.5px solid #f1f5f9;
+        width: 100% !important;
+        justify-content: space-around !important;
+        gap: 12px !important;
+        padding: 12px 0 6px !important;
+        border-top: 1.5px solid #f1f5f9 !important;
+        margin-top: 4px !important;
       }
       .pp-header-stats > div {
         flex: 1;
         min-width: 0;
       }
-      .pp-dialog-grid-2 {
-        grid-template-columns: 1fr !important;
+      .pp-tabs-list {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        max-width: 100% !important;
+        scrollbar-width: none !important; /* Firefox */
+        -ms-overflow-style: none !important; /* IE/Edge */
+        padding: 12px 0 8px !important;
+        -webkit-overflow-scrolling: touch;
+      }
+      .pp-tabs-list::-webkit-scrollbar {
+        display: none !important; /* Chrome, Safari, Opera */
+      }
+      .pp-tab {
+        flex-shrink: 0 !important;
+        font-size: 12.5px !important;
+        padding: 8px 14px !important;
+      }
+      .pp-tab-content-pad {
+        padding: 18px 14px !important;
       }
       .pp-card {
         padding: 14px;
+      }
+      .pp-card-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        margin-top: 10px !important;
+        border-top: 1px dashed #e2e8f0 !important;
+        padding-top: 10px !important;
       }
       .pp-info-cell {
         padding: 12px;
@@ -197,41 +302,6 @@ if (!document.getElementById("pp-styles")) {
       .pp-btn {
         max-width: 100%;
       }
-      /* Mobile tabs as settings-style list */
-      .pp-tab {
-        width: 100%;
-        justify-content: space-between;
-        border-radius: 12px !important;
-        background: #fff !important;
-        border: 1.5px solid #e2e8f0 !important;
-        padding: 12px 14px !important;
-      }
-      .pp-tab + .pp-tab {
-        margin-top: 6px;
-      }
-      .pp-tab[data-state="active"] {
-        background: linear-gradient(135deg,#4f46e5,#6366f1) !important;
-        color: #fff !important;
-        border-color: transparent !important;
-      }
-      /* Back-to-top button on mobile */
-      .pp-back-top-mobile {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 14px;
-        font-size: 12px;
-        font-weight: 600;
-        color: #4f46e5;
-        background: #e0e7ff;
-        border-radius: 999px;
-        padding: 6px 12px;
-        border: none;
-        cursor: pointer;
-      }
-      .pp-tab-content-pad {
-        padding: 18px 14px !important;
-      }
       .pp-section-head {
         flex-wrap: wrap;
         gap: 10px;
@@ -241,12 +311,19 @@ if (!document.getElementById("pp-styles")) {
         justify-content: center;
       }
       .pp-dialog-actions {
-        flex-direction: column-reverse !important;
-        align-items: stretch !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 8px !important;
       }
       .pp-dialog-actions .pp-btn {
-        width: 100%;
-        justify-content: center;
+        width: auto !important;
+        flex: 1 !important;
+        justify-content: center !important;
+      }
+      .pp-dialog-grid-2 {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
       }
     }
 
@@ -339,7 +416,6 @@ export default function ProfilePage() {
   const topRef = useRef(null);
   const [activeTab, setActiveTab] = useState("about");
   const [isMobile, setIsMobile] = useState(false);
-  const [isMobileDetail, setIsMobileDetail] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -376,7 +452,6 @@ export default function ProfilePage() {
     const mq = window.matchMedia("(max-width: 640px)");
     const handleChange = (e) => {
       setIsMobile(e.matches);
-      if (!e.matches) setIsMobileDetail(false);
     };
     setIsMobile(mq.matches);
     mq.addEventListener("change", handleChange);
@@ -513,7 +588,6 @@ export default function ProfilePage() {
   const handleTabChange = (val) => {
     setActiveTab(val);
     if (isMobile) {
-      setIsMobileDetail(true);
       setTimeout(() => {
         topRef.current?.scrollIntoView({
           behavior: "smooth",
@@ -550,107 +624,89 @@ export default function ProfilePage() {
       </div>
 
       {/* ── Profile Card ── */}
-      <div style={{ maxWidth: 1260, margin: "-52px auto 48px", padding: "0 16px", position: "relative", zIndex: 2 }}>
+      <div className="pp-profile-card-container" style={{ maxWidth: 1260, margin: "-52px auto 48px", padding: "0 16px", position: "relative", zIndex: 2 }}>
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }}>
 
-          {/* ── Header ── */}
-          <div style={{ background: "#fff", borderRadius: "20px 20px 0 0", border: "1.5px solid #e8edf5", borderBottom: "none", padding: "20px 16px 0" }}>
-            <div className="pp-header-row" style={{ display: "flex", alignItems: "flex-end", gap: 16, flexWrap: "wrap", paddingBottom: 16, borderBottom: "1.5px solid #f1f5f9" }}>
+          {/* ── Profile Card Wrapper ── */}
+          <div className="pp-profile-card">
+            {/* ── Header Section ── */}
+            <div className="pp-header-section">
+              <div className="pp-header-row" style={{ display: "flex", alignItems: "flex-end", gap: 16, flexWrap: "wrap", paddingBottom: 16, borderBottom: "1.5px solid #f1f5f9" }}>
 
-              {/* Avatar */}
-              <div style={{ position: "relative", marginTop: -52 }}>
-                <div
-                  className="pp-avatar-wrap"
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{ display: "block" }}
-                >
-                  <Avatar style={{ width: 96, height: 96, border: "4px solid #fff", boxShadow: "0 6px 24px rgba(0,0,0,0.15)" }}>
-                    <AvatarImage src={user.profileUrl || "/placeholder.svg"} alt={fullName} />
-                    <AvatarFallback style={{ background: getGrad(initial), color: "#fff", fontSize: 32, fontWeight: 800, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-                      {initial}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="pp-avatar-overlay">
-                    <Camera size={22} className="pp-cam-icon" />
+                {/* Avatar */}
+                <div className="pp-avatar-container" style={{ position: "relative", marginTop: -52 }}>
+                  <div
+                    className="pp-avatar-wrap"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ display: "block" }}
+                  >
+                    <Avatar className="pp-avatar-el">
+                      <AvatarImage src={user.profileUrl || "/placeholder.svg"} alt={fullName} />
+                      <AvatarFallback style={{ background: getGrad(initial), color: "#fff", fontSize: 32, fontWeight: 800, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                        {initial}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="pp-avatar-overlay">
+                      <Camera size={22} className="pp-cam-icon" />
+                    </div>
                   </div>
+                  <input type="file" hidden ref={fileInputRef} onChange={handleImageUpload} accept="image/*" />
                 </div>
-                <input type="file" hidden ref={fileInputRef} onChange={handleImageUpload} accept="image/*" />
-              </div>
 
-              {/* Name / location */}
-              <div style={{ flex: 1, minWidth: 160, paddingBottom: 4 }}>
-                <h1 style={{ fontSize: "clamp(18px,3vw,24px)", fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-0.02em" }}>{fullName}</h1>
-                <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 10px", display: "flex", alignItems: "center", gap: 4 }}>
-                  <MapPin size={13} style={{ color: "#6366f1" }} />
-                  {user.location || "No location set"}
-                </p>
-                <button
-                  className="pp-btn pp-btn-outline"
-                  onClick={() => { setTempUser({ ...user }); setIsEditDialogOpen(true); }}
-                  style={{ fontSize: 12 }}
-                >
-                  <Edit size={13} /> Edit Profile
-                </button>
-              </div>
+                {/* Name / location */}
+                <div className="pp-name-container" style={{ flex: 1, minWidth: 160, paddingBottom: 4 }}>
+                  <h1 style={{ fontSize: "clamp(18px,3vw,24px)", fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-0.02em" }}>{fullName}</h1>
+                  <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 10px", display: "flex", alignItems: "center", gap: 4 }}>
+                    <MapPin size={13} style={{ color: "#6366f1" }} />
+                    {user.location || "No location set"}
+                  </p>
+                  <button
+                    className="pp-btn pp-btn-outline pp-edit-profile-btn"
+                    onClick={() => { setTempUser({ ...user }); setIsEditDialogOpen(true); }}
+                  >
+                    <Edit size={13} /> Edit Profile
+                  </button>
+                </div>
 
-              {/* Quick stats */}
-              <div className="pp-header-stats" style={{ display: "flex", gap: 12, paddingBottom: 4, flexWrap: "wrap" }}>
-                {[
-                  { label: "Education", val: user.education?.length || 0, color: "#6366f1" },
-                  { label: "Experience", val: user.experience?.length || 0, color: "#16a34a" },
-                  { label: "Resumes", val: getResumeCount(user.resume), color: "#f59e0b" },
-                ].map(({ label, val, color }) => (
-                  <div key={label} style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: 22, fontWeight: 800, color, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{val}</div>
-                    <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 500 }}>{label}</div>
-                  </div>
-                ))}
+                {/* Quick stats */}
+                <div className="pp-header-stats" style={{ display: "flex", gap: 12, paddingBottom: 4, flexWrap: "wrap" }}>
+                  {[
+                    { label: "Education", val: user.education?.length || 0, color: "#6366f1" },
+                    { label: "Experience", val: user.experience?.length || 0, color: "#16a34a" },
+                    { label: "Resumes", val: getResumeCount(user.resume), color: "#f59e0b" },
+                  ].map(({ label, val, color }) => (
+                    <div key={label} style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: 22, fontWeight: 800, color, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{val}</div>
+                      <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 500 }}>{label}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Tab Bar */}
-            <Tabs defaultValue="about" value={activeTab} onValueChange={handleTabChange}>
-              {(!isMobile || !isMobileDetail) ? (
-                <TabsList style={{ display: "flex", gap: 4, background: "transparent", padding: "12px 0 0", borderBottom: "none", width: "100%", justifyContent: "flex-start", flexWrap: "wrap" }}>
+            <Tabs defaultValue="about" value={activeTab} onValueChange={handleTabChange} style={{ width: "100%" }}>
+              <div className="pp-tabs-list-wrapper">
+                <TabsList className="pp-tabs-list">
                   {TABS.map(({ value, label, icon }) => (
                     <TabsTrigger key={value} value={value} className="pp-tab">
-                      {icon}{label}
+                      {icon}
+                      <span>{label}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
-              ) : (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0 0", gap: 8 }}>
-                  <button
-                    type="button"
-                    className="pp-back-top-mobile"
-                    onClick={() => {
-                      setIsMobileDetail(false);
-                      topRef.current?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start",
-                      });
-                    }}
-                  >
-                    <ChevronLeft size={14} />
-                    Back
-                  </button>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "#0f172a" }}>
-                    {currentTab?.label}
-                  </span>
-                </div>
-              )}
+              </div>
 
               {/* ── Tab Content ── */}
-              {(!isMobile || isMobileDetail) && (
-                <div className="pp-tab-content-pad" style={{ background: "#fff", borderRadius: "0 0 20px 20px", border: "1.5px solid #e8edf5", borderTop: "none", padding: "28px" }}>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeTab}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: .25 }}
-                    >
+              <div className="pp-tab-content-pad">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: .25 }}
+                  >
                       {/* ── ABOUT ── */}
                       <TabsContent value="about" className="mt-0">
                       <SectionHeader title="About Me" />
@@ -736,6 +792,7 @@ export default function ProfilePage() {
                                   </div>
                                 </div>
                                 <div
+                                  className="pp-card-actions"
                                   style={{
                                     display: "flex",
                                     gap: 6,
@@ -782,7 +839,7 @@ export default function ProfilePage() {
                                   <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 8px", overflowWrap: "anywhere" }}>{exp.company}</p>
                                   <span className="pp-year-pill" style={{ background: "#f0fdf4", color: "#16a34a" }}>🗓️ {exp.startYear} – {exp.endYear || "Present"}</span>
                                 </div>
-                                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                                <div className="pp-card-actions" style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                                   <button className="pp-btn pp-btn-outline" style={{ fontSize: 11, padding: "6px 12px" }} onClick={() => openExperienceDialog(i)}><Edit size={12} />Edit</button>
                                   <button className="pp-btn-ghost-red" onClick={() => deleteExperience(i)}><Trash2 size={14} /></button>
                                 </div>
@@ -802,7 +859,6 @@ export default function ProfilePage() {
                     </motion.div>
                   </AnimatePresence>
                 </div>
-              )}
             </Tabs>
           </div>
         </motion.div>
@@ -811,7 +867,7 @@ export default function ProfilePage() {
       {/* ═══ DIALOGS ═══ */}
 
       {/* Edit Profile */}
-      <StyledDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} title="Edit Profile" description="Update your personal information below">
+      <ResponsiveDialog isMobile={isMobile} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} title="Edit Profile" description="Update your personal information below">
         <Formik
           initialValues={{ firstName: tempUser?.firstName || "", lastName: tempUser?.lastName || "", email: tempUser?.email || "", phone: tempUser?.phone || "", about: tempUser?.about || "", DOB: tempUser?.DOB ? new Date(tempUser.DOB).toISOString().split("T")[0] : "", location: tempUser?.location || "", ...tempUser }}
           validationSchema={ProfileSchema} onSubmit={handleUpdateProfile}
@@ -846,7 +902,7 @@ export default function ProfilePage() {
             </Form>
           )}
         </Formik>
-      </StyledDialog>
+      </ResponsiveDialog>
 
       {/* Education */}
       <StyledDialog open={isEducationDialogOpen} onOpenChange={setIsEducationDialogOpen} title={educationIndex !== null ? "Edit Education" : "Add Education"} description="Enter your academic details below">
@@ -968,6 +1024,74 @@ function SectionHeader({ title }) {
 }
 
 function StyledDialog({ open, onOpenChange, title, description, children }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="pp-styled-dialog"
+        style={{
+          borderRadius: 18,
+          border: "1.5px solid #e0e7ff",
+          padding: 0,
+          overflow: "hidden",
+          maxWidth: "min(540px, calc(100vw - 1.5rem))",
+          width: "100%",
+          fontFamily: "'DM Sans',sans-serif",
+        }}
+      >
+        <div style={{ background: "linear-gradient(135deg,#312e81,#4f46e5)", padding: "20px 48px 20px 24px", position: "relative" }}>
+          <DialogTitle style={{ color: "#fff", fontSize: 17, fontWeight: 700, margin: 0, fontFamily: "'Plus Jakarta Sans',sans-serif", paddingRight: 8 }}>{title}</DialogTitle>
+          {description && <DialogDescription style={{ color: "#c7d2fe", fontSize: 13, margin: "4px 0 0" }}>{description}</DialogDescription>}
+        </div>
+        <div style={{ padding: "16px 20px 20px" }}>{children}</div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ResponsiveDialog({ isMobile, open, onOpenChange, title, description, children }) {
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent
+          side="right"
+          hideClose={true}
+          className="w-full sm:max-w-md p-0 flex flex-col h-full overflow-hidden border-none"
+          style={{ fontFamily: "'DM Sans',sans-serif", background: "#fff" }}
+        >
+          <div style={{ background: "linear-gradient(135deg,#312e81,#4f46e5)", padding: "24px 48px 20px 24px", position: "relative" }}>
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              style={{
+                position: "absolute",
+                top: 22,
+                right: 16,
+                background: "none",
+                border: "none",
+                color: "#fff",
+                cursor: "pointer",
+                opacity: 0.9,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "6px",
+                borderRadius: "50%",
+                transition: "background 0.2s"
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; }}
+              onMouseOut={(e) => { e.currentTarget.style.background = "none"; }}
+            >
+              <X size={18} />
+            </button>
+            <SheetTitle style={{ color: "#fff", fontSize: 18, fontWeight: 700, margin: 0, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{title}</SheetTitle>
+            {description && <SheetDescription style={{ color: "#c7d2fe", fontSize: 13, margin: "4px 0 0" }}>{description}</SheetDescription>}
+          </div>
+          <div style={{ padding: "20px", flex: 1, overflowY: "auto" }}>{children}</div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent

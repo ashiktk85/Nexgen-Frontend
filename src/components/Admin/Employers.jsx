@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import StatCard from "@/components/ui/StatCard";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Building2, CheckCircle2, XCircle, Users } from "lucide-react";
+import { Building2, CheckCircle2, XCircle, Users, Download } from "lucide-react";
 
 import ConfirmModal from "@/components/Admin/ConfirmModal";
-import { getAllEmployers, employerListUnList } from "@/apiServices/adminApi";
+import { getAllEmployers, employerListUnList, exportAllEmployersXlsx } from "@/apiServices/adminApi";
 import { toast } from "sonner";
 import {
   ADMIN_PAGE,
@@ -26,6 +26,7 @@ const Employers = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingId, setPendingId] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const rowsPerPage = 20;
 
   useEffect(() => {
@@ -67,6 +68,25 @@ const Employers = () => {
         error.message
       );
       toast.error("An unexpected error occured");
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+      const result = await exportAllEmployersXlsx(searchTerm);
+      if (!result?.data) return;
+      const url = URL.createObjectURL(new Blob([result.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `techpath-employers-${Date.now()}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success("Employers exported successfully");
+    } catch (_) {
+      /* toast in API */
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -133,6 +153,18 @@ const Employers = () => {
             placeholder="Search by name, email or location…"
             className={ADMIN_SEARCH_INPUT}
           />
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            disabled={exporting}
+            onClick={handleExport}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
+          >
+            <Download className="w-3.5 h-3.5" />
+            {exporting ? "Exporting…" : "Export Excel"}
+          </button>
         </div>
       </div>
 

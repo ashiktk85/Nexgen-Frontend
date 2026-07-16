@@ -498,3 +498,76 @@ export const updatePlatformSettings = async (data) => {
     throw error;
   }
 };
+
+export const exportAllShopsXlsx = async (filters = {}) => {
+  try {
+    const params = new URLSearchParams();
+    if (filters.search) params.append("search", filters.search);
+    if (filters.listing && filters.listing !== "all") params.append("listing", filters.listing);
+    if (filters.sortBy) params.append("sortBy", filters.sortBy);
+    if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
+
+    const response = await adminAxiosInstance.get(`/getShops/export?${params.toString()}`, {
+      responseType: "blob",
+    });
+    return response;
+  } catch (error) {
+    console.error("Error in exportAllShopsXlsx:", error);
+    toast.error(error.response?.data?.message || "Failed to export shops");
+    throw error;
+  }
+};
+
+export const exportAllEmployersXlsx = async (search = "") => {
+  try {
+    const params = new URLSearchParams();
+    if (search) params.append("search", search);
+
+    const response = await adminAxiosInstance.get(`/getEmployers/export?${params.toString()}`, {
+      responseType: "blob",
+    });
+    return response;
+  } catch (error) {
+    console.error("Error in exportAllEmployersXlsx:", error);
+    toast.error(error.response?.data?.message || "Failed to export employers");
+    throw error;
+  }
+};
+
+export const exportJobApplicationsXlsx = async (params = {}) => {
+  try {
+    const urlParams = new URLSearchParams();
+    if (params.search) urlParams.append("search", params.search);
+    if (params.jobId) urlParams.append("jobId", params.jobId);
+
+    const response = await adminAxiosInstance.get(`/job-applications/export?${urlParams.toString()}`, {
+      responseType: "blob",
+    });
+    return response;
+  } catch (error) {
+    console.error("Error in exportJobApplicationsXlsx:", error);
+    toast.error(error.response?.data?.message || "Failed to export applied students");
+    throw error;
+  }
+};
+
+export const exportAllJobsXlsx = async (filters = {}) => {
+  try {
+    const params = new URLSearchParams();
+    if (filters.search) params.append("search", filters.search);
+    if (filters.listing && filters.listing !== "all") params.append("listing", filters.listing);
+    if (filters.status && filters.status !== "all") params.append("status", filters.status);
+    if (filters.jobType && filters.jobType !== "all") params.append("jobType", filters.jobType);
+    if (filters.sortBy) params.append("sortBy", filters.sortBy);
+    if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
+
+    const response = await adminAxiosInstance.get(`/getJobs/export?${params.toString()}`, {
+      responseType: "blob",
+    });
+    return response;
+  } catch (error) {
+    console.error("Error in exportAllJobsXlsx:", error);
+    toast.error(error.response?.data?.message || "Failed to export jobs");
+    throw error;
+  }
+};

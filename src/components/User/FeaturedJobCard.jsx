@@ -80,18 +80,21 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
         <JobShareButton job={job} compact iconOnly />
       </div>
 
-      <h3 className="text-base sm:text-lg font-semibold text-[#141b2b] line-clamp-2 leading-snug mb-1 shrink-0 break-words">
+      <h3 className="text-base sm:text-lg font-semibold text-[#141b2b] line-clamp-2 leading-snug mb-1 shrink-0 break-words h-[44px] sm:h-[50px]">
         {job.jobTitle}
       </h3>
       <p className="text-xs font-semibold text-[#0058be] uppercase tracking-wide line-clamp-1 mb-3 shrink-0">
-        {job.companyName || "\u00A0"}
+        {job.companyName || "Private Employer"}
       </p>
 
       <div className="flex flex-col gap-1 text-xs text-[#424752] mb-3 overflow-hidden shrink-0 min-w-0">
-        {locationText ? <MetaLine icon={<LocationOn sx={{ fontSize: 14 }} />} text={locationText} /> : null}
+        <MetaLine
+          icon={<LocationOn sx={{ fontSize: 14 }} />}
+          text={locationText || "Location not specified"}
+        />
         <MetaLine
           icon={<Payments sx={{ fontSize: 14 }} />}
-          text={[salaryText, expText].filter(Boolean).join(" · ")}
+          text={[salaryText, expText].filter(Boolean).join(" · ") || "Salary not disclosed"}
         />
       </div>
 
@@ -116,7 +119,7 @@ function MetaLine({ icon, text }) {
 
 function CardActions({ job, onApply, onDetails, large = false, postedText }) {
   const btnHeight = large ? "h-11 text-sm" : "h-9 text-xs sm:text-sm";
-  const iconSize = large ? 36 : 28;
+  const iconSize = large ? 44 : 36;
 
   return (
     <div className="mt-auto shrink-0 w-full min-w-0 flex flex-col gap-1.5">
