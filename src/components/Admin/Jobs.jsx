@@ -11,6 +11,7 @@ import { getAllJobs, jobListUnList, deleteJobAdmin, exportAllJobsXlsx } from "@/
 import { toast } from "sonner";
 import moment from "moment";
 import { formatSalary } from "@/utils/formatSalary";
+import { formatExperience, isFresherJob } from "@/utils/formatExperience";
 import CreateJobForm from "@/components/Employer/CreateJobForm";
 import {
   ADMIN_PAGE,
@@ -154,6 +155,16 @@ const Jobs = () => {
 
   const columns = [
     {
+      id: "jobCode",
+      header: "Job ID",
+      accessor: (row) => row.jobCode || "—",
+      cell: (row) => (
+        <span className="font-mono text-[11px] font-semibold text-indigo-700">
+          {row.jobCode || "—"}
+        </span>
+      ),
+    },
+    {
       id: "jobTitle",
       header: "Job Title",
       accessor: "jobTitle",
@@ -269,7 +280,7 @@ const Jobs = () => {
               setCurrentPage(1);
               setSearchTerm(e.target.value);
             }}
-            placeholder="Search by title, shop, city…"
+            placeholder="Search by job ID, title, shop, city…"
             className={ADMIN_SEARCH_INPUT}
           />
         </div>
@@ -444,6 +455,12 @@ const Jobs = () => {
                 </div>
                 <div className="px-3 py-3 space-y-3">
                   <div>
+                    <p className="text-[11px] font-medium text-slate-500 uppercase">Job ID</p>
+                    <p className="text-sm font-semibold font-mono text-indigo-700">
+                      {selectedJob.jobCode || "—"}
+                    </p>
+                  </div>
+                  <div>
                     <p className="text-[11px] font-medium text-slate-500 uppercase">Job title</p>
                     <p className="text-sm font-semibold text-slate-900">{selectedJob.jobTitle}</p>
                   </div>
@@ -539,7 +556,8 @@ const Jobs = () => {
 
                   <p className="text-[11px] font-medium text-slate-500 uppercase">Experience</p>
                   <p className="text-sm text-slate-900">
-                    {selectedJob.experienceRequired?.[0]}–{selectedJob.experienceRequired?.[selectedJob.experienceRequired?.length - 1]} years
+                    {formatExperience(selectedJob) || "—"}
+                    {isFresherJob(selectedJob) ? " · Fresher" : ""}
                   </p>
 
                   {selectedJob.workingTime && (

@@ -44,38 +44,6 @@ const TIME_OPTIONS = [
   { value: "30d", label: "Last 30 days" },
 ];
 
-const jobMatchesExperience = (job, selected) => {
-  if (!selected.length) return true;
-  const jobMin = Number(job.experienceRequired?.[0] ?? 0);
-  const jobMax = Number(job.experienceRequired?.[job.experienceRequired?.length - 1] ?? jobMin);
-  return selected.some((id) => {
-    const threshold = Number(id);
-    if (Number.isNaN(threshold)) return true;
-    if (threshold === 0) return jobMin === 0;
-    return jobMin >= threshold || (jobMin <= threshold && jobMax >= threshold);
-  });
-};
-
-const getTimeFilteredJobs = (source, timeRange) => {
-  if (!timeRange) return source;
-  const now = Date.now();
-  const ranges = {
-    "1h": 1 * 60 * 60 * 1000,
-    "24h": 24 * 60 * 60 * 1000,
-    "3d": 3 * 24 * 60 * 60 * 1000,
-    "7d": 7 * 24 * 60 * 60 * 1000,
-    "30d": 30 * 24 * 60 * 60 * 1000,
-  };
-  const windowMs = ranges[timeRange];
-  if (!windowMs) return source;
-  return source.filter((job) => {
-    if (!job.createdAt) return false;
-    const created = new Date(job.createdAt).getTime();
-    if (Number.isNaN(created)) return false;
-    return now - created <= windowMs;
-  });
-};
-
 const globalStyle = `
   .ajp-root *, .ajp-root *::before, .ajp-root *::after { box-sizing: border-box; }
   .ajp-root { font-family:'DM Sans',sans-serif; overflow-x:hidden; max-width:100vw; }
@@ -420,7 +388,9 @@ const AllJobsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const jobsPerPage = JOB_GRID_PAGE_SIZE;
   const [serverTotalPages, setServerTotalPages] = useState(1);
-  const skipLocationFetch = useRef(true);
+  const [totalCount, setTotalCount] = useState(0);
+  const skipFilterFetch = useRef(true);
+  const appliedSearchRef = useRef("");
 
   useEffect(() => {
     const onResize = () => { if (window.innerWidth > 900) setDrawerOpen(false); };
@@ -436,6 +406,7 @@ const AllJobsPage = () => {
   useEffect(() => {
     if (searchInput) {
       setSearchTerm(searchInput);
+      appliedSearchRef.current = searchInput;
       window.history.replaceState({}, document.title);
       fetchJobs({ page: 1, searchOverride: searchInput });
     } else {
@@ -443,37 +414,50 @@ const AllJobsPage = () => {
     }
   }, []);
 
-  useEffect(() => { fetchJobs({ page: currentPage }); }, [currentPage]);
+  useEffect(() => {
+    fetchJobs({ page: currentPage });
+  }, [currentPage]);
 
   useEffect(() => {
-    if (skipLocationFetch.current) {
-      skipLocationFetch.current = false;
+    if (skipFilterFetch.current) {
+      skipFilterFetch.current = false;
       return;
     }
     setCurrentPage(1);
     fetchJobs({ page: 1 });
-  }, [filterCountry, filterState, filterCity]);
+  }, [filterCountry, filterState, filterCity, experienceLevels, timeRange]);
 
   const fetchJobs = async ({ page = 1, searchOverride } = {}) => {
     try {
       setLoading(true);
+      const searchValue =
+        searchOverride !== undefined ? searchOverride : appliedSearchRef.current;
       const { data } = await userAxiosInstance.get("/getJobPosts", {
         params: {
           userId: user?.userId,
           page,
           limit: jobsPerPage,
-          search: (searchOverride ?? searchTerm)?.trim() || undefined,
+          search: String(searchValue || "").trim() || undefined,
           country: filterCountry || undefined,
           state: filterState || undefined,
           city: filterCity || undefined,
+          experience: experienceLevels.length ? experienceLevels.join(",") : undefined,
+          posted: timeRange || undefined,
         },
       });
       const serverJobs = data?.jobs || data?.jobPosts || [];
       setJobs(serverJobs);
       setServerTotalPages(data?.totalPages || 1);
+      setTotalCount(data?.totalCount ?? serverJobs.length);
     } catch (error) {
       toast.warning(error?.response?.data?.message || "An error occurred");
     } finally { setLoading(false); }
+  };
+
+  const runSearch = () => {
+    appliedSearchRef.current = searchTerm;
+    setCurrentPage(1);
+    fetchJobs({ page: 1, searchOverride: searchTerm });
   };
 
   const clearAll = () => {
@@ -486,7 +470,12 @@ const AllJobsPage = () => {
     setSearchParams({}, { replace: true });
     fetchJobs({ page: 1 });
   };
-  const clearSearchTerm = () => { setSearchTerm(""); setCurrentPage(1); fetchJobs({ page: 1, searchOverride: "" }); };
+  const clearSearchTerm = () => {
+    setSearchTerm("");
+    appliedSearchRef.current = "";
+    setCurrentPage(1);
+    fetchJobs({ page: 1, searchOverride: "" });
+  };
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -516,13 +505,6 @@ const AllJobsPage = () => {
     (filterCity ? 1 : 0) +
     experienceLevels.length +
     (timeRange ? 1 : 0);
-
-  const timeFilteredJobs = useMemo(() => {
-    let result = jobs;
-    result = result.filter((job) => jobMatchesExperience(job, experienceLevels));
-    result = getTimeFilteredJobs(result, timeRange);
-    return result;
-  }, [jobs, experienceLevels, timeRange]);
 
   const totalPages = serverTotalPages;
 
@@ -570,7 +552,7 @@ const AllJobsPage = () => {
                 Mobile Repair Jobs{locationLabel ? ` in ${locationLabel}` : " Worldwide"}
               </h1>
               <p style={{ color:"#c7d2fe", fontSize:14, marginTop:8, fontWeight:400 }}>
-                {timeFilteredJobs.length} positions available — Chip-level, Android, iPhone, &amp; Management Roles
+                {totalCount} positions available — Chip-level, Android, iPhone, &amp; Management Roles
               </p>
             </motion.div>
           </div>
@@ -600,7 +582,7 @@ const AllJobsPage = () => {
 
                 {/* Row 1 on mobile: Results badge */}
                 <div className="ajp-results-badge">
-                  <span style={{ fontSize:18, fontWeight:800, color:"#4f46e5", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>{timeFilteredJobs.length}</span>
+                  <span style={{ fontSize:18, fontWeight:800, color:"#4f46e5", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>{totalCount}</span>
                   <span style={{ fontSize:13, color:"#64748b" }}>jobs found</span>
                 </div>
 
@@ -636,7 +618,7 @@ const AllJobsPage = () => {
                     <FaSearch style={{ color:"#94a3b8", flexShrink:0, fontSize:14, marginRight:8 }} />
                     <input type="text" value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      onKeyDown={(e) => { if (e.key==="Enter") { setCurrentPage(1); fetchJobs({page:1}); } }}
+                      onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
                       placeholder="Search job title…"
                       style={{ flex:1, border:"none", background:"transparent", fontSize:14, color:"#1e293b", outline:"none", fontFamily:"'DM Sans',sans-serif", padding:"12px 0", minWidth:0 }} />
                     {searchTerm && (
@@ -644,7 +626,7 @@ const AllJobsPage = () => {
                         <RxCross2 style={{ color:"#64748b", fontSize:13 }} />
                       </button>
                     )}
-                    <button onClick={() => { setCurrentPage(1); fetchJobs({page:1}); }}
+                    <button type="button" onClick={runSearch}
                       style={{ padding:"8px 14px", background:"linear-gradient(135deg,#4f46e5,#6366f1)", color:"#fff", border:"none", borderRadius:8, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", boxShadow:"0 2px 6px rgba(99,102,241,0.3)", transition:"all 0.1s ease", flexShrink:0, display:"flex", alignItems:"center", gap:6 }}
                       onMouseOver={(e) => e.currentTarget.style.transform="scale(1.02)"}
                       onMouseOut={(e) => e.currentTarget.style.transform="scale(1)"}>
@@ -662,7 +644,7 @@ const AllJobsPage = () => {
                   <div style={{ width:40, height:40, borderRadius:"50%", border:"3px solid #e0e7ff", borderTopColor:"#6366f1", animation:"spin 0.8s linear infinite", marginBottom:14 }} />
                   <p style={{ color:"#64748b", fontSize:14, fontWeight:500 }}>Fetching opportunities…</p>
                 </div>
-              ) : timeFilteredJobs.length > 0 ? (
+              ) : jobs.length > 0 ? (
                 <>
                   <motion.div
                     variants={containerVariants}
@@ -671,7 +653,7 @@ const AllJobsPage = () => {
                     className={viewMode === "grid" ? "ajp-jobs-grid" : ""}
                     style={viewMode === "list" ? { display: "flex", flexDirection: "column", gap: 12 } : undefined}
                   >
-                    {timeFilteredJobs.map((job, index) => (
+                    {jobs.map((job, index) => (
                       <motion.div key={job._id} variants={itemVariants} className="job-card-wrap min-w-0 h-full">
                         {viewMode === "grid" ? (
                           <FeaturedJobCard job={job} index={index} compact />

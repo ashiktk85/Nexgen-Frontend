@@ -108,8 +108,8 @@ const initialDummyUsers = [
 ];
 
 const dummyColumns = [
-  { id: "name", header: "Name", accessor: "name", sortable: true },
-  { id: "email", header: "Email", accessor: "email", sortable: true },
+  { id: "name", header: "Name", accessor: "name" },
+  { id: "email", header: "Email", accessor: "email" },
   { id: "location", header: "Location", accessor: "location" },
   {
     id: "status",
@@ -138,31 +138,31 @@ const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, trans
 const itemVariants = { hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0, transition: { duration: .35, ease: "easeOut" } } };
 
 /* ─── Stat card definitions ─── */
-const getStats = (applications) => [
+const getStats = (stats) => [
   {
     label: "Total Applicants",
-    value: applications.length,
+    value: stats.total ?? 0,
     icon: <Users size={20} color="#fff" />,
     gradient: "linear-gradient(135deg,#4f46e5 0%,#6366f1 55%,#818cf8 100%)",
     shadow: "0 8px 24px rgba(99,102,241,.35)",
   },
   {
     label: "Shortlisted",
-    value: applications.filter((a) => a.status === "Shortlisted").length,
+    value: stats.shortlisted ?? 0,
     icon: <CheckCircle2 size={20} color="#fff" />,
     gradient: "linear-gradient(135deg,#059669 0%,#10b981 55%,#34d399 100%)",
     shadow: "0 8px 24px rgba(16,185,129,.32)",
   },
   {
     label: "Pending",
-    value: applications.filter((a) => a.status === "Pending").length,
+    value: stats.pending ?? 0,
     icon: <TrendingUp size={20} color="#fff" />,
     gradient: "linear-gradient(135deg,#f59e0b 0%,#fbbf24 55%,#fcd34d 100%)",
     shadow: "0 8px 24px rgba(245,158,11,.32)",
   },
   {
     label: "Rejected",
-    value: applications.filter((a) => a.status === "Rejected").length,
+    value: stats.rejected ?? 0,
     icon: <XCircle size={20} color="#fff" />,
     gradient: "linear-gradient(135deg,#dc2626 0%,#ef4444 55%,#f87171 100%)",
     shadow: "0 8px 24px rgba(220,38,38,.32)",
@@ -174,53 +174,71 @@ function Applicants() {
   const navigate = useNavigate();
   const employer = useSelector((state) => state.employer.employer);
   const [applications, setApplications] = useState([]);
+  const [stats, setStats] = useState({ total: 0, shortlisted: 0, pending: 0, rejected: 0 });
   const [jobDetails, setJobDetails] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const ROWS_PER_PAGE = 5;
 
-  const fetchApplications = async () => {
+  const fetchApplications = async ({
+    page = currentPage,
+    search = appliedSearch,
+    status = statusFilter,
+  } = {}) => {
     setLoading(true);
     try {
       const { data } = await employerAxiosInstance.get(
-        `/job-applications/${jobId}`
+        `/job-applications/${jobId}`,
+        {
+          params: {
+            page,
+            limit: ROWS_PER_PAGE,
+            search: search?.trim() || undefined,
+            status: status !== "all" ? status : undefined,
+            sortBy: "createdAt",
+            sortOrder: "desc",
+          },
+        }
       );
-      setApplications(data.jobApplications);
-      setCurrentPage(1);
+      setApplications(data.jobApplications || []);
+      setTotalPages(data.totalPages || 1);
+      if (data.stats) setStats(data.stats);
 
-      if (employer?.employerId) {
+      if (employer?.employerId && !jobDetails) {
         const jobsRes = await employerAxiosInstance.get(`/job-list/${employer.employerId}`);
         const currentJob = jobsRes.data.jobPosts?.find((j) => j._id === jobId);
         if (currentJob) setJobDetails(currentJob);
       }
-      setLoading(false);
     } catch (error) {
       console.log(error);
       toast.error("Failed to load applicants");
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchApplications();
+    setCurrentPage(1);
   }, [jobId]);
+
+  useEffect(() => {
+    fetchApplications({ page: currentPage });
+  }, [jobId, currentPage, statusFilter, appliedSearch]);
+
+  const runSearch = () => {
+    setAppliedSearch(searchTerm);
+    setCurrentPage(1);
+  };
 
   const handleView = (row) => {
     setSelectedData(row);
     setIsDialogOpen(true);
-  };
-
-  const handleActiveToggle = (id) => {
-    setApplications((prevApplications) =>
-      prevApplications.map((application) =>
-        application.id === id
-          ? { ...application, active: !application.active }
-          : application
-      )
-    );
   };
 
   const handleCloseDialog = () => {
@@ -228,28 +246,6 @@ function Applicants() {
     setSelectedData(null);
   };
 
-  // ─── Filtered + paginated list ───
-  const ROWS_PER_PAGE = 5;
-
-  const filteredApplications = applications.filter((app) => {
-    const matchesStatus =
-      statusFilter === "all" || app.status === statusFilter;
-
-    if (!searchTerm.trim()) return matchesStatus;
-
-    const term = searchTerm.toLowerCase();
-    const inText =
-      app.name?.toLowerCase().includes(term) ||
-      app.email?.toLowerCase().includes(term) ||
-      app.location?.toLowerCase().includes(term);
-
-    return matchesStatus && inText;
-  });
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredApplications.length / ROWS_PER_PAGE)
-  );
   const safePage = Math.min(currentPage, totalPages);
 
   return (
@@ -273,7 +269,7 @@ function Applicants() {
           variants={itemVariants}
           style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(min(100%,140px),1fr))", gap: 12, marginBottom: 24 }}
         >
-          {getStats(applications).map(({ label, value, icon, gradient, shadow }) => (
+          {getStats(stats).map(({ label, value, icon, gradient, shadow }) => (
             <StatCard
               key={label}
               icon={icon}
@@ -296,7 +292,6 @@ function Applicants() {
             marginBottom: 16,
           }}
         >
-          {/* Search box */}
           <div
             style={{
               width: "100%",
@@ -308,16 +303,15 @@ function Applicants() {
               borderRadius: 12,
               padding: "6px 10px",
               boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
+              gap: 8,
             }}
           >
-            <Search size={14} style={{ color: "#94a3b8", marginRight: 8 }} />
+            <Search size={14} style={{ color: "#94a3b8", flexShrink: 0 }} />
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
               placeholder="Search applicants by name, email or location…"
               style={{
                 flex: 1,
@@ -327,8 +321,27 @@ function Applicants() {
                 fontSize: 13.5,
                 color: "#0f172a",
                 fontFamily: "'DM Sans',sans-serif",
+                minWidth: 0,
               }}
             />
+            <button
+              type="button"
+              onClick={runSearch}
+              style={{
+                padding: "7px 12px",
+                borderRadius: 8,
+                border: "none",
+                background: "linear-gradient(135deg,#4f46e5,#6366f1)",
+                color: "#fff",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: "'Plus Jakarta Sans',sans-serif",
+                flexShrink: 0,
+              }}
+            >
+              Search
+            </button>
           </div>
 
           {/* Status filter */}
@@ -385,7 +398,7 @@ function Applicants() {
           <div style={{ padding: "0" }}>
             <DataTable
               columns={dummyColumns}
-              data={filteredApplications}
+              data={applications}
               loading={loading}
               onView={handleView}
               selectable={false}
@@ -397,7 +410,6 @@ function Applicants() {
               totalPages={totalPages}
               onPageChange={setCurrentPage}
               rowsPerPage={ROWS_PER_PAGE}
-              clientSidePagination
             />
           </div>
         </motion.div>

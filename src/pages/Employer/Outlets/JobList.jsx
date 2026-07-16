@@ -14,6 +14,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import CreateJobForm from "@/components/Employer/CreateJobForm";
 import { formatSalary } from "@/utils/formatSalary";
+import { formatExperience, isFresherJob } from "@/utils/formatExperience";
 import Pagination from "@/components/ui/Pagination";
 import { JOB_GRID_PAGE_SIZE } from "@/constants/pagination";
 import { getSafePage } from "@/utils/pagination";
@@ -125,31 +126,31 @@ const cardVariants = {
 };
 
 /* ─── Stat card definitions ─── */
-const getStats = (jobs) => [
+const getStats = (stats) => [
   {
     label: "Total Jobs",
-    value: jobs.length,
+    value: stats.total ?? 0,
     icon: <TrendingUp size={20} color="#fff" />,
     gradient: "linear-gradient(135deg,#4f46e5 0%,#6366f1 55%,#818cf8 100%)",
     shadow: "0 8px 24px rgba(99,102,241,.35)",
   },
   {
     label: "Active",
-    value: jobs.filter(j => j.status === "open").length,
+    value: stats.active ?? 0,
     icon: <CheckCircle2 size={20} color="#fff" />,
     gradient: "linear-gradient(135deg,#059669 0%,#10b981 55%,#34d399 100%)",
     shadow: "0 8px 24px rgba(16,185,129,.32)",
   },
   {
     label: "Closed",
-    value: jobs.filter(j => j.status !== "open").length,
+    value: stats.closed ?? 0,
     icon: <XCircle size={20} color="#fff" />,
     gradient: "linear-gradient(135deg,#0369a1 0%,#0ea5e9 55%,#38bdf8 100%)",
     shadow: "0 8px 24px rgba(14,165,233,.3)",
   },
   {
     label: "Total Applicants",
-    value: jobs.reduce((sum, j) => sum + (j.applicantsCount || 0), 0),
+    value: stats.totalApplicants ?? 0,
     icon: <Users size={20} color="#fff" />,
     gradient: "linear-gradient(135deg,#b45309 0%,#f59e0b 55%,#fbbf24 100%)",
     shadow: "0 8px 24px rgba(217,119,6,.28)",
@@ -160,12 +161,17 @@ const getStats = (jobs) => [
 function JobList() {
   const employer = useSelector((state) => state.employer.employer);
   const [jobs, setJobs] = useState([]);
+  const [stats, setStats] = useState({ total: 0, active: 0, closed: 0, totalApplicants: 0 });
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
   const [searchTerm, setSearchTerm] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("");
+  const [appliedLocation, setAppliedLocation] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
@@ -174,6 +180,7 @@ function JobList() {
 
   const [editingJob, setEditingJob] = useState(null);
   const [viewingJob, setViewingJob] = useState(null);
+  const JOBS_PER_PAGE = JOB_GRID_PAGE_SIZE;
 
   const handleEdit = (job) => job && setEditingJob(job);
   const handleView = (job) => job && setViewingJob(job);
@@ -183,14 +190,45 @@ function JobList() {
     if (job) { setStatusJob(job); setIsStatusDialogOpen(true); }
   };
 
+  const fetchJobs = async ({
+    page = currentPage,
+    search = appliedSearch,
+    status = statusFilter,
+    location = appliedLocation,
+  } = {}) => {
+    if (!employer?.employerId) return;
+    setLoading(true);
+    try {
+      const res = await employerAxiosInstance.get(`/job-list/${employer.employerId}`, {
+        params: {
+          page,
+          limit: JOBS_PER_PAGE,
+          search: search?.trim() || undefined,
+          status: status !== "all" ? status : undefined,
+          location: location?.trim() || undefined,
+          sortBy: "createdAt",
+          sortOrder: "desc",
+        },
+      });
+      setJobs(res.data.jobPosts || []);
+      setTotalPages(res.data.totalPages || 1);
+      setTotalCount(res.data.totalCount ?? (res.data.jobPosts || []).length);
+      if (res.data.stats) setStats(res.data.stats);
+    } catch (err) {
+      toast.warning(err?.response?.data?.message || "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleStatusDecision = async () => {
     if (!statusJob) return;
     try {
       const data = { status: statusJob?.status === "open" ? "close" : "open" };
       const res = await employerJobStatusChange(statusJob._id, data);
       if (res) {
-        setJobs((prev) => prev.map((j) => (j._id === res.data.updatedJob._id ? res.data.updatedJob : j)));
         toast.success(`Job ${data.status === "open" ? "reopened" : "closed"}.`);
+        fetchJobs();
       } else toast.error("Error updating status");
     } catch (err) { toast.error(err.response?.data?.message || "Unexpected error"); }
     finally { setIsStatusDialogOpen(false); setStatusJob(null); }
@@ -200,8 +238,10 @@ function JobList() {
     if (!selectedJob) return;
     try {
       const res = await employerJobDelete(selectedJob._id, employer?.employerId);
-      if (res) { setJobs((prev) => prev.filter((j) => j._id !== selectedJob._id)); toast.success("Job deleted."); }
-      else toast.error("Error deleting job");
+      if (res) {
+        toast.success("Job deleted.");
+        fetchJobs();
+      } else toast.error("Error deleting job");
     } catch (err) { toast.error(err.response?.data?.message || "Unexpected error"); }
     finally { setIsDialogOpen(false); }
   };
@@ -215,26 +255,32 @@ function JobList() {
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const res = await employerAxiosInstance.get(`/job-list/${employer?.employerId}`);
-        setJobs(res.data.jobPosts);
-        setCurrentPage(1);
-      } catch (err) { toast.warning(err?.response?.data?.message || "An error occurred"); }
-      finally { setLoading(false); }
-    };
-    fetchData();
-  }, [employer?.employerId]);
+    fetchJobs({ page: currentPage });
+  }, [employer?.employerId, currentPage, statusFilter, appliedSearch, appliedLocation]);
 
+  const runSearch = () => {
+    setAppliedSearch(searchTerm);
+    setAppliedLocation(locationFilter);
+    setCurrentPage(1);
+  };
   const columns = [
+    {
+      id: "jobCode",
+      header: "Job ID",
+      cell: (row) => (
+        <span style={{ fontSize: 12, fontWeight: 700, color: "#4f46e5", fontFamily: "ui-monospace, monospace" }}>
+          {row.jobCode || "—"}
+        </span>
+      ),
+      accessor: "jobCode",
+    },
     {
       id: "jobTitle",
       header: "Job Title",
       cell: (row) => (
         <span style={{ fontSize: 13.5, fontWeight: 600, color: "#0f172a" }}>{row.jobTitle}</span>
       ),
-      sortable: true,
+      sortable: false,
       accessor: "jobTitle",
     },
     {
@@ -284,53 +330,11 @@ function JobList() {
           </span>
         );
       },
-      sortable: true,
       accessor: "status",
     },
   ];
 
-  // ─── Search & Pagination helpers ───
-  const JOBS_PER_PAGE = JOB_GRID_PAGE_SIZE;
-
-  const filteredJobs = jobs.filter((job) => {
-    // text search
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      if (
-        !(
-          job.jobTitle?.toLowerCase().includes(term) ||
-          job.city?.toLowerCase().includes(term) ||
-          job.country?.toLowerCase().includes(term)
-        )
-      ) {
-        return false;
-      }
-    }
-
-    // status filter
-    if (statusFilter === "open" && job.status !== "open") return false;
-    if (statusFilter === "closed" && job.status === "open") return false;
-
-    // location filter (separate from main search)
-    if (locationFilter.trim()) {
-      const loc = locationFilter.toLowerCase();
-      if (
-        !(
-          job.city?.toLowerCase().includes(loc) ||
-          job.country?.toLowerCase().includes(loc)
-        )
-      ) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-
-  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / JOBS_PER_PAGE));
   const safePage = getSafePage(currentPage, totalPages);
-  const startIdx = (safePage - 1) * JOBS_PER_PAGE;
-  const paginatedJobs = filteredJobs.slice(startIdx, startIdx + JOBS_PER_PAGE);
 
   return (
     <>
@@ -380,7 +384,7 @@ function JobList() {
               marginBottom: 24,
             }}
           >
-            {getStats(jobs).map(({ label, value, icon, gradient, shadow }) => (
+            {getStats(stats).map(({ label, value, icon, gradient, shadow }) => (
               <StatCard
                 key={label}
                 icon={icon}
@@ -414,7 +418,7 @@ function JobList() {
               }}
             >
               All Listings
-              <span style={{ fontSize: 12.5, fontWeight: 500, color: "#94a3b8", marginLeft: 7 }}>({filteredJobs.length})</span>
+              <span style={{ fontSize: 12.5, fontWeight: 500, color: "#94a3b8", marginLeft: 7 }}>({totalCount})</span>
             </h2>
             <div className="ejl-view-toggle" style={{ background: "#fff", border: "1.5px solid #e2e8f0", borderRadius: 10, overflow: "hidden", marginLeft: "auto" }}>
               <button className={`ejl-view-btn ${viewMode === "grid" ? "active" : "inactive"}`} onClick={() => setViewMode("grid")}><FaTh /></button>
@@ -440,16 +444,18 @@ function JobList() {
                 background: "#fff",
                 border: "1.5px solid #e2e8f0",
                 borderRadius: 10,
-                padding: "12px 10px",
+                padding: "8px 10px",
                 boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
+                gap: 8,
               }}
             >
-              <FaTh style={{ color: "#94a3b8", fontSize: 14, marginRight: 8 }} />
+              <FaTh style={{ color: "#94a3b8", fontSize: 14, flexShrink: 0 }} />
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                placeholder="Search by title, city or country…"
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
+                placeholder="Search by job ID, title, city or country…"
                 style={{
                   flex: 1,
                   border: "none",
@@ -458,8 +464,17 @@ function JobList() {
                   fontSize: 13.5,
                   color: "#0f172a",
                   fontFamily: "'DM Sans',sans-serif",
+                  minWidth: 0,
                 }}
               />
+              <button
+                type="button"
+                className="ejl-add-btn"
+                style={{ padding: "7px 12px", boxShadow: "none", flexShrink: 0 }}
+                onClick={runSearch}
+              >
+                Search
+              </button>
             </div>
             {/* Mobile-friendly filter row below search */}
             <div className="ejl-filter-row">
@@ -476,7 +491,8 @@ function JobList() {
                 type="text"
                 className="ejl-filter-input"
                 value={locationFilter}
-                onChange={(e) => { setLocationFilter(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => setLocationFilter(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
                 placeholder="Filter by location…"
               />
             </div>
@@ -488,14 +504,14 @@ function JobList() {
               <div className="ejl-spinner" />
               <p style={{ color: "#64748b", fontSize: 13.5, margin: 0 }}>Loading your jobs…</p>
             </div>
-          ) : filteredJobs.length > 0 ? (
+          ) : jobs.length > 0 ? (
             viewMode === "grid" ? (
               <motion.div
                 variants={containerVariants}
                 className="ejl-jobs-grid"
               >
                 <AnimatePresence>
-                  {paginatedJobs.map((job, index) => (
+                  {jobs.map((job, index) => (
                     <motion.div key={job._id} custom={index} variants={cardVariants} initial="hidden" animate="visible" exit="exit" style={{ height: "100%" }}>
                       <JobCard job={job} handleEdit={handleEdit} handleStatus={handleStatus} handleDelete={handleDelete} handleView={handleView} />
                     </motion.div>
@@ -515,7 +531,7 @@ function JobList() {
                 <div style={{ width: "100%", overflowX: "auto" }}>
                     <DataTable
                       columns={columns}
-                      data={filteredJobs}
+                      data={jobs}
                       selectable={false}
                       showActions={true}
                       compact={false}
@@ -530,7 +546,6 @@ function JobList() {
                       totalPages={totalPages}
                       onPageChange={setCurrentPage}
                       rowsPerPage={JOBS_PER_PAGE}
-                      clientSidePagination
                     />
                 </div>
               </motion.div>
@@ -550,7 +565,7 @@ function JobList() {
           )}
 
           {/* ── Pagination (grid view) ── */}
-          {!loading && filteredJobs.length > JOBS_PER_PAGE && viewMode === "grid" && (
+          {!loading && totalCount > JOBS_PER_PAGE && viewMode === "grid" && (
             <motion.div variants={itemVariants} style={{ marginTop: 22 }}>
               <Pagination
                 currentPage={safePage}
@@ -639,6 +654,11 @@ function JobList() {
                 <SheetTitle style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 18 }}>
                   {viewingJob.jobTitle}
                 </SheetTitle>
+                {viewingJob.jobCode && (
+                  <p style={{ fontSize: 12.5, fontWeight: 700, color: "#4f46e5", margin: "4px 0 0", fontFamily: "ui-monospace, monospace" }}>
+                    {viewingJob.jobCode}
+                  </p>
+                )}
               </SheetHeader>
               <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 14, fontFamily: "'DM Sans',sans-serif" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#475569" }}>
@@ -649,7 +669,8 @@ function JobList() {
                   Salary: {formatSalary(viewingJob)}
                 </div>
                 <div style={{ fontSize: 13, color: "#475569" }}>
-                  Experience: {viewingJob.experienceRequired?.[0]}–{viewingJob.experienceRequired?.[viewingJob.experienceRequired?.length - 1]} yrs
+                  Experience: {formatExperience(viewingJob) || "—"}
+                  {isFresherJob(viewingJob) ? " · Fresher" : ""}
                 </div>
                 <div>
                   <span style={{

@@ -3,6 +3,7 @@ import { LocationOn, Payments, ArrowForward } from "@mui/icons-material";
 import { getJobCategory } from "@/constants/options";
 import { calculateTimeAgo } from "@/utils/dateFormation";
 import { formatSalary } from "@/utils/formatSalary";
+import { formatExperience, isFresherJob } from "@/utils/formatExperience";
 import { formatJobLocation } from "@/utils/formatLocation";
 import JobShareButton from "@/components/common/JobShareButton";
 import JobWhatsAppButton from "@/components/common/JobWhatsAppButton";
@@ -15,10 +16,9 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
   const category = getJobCategory(job.jobTitle);
   const salaryText = formatSalary(job);
   const locationText = formatJobLocation(job);
-  const expText =
-    job.experienceRequired?.length >= 1
-      ? `${job.experienceRequired[0]}–${job.experienceRequired[job.experienceRequired.length - 1]} yrs`
-      : null;
+  const expText = formatExperience(job);
+  const fresher = isFresherJob(job);
+  const experienceMeta = [expText, fresher ? "Fresher" : null].filter(Boolean).join(" · ");
   const postedText = job.createdAt ? calculateTimeAgo(job.createdAt) : null;
 
   const handleApply = () =>
@@ -51,7 +51,7 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
           {locationText ? <MetaLine icon={<LocationOn sx={{ fontSize: 16 }} />} text={locationText} /> : null}
           <MetaLine
             icon={<Payments sx={{ fontSize: 16 }} />}
-            text={[salaryText, expText].filter(Boolean).join(" · ")}
+            text={[salaryText, experienceMeta].filter(Boolean).join(" · ")}
           />
         </div>
         <CardActions
@@ -94,7 +94,7 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
         />
         <MetaLine
           icon={<Payments sx={{ fontSize: 14 }} />}
-          text={[salaryText, expText].filter(Boolean).join(" · ") || "Salary not disclosed"}
+          text={[salaryText, experienceMeta].filter(Boolean).join(" · ") || "Salary not disclosed"}
         />
       </div>
 

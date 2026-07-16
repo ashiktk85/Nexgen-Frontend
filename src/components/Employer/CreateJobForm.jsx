@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { TextField, Autocomplete, Box, Slider, createFilterOptions } from "@mui/material";
+import { TextField, Autocomplete, createFilterOptions } from "@mui/material";
 import { Country, State, City } from "country-state-city";
 import { useFormik } from "formik";
 import validateJobForm from "@/Validations/CreateJob-validation";
@@ -103,10 +103,6 @@ if (!document.getElementById("cjf-styles")) {
     .cjf-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline { border-color:#6366f1 !important; border-width:1.5px !important; }
     .cjf-root .MuiInputLabel-root.Mui-focused { color:#6366f1 !important; }
     .cjf-root .MuiInputBase-input { padding:11px 14px !important; }
-    .cjf-root .MuiSlider-root { color:#6366f1 !important; }
-    .cjf-root .MuiSlider-thumb { box-shadow:0 0 0 6px rgba(99,102,241,.16) !important; }
-    .cjf-root .MuiSlider-rail { background:#e2e8f0 !important; }
-
     .cjf-grid-2 { display:grid; grid-template-columns:1fr; gap:24px; }
     @media (min-width:768px) { .cjf-grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     .cjf-grid-auto { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr)); gap:16px; }
@@ -147,6 +143,7 @@ const FE = ({ msg }) => msg ? (
 ) : null;
 
 import { parseSalaryFromJob } from "@/utils/formatSalary";
+import { parseExperienceFromJob, buildExperienceRequired } from "@/utils/formatExperience";
 
 const cityFilter = createFilterOptions({ stringify: (option) => (typeof option === "string" ? option : option?.name || "") });
 
@@ -243,10 +240,12 @@ function CreateJobForm({
       })(),
       state: selectedData?.state || null,
       city: selectedData?.city || null,
-      experienceRequired: [
-        selectedData?.experienceRequired?.[0] ?? 0,
-        selectedData?.experienceRequired?.[selectedData.experienceRequired.length - 1] ?? 3,
-      ],
+      ...(() => {
+        const { from, to } = parseExperienceFromJob(selectedData);
+        // New jobs default to 0–3 range when nothing is set
+        if (!selectedData) return { experienceFrom: 0, experienceTo: 3 };
+        return { experienceFrom: from, experienceTo: to };
+      })(),
       description: selectedData?.description || "",
       requirements: selectedData?.requirements || [],
       companyId: selectedData?.companyId || "",
@@ -276,8 +275,10 @@ function CreateJobForm({
         return;
       }
       try {
+        const { experienceFrom, experienceTo, ...rest } = values;
         const payload = {
-          ...values,
+          ...rest,
+          experienceRequired: buildExperienceRequired(experienceFrom, experienceTo),
           description: values.description?.trim() || null,
           country: values.country || null,
           state: values.state || null,
@@ -757,27 +758,71 @@ function CreateJobForm({
               </div>
             </div>
 
-            {/* Experience slider */}
-            <div>
-              <FL>Experience Required</FL>
-              <div style={{ background: "#f8fafc", border: "1.5px solid #f1f5f9", borderRadius: 12, padding: "16px 20px 10px" }}>
-                <Box sx={{ px: 1 }}>
-                  <Slider
-                    value={formik.values.experienceRequired}
-                    onChange={(_, v) => formik.setFieldValue("experienceRequired", v)}
-                    valueLabelDisplay="auto"
-                    min={0} max={10} marks
-                  />
-                </Box>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 12.5, color: "#64748b" }}>0 years</span>
-                  <span style={{ fontSize: 13.5, fontWeight: 700, color: "#4f46e5", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-                    {formik.values.experienceRequired[0]} – {formik.values.experienceRequired[1]}{formik.values.experienceRequired[1] === 10 ? "+" : ""} years
-                  </span>
-                  <span style={{ fontSize: 12.5, color: "#64748b" }}>10+ years</span>
-                </div>
+            {/* Experience — single year or optional range (like salary) */}
+            <div className="cjf-grid-auto" style={{ marginBottom: 8 }}>
+              <div>
+                <FL>Experience From (years)</FL>
+                <input
+                  name="experienceFrom"
+                  type="number"
+                  min={0}
+                  max={10}
+                  value={formik.values.experienceFrom}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="cjf-input"
+                  placeholder="e.g. 0 or 2"
+                />
+              </div>
+              <div>
+                <FL>Experience To (optional)</FL>
+                <input
+                  name="experienceTo"
+                  type="number"
+                  min={0}
+                  max={10}
+                  value={formik.values.experienceTo}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="cjf-input"
+                  placeholder="Leave empty for single year"
+                />
               </div>
             </div>
+            {(() => {
+              const from = Number(formik.values.experienceFrom) || 0;
+              const toRaw = formik.values.experienceTo;
+              const hasTo = toRaw !== "" && toRaw != null && !Number.isNaN(Number(toRaw));
+              const to = hasTo ? Number(toRaw) : from;
+              const isFresher = from === 0 && to === 0;
+              const label = !hasTo || to === from
+                ? `${from} yr${from === 1 ? "" : "s"}`
+                : `${from} – ${to}${to === 10 ? "+" : ""} years`;
+              return (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#4f46e5", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                    {label}
+                  </span>
+                  {isFresher && (
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: "0.04em",
+                        textTransform: "uppercase",
+                        padding: "3px 8px",
+                        borderRadius: 999,
+                        background: "#ecfdf5",
+                        color: "#059669",
+                        border: "1px solid #a7f3d0",
+                      }}
+                    >
+                      Fresher
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Additional job details */}
             <div

@@ -1,6 +1,7 @@
 import React from "react";
 import { MdPlace } from "react-icons/md";
 import { formatSalary } from "@/utils/formatSalary";
+import { formatExperience, isFresherJob } from "@/utils/formatExperience";
 import { IoBriefcase } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { EditOutlined, EyeInvisibleOutlined, DeleteOutlined, EyeOutlined, TeamOutlined } from "@ant-design/icons";
@@ -155,6 +156,12 @@ const JobCard = ({ job, handleEdit, handleDelete, handleStatus, handleView }) =>
               </span>
             </div>
             <p style={{ fontSize:11.5, color:"#94a3b8", margin:"3px 0 0", fontWeight:500 }}>
+              {job.jobCode ? (
+                <>
+                  <span style={{ color:"#4f46e5", fontWeight:700, fontFamily:"ui-monospace, monospace" }}>{job.jobCode}</span>
+                  {" · "}
+                </>
+              ) : null}
               Posted {moment(job?.createdAt).format("MMM D, YYYY")}
             </p>
           </div>
@@ -163,7 +170,7 @@ const JobCard = ({ job, handleEdit, handleDelete, handleStatus, handleView }) =>
         {/* ── Meta chips ── */}
         <div className="ejc-card-meta">
           <div className="ejc-meta-row">
-            <span className="ejc-meta"><IoBriefcase style={{ color:"#6366f1", fontSize:12 }} />{job.experienceRequired[0]}–{job.experienceRequired[job.experienceRequired.length-1]} yrs</span>
+            <span className="ejc-meta"><IoBriefcase style={{ color:"#6366f1", fontSize:12 }} />{formatExperience(job)}{isFresherJob(job) ? " · Fresher" : ""}</span>
             <span style={{ color:"#e2e8f0" }}>·</span>
             <span className="ejc-meta"><MdPlace style={{ color:"#ec4899", fontSize:13 }} />{job.city}, {job.country}</span>
           </div>

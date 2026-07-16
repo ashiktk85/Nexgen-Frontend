@@ -13,6 +13,7 @@ import {
 import { buildTelHref, formatPhoneDisplay } from '@/utils/phone';
 import JobWhatsAppButton from '@/components/common/JobWhatsAppButton';
 import { formatSalary } from '@/utils/formatSalary';
+import { formatExperience, isFresherJob } from '@/utils/formatExperience';
 import { formatJobLocation } from '@/utils/formatLocation';
 import JobShareButton from '@/components/common/JobShareButton';
 
@@ -674,7 +675,8 @@ const JobDetails = () => {
                 <div className="jd-li-meta-item">
                   <label>Experience</label>
                   <span>
-                    {job.experience?.[0]}–{job.experience?.[job.experience?.length - 1]} years
+                    {formatExperience(job) || "—"}
+                    {isFresherJob(job) ? " · Fresher" : ""}
                   </span>
                 </div>
                 <div className="jd-li-meta-item">

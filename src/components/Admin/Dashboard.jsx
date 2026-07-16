@@ -29,6 +29,7 @@ import StatCard from "@/components/ui/StatCard";
 import { ADMIN_PAGE, ADMIN_HEADER_TITLE } from "@/components/Admin/adminPageLayout";
 
 import { displayValue } from "@/utils/tableValue";
+import { formatExperience, isFresherJob } from "@/utils/formatExperience";
 
 /* ─── helpers ─── */
 const fmt = (n) =>
@@ -124,7 +125,8 @@ const JobCard = ({ job, rank }) => (
         </span>
         <span className="flex items-center gap-1 text-xs text-slate-500">
           <Briefcase className="w-3 h-3" />
-          {job.experienceRequired?.join(" – ")} yrs
+          {formatExperience(job) || "—"}
+          {isFresherJob(job) ? " · Fresher" : ""}
         </span>
         <span className="flex items-center gap-1 text-xs text-slate-500">
           <Calendar className="w-3 h-3" />

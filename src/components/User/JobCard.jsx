@@ -5,6 +5,7 @@ import { IoBriefcase } from "react-icons/io5";
 import { calculateTimeAgo } from "@/utils/dateFormation";
 import { CATEGORY_COLORS, getJobCategory } from "@/constants/options";
 import { formatSalary } from "@/utils/formatSalary";
+import { formatExperience, isFresherJob } from "@/utils/formatExperience";
 import { formatJobLocation } from "@/utils/formatLocation";
 import JobShareButton from "@/components/common/JobShareButton";
 import JobWhatsAppButton from "@/components/common/JobWhatsAppButton";
@@ -216,6 +217,8 @@ const JobCard = ({ job, layout }) => {
   const category = getJobCategory(job.jobTitle);
   const salaryText = formatSalary(job);
   const locationText = formatJobLocation(job);
+  const expText = formatExperience(job);
+  const fresher = isFresherJob(job);
 
   const jobDetailNavigation = () => navigate(`/job-details/${job._id}`);
   const handleApplyJob = () =>
@@ -286,10 +289,17 @@ const JobCard = ({ job, layout }) => {
             <span className="jc-badge">
               {salaryText}
             </span>
-            <span className="jc-badge">
-              <IoBriefcase style={{ color: "#f59e0b", fontSize: 12 }} />
-              {job.experienceRequired[0]}–{job.experienceRequired[job.experienceRequired.length - 1]} yrs
-            </span>
+            {expText && (
+              <span className="jc-badge">
+                <IoBriefcase style={{ color: "#f59e0b", fontSize: 12 }} />
+                {expText}
+              </span>
+            )}
+            {fresher && (
+              <span className="jc-badge" style={{ background: "#ecfdf5", color: "#059669", border: "1px solid #a7f3d0" }}>
+                Fresher
+              </span>
+            )}
           </div>
         </div>
 
