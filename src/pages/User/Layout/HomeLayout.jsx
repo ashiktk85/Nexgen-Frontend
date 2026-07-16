@@ -5,7 +5,9 @@ import { Outlet, useLocation } from 'react-router-dom';
 
 function HomeLayout() {
   const { pathname } = useLocation();
-  const showLegalFooter = pathname !== "/";
+  const isHome = pathname === "/";
+  const isLegalPage = pathname === "/privacy" || pathname === "/terms";
+  const showLegalFooter = !isHome && !isLegalPage;
 
   return (
     <div className="relative z-0 flex flex-col min-h-screen w-full overflow-x-hidden font-rubik">

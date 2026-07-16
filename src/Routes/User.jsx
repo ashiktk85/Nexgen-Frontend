@@ -4,6 +4,8 @@ import RouteFallback from "@/components/RouteFallback";
 import { UserProtectedRoute } from "@/services/userProtector";
 import Home from "../pages/User/Outlets/Home";
 import HomeLayout from "@/pages/User/Layout/HomeLayout";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
+import TermsOfService from "../pages/TermsOfService";
 
 const LoginPage = lazy(() => import("./../pages/Login"));
 const ForgotPassword = lazy(() => import("./../pages/ForgotPassword"));
@@ -19,8 +21,6 @@ const AllJobsPage = lazy(() => import("../pages/User/Outlets/AllJobs"));
 const JobDetailPage = lazy(() => import("../pages/User/Outlets/JobDetails"));
 const ShopDetails = lazy(() => import("../pages/User/Outlets/ShopDetails"));
 const JobApplicationHistory = lazy(() => import("@/pages/User/Outlets/JobApplicationHistory"));
-const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("@/pages/TermsOfService"));
 
 function User() {
   return (
@@ -32,8 +32,6 @@ function User() {
         <Route path="/otp-verification" element={<RegisterOtp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/forgot-password-otp" element={<ForgotPasswordOtp />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<TermsOfService />} />
         <Route path="/terms-and-conditions" element={<Navigate to="/terms" replace />} />
 
         <Route element={<HomeLayout />}>
@@ -45,6 +43,8 @@ function User() {
           <Route path="/application-submitted" element={<UserProtectedRoute><ApplicationSubmitted /></UserProtectedRoute>} />
           <Route path="/job-application-history" element={<UserProtectedRoute><JobApplicationHistory /></UserProtectedRoute>} />
           <Route path="/profile" element={<UserProtectedRoute><Profile /></UserProtectedRoute>} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

@@ -13,7 +13,7 @@ function PrivacyPolicy() {
     <div className="flex min-h-screen flex-col bg-white font-rubik text-gray-800">
       <main
         id="main-content"
-        className="mx-auto w-full max-w-[800px] flex-1 px-4 py-10 sm:px-6 sm:py-14 lg:px-8"
+        className="mx-auto w-full max-w-[800px] flex-1 px-4 pt-24 pb-10 sm:px-6 sm:pt-28 sm:pb-14 lg:px-8"
       >
         <p className="mb-6">
           <Link

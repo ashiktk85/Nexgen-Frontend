@@ -1,25 +1,25 @@
 import React, { useRef, useState, useEffect } from "react";
-import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "@/utils/apiError";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import GrapeAnimation from "@/components/GrapeAnimation";
-import useRequest from "@/hooks/useRequestUser";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 import { AUTH_PANEL_OTP_EMPLOYER } from "@/constants/authPanelCopy";
 import NextUiShell from "@/components/NextUiShell";
+import { useDispatch } from "react-redux";
+import { setEmployer } from "@/redux/slices/employer";
 
 const RegisterOtp = () => {
   const OTP_LENGTH = 4;
   const [otp, setOtp] = useState(new Array(OTP_LENGTH).fill(""));
+  const [submitting, setSubmitting] = useState(false);
   const inputRefs = useRef([]);
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const email = location.state?.email;
-  const { data, loading, error, sendRequest } = useRequest();
-
+  const email = location.state?.email || localStorage.getItem("employer-email");
 
   useEffect(() => {
     if (inputRefs.current[0]) {
@@ -48,36 +48,37 @@ const RegisterOtp = () => {
     const otpArray = pastedData.slice(0, OTP_LENGTH).split("");
     setOtp([...otpArray, ...new Array(OTP_LENGTH - otpArray.length).fill("")]);
     inputRefs.current[Math.min(otpArray.length, OTP_LENGTH - 1)].focus();
-    console.log(otp);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     try {
-      const email = localStorage.getItem("employer-email");
+      setSubmitting(true);
+      const storedEmail = localStorage.getItem("employer-email") || email;
       const joinedOtp = otp.join("");
-      const data = {
-        otp : joinedOtp,
-        email
-      }
-      
-      console.log(data);
-      
-      const res = await employerAxiosInstance.post('/verify-otp' , data)
-      console.log(res);
-      if(res) {
-        localStorage.removeItem("employer-email")
-        toast.success("Otp verification successfull")
-        setTimeout(() => {
-            navigate('/employer/employer-login')
-        }, 1500);
-      }
-      
+      const payload = {
+        otp: joinedOtp,
+        email: storedEmail,
+      };
 
-      if (loading) return <p>Loading...</p>;
-      if (error) return <p>Error: {error}</p>;
+      const res = await employerAxiosInstance.post("/verify-otp", payload);
+      const data = res.data;
+
+      if (data?.status && data?.employerCred) {
+        localStorage.removeItem("employer-email");
+        dispatch(setEmployer(data.employerCred));
+        toast.success("Registration successful");
+        navigate("/employer/dashboard", { replace: true });
+      } else if (data?.status) {
+        localStorage.removeItem("employer-email");
+        toast.success("OTP verification successful");
+        navigate("/employer/employer-login", { replace: true });
+      }
     } catch (err) {
       toast.error(getApiErrorMessage(err, "OTP verification failed"));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -130,27 +131,26 @@ const RegisterOtp = () => {
             </div>
             <button
               className={`w-full bg-primary hover:bg-blue-700 text-white py-2 rounded-lg mt-6 transition-colors ${
-                otp.some((digit) => digit === "")
+                otp.some((digit) => digit === "") || submitting
                   ? "opacity-50 cursor-not-allowed"
                   : ""
               }`}
-              disabled={otp.some((digit) => digit === "")}
+              disabled={otp.some((digit) => digit === "") || submitting}
               type="submit"
             >
-              Verify Email
+              {submitting ? "Verifying…" : "Verify Email"}
             </button>
           </form>
 
           <div className="text-center mt-4 flex justify-center gap-3">
             <p className="text-gray-600">Didn't receive the code?</p>
-            <button className="text-blue-600 hover:text-blue-700 text-sm hover:underline"
-            >
+            <button type="button" className="text-blue-600 hover:text-blue-700 text-sm hover:underline">
               Resend Code
             </button>
           </div>
           <p className="text-center text-sm text-gray-600 mt-6">
             Back to{" "}
-            <Link to="/login" className="text-blue-600 hover:underline">
+            <Link to="/employer/employer-login" className="text-blue-600 hover:underline">
               Login
             </Link>
           </p>

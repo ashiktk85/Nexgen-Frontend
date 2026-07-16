@@ -1,25 +1,24 @@
 import React, { useRef, useState, useEffect } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
-import { InputOtp } from "@nextui-org/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "@/utils/apiError";
-import useRequest from "../hooks/useRequestUser";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 import { AUTH_PANEL_OTP_JOB_SEEKER } from "@/constants/authPanelCopy";
 import NextUiShell from "@/components/NextUiShell";
+import { useAuth } from "@/hooks/useAuth";
 
 const RegisterOtp = () => {
   const OTP_LENGTH = 4;
   const [otp, setOtp] = useState(new Array(OTP_LENGTH).fill(""));
+  const [submitting, setSubmitting] = useState(false);
   const inputRefs = useRef([]);
   const location = useLocation();
   const navigate = useNavigate();
+  const { applyAuth } = useAuth();
 
-  const email = location.state?.email;
-  const { data, loading, error, sendRequest } = useRequest();
-
+  const email = location.state?.email || localStorage.getItem("email");
 
   useEffect(() => {
     if (inputRefs.current[0]) {
@@ -48,34 +47,38 @@ const RegisterOtp = () => {
     const otpArray = pastedData.slice(0, OTP_LENGTH).split("");
     setOtp([...otpArray, ...new Array(OTP_LENGTH - otpArray.length).fill("")]);
     inputRefs.current[Math.min(otpArray.length, OTP_LENGTH - 1)].focus();
-    console.log(otp);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     try {
-      const email = localStorage.getItem("email");
+      setSubmitting(true);
+      const storedEmail = localStorage.getItem("email") || email;
       const joinedOtp = otp.join("");
       const payload = {
-        email,
+        email: storedEmail,
         otp: joinedOtp,
       };
-      console.log(payload);
-     
-      const {data} = await userAxiosInstance.post('/verify-otp' , payload)
-      
-    console.log(data);
-    if(data.status) {
-      localStorage.removeItem('email')
-      toast.success('Registration successful')
-      navigate('/login')
-    }
-    
 
-      if (loading) return <p>Loading...</p>;
-      if (error) return <p>Error: {error}</p>;
+      const { data } = await userAxiosInstance.post("/verify-otp", payload);
+
+      if (data.status) {
+        localStorage.removeItem("email");
+        if (data.token && data.user) {
+          applyAuth(data.token, {
+            ...data.user,
+            ...(data.cred || {}),
+            userId: data.user.userId || data.cred?.userId,
+          });
+        }
+        toast.success("Registration successful");
+        navigate("/", { replace: true });
+      }
     } catch (err) {
       toast.error(getApiErrorMessage(err, "OTP verification failed"));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -128,20 +131,20 @@ const RegisterOtp = () => {
             </div>
             <button
               className={`w-full bg-primary hover:bg-blue-700 text-white py-2 rounded-lg mt-6 transition-colors ${
-                otp.some((digit) => digit === "")
+                otp.some((digit) => digit === "") || submitting
                   ? "opacity-50 cursor-not-allowed"
                   : ""
               }`}
-              disabled={otp.some((digit) => digit === "")}
+              disabled={otp.some((digit) => digit === "") || submitting}
               type="submit"
             >
-              Verify Email
+              {submitting ? "Verifying…" : "Verify Email"}
             </button>
           </form>
 
           <div className="text-center mt-4 flex justify-center gap-3">
             <p className="text-gray-600">Didn't receive the code?</p>
-            <button className="text-blue-600 hover:text-blue-700 text-sm hover:underline">
+            <button type="button" className="text-blue-600 hover:text-blue-700 text-sm hover:underline">
               Resend Code
             </button>
           </div>
