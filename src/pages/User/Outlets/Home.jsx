@@ -363,7 +363,7 @@ export default function Home() {
                 className="grid gap-5 w-full min-w-0"
                 style={{ gridTemplateColumns: "repeat(auto-fill, minmax(min(300px, 100%), 1fr))" }}
               >
-                {jobs.slice(0, 6).map((job, index) => (
+                {jobs.slice(0, 8).map((job, index) => (
                   <motion.div key={job._id} variants={fadeUp} className="min-w-0 h-full">
                     <FeaturedJobCard job={job} index={index} compact />
                   </motion.div>
