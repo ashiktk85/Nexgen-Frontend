@@ -142,6 +142,59 @@ const FE = ({ msg }) => msg ? (
   <p className="cjf-error"><X size={11} />{msg}</p>
 ) : null;
 
+const CUSTOM_OPTION = "__custom__";
+
+const CustomOptionField = ({ label, name, options, formik, placeholder }) => {
+  const value = formik.values[name] || "";
+  const [isCustom, setIsCustom] = useState(
+    () => Boolean(value && !options.includes(value))
+  );
+
+  const handleSelect = (event) => {
+    const nextValue = event.target.value;
+    if (nextValue === CUSTOM_OPTION) {
+      setIsCustom(true);
+      formik.setFieldValue(name, "");
+      return;
+    }
+
+    setIsCustom(false);
+    formik.setFieldValue(name, nextValue);
+  };
+
+  return (
+    <div>
+      <FL>{label}</FL>
+      <select
+        name={name}
+        value={isCustom ? CUSTOM_OPTION : value}
+        onChange={handleSelect}
+        onBlur={formik.handleBlur}
+        className="cjf-input"
+      >
+        <option value="">Select</option>
+        {options.map((option) => (
+          <option key={option} value={option}>{option}</option>
+        ))}
+        <option value={CUSTOM_OPTION}>Add custom</option>
+      </select>
+      {isCustom && (
+        <input
+          type="text"
+          name={name}
+          value={value}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          className="cjf-input"
+          style={{ marginTop: 8 }}
+          placeholder={placeholder || `Enter custom ${label.toLowerCase()}`}
+          autoFocus
+        />
+      )}
+    </div>
+  );
+};
+
 import { parseSalaryFromJob } from "@/utils/formatSalary";
 import { parseExperienceFromJob, buildExperienceRequired } from "@/utils/formatExperience";
 
@@ -833,113 +886,62 @@ function CreateJobForm({
                 marginBottom: 8,
               }}
             >
-              <div>
-                <FL>Room Available</FL>
-                <select
-                  name="roomAvailable"
-                  value={formik.values.roomAvailable || ""}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="cjf-input"
-                >
-                  <option value="">Select</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-              </div>
+              <CustomOptionField
+                label="Room Available"
+                name="roomAvailable"
+                options={["Yes", "No"]}
+                formik={formik}
+              />
 
-              <div>
-                <FL>Food Available</FL>
-                <select
-                  name="foodAvailable"
-                  value={formik.values.foodAvailable || ""}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="cjf-input"
-                >
-                  <option value="">Select</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-              </div>
+              <CustomOptionField
+                label="Food Available"
+                name="foodAvailable"
+                options={["Yes", "No"]}
+                formik={formik}
+              />
 
-              <div>
-                <FL>Incentive</FL>
-                <select
-                  name="incentive"
-                  value={formik.values.incentive || ""}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="cjf-input"
-                >
-                  <option value="">Select</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-              </div>
+              <CustomOptionField
+                label="Incentive"
+                name="incentive"
+                options={["Yes", "No"]}
+                formik={formik}
+              />
 
-              <div>
-                <FL>Working Time</FL>
-                <select
-                  name="workingTime"
-                  value={formik.values.workingTime || ""}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="cjf-input"
-                >
-                  <option value="">Select</option>
-                  <option value="9:00 AM – 6:00 PM">9:00 AM – 6:00 PM</option>
-                  <option value="10:00 AM – 10:00 PM">10:00 AM – 10:00 PM</option>
-                </select>
-              </div>
+              <CustomOptionField
+                label="Working Time"
+                name="workingTime"
+                options={["9:00 AM – 6:00 PM", "10:00 AM – 10:00 PM"]}
+                formik={formik}
+                placeholder="e.g. 8:30 AM – 5:30 PM"
+              />
 
-              <div>
-                <FL>Working Days</FL>
-                <select
-                  name="workingDays"
-                  value={formik.values.workingDays || ""}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="cjf-input"
-                >
-                  <option value="">Select</option>
-                  <option value="Monday – Saturday">Monday – Saturday</option>
-                  <option value="Monday – Friday">Monday – Friday</option>
-                </select>
-              </div>
+              <CustomOptionField
+                label="Working Days"
+                name="workingDays"
+                options={["Monday – Saturday", "Monday – Friday"]}
+                formik={formik}
+                placeholder="e.g. Tuesday – Sunday"
+              />
 
-              <div>
-                <FL>Holiday</FL>
-                <select
-                  name="holiday"
-                  value={formik.values.holiday || ""}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="cjf-input"
-                >
-                  <option value="">Select</option>
-                  <option value="Sunday Leave">Sunday Leave</option>
-                  <option value="Saturday Leave">Saturday Leave</option>
-                  <option value="Monthly Leave (2 Days / 4 Days)">Monthly Leave (2 Days / 4 Days)</option>
-                </select>
-              </div>
+              <CustomOptionField
+                label="Holiday"
+                name="holiday"
+                options={[
+                  "Sunday Leave",
+                  "Saturday Leave",
+                  "Monthly Leave (2 Days / 4 Days)",
+                ]}
+                formik={formik}
+                placeholder="e.g. Alternate Sundays"
+              />
 
-              <div>
-                <FL>Probation Period</FL>
-                <select
-                  name="probationPeriod"
-                  value={formik.values.probationPeriod || ""}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="cjf-input"
-                >
-                  <option value="">Select</option>
-                  <option value="No Probation">No Probation</option>
-                  <option value="1 Month">1 Month</option>
-                  <option value="3 Months">3 Months</option>
-                  <option value="6 Months">6 Months</option>
-                </select>
-              </div>
+              <CustomOptionField
+                label="Probation Period"
+                name="probationPeriod"
+                options={["No Probation", "1 Month", "3 Months", "6 Months"]}
+                formik={formik}
+                placeholder="e.g. 2 Months"
+              />
             </div>
           </motion.div>
 
