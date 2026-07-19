@@ -13,7 +13,7 @@ import JobWhatsAppButton from "@/components/common/JobWhatsAppButton";
 /* ─── Inline styles injected once ─── */
 const injectJobCardStyles = () => {
   const css = `
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
 
     .jc-root { font-family: 'DM Sans', sans-serif; }
     .jc-root h2 { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -21,40 +21,79 @@ const injectJobCardStyles = () => {
     .jc-card {
       background: #ffffff;
       border: 1.5px solid #e8edf5;
-      border-radius: 16px;
+      border-radius: 14px;
       transition: box-shadow 0.22s ease, transform 0.22s ease, border-color 0.22s ease;
-      cursor: default;
-      overflow: hidden;
+      cursor: pointer;
+      overflow: visible;
     }
     .jc-card:hover {
-      box-shadow: 0 12px 40px rgba(79,70,229,0.1);
-      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(79,70,229,0.1);
+      transform: translateY(-2px);
       border-color: #c7d2fe;
+    }
+
+    .jc-job-id {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #4f46e5;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      margin: 0 0 4px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 5px;
+      padding: 2px 6px;
+      line-height: 1.2;
+    }
+    .jc-job-id-label {
+      font-weight: 600;
+      color: #6366f1;
+      font-family: 'DM Sans', sans-serif;
     }
 
     .jc-badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       background: #f8fafc;
       border: 1px solid #e2e8f0;
-      border-radius: 7px;
-      padding: 4px 9px;
-      font-size: 12px;
-      color: #64748b;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: #475569;
       max-width: 100%;
       white-space: normal;
       word-break: break-word;
+    }
+    .jc-badge-strong {
+      font-weight: 700;
+      color: #0f172a;
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+    .jc-badge-salary {
+      font-weight: 700;
+      color: #065f46;
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+    }
+    .jc-badge-exp {
+      font-weight: 700;
+      color: #92400e;
+      background: #fffbeb;
+      border-color: #fde68a;
     }
 
     .jc-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
-      padding: 8px 18px;
-      border-radius: 10px;
-      font-size: 13px;
+      gap: 4px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.18s ease;
@@ -65,7 +104,7 @@ const injectJobCardStyles = () => {
     .jc-btn-apply {
       background: linear-gradient(135deg, #16a34a, #22c55e);
       color: #fff;
-      box-shadow: 0 3px 10px rgba(34,197,94,0.28);
+      box-shadow: 0 2px 8px rgba(34,197,94,0.25);
     }
     .jc-btn-apply:hover {
       background: #fff;
@@ -84,15 +123,15 @@ const injectJobCardStyles = () => {
       display: flex;
       flex-direction: row;
       align-items: center;
-      gap: 16px;
-      padding: 16px 20px;
+      gap: 12px;
+      padding: 12px 14px;
       flex: 1;
       min-width: 0;
     }
     .jc-grid-layout {
       display: flex;
       flex-direction: column;
-      padding: 24px 24px 28px;
+      padding: 14px 14px 12px;
       flex: 1;
       min-width: 0;
     }
@@ -101,8 +140,8 @@ const injectJobCardStyles = () => {
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 10px;
-      margin-top: 16px;
+      gap: 6px;
+      margin-top: 10px;
       flex-shrink: 0;
       width: 100%;
       min-width: 0;
@@ -112,7 +151,7 @@ const injectJobCardStyles = () => {
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 10px;
+      gap: 6px;
       flex-shrink: 0;
       min-width: 0;
       width: 100%;
@@ -122,7 +161,7 @@ const injectJobCardStyles = () => {
       .jc-list-footer {
         flex-direction: row;
         align-items: flex-end;
-        width: 360px;
+        width: 300px;
       }
       .jc-list-footer .jc-btn-apply {
         flex: 1;
@@ -133,7 +172,7 @@ const injectJobCardStyles = () => {
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 6px;
+      gap: 4px;
       flex: 1;
       min-width: 0;
       width: 100%;
@@ -150,22 +189,41 @@ const injectJobCardStyles = () => {
     .jc-btn-details {
       flex: 1;
       min-width: 0;
-      padding: 8px 10px !important;
+      padding: 7px 8px !important;
       font-size: 12px !important;
     }
 
     .jc-title {
-      font-size: 16px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 800;
       color: #0f172a;
       margin: 0;
-      line-height: 1.35;
+      line-height: 1.3;
       letter-spacing: -0.01em;
       overflow-wrap: anywhere;
       word-break: break-word;
       white-space: normal;
     }
-    .jc-title.list { font-size: 15px; }
+    .jc-title.list { font-size: 14px; }
+
+    .jc-company {
+      font-size: 11px;
+      font-weight: 700;
+      color: #4f46e5;
+      margin: 2px 0 0;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .jc-meta-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
+      align-items: center;
+    }
 
     .jc-posted-time {
       font-size: 10px;
@@ -180,19 +238,23 @@ const injectJobCardStyles = () => {
       .jc-list-layout {
         flex-direction: column !important;
         align-items: stretch !important;
-        gap: 12px;
-        padding: 14px 14px;
+        gap: 10px;
+        padding: 12px;
       }
       .jc-grid-layout {
-        padding: 16px 14px 18px;
+        padding: 12px;
       }
+      .jc-action-row { gap: 6px; }
+      .jc-btn { padding: 8px 12px; font-size: 12px; min-height: 36px; }
+      .jc-btn-details { min-height: 36px !important; }
     }
 
     .jc-accent-bar {
-      height: 3px;
+      height: 2px;
       background: linear-gradient(90deg, #6366f1, #a5b4fc);
       opacity: 0;
       transition: opacity 0.22s;
+      flex-shrink: 0;
     }
     .jc-card:hover .jc-accent-bar { opacity: 1; }
   `;
@@ -208,9 +270,6 @@ const injectJobCardStyles = () => {
 
 injectJobCardStyles();
 
-/* ═══════════════════════════════════════════
-   JobCard
-═══════════════════════════════════════════ */
 const JobCard = ({ job, layout }) => {
   const navigate = useNavigate();
   const isList = layout === "list";
@@ -221,7 +280,8 @@ const JobCard = ({ job, layout }) => {
   const fresher = isFresherJob(job);
 
   const jobDetailNavigation = () => navigate(`/job-details/${job._id}`);
-  const handleApplyJob = () =>
+  const handleApplyJob = (e) => {
+    e?.stopPropagation?.();
     navigate(`/job-application/${job._id}`, {
       state: {
         jobTitle: job?.jobTitle,
@@ -231,80 +291,73 @@ const JobCard = ({ job, layout }) => {
         employerId: job?.employerId,
       },
     });
+  };
+  const stopCardClick = (e) => e.stopPropagation();
 
   return (
-    <article className="jc-root jc-card" style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column" }} aria-label="Job listing card">
-      {/* Animated accent bar */}
-      <div className="jc-accent-bar" style={{ flexShrink: 0 }} />
+    <article
+      className="jc-root jc-card"
+      style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", cursor: "pointer" }}
+      aria-label="Job listing card"
+      role="link"
+      tabIndex={0}
+      onClick={jobDetailNavigation}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          jobDetailNavigation();
+        }
+      }}
+    >
+      <div className="jc-accent-bar" />
 
-      <div className={isList ? "jc-list-layout" : "jc-grid-layout"} >
+      <div className={isList ? "jc-list-layout" : "jc-grid-layout"}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {job.jobCode ? (
+            <p className="jc-job-id">
+              <span className="jc-job-id-label">Job ID:</span>
+              {job.jobCode}
+            </p>
+          ) : null}
 
-        {/* ── Main Info ── */}
-        <div style={{ flex: 1, minWidth: 0, marginBottom: isList ? 0 : 14 }}>
-          {/* Title + share */}
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 6, marginBottom: 4 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <h2 className={`jc-title${isList ? " list" : ""}`}>
-                {job.jobTitle}
-              </h2>
-              <p
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "#6366f1",
-                  margin: "3px 0 0",
-                  letterSpacing: "0.04em",
-                  textTransform: "uppercase",
-                  overflowWrap: "anywhere",
-                  wordBreak: "break-word",
-                }}
-              >
-                {job.companyName}
-              </p>
+              <h2 className={`jc-title${isList ? " list" : ""}`}>{job.jobTitle}</h2>
+              <p className="jc-company">{job.companyName}</p>
             </div>
-            <div style={{ flexShrink: 0, marginTop: 2 }}>
+            <div style={{ flexShrink: 0 }} onClick={stopCardClick} onKeyDown={stopCardClick}>
               <JobShareButton job={job} compact iconOnly />
             </div>
           </div>
 
-          {/* Badges */}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 6,
-            }}
-          >
+          <div className="jc-meta-stack">
             {category && (
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${CATEGORY_COLORS[category] || "bg-gray-100 text-gray-700"}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${CATEGORY_COLORS[category] || "bg-gray-100 text-gray-700"}`}>
                 {category}
               </span>
             )}
             {locationText && (
-              <span className="jc-badge">
-                <MdPlace style={{ color: "#6366f1", fontSize: 13 }} />
+              <span className="jc-badge jc-badge-strong">
+                <MdPlace style={{ color: "#6366f1", fontSize: 12 }} />
                 {locationText}
               </span>
             )}
-            <span className="jc-badge">
-              {salaryText}
-            </span>
+            <span className="jc-badge jc-badge-salary">{salaryText}</span>
             {expText && (
-              <span className="jc-badge">
-                <IoBriefcase style={{ color: "#f59e0b", fontSize: 12 }} />
+              <span className="jc-badge jc-badge-exp">
+                <IoBriefcase style={{ color: "#d97706", fontSize: 11 }} />
                 {expText}
               </span>
             )}
             {fresher && (
-              <span className="jc-badge" style={{ background: "#ecfdf5", color: "#059669", border: "1px solid #a7f3d0" }}>
+              <span className="jc-badge" style={{ background: "#ecfdf5", color: "#059669", border: "1px solid #a7f3d0", fontWeight: 700 }}>
                 Fresher
               </span>
             )}
           </div>
         </div>
 
-        {/* ── Footer: Apply + WhatsApp + Details ── */}
-        <div className={isList ? "jc-list-footer" : "jc-grid-footer"}>
+        <div className={isList ? "jc-list-footer" : "jc-grid-footer"} onClick={stopCardClick} onKeyDown={stopCardClick}>
           <button
             className={`jc-btn ${job.alreadyApplied ? "jc-btn-applied" : "jc-btn-apply"}`}
             disabled={job.alreadyApplied}
@@ -316,9 +369,7 @@ const JobCard = ({ job, layout }) => {
           </button>
 
           <div className="jc-details-col">
-            <span className="jc-posted-time">
-              Posted {calculateTimeAgo(job.createdAt)}
-            </span>
+            <span className="jc-posted-time">Posted {calculateTimeAgo(job.createdAt)}</span>
             <div className="jc-action-row">
               <JobWhatsAppButton
                 phone={job.phone}
@@ -345,7 +396,6 @@ const JobCard = ({ job, layout }) => {
             </div>
           </div>
         </div>
-
       </div>
     </article>
   );

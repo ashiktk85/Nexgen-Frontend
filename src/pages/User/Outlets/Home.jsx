@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowForward,
@@ -21,13 +21,127 @@ import { TECHPATH_SOCIAL } from "@/constants/socialLinks";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { motion, useReducedMotion } from "framer-motion";
 import { useSelector } from "react-redux";
-import AdBannerCarousel from "@/components/User/adBanner";
-import MobileBanner from "@/components/User/MobileBanner";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 import { Helmet } from "react-helmet-async";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 
 const HERO_BANNER_SRC = "/Images/bannerImg.jpg";
+const HERO_ROTATE_MS = 6500;
+const HERO_FADE_MS = 1.25;
+
+function HeroBackgroundCarousel({ slides, reduceMotion }) {
+  const [index, setIndex] = useState(0);
+  const videoRefs = useRef({});
+  const items =
+    slides?.length > 0
+      ? slides
+      : [{ id: "fallback", url: HERO_BANNER_SRC, mediaType: "image" }];
+
+  // Keep index in range when banner list changes after fetch
+  useEffect(() => {
+    if (index >= items.length) setIndex(0);
+  }, [items.length, index]);
+
+  // Preload upcoming image so the crossfade never shows empty media
+  useEffect(() => {
+    if (items.length <= 1) return;
+    const next = items[(index + 1) % items.length];
+    if (next?.mediaType !== "video" && next?.url) {
+      const img = new Image();
+      img.src = next.url;
+    }
+  }, [items, index]);
+
+  useEffect(() => {
+    if (items.length <= 1 || reduceMotion) return;
+    const current = items[index];
+    if (current?.mediaType === "video") return undefined;
+    const t = setInterval(() => {
+      setIndex((i) => (i + 1) % items.length);
+    }, HERO_ROTATE_MS);
+    return () => clearInterval(t);
+  }, [items, index, reduceMotion]);
+
+  useEffect(() => {
+    items.forEach((item, i) => {
+      const el = videoRefs.current[item.id || i];
+      if (!el) return;
+      if (i === index && item.mediaType === "video") {
+        el.currentTime = 0;
+        el.play?.().catch(() => {});
+      } else {
+        el.pause?.();
+      }
+    });
+  }, [index, items]);
+
+  return (
+    <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-[#141b2b]">
+      {items.map((item, i) => {
+        const isActive = i === index;
+        const key = item.id || item.url || i;
+        return (
+          <motion.div
+            key={key}
+            className="absolute inset-0"
+            initial={false}
+            animate={{
+              opacity: isActive ? 1 : 0,
+              scale: reduceMotion ? 1 : isActive ? 1 : 1.03,
+            }}
+            transition={{
+              opacity: {
+                duration: reduceMotion ? 0.01 : HERO_FADE_MS,
+                ease: [0.4, 0, 0.2, 1],
+              },
+              scale: {
+                duration: reduceMotion ? 0.01 : HERO_FADE_MS + 0.4,
+                ease: [0.22, 1, 0.36, 1],
+              },
+            }}
+            style={{
+              zIndex: isActive ? 2 : 1,
+              willChange: "opacity, transform",
+            }}
+          >
+            {item.mediaType === "video" ? (
+              <video
+                ref={(el) => {
+                  if (el) videoRefs.current[key] = el;
+                }}
+                src={item.url}
+                className="w-full h-full object-cover"
+                muted
+                playsInline
+                loop={items.length === 1}
+                preload="auto"
+                onEnded={() => {
+                  if (items.length > 1 && isActive) {
+                    setIndex((n) => (n + 1) % items.length);
+                  }
+                }}
+              />
+            ) : (
+              <img
+                src={item.url}
+                alt={item.altText || "TechPath hero background"}
+                className="w-full h-full object-cover"
+                fetchPriority={i === 0 ? "high" : "low"}
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding="async"
+                draggable={false}
+              />
+            )}
+          </motion.div>
+        );
+      })}
+      <div
+        className="absolute inset-0 z-[3]"
+        style={{ background: "linear-gradient(to right, rgba(20, 27, 43, 0.9), rgba(20, 27, 43, 0.4))" }}
+      />
+    </div>
+  );
+}
 const EMPLOYER_IMG_SRC = "/Images/employer-img.jpg";
 const REPAIR_IMG_SRC = "/Images/mob-repair-img1.jpg";
 
@@ -104,7 +218,7 @@ export default function Home() {
   const [jobs, setJobs] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const user = useSelector((state) => state.user.seekerInfo);
-  const [adBanners, setAdBanners] = useState([]);
+  const [heroBanners, setHeroBanners] = useState([]);
   const reduceMotion = useReducedMotion();
   const fadeUp = reduceMotion ? reducedMotionFadeVariants : scrollFadeUpVariants;
   const fadeLeft = reduceMotion ? reducedMotionFadeVariants : scrollFadeLeftVariants;
@@ -112,30 +226,26 @@ export default function Home() {
   const fadeScale = reduceMotion ? reducedMotionFadeVariants : scrollScaleVariants;
   const sectionStagger = reduceMotion ? reducedMotionFadeVariants : scrollContainerVariants;
 
-  // Fetch ad banners from the same endpoint used in banner-admin
-  const fetchAdBanners = async () => {
+  // Active banners rotate as the homepage hero background carousel
+  const fetchHeroBanners = async () => {
     try {
       const { data } = await adminAxiosInstance.get("/all-banners");
-      // The response structure is { message, data } where data contains the banner array
       if (data && data.data) {
-        // Map the backend data structure to match what AdBannerCarousel expects
-        const mappedBanners = data.data
-          .filter((banner) => banner.active) // Only show active banners
+        const hero = data.data
+          .filter((banner) => banner.active)
           .map((banner) => ({
             id: banner._id,
-            imageUrl: banner.image, // This is the signed URL from S3
-            link: banner.link || "#", // Default to "#" if no link is provided
-            altText: banner.fileName || "Advertisement Banner",
+            url: banner.image || banner.url,
+            mediaType: banner.mediaType || "image",
+            altText: banner.fileName || "Hero banner",
           }));
-        setAdBanners(mappedBanners);
-        console.log("Banners loaded:", mappedBanners.length);
+        setHeroBanners(hero);
       } else {
-        setAdBanners([]);
+        setHeroBanners([]);
       }
     } catch (error) {
       console.error("Error fetching banners:", error);
-      // Fallback to empty array if fetch fails
-      setAdBanners([]);
+      setHeroBanners([]);
     }
   };
 
@@ -167,7 +277,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchJobs();
-    fetchAdBanners();
+    fetchHeroBanners();
   }, []);
 
   const JobsSkeleton = () => (
@@ -203,20 +313,7 @@ export default function Home() {
       <main className="flex-grow bg-[#f9f9ff] w-full overflow-x-hidden">
         {/* Hero — min-height only so scroll is never trapped on load */}
         <section className="relative min-h-[100dvh] flex items-center overflow-x-hidden bg-[#141b2b] w-full">
-          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-            <img
-              src={HERO_BANNER_SRC}
-              alt="Mobile repair professionals at work in Kerala"
-              className="home-hero-bg w-full h-full object-cover transform-gpu"
-              fetchPriority="high"
-              loading="eager"
-              decoding="async"
-            />
-            <div
-              className="absolute inset-0"
-              style={{ background: "linear-gradient(to right, rgba(20, 27, 43, 0.9), rgba(20, 27, 43, 0.4))" }}
-            />
-          </div>
+          <HeroBackgroundCarousel slides={heroBanners} reduceMotion={reduceMotion} />
 
           <motion.div
             className="relative z-10 w-full max-w-[1280px] mx-auto px-3 sm:px-4 lg:px-5 pt-20 pb-10 min-w-0"
@@ -322,10 +419,6 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {adBanners.length > 0 && (
-          <MobileBanner banners={adBanners} className="md:hidden" />
-        )}
-
         {/* Featured Jobs */}
         <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#f1f3ff] overflow-x-hidden w-full">
           <div className="max-w-[1280px] mx-auto">
@@ -373,18 +466,6 @@ export default function Home() {
 
           </div>
         </section>
-
-        {adBanners.length > 0 && (
-          <motion.div
-            className="hidden md:block bg-[#f1f3ff]"
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportOnce}
-            variants={fadeUp}
-          >
-            <AdBannerCarousel banners={adBanners} autoSlideInterval={5000} />
-          </motion.div>
-        )}
 
         {/* For Job Seekers */}
         <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 overflow-x-hidden w-full">

@@ -141,6 +141,7 @@ export default function JobShareButton({
   label = "Share",
   compact = false,
   iconOnly = false,
+  prominent = false,
 }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -282,11 +283,13 @@ export default function JobShareButton({
     setOpen(false);
   };
 
-  const defaultBtnClass = compact
-    ? "inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-colors"
-    : "inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors";
+  const defaultBtnClass = prominent
+    ? "inline-flex items-center justify-center gap-1.5 min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl border-2 border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm hover:bg-indigo-100 hover:border-indigo-300 hover:shadow-md active:scale-95 transition-all touch-manipulation"
+    : compact
+      ? "inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-colors"
+      : "inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors";
 
-  const iconSize = compact || iconOnly ? 14 : 16;
+  const iconSize = prominent ? 20 : compact || iconOnly ? 14 : 16;
 
   const menu = open
     ? createPortal(

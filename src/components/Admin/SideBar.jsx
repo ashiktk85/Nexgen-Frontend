@@ -18,6 +18,8 @@ import {
   Building2,
   Briefcase,
   ShieldCheck,
+  Download,
+  ClipboardList,
   Image as ImageIcon,
   Store,
   Tags,
@@ -126,6 +128,18 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       icon: <Users className="w-4 h-4" />,
     },
     {
+      id: "placement-tracking",
+      label: "Placement Tracking",
+      url: "/admin/placement-tracking",
+      icon: <ClipboardList className="w-4 h-4" />,
+    },
+    {
+      id: "reports",
+      label: "Reports & Downloads",
+      url: "/admin/reports",
+      icon: <Download className="w-4 h-4" />,
+    },
+    {
       id: "job-titles",
       label: "Job Titles",
       url: "/admin/job-titles",
@@ -145,7 +159,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     },
     {
       id: "banner",
-      label: "Banner",
+      label: "Hero Banners",
       url: "/admin/banner",
       icon: <ImageIcon className="w-4 h-4" />,
     },

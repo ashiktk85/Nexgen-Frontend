@@ -81,8 +81,8 @@ const globalStyle = `
   .tf-radio.checked::after { content:''; width:7px; height:7px; border-radius:50%; background:#0950a0; }
   .tf-clear-btn { width:100%; margin-top:22px; padding:11px 14px; border:1.5px solid #c5d0dc; background:transparent; color:#121A2D; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; font-family:'DM Sans',monospace,sans-serif; transition:all 0.15s ease; }
   .tf-clear-btn:hover { border-color:#0950a0; color:#0950a0; background:#fff; }
-  .tf-close-bottom-btn { width:100%; margin-top:10px; padding:11px 14px; border:1.5px solid #121A2D; background:#121A2D; color:#fff; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; font-family:'DM Sans',monospace,sans-serif; transition:all 0.15s ease; text-align:center; }
-  .tf-close-bottom-btn:hover { background:#0950a0; border-color:#0950a0; }
+  .tf-apply-btn { width:100%; margin-top:10px; padding:12px 14px; border:1.5px solid #0950a0; background:#0950a0; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:'DM Sans',monospace,sans-serif; transition:all 0.15s ease; text-align:center; border-radius:8px; min-height:44px; }
+  .tf-apply-btn:hover { background:#073d7a; border-color:#073d7a; }
   .tf-close-btn {
     background:#fff; border:1.5px solid #c5d0dc; color:#121A2D; cursor:pointer;
     display:inline-flex; align-items:center; justify-content:center;
@@ -306,6 +306,8 @@ const FilterPanel = ({
   activeFiltersCount,
   clearAll,
   onClose,
+  onApply,
+  postedRadioName = "tf-posted",
 }) => {
 
   const toggleExperience = (level) => {
@@ -351,7 +353,7 @@ const FilterPanel = ({
           <RadioGroup
             options={TIME_OPTIONS.map((o) => ({ id: o.value, label: o.label }))}
             value={timeRange}
-            name="tf-posted"
+            name={postedRadioName}
             onChange={(id) => setTimeRange((prev) => (prev === id ? "" : id))}
           />
         </CollapsibleSection>
@@ -360,9 +362,9 @@ const FilterPanel = ({
           Clear All Filters
         </button>
 
-        {onClose && (
-          <button type="button" className="tf-close-bottom-btn" onClick={onClose}>
-            Close Filters
+        {onApply && (
+          <button type="button" className="tf-apply-btn" onClick={onApply}>
+            Apply Filter
           </button>
         )}
       </div>
@@ -379,6 +381,11 @@ const AllJobsPage = () => {
   const [jobs, setJobs] = useState([]);
   const [experienceLevels, setExperienceLevels] = useState([]);
   const [timeRange, setTimeRange] = useState("");
+  const [draftCountry, setDraftCountry] = useState(searchParams.get("country") || "");
+  const [draftState, setDraftState] = useState(searchParams.get("state") || "");
+  const [draftCity, setDraftCity] = useState(searchParams.get("city") || "");
+  const [draftExperienceLevels, setDraftExperienceLevels] = useState([]);
+  const [draftTimeRange, setDraftTimeRange] = useState("");
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -460,15 +467,96 @@ const AllJobsPage = () => {
     fetchJobs({ page: 1, searchOverride: searchTerm });
   };
 
-  const clearAll = () => {
+  const openDrawer = () => {
+    setDraftCountry(filterCountry);
+    setDraftState(filterState);
+    setDraftCity(filterCity);
+    setDraftExperienceLevels([...experienceLevels]);
+    setDraftTimeRange(timeRange);
+    setDrawerOpen(true);
+  };
+
+  const applyDraftFilters = () => {
+    skipFilterFetch.current = true;
+    setFilterCountry(draftCountry);
+    setFilterState(draftState);
+    setFilterCity(draftCity);
+    setExperienceLevels([...draftExperienceLevels]);
+    setTimeRange(draftTimeRange);
+    setCurrentPage(1);
+    setDrawerOpen(false);
+    // fetch with draft values immediately (state updates are async)
+    (async () => {
+      try {
+        setLoading(true);
+        const searchValue = appliedSearchRef.current;
+        const { data } = await userAxiosInstance.get("/getJobPosts", {
+          params: {
+            userId: user?.userId,
+            page: 1,
+            limit: jobsPerPage,
+            search: String(searchValue || "").trim() || undefined,
+            country: draftCountry || undefined,
+            state: draftState || undefined,
+            city: draftCity || undefined,
+            experience: draftExperienceLevels.length ? draftExperienceLevels.join(",") : undefined,
+            posted: draftTimeRange || undefined,
+          },
+        });
+        const serverJobs = data?.jobs || data?.jobPosts || [];
+        setJobs(serverJobs);
+        setServerTotalPages(data?.totalPages || 1);
+        setTotalCount(data?.totalCount ?? serverJobs.length);
+      } catch (error) {
+        toast.warning(error?.response?.data?.message || "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
+  const clearDraftFilters = () => {
+    setDraftCountry("");
+    setDraftState("");
+    setDraftCity("");
+    setDraftExperienceLevels([]);
+    setDraftTimeRange("");
+  };
+
+  const clearAll = async () => {
+    skipFilterFetch.current = true;
     setFilterCountry("");
     setFilterState("");
     setFilterCity("");
     setExperienceLevels([]);
     setTimeRange("");
+    setDraftCountry("");
+    setDraftState("");
+    setDraftCity("");
+    setDraftExperienceLevels([]);
+    setDraftTimeRange("");
     setCurrentPage(1);
     setSearchParams({}, { replace: true });
-    fetchJobs({ page: 1 });
+    try {
+      setLoading(true);
+      const searchValue = appliedSearchRef.current;
+      const { data } = await userAxiosInstance.get("/getJobPosts", {
+        params: {
+          userId: user?.userId,
+          page: 1,
+          limit: jobsPerPage,
+          search: String(searchValue || "").trim() || undefined,
+        },
+      });
+      const serverJobs = data?.jobs || data?.jobPosts || [];
+      setJobs(serverJobs);
+      setServerTotalPages(data?.totalPages || 1);
+      setTotalCount(data?.totalCount ?? serverJobs.length);
+    } catch (error) {
+      toast.warning(error?.response?.data?.message || "An error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
   const clearSearchTerm = () => {
     setSearchTerm("");
@@ -508,7 +596,14 @@ const AllJobsPage = () => {
 
   const totalPages = serverTotalPages;
 
-  const filterProps = {
+  const draftActiveFiltersCount =
+    (draftCountry ? 1 : 0) +
+    (draftState ? 1 : 0) +
+    (draftCity ? 1 : 0) +
+    draftExperienceLevels.length +
+    (draftTimeRange ? 1 : 0);
+
+  const desktopFilterProps = {
     filterCountry,
     setFilterCountry,
     filterState,
@@ -521,6 +616,24 @@ const AllJobsPage = () => {
     setTimeRange,
     activeFiltersCount,
     clearAll,
+    postedRadioName: "tf-posted-desktop",
+  };
+
+  const drawerFilterProps = {
+    filterCountry: draftCountry,
+    setFilterCountry: setDraftCountry,
+    filterState: draftState,
+    setFilterState: setDraftState,
+    filterCity: draftCity,
+    setFilterCity: setDraftCity,
+    experienceLevels: draftExperienceLevels,
+    setExperienceLevels: setDraftExperienceLevels,
+    timeRange: draftTimeRange,
+    setTimeRange: setDraftTimeRange,
+    activeFiltersCount: draftActiveFiltersCount,
+    clearAll: clearDraftFilters,
+    onApply: applyDraftFilters,
+    postedRadioName: "tf-posted-drawer",
   };
 
   return (
@@ -535,7 +648,7 @@ const AllJobsPage = () => {
       {/* Mobile drawer */}
       <div className={`ajp-overlay${drawerOpen?" open":""}`} onClick={() => setDrawerOpen(false)} />
       <div className={`ajp-drawer${drawerOpen?" open":""}`}>
-        <FilterPanel {...filterProps} onClose={() => setDrawerOpen(false)} />
+        <FilterPanel {...drawerFilterProps} onClose={() => setDrawerOpen(false)} />
       </div>
 
       <motion.div className="ajp-root" initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ duration:0.6 }}
@@ -564,7 +677,7 @@ const AllJobsPage = () => {
 
             {/* Desktop sidebar */}
             <motion.aside variants={itemVariants} className="ajp-sidebar">
-              <FilterPanel {...filterProps} onClose={null} />
+              <FilterPanel {...desktopFilterProps} onClose={null} />
             </motion.aside>
 
             {/* Right column */}
@@ -574,7 +687,7 @@ const AllJobsPage = () => {
               <div className="ajp-search-row">
 
                 {/* Row 1 on mobile: Filters toggle */}
-                <button className="ajp-filter-toggle" onClick={() => setDrawerOpen(true)}>
+                <button className="ajp-filter-toggle" onClick={openDrawer}>
                   <SlidersHorizontal size={14} />
                   Filters
                   {activeFiltersCount > 0 && <span className="tf-count">{activeFiltersCount}</span>}

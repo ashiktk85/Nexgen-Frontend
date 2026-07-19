@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import GrapeAnimation from "@/components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
@@ -11,7 +11,6 @@ import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 import { AUTH_PANEL_ADMIN } from "@/constants/authPanelCopy";
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const AdminRegister = () => {
   const navigate = useNavigate();
@@ -126,7 +125,9 @@ export default AdminRegister;
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <TechpathBrand {...BRAND_SIZES.page} className="mb-3 mx-auto lg:mx-0" />
+          <Link to="/" aria-label="Go to homepage">
+            <TechpathBrand {...BRAND_SIZES.page} className="mb-3 mx-auto lg:mx-0" />
+          </Link>
 
           {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">

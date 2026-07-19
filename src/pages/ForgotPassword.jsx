@@ -65,7 +65,9 @@ const ForgotPassword = () => {
       <div className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-8 pt-20 lg:p-10">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <TechpathBrand {...BRAND_SIZES.page} className="mb-8 mx-auto lg:mx-0" />
+          <Link to="/" aria-label="Go to homepage">
+            <TechpathBrand {...BRAND_SIZES.page} className="mb-8 mx-auto lg:mx-0" />
+          </Link>
 
           {/* Welcome Text */}
           <h2 className="text-3xl font-semibold mb-4 text-center lg:text-left">

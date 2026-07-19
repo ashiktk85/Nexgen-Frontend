@@ -17,6 +17,8 @@ const OtpVerification = lazy(() => import("@/pages/Admin/OtpVerification"));
 const Admins = lazy(() => import("@/components/Admin/Admins"));
 const EmployerVerification = lazy(() => import("@/components/Admin/EmployerVerification"));
 const AppliedStudents = lazy(() => import("@/components/Admin/AppliedStudents"));
+const ReportsDownloads = lazy(() => import("@/components/Admin/Reports"));
+const PlacementTracking = lazy(() => import("@/components/Admin/PlacementTracking"));
 
 function Admin() {
   return (
@@ -93,6 +95,22 @@ function Admin() {
             element={
               <AdminProtectedRoute>
                 <AppliedStudents />
+              </AdminProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <AdminProtectedRoute>
+                <ReportsDownloads />
+              </AdminProtectedRoute>
+            }
+          />
+          <Route
+            path="/placement-tracking"
+            element={
+              <AdminProtectedRoute>
+                <PlacementTracking />
               </AdminProtectedRoute>
             }
           />

@@ -26,7 +26,7 @@ import {
 import userAxiosInstance from "../../../config/axiosConfig/userAxiosInstance";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { JOB_CATEGORIES, KERALA_DISTRICTS } from "@/constants/options";
+import { JOB_CATEGORIES } from "@/constants/options";
 
 function getResumeCount(resume) {
   const list = Array.isArray(resume) ? resume.filter(Boolean) : resume ? [resume] : [];
@@ -883,17 +883,7 @@ export default function ProfilePage() {
               <FormField label="About" name="about" placeholder="A short bio about yourself" />
               <div className="pp-dialog-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <FormField label="Date of Birth" name="DOB" type="date" />
-                <FormSelect label="Location" name="location" placeholder="Select preferred location">
-                  <optgroup label="Kerala Districts (Preferred)">
-                    {KERALA_DISTRICTS.map((d) => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Other">
-                    <option value="All India (Remote)">All India (Remote)</option>
-                    <option value="Other Location">Other Location</option>
-                  </optgroup>
-                </FormSelect>
+                <FormField label="Location" name="location" placeholder="City, State, Country" />
               </div>
               <div className="pp-dialog-actions" style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1.5px solid #f1f5f9" }}>
                 <button type="button" className="pp-btn pp-btn-outline" onClick={() => setIsEditDialogOpen(false)}><X size={13} />Cancel</button>

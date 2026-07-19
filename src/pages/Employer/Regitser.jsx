@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import GrapeAnimation from "../../components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
@@ -239,7 +239,9 @@ const Register = () => {
         animate="visible"
       >
         <motion.div variants={itemVariants} className="mb-3 mx-auto lg:mx-0">
-          <TechpathBrand {...BRAND_SIZES.page} />
+          <Link to="/" aria-label="Go to homepage">
+            <TechpathBrand {...BRAND_SIZES.page} />
+          </Link>
         </motion.div>
         <div className="w-full max-w-md px-2">
           <motion.h2

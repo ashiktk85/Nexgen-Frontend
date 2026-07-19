@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import GrapeAnimation from "../../components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
@@ -106,7 +106,9 @@ const AdminLogin = () => {
         <motion.div className="w-full max-w-md" variants={containerVariants}>
           {/* Logo */}
           <motion.div variants={itemVariants} className="mb-8 mx-auto lg:mx-0">
-            <TechpathBrand {...BRAND_SIZES.page} className="mx-auto lg:mx-0" />
+            <Link to="/" aria-label="Go to homepage">
+              <TechpathBrand {...BRAND_SIZES.page} className="mx-auto lg:mx-0" />
+            </Link>
           </motion.div>
 
           {/* Welcome Text */}

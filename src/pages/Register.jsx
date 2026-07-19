@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import GrapeAnimation from "../components/GrapeAnimation";
 import { PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,16 +6,18 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "@/utils/apiError";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { GoogleButton } from "@/components/GoogleButton";
 import { useAuth } from "@/hooks/useAuth";
 import userAxiosInstance from "@/config/axiosConfig/userAxiosInstance";
 import { Helmet } from "react-helmet-async";
-import { JOB_CATEGORIES, KERALA_DISTRICTS } from "@/constants/options";
+import { JOB_CATEGORIES } from "@/constants/options";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 import { AUTH_PANEL_JOB_SEEKER } from "@/constants/authPanelCopy";
+import { Autocomplete, TextField } from "@mui/material";
+import { Country, State, City } from "country-state-city";
+import { getCountryName, getStateName } from "@/utils/formatLocation";
 
-// Animation variants
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -31,11 +33,20 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
+const errorVariants = {
+  hidden: { opacity: 0, y: -10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2 } },
+};
+
 const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
   const { loginWithGoogle, user } = useAuth();
+
+  const countries = useMemo(() => Country.getAllCountries(), []);
 
   useEffect(() => {
     if (user) navigate("/");
@@ -72,7 +83,9 @@ const Register = () => {
       password: "",
       confirmPassword: "",
       jobTitle: "",
-      preferredLocation: "",
+      country: "",
+      state: "",
+      city: "",
     },
     validationSchema: Yup.object({
       firstName: Yup.string()
@@ -97,16 +110,27 @@ const Register = () => {
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password"), null], "Passwords must match")
         .required("Confirm password is required"),
+      country: Yup.string().required("Country is required"),
+      state: Yup.string().required("State / Province is required"),
+      city: Yup.string().trim().required("City / District is required"),
     }),
     onSubmit: async (values) => {
       try {
+        const location = [
+          values.city,
+          getStateName(values.country, values.state),
+          getCountryName(values.country),
+        ]
+          .filter(Boolean)
+          .join(", ");
+
         const payload = {
           firstName: values.firstName,
           lastName: values.lastName,
           email: values.email,
           phone: values.phone,
           password: values.password,
-          ...(values.preferredLocation && { location: values.preferredLocation }),
+          location,
           ...(values.jobTitle && { fieldOfStudy: values.jobTitle }),
         };
 
@@ -122,29 +146,67 @@ const Register = () => {
     },
   });
 
+  useEffect(() => {
+    if (formik.values.country) {
+      setStates(State.getStatesOfCountry(formik.values.country));
+    } else {
+      setStates([]);
+    }
+  }, [formik.values.country]);
+
+  useEffect(() => {
+    if (formik.values.country && formik.values.state) {
+      setCities(City.getCitiesOfState(formik.values.country, formik.values.state));
+    } else {
+      setCities([]);
+    }
+  }, [formik.values.country, formik.values.state]);
+
+  const selectedCountry =
+    countries.find((c) => c.isoCode === formik.values.country) || null;
+  const selectedState =
+    states.find((s) => s.isoCode === formik.values.state) || null;
+  const selectedCity =
+    cities.find((c) => c.name === formik.values.city) ||
+    (formik.values.city ? formik.values.city : null);
+
+  const FieldError = ({ name }) => (
+    <AnimatePresence>
+      {formik.touched[name] && formik.errors[name] && (
+        <motion.div
+          className="text-red-500 text-xs mt-1"
+          variants={errorVariants}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+        >
+          {formik.errors[name]}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className="flex flex-col lg:flex-row h-screen overflow-hidden"
+      className="flex flex-col lg:flex-row min-h-[100dvh] lg:h-screen lg:overflow-hidden"
     >
       <Helmet>
         <title>Register as Mobile Technician | TechPath Job Platform</title>
         <meta
           name="description"
-          content="Register as a mobile phone technician on TechPath. Create your profile, get matched with repair jobs in Kerala, and grow your career. Chip-level, Android, iPhone experts welcome."
+          content="Register as a mobile phone technician on TechPath. Create your profile, get matched with repair jobs worldwide, and grow your career. Chip-level, Android, iPhone experts welcome."
         />
       </Helmet>
-      {/* Left Section (Form) */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="lg:w-1/2 w-full bg-white flex flex-col justify-center items-center p-6 lg:p-10 overflow-y-auto"
+        className="lg:w-1/2 w-full bg-white flex flex-col justify-start lg:justify-center items-center px-4 py-8 sm:p-6 lg:p-10 lg:overflow-y-auto"
       >
-        <div className="w-full max-w-md">
-          {/* Logo */}
+        <div className="w-full max-w-md pb-8 lg:pb-0">
           <motion.div variants={itemVariants}>
             <Link to="/">
               <TechpathBrand {...BRAND_SIZES.page} className="mb-6 mx-auto lg:mx-0" />
@@ -155,16 +217,15 @@ const Register = () => {
             variants={itemVariants}
             className="text-2xl sm:text-3xl font-semibold mb-2 text-center lg:text-left"
           >
-            Register as Mobile Technician - Kerala&apos;s Top Job Platform
+            Register as Mobile Technician
           </motion.h1>
           <motion.p
             variants={itemVariants}
             className="text-gray-500 mb-6 text-center lg:text-left"
           >
-            Join Techpath to discover mobile repair careers and connect with top employers in Kerala.
+            Join Techpath to discover mobile repair careers and connect with top employers worldwide.
           </motion.p>
 
-          {/* Social Login Buttons */}
           <motion.div
             variants={itemVariants}
             className="flex flex-col lg:flex-row gap-4 mb-6"
@@ -174,7 +235,6 @@ const Register = () => {
             </div>
           </motion.div>
 
-          {/* Divider */}
           <motion.div variants={itemVariants} className="relative my-4">
             <span className="absolute bg-white px-4 -top-2 left-1/2 transform -translate-x-1/2 text-gray-500 text-sm">
               or sign up with email
@@ -182,7 +242,6 @@ const Register = () => {
             <hr className="border-gray-200" />
           </motion.div>
 
-          {/* Form */}
           <motion.form
             variants={containerVariants}
             onSubmit={formik.handleSubmit}
@@ -198,9 +257,7 @@ const Register = () => {
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
                   placeholder="John"
                 />
-                {formik.touched.firstName && formik.errors.firstName && (
-                  <p className="text-red-500 text-xs mt-1">{formik.errors.firstName}</p>
-                )}
+                <FieldError name="firstName" />
               </motion.div>
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700">Last Name</label>
@@ -212,9 +269,7 @@ const Register = () => {
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
                   placeholder="Doe"
                 />
-                {formik.touched.lastName && formik.errors.lastName && (
-                  <p className="text-red-500 text-xs mt-1">{formik.errors.lastName}</p>
-                )}
+                <FieldError name="lastName" />
               </motion.div>
             </div>
 
@@ -234,26 +289,96 @@ const Register = () => {
               </select>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Preferred Location</label>
-              <select
-                name="preferredLocation"
-                value={formik.values.preferredLocation}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
-              >
-                <option value="">Select preferred location</option>
-                <optgroup label="Kerala Districts (Preferred)">
-                  {KERALA_DISTRICTS.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </optgroup>
-                <optgroup label="Other">
-                  <option value="All India (Remote)">All India (Remote)</option>
-                  <option value="Other Location">Other Location</option>
-                </optgroup>
-              </select>
+            <motion.div variants={itemVariants} className="mb-4 space-y-3">
+              <p className="block text-sm font-medium text-gray-700">Preferred Location</p>
+
+              <div>
+                <label htmlFor="country" className="block text-xs text-gray-500 mb-1">
+                  Country
+                </label>
+                <Autocomplete
+                  id="country"
+                  options={countries}
+                  getOptionLabel={(o) => o.name}
+                  value={selectedCountry}
+                  onChange={(_, v) => {
+                    formik.setFieldValue("country", v ? v.isoCode : "");
+                    formik.setFieldValue("state", "");
+                    formik.setFieldValue("city", "");
+                  }}
+                  onBlur={() => formik.setFieldTouched("country", true)}
+                  disablePortal
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      placeholder="Select country"
+                      error={formik.touched.country && Boolean(formik.errors.country)}
+                    />
+                  )}
+                />
+                <FieldError name="country" />
+              </div>
+
+              <div>
+                <label htmlFor="state" className="block text-xs text-gray-500 mb-1">
+                  State / Province
+                </label>
+                <Autocomplete
+                  id="state"
+                  options={states}
+                  getOptionLabel={(o) => o.name}
+                  value={selectedState}
+                  disabled={!formik.values.country}
+                  onChange={(_, v) => {
+                    formik.setFieldValue("state", v ? v.isoCode : "");
+                    formik.setFieldValue("city", "");
+                  }}
+                  onBlur={() => formik.setFieldTouched("state", true)}
+                  disablePortal
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      placeholder={formik.values.country ? "Select state" : "Select country first"}
+                      error={formik.touched.state && Boolean(formik.errors.state)}
+                    />
+                  )}
+                />
+                <FieldError name="state" />
+              </div>
+
+              <div>
+                <label htmlFor="city" className="block text-xs text-gray-500 mb-1">
+                  City / District
+                </label>
+                <Autocomplete
+                  id="city"
+                  freeSolo
+                  options={cities}
+                  getOptionLabel={(o) => (typeof o === "string" ? o : o.name)}
+                  value={selectedCity}
+                  disabled={!formik.values.state}
+                  onChange={(_, v) => {
+                    const name = typeof v === "string" ? v.trim() : v?.name || "";
+                    formik.setFieldValue("city", name);
+                  }}
+                  onInputChange={(_, value, reason) => {
+                    if (reason === "input") formik.setFieldValue("city", value);
+                  }}
+                  onBlur={() => formik.setFieldTouched("city", true)}
+                  disablePortal
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      placeholder={formik.values.state ? "Search or type a city / district" : "Select state first"}
+                      error={formik.touched.city && Boolean(formik.errors.city)}
+                    />
+                  )}
+                />
+                <FieldError name="city" />
+              </div>
             </motion.div>
 
             <motion.div variants={itemVariants} className="mb-4">
@@ -266,9 +391,7 @@ const Register = () => {
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
                 placeholder="Enter your phone number"
               />
-              {formik.touched.phone && formik.errors.phone && (
-                <p className="text-red-500 text-xs mt-1">{formik.errors.phone}</p>
-              )}
+              <FieldError name="phone" />
             </motion.div>
 
             <motion.div variants={itemVariants} className="mb-4">
@@ -282,9 +405,7 @@ const Register = () => {
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none"
                 placeholder="you@example.com"
               />
-              {formik.touched.email && formik.errors.email && (
-                <p className="text-red-500 text-xs mt-1">{formik.errors.email}</p>
-              )}
+              <FieldError name="email" />
             </motion.div>
 
             <motion.div variants={itemVariants} className="mb-4">
@@ -308,9 +429,7 @@ const Register = () => {
                   {showPassword ? <PiEyeBold /> : <PiEyeSlashBold />}
                 </button>
               </div>
-              {formik.touched.password && formik.errors.password && (
-                <p className="text-red-500 text-xs mt-1">{formik.errors.password}</p>
-              )}
+              <FieldError name="password" />
             </motion.div>
 
             <motion.div variants={itemVariants} className="mb-6">
@@ -334,9 +453,7 @@ const Register = () => {
                   {showConfirmPassword ? <PiEyeBold /> : <PiEyeSlashBold />}
                 </button>
               </div>
-              {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-                <p className="text-red-500 text-xs mt-1">{formik.errors.confirmPassword}</p>
-              )}
+              <FieldError name="confirmPassword" />
             </motion.div>
 
             <motion.button
@@ -360,7 +477,6 @@ const Register = () => {
         </div>
       </motion.div>
 
-      {/* Right Section (Animation) */}
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}

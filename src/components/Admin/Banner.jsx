@@ -117,6 +117,7 @@ const BannerManagement = () => {
   const [imagePreview, setImagePreview] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(null);
+  const [previewIsVideo, setPreviewIsVideo] = useState(false);
 
   useEffect(() => {
     fetchBanners();
@@ -132,9 +133,10 @@ const BannerManagement = () => {
         const mappedBanners = response.data.map((banner) => ({
           id: banner._id,
           fileName: banner.fileName,
-          imageUrl: banner.image, // This comes from the signed URL in the service
+          imageUrl: banner.image || banner.url,
           createdAt: banner.createdAt,
           active: banner.active,
+          mediaType: banner.mediaType || "image",
         }));
         setBanners(mappedBanners);
       }
@@ -149,12 +151,18 @@ const BannerManagement = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const isVideo = file.type.startsWith("video/");
       setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setPreviewIsVideo(isVideo);
+      if (isVideo) {
+        setImagePreview(URL.createObjectURL(file));
+      } else {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -162,16 +170,20 @@ const BannerManagement = () => {
     e.preventDefault();
 
     if (!imageFile) {
-      toast.error("Please select an image");
+      toast.error("Please select an image or video");
       return;
     }
 
     try {
       setIsSubmitting(true);
 
-      // Create form data for file upload
       const formData = new FormData();
-      formData.append("banner", imageFile); // Match the field name expected by the backend
+      formData.append("banner", imageFile);
+      formData.append("placement", "hero");
+      formData.append(
+        "mediaType",
+        imageFile.type.startsWith("video/") ? "video" : "image"
+      );
 
       const response = await addBanner(formData);
 
@@ -179,7 +191,7 @@ const BannerManagement = () => {
         toast.success("Banner added successfully");
         setAddDialogOpen(false);
         resetForm();
-        fetchBanners(); // Refresh the list
+        fetchBanners();
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to add banner");
@@ -254,6 +266,7 @@ const BannerManagement = () => {
   const resetForm = () => {
     setImageFile(null);
     setImagePreview("");
+    setPreviewIsVideo(false);
   };
 
   if (loading) {
@@ -267,7 +280,7 @@ const BannerManagement = () => {
   return (
     <div className={`${ADMIN_PAGE} flex flex-col`}>
       <div className="flex items-center justify-between">
-        <h1 className={ADMIN_HEADER_TITLE}>Banner Management</h1>
+        <h1 className={ADMIN_HEADER_TITLE}>Hero Banner Management</h1>
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
@@ -276,25 +289,34 @@ const BannerManagement = () => {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Add New Banner</DialogTitle>
+              <DialogTitle>Add Hero Banner</DialogTitle>
               <DialogDescription>
-                Upload a banner for the home page. Use{" "}
-                <strong>1200×300 px (4:1 ratio)</strong> for a perfect fit. You can add
-                multiple banners; they will scroll in a carousel (one at a time with arrows and dots).
+                Upload an image or video for the homepage hero background.
+                Multiple active banners rotate automatically as a carousel behind
+                the hero title and CTAs. Use a full-bleed landscape image or short muted video.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddBanner}>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="image">Banner Image</Label>
+                  <Label htmlFor="image">Banner Media (Image or Video)</Label>
                   <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors">
                     {imagePreview ? (
                       <div className="relative w-full">
-                        <img
-                          src={imagePreview || "/placeholder.svg"}
-                          alt="Preview"
-                          className="max-h-[200px] mx-auto object-contain rounded-md"
-                        />
+                        {previewIsVideo ? (
+                          <video
+                            src={imagePreview}
+                            className="max-h-[200px] mx-auto object-contain rounded-md"
+                            controls
+                            muted
+                          />
+                        ) : (
+                          <img
+                            src={imagePreview || "/placeholder.svg"}
+                            alt="Preview"
+                            className="max-h-[200px] mx-auto object-contain rounded-md"
+                          />
+                        )}
                         <Button
                           type="button"
                           variant="destructive"
@@ -303,6 +325,7 @@ const BannerManagement = () => {
                           onClick={() => {
                             setImageFile(null);
                             setImagePreview("");
+                            setPreviewIsVideo(false);
                           }}
                         >
                           <X className="h-4 w-4" />
@@ -318,12 +341,12 @@ const BannerManagement = () => {
                           Click to upload or drag and drop
                         </span>
                         <span className="text-xs text-gray-400 mt-1">
-                          PNG, JPG or GIF. Recommended: <strong>1200×300 px</strong> (4:1). Max 5MB.
+                          PNG, JPG, GIF, MP4, WebM. Max 50MB. Full-bleed landscape recommended.
                         </span>
                         <input
                           id="image-upload"
                           type="file"
-                          accept="image/*"
+                          accept="image/*,video/mp4,video/webm,video/quicktime"
                           className="hidden"
                           onChange={handleImageChange}
                         />
@@ -359,10 +382,10 @@ const BannerManagement = () => {
       {/* Banner List */}
       <Card>
         <CardHeader>
-          <CardTitle>All Banners</CardTitle>
+          <CardTitle>Hero Banners</CardTitle>
           <CardDescription>
-            Banners appear on the home page in a carousel. One banner is shown at a time;
-            with multiple active banners, users can scroll with arrows or dots. Upload at 1200×300 px for best fit.
+            Active banners rotate as the homepage hero background carousel.
+            Hero title, search CTAs, and register cards stay on top of the media.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -372,6 +395,7 @@ const BannerManagement = () => {
                 <TableRow>
                   <TableHead>Preview</TableHead>
                   <TableHead>File Name</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -381,16 +405,28 @@ const BannerManagement = () => {
                 {banners.map((banner) => (
                   <TableRow key={banner.id}>
                     <TableCell>
-                      <div className="h-16 w-32 relative">
-                        <img
-                          src={banner.imageUrl || "/placeholder.svg"}
-                          alt={banner.fileName}
-                          className="h-full w-full object-cover rounded-md"
-                        />
+                      <div className="h-16 w-32 relative bg-slate-100 rounded-md overflow-hidden">
+                        {banner.mediaType === "video" ? (
+                          <video
+                            src={banner.imageUrl}
+                            className="h-full w-full object-cover"
+                            muted
+                            playsInline
+                          />
+                        ) : (
+                          <img
+                            src={banner.imageUrl || "/placeholder.svg"}
+                            alt={banner.fileName}
+                            className="h-full w-full object-cover rounded-md"
+                          />
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="font-medium">
                       {banner.fileName}
+                    </TableCell>
+                    <TableCell className="capitalize text-sm text-slate-600">
+                      {banner.mediaType || "image"}
                     </TableCell>
                     <TableCell>
                       {new Date(banner.createdAt).toLocaleDateString("en-US", {

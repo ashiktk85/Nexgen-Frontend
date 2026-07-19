@@ -73,6 +73,47 @@ export const exportAllUsersXlsx = async (filters = {}) => {
   }
 };
 
+export const exportReport = async ({
+  segment,
+  format = "xlsx",
+  search = "",
+  from = "",
+  to = "",
+} = {}) => {
+  const params = new URLSearchParams();
+  params.append("segment", segment);
+  params.append("format", format);
+  if (search) params.append("search", search);
+  if (from) params.append("from", from);
+  if (to) params.append("to", to);
+  const response = await adminAxiosInstance.get(`/reports/export?${params.toString()}`, {
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const getPlacementTracking = async (filters = {}) => {
+  const params = new URLSearchParams();
+  if (filters.page) params.append("page", String(filters.page));
+  if (filters.limit) params.append("limit", String(filters.limit));
+  if (filters.search) params.append("search", filters.search);
+  if (filters.status) params.append("status", filters.status);
+  if (filters.from) params.append("from", filters.from);
+  if (filters.to) params.append("to", filters.to);
+  const response = await adminAxiosInstance.get(
+    `/placement-tracking?${params.toString()}`
+  );
+  return response.data;
+};
+
+export const updatePlacementStatus = async (applicationId, status) => {
+  const response = await adminAxiosInstance.patch(
+    `/placement-tracking/${applicationId}`,
+    { status }
+  );
+  return response.data;
+};
+
 export const userChangeStatusService = async (userId) => {
   try {
     const response = await adminAxiosInstance.put(`/changeStatus/${userId}`);

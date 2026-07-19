@@ -807,10 +807,10 @@ const JobDetails = () => {
               </div>
             )}
 
-            {/* Contact phone + WhatsApp (job post contact only — no employer email) */}
-            {job.phone && buildTelHref(job.phone, job.countryCode) && (
-              <div className="jd-li-card">
-                <h2 className="jd-li-section-title">Contact</h2>
+            {/* Contact phone + WhatsApp — gated until seeker registers */}
+            <div className="jd-li-card">
+              <h2 className="jd-li-section-title">Contact</h2>
+              {user?.userId && job.phone && buildTelHref(job.phone, job.countryCode) ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
                   <a
                     href={buildTelHref(job.phone, job.countryCode)}
@@ -827,8 +827,34 @@ const JobDetails = () => {
                     size={38}
                   />
                 </div>
-              </div>
-            )}
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <p style={{ margin: 0, fontSize: 14, color: '#475569', lineHeight: 1.5 }}>
+                    Register to unlock employer contact details.
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
+                    <JobWhatsAppButton
+                      phone={job.phone}
+                      countryCode={job.countryCode}
+                      jobTitle={job.name}
+                      companyName={displayCompany}
+                      size={38}
+                      contactLocked={!user?.userId}
+                    />
+                    {!user?.userId && (
+                      <button
+                        type="button"
+                        className="jd-li-btn-outline"
+                        style={{ fontSize: 13, padding: '8px 14px' }}
+                        onClick={() => navigate('/register')}
+                      >
+                        Register to view WhatsApp
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </motion.div>
 
           {/* ── Right sidebar: About the company ── */}
@@ -862,7 +888,7 @@ const JobDetails = () => {
                   : ''}
               </p>
 
-              {company.phone && buildTelHref(company.phone, job.countryCode) && (
+              {user?.userId && company.phone && buildTelHref(company.phone, job.countryCode) && (
                 <p className="jd-li-company-meta" style={{ marginBottom: 12 }}>
                   <Phone size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
                   <a
@@ -871,6 +897,11 @@ const JobDetails = () => {
                   >
                     {formatPhoneDisplay(company.phone, job.countryCode)}
                   </a>
+                </p>
+              )}
+              {!user?.userId && (
+                <p className="jd-li-company-meta" style={{ marginBottom: 12, color: '#64748b' }}>
+                  You must register first to view the employer&apos;s WhatsApp number.
                 </p>
               )}
 

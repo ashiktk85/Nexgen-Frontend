@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LocationOn, Payments, ArrowForward } from "@mui/icons-material";
+import { LocationOn, Payments, WorkOutline, ArrowForward } from "@mui/icons-material";
 import { getJobCategory } from "@/constants/options";
 import { calculateTimeAgo } from "@/utils/dateFormation";
 import { formatSalary } from "@/utils/formatSalary";
@@ -8,9 +8,7 @@ import { formatJobLocation } from "@/utils/formatLocation";
 import JobShareButton from "@/components/common/JobShareButton";
 import JobWhatsAppButton from "@/components/common/JobWhatsAppButton";
 
-const COMPACT_CARD_HEIGHT = "min-h-[240px] sm:h-[272px]";
-
-/** Tile card — fixed-size grid layout (Home + All Jobs grid view) */
+/** Tile card — compact grid layout (Home + All Jobs grid view) */
 const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
   const navigate = useNavigate();
   const category = getJobCategory(job.jobTitle);
@@ -21,7 +19,9 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
   const experienceMeta = [expText, fresher ? "Fresher" : null].filter(Boolean).join(" · ");
   const postedText = job.createdAt ? calculateTimeAgo(job.createdAt) : null;
 
-  const handleApply = () =>
+  const goToDetails = () => navigate(`/job-details/${job._id}`);
+  const handleApply = (e) => {
+    e?.stopPropagation?.();
     navigate(`/job-application/${job._id}`, {
       state: {
         jobTitle: job?.jobTitle,
@@ -31,106 +31,165 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
         employerId: job?.employerId,
       },
     });
+  };
+  const stopCardClick = (e) => e.stopPropagation();
+  const onCardKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      goToDetails();
+    }
+  };
 
   if (!compact) {
     return (
-      <article className="bg-white p-6 sm:p-8 rounded-xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow h-full min-h-[320px] flex flex-col min-w-0 w-full">
-        <div className="flex justify-between items-start gap-2 mb-4 shrink-0">
-          {category ? (
-            <span className="bg-[#0058be]/10 text-[#0058be] px-2.5 py-0.5 rounded-full text-xs font-bold max-w-full truncate">
-              {category}
-            </span>
-          ) : (
-            <span className="h-5" aria-hidden />
-          )}
-          <JobShareButton job={job} compact iconOnly />
+      <article
+        className="bg-white p-5 sm:p-6 rounded-xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow h-full flex flex-col min-w-0 w-full cursor-pointer"
+        role="link"
+        tabIndex={0}
+        onClick={goToDetails}
+        onKeyDown={onCardKeyDown}
+        aria-label={`${job.jobTitle} job details`}
+      >
+        <div className="flex justify-between items-start gap-2 mb-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+            {job.jobCode ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#4f46e5] bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 font-mono">
+                <span className="font-semibold text-indigo-500 font-sans">ID:</span>
+                {job.jobCode}
+              </span>
+            ) : null}
+            {category ? (
+              <span className="bg-[#0058be]/10 text-[#0058be] px-2 py-0.5 rounded-full text-xs font-bold max-w-full truncate">
+                {category}
+              </span>
+            ) : null}
+          </div>
+          <div onClick={stopCardClick} onKeyDown={stopCardClick}>
+            <JobShareButton job={job} compact iconOnly />
+          </div>
         </div>
-        <h3 className="text-2xl font-semibold text-[#141b2b] mb-2 break-words leading-snug">{job.jobTitle}</h3>
-        <p className="text-sm font-semibold text-[#0058be] uppercase tracking-wide break-words mb-4">{job.companyName}</p>
-        <div className="flex flex-col gap-1.5 text-sm text-[#424752] mb-6 overflow-hidden shrink-0">
-          {locationText ? <MetaLine icon={<LocationOn sx={{ fontSize: 16 }} />} text={locationText} /> : null}
-          <MetaLine
-            icon={<Payments sx={{ fontSize: 16 }} />}
-            text={[salaryText, experienceMeta].filter(Boolean).join(" · ")}
+        <h3 className="text-xl font-extrabold text-[#141b2b] mb-1 break-words leading-snug">{job.jobTitle}</h3>
+        <p className="text-sm font-bold text-[#0058be] uppercase tracking-wide break-words mb-3">{job.companyName}</p>
+        <div className="flex flex-col gap-1 text-sm text-[#424752] mb-4 overflow-hidden shrink-0">
+          {locationText ? (
+            <MetaLine icon={<LocationOn sx={{ fontSize: 15 }} />} text={locationText} bold />
+          ) : null}
+          <MetaLine icon={<Payments sx={{ fontSize: 15 }} />} text={salaryText} bold accent="salary" />
+          {experienceMeta ? (
+            <MetaLine icon={<WorkOutline sx={{ fontSize: 15 }} />} text={experienceMeta} bold accent="exp" />
+          ) : null}
+        </div>
+        <div onClick={stopCardClick} onKeyDown={stopCardClick}>
+          <CardActions
+            job={job}
+            onApply={handleApply}
+            onDetails={goToDetails}
+            postedText={postedText}
+            large
           />
         </div>
-        <CardActions
-          job={job}
-          onApply={handleApply}
-          onDetails={() => navigate(`/job-details/${job._id}`)}
-          postedText={postedText}
-          large
-        />
       </article>
     );
   }
 
   return (
     <article
-      className={`bg-white rounded-xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow min-w-0 w-full flex flex-col p-4 sm:p-5 overflow-hidden ${COMPACT_CARD_HEIGHT}`}
+      className="bg-white rounded-xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow min-w-0 w-full flex flex-col p-3 sm:p-3.5 overflow-visible h-full cursor-pointer"
+      role="link"
+      tabIndex={0}
+      onClick={goToDetails}
+      onKeyDown={onCardKeyDown}
+      aria-label={`${job.jobTitle} job details`}
     >
-      <div className="flex justify-between items-start gap-2 mb-2 shrink-0 min-h-[24px]">
-        {category ? (
-          <span className="bg-[#0058be]/10 text-[#0058be] px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold max-w-[70%] truncate leading-5">
-            {category}
-          </span>
-        ) : (
-          <span aria-hidden />
-        )}
-        <JobShareButton job={job} compact iconOnly />
+      <div className="flex justify-between items-start gap-1.5 mb-1.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-1 min-w-0 flex-1">
+          {job.jobCode ? (
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#4f46e5] bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 font-mono leading-none">
+              <span className="font-semibold text-indigo-500 font-sans">ID:</span>
+              {job.jobCode}
+            </span>
+          ) : null}
+          {category ? (
+            <span className="bg-[#0058be]/10 text-[#0058be] px-2 py-0.5 rounded-full text-[10px] font-bold max-w-[55%] truncate leading-none">
+              {category}
+            </span>
+          ) : null}
+        </div>
+        <div onClick={stopCardClick} onKeyDown={stopCardClick}>
+          <JobShareButton job={job} compact iconOnly />
+        </div>
       </div>
 
-      <h3 className="text-base sm:text-lg font-semibold text-[#141b2b] line-clamp-2 leading-snug mb-1 shrink-0 break-words h-[44px] sm:h-[50px]">
+      <h3 className="text-sm sm:text-base font-extrabold text-[#141b2b] line-clamp-2 leading-snug mb-0.5 shrink-0 break-words">
         {job.jobTitle}
       </h3>
-      <p className="text-xs font-semibold text-[#0058be] uppercase tracking-wide line-clamp-1 mb-3 shrink-0">
+      <p className="text-[11px] font-bold text-[#0058be] uppercase tracking-wide line-clamp-1 mb-2 shrink-0">
         {job.companyName || "Private Employer"}
       </p>
 
-      <div className="flex flex-col gap-1 text-xs text-[#424752] mb-3 overflow-hidden shrink-0 min-w-0">
+      <div className="flex flex-col gap-0.5 text-[11px] sm:text-xs text-[#424752] mb-2.5 overflow-hidden shrink-0 min-w-0">
         <MetaLine
-          icon={<LocationOn sx={{ fontSize: 14 }} />}
+          icon={<LocationOn sx={{ fontSize: 13 }} />}
           text={locationText || "Location not specified"}
+          bold
         />
         <MetaLine
-          icon={<Payments sx={{ fontSize: 14 }} />}
-          text={[salaryText, experienceMeta].filter(Boolean).join(" · ") || "Salary not disclosed"}
+          icon={<Payments sx={{ fontSize: 13 }} />}
+          text={salaryText || "Salary not disclosed"}
+          bold
+          accent="salary"
         />
+        {experienceMeta ? (
+          <MetaLine
+            icon={<WorkOutline sx={{ fontSize: 13 }} />}
+            text={experienceMeta}
+            bold
+            accent="exp"
+          />
+        ) : null}
       </div>
 
-      <CardActions
-        job={job}
-        onApply={handleApply}
-        onDetails={() => navigate(`/job-details/${job._id}`)}
-        postedText={postedText}
-      />
+      <div onClick={stopCardClick} onKeyDown={stopCardClick}>
+        <CardActions
+          job={job}
+          onApply={handleApply}
+          onDetails={goToDetails}
+          postedText={postedText}
+        />
+      </div>
     </article>
   );
 };
 
-function MetaLine({ icon, text }) {
+function MetaLine({ icon, text, bold = false, accent }) {
+  const color =
+    accent === "salary"
+      ? "text-emerald-800"
+      : accent === "exp"
+        ? "text-amber-800"
+        : "text-[#141b2b]";
   return (
-    <div className="flex items-center gap-1 min-h-[18px] min-w-0">
-      <span className="shrink-0 flex items-center">{icon}</span>
-      <span className="truncate">{text || "\u00A0"}</span>
+    <div className="flex items-center gap-1 min-h-[16px] min-w-0">
+      <span className="shrink-0 flex items-center text-[#64748b]">{icon}</span>
+      <span className={`truncate ${bold ? `font-bold ${color}` : ""}`}>{text || "\u00A0"}</span>
     </div>
   );
 }
 
 function CardActions({ job, onApply, onDetails, large = false, postedText }) {
-  const btnHeight = large ? "h-11 text-sm" : "h-9 text-xs sm:text-sm";
-  const iconSize = large ? 44 : 36;
+  const btnHeight = large ? "h-10 text-sm" : "h-9 text-xs";
+  const iconSize = large ? 36 : 34;
 
   return (
-    <div className="mt-auto shrink-0 w-full min-w-0 flex flex-col gap-1.5">
+    <div className="mt-auto shrink-0 w-full min-w-0 flex flex-col gap-1">
       {postedText && (
         <div className="text-right">
-          <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium leading-none">
+          <span className="text-[10px] text-slate-400 font-medium leading-none">
             Posted {postedText}
           </span>
         </div>
       )}
-      <div className={`flex gap-1.5 items-center w-full min-w-0 ${large ? "sm:gap-2" : ""}`}>
+      <div className="flex gap-1.5 items-center w-full min-w-0">
         <button
           type="button"
           onClick={!job.alreadyApplied ? onApply : undefined}
@@ -150,14 +209,17 @@ function CardActions({ job, onApply, onDetails, large = false, postedText }) {
 
         <button
           type="button"
-          onClick={onDetails}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDetails();
+          }}
           aria-label="View job details"
           title="View job details"
           className={`shrink-0 flex items-center justify-center gap-1 border border-[#c2c6d4] rounded-lg text-[#141b2b] hover:bg-[#f1f3ff] transition-colors font-semibold ${btnHeight} ${
-            large ? "px-3" : "px-2.5"
+            large ? "px-3" : "px-2"
           }`}
         >
-          {large ? "Details" : <ArrowForward sx={{ fontSize: 16 }} />}
+          {large ? "Details" : <ArrowForward sx={{ fontSize: 15 }} />}
         </button>
       </div>
     </div>
