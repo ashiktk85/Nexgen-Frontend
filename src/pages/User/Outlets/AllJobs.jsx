@@ -14,6 +14,7 @@ import { Country, State, City } from "country-state-city";
 import { getCountryName, getStateName } from "@/utils/formatLocation";
 import Pagination from "@/components/ui/Pagination";
 import { JOB_GRID_PAGE_SIZE } from "@/constants/pagination";
+import SearchablePlaceSelect from "@/components/common/SearchablePlaceSelect";
 
 /* ─── Google Fonts ─── */
 if (!document.getElementById("ajp-font-link")) {
@@ -97,11 +98,23 @@ const globalStyle = `
   .tf-select:focus { outline:none; border-color:#0950a0; box-shadow:0 0 0 2px rgba(9,80,160,0.12); }
   .tf-select:disabled { opacity:0.55; cursor:not-allowed; }
 
-  /* Drawer */
-  .ajp-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.45); z-index:40; backdrop-filter:blur(2px); }
+  /* Drawer — above fixed navbar (z-index 100) */
+  .ajp-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.45); z-index:110; backdrop-filter:blur(2px); }
   .ajp-overlay.open { display:block; }
-  .ajp-drawer { position:fixed; top:0; left:0; bottom:0; width:min(300px,88vw); background:#eef3f8; z-index:50; overflow-y:auto; box-shadow:4px 0 32px rgba(15,23,42,0.18); transform:translateX(-100%); transition:transform 0.28s cubic-bezier(.4,0,.2,1); border-radius:0; }
+  .ajp-drawer { position:fixed; top:0; left:0; bottom:0; width:min(300px,88vw); background:#eef3f8; z-index:120; overflow-y:auto; box-shadow:4px 0 32px rgba(15,23,42,0.18); transform:translateX(-100%); transition:transform 0.28s cubic-bezier(.4,0,.2,1); border-radius:0; }
   .ajp-drawer.open { transform:translateX(0); }
+  .ajp-drawer .tf-header { padding-right:44px; }
+  .ajp-drawer-close {
+    position:absolute; top:14px; right:14px; z-index:10;
+    width:28px; height:28px; padding:0; border:none; background:transparent;
+    color:#64748b; cursor:pointer; display:none;
+    align-items:center; justify-content:center; border-radius:6px;
+    transition:background 0.15s ease, color 0.15s ease;
+  }
+  .ajp-drawer-close:hover { background:rgba(15,23,42,0.06); color:#121A2D; }
+  @media (max-width:900px) {
+    .ajp-drawer-close { display:inline-flex; }
+  }
 
   /* Layout */
   .ajp-layout { display:flex; gap:20px; align-items:flex-start; width:100%; min-width:0; }
@@ -242,52 +255,59 @@ const LocationFilter = ({
     [filterCountry, filterState]
   );
 
+  const selectedCountry = countries.find((c) => c.isoCode === filterCountry) || null;
+  const selectedState = states.find((s) => s.isoCode === filterState) || null;
+  const selectedCity = cities.find((c) => c.name === filterCity) || (filterCity ? { name: filterCity } : null);
+
+  const placeSelectSx = {
+    mb: "10px",
+    "& .MuiOutlinedInput-root": {
+      borderRadius: "8px",
+      fontSize: 13,
+      backgroundColor: "#fff",
+      "& fieldset": { borderColor: "#c5d0dc", borderWidth: "1.5px" },
+      "&:hover fieldset": { borderColor: "#0950a0" },
+      "&.Mui-focused fieldset": { borderColor: "#0950a0", borderWidth: "1.5px" },
+    },
+  };
+
   return (
     <div>
       <label className="tf-field-label">Country</label>
-      <select
-        className="tf-select"
-        value={filterCountry}
-        onChange={(e) => {
-          setFilterCountry(e.target.value);
+      <SearchablePlaceSelect
+        options={countries}
+        value={selectedCountry}
+        placeholder="Search country..."
+        onChange={(_, v) => {
+          setFilterCountry(v ? v.isoCode : "");
           setFilterState("");
           setFilterCity("");
         }}
-      >
-        <option value="">All countries</option>
-        {countries.map((c) => (
-          <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
-        ))}
-      </select>
+        sx={placeSelectSx}
+      />
 
       <label className="tf-field-label">State / Province</label>
-      <select
-        className="tf-select"
-        value={filterState}
+      <SearchablePlaceSelect
+        options={states}
+        value={selectedState}
         disabled={!filterCountry}
-        onChange={(e) => {
-          setFilterState(e.target.value);
+        placeholder={filterCountry ? "Search state..." : "Select country first"}
+        onChange={(_, v) => {
+          setFilterState(v ? v.isoCode : "");
           setFilterCity("");
         }}
-      >
-        <option value="">All states</option>
-        {states.map((s) => (
-          <option key={s.isoCode} value={s.isoCode}>{s.name}</option>
-        ))}
-      </select>
+        sx={placeSelectSx}
+      />
 
       <label className="tf-field-label">City</label>
-      <select
-        className="tf-select"
-        value={filterCity}
+      <SearchablePlaceSelect
+        options={cities}
+        value={selectedCity}
         disabled={!filterState}
-        onChange={(e) => setFilterCity(e.target.value)}
-      >
-        <option value="">All cities</option>
-        {cities.map((c) => (
-          <option key={c.name} value={c.name}>{c.name}</option>
-        ))}
-      </select>
+        placeholder={filterState ? "Search city..." : "Select state first"}
+        onChange={(_, v) => setFilterCity(v ? v.name : "")}
+        sx={{ ...placeSelectSx, mb: 0 }}
+      />
     </div>
   );
 };
@@ -648,7 +668,15 @@ const AllJobsPage = () => {
       {/* Mobile drawer */}
       <div className={`ajp-overlay${drawerOpen?" open":""}`} onClick={() => setDrawerOpen(false)} />
       <div className={`ajp-drawer${drawerOpen?" open":""}`}>
-        <FilterPanel {...drawerFilterProps} onClose={() => setDrawerOpen(false)} />
+        <button
+          type="button"
+          className="ajp-drawer-close"
+          onClick={() => setDrawerOpen(false)}
+          aria-label="Close filters"
+        >
+          <RxCross2 size={16} />
+        </button>
+        <FilterPanel {...drawerFilterProps} onClose={null} />
       </div>
 
       <motion.div className="ajp-root" initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ duration:0.6 }}

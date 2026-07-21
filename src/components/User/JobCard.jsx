@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MdPlace } from "react-icons/md";
-import { IoBriefcase } from "react-icons/io5";
 import { calculateTimeAgo } from "@/utils/dateFormation";
 import { CATEGORY_COLORS, getJobCategory } from "@/constants/options";
 import { formatSalary } from "@/utils/formatSalary";
@@ -84,6 +83,13 @@ const injectJobCardStyles = () => {
       color: #92400e;
       background: #fffbeb;
       border-color: #fde68a;
+    }
+    .jc-exp-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #b45309;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
     .jc-btn {
@@ -345,7 +351,7 @@ const JobCard = ({ job, layout }) => {
             <span className="jc-badge jc-badge-salary">{salaryText}</span>
             {expText && (
               <span className="jc-badge jc-badge-exp">
-                <IoBriefcase style={{ color: "#d97706", fontSize: 11 }} />
+                <span className="jc-exp-label">Experience</span>
                 {expText}
               </span>
             )}

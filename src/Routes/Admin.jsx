@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import RouteFallback from "@/components/RouteFallback";
 import { AdminProtectedRoute } from "@/services/adminProtecter";
 
@@ -17,7 +17,6 @@ const OtpVerification = lazy(() => import("@/pages/Admin/OtpVerification"));
 const Admins = lazy(() => import("@/components/Admin/Admins"));
 const EmployerVerification = lazy(() => import("@/components/Admin/EmployerVerification"));
 const AppliedStudents = lazy(() => import("@/components/Admin/AppliedStudents"));
-const ReportsDownloads = lazy(() => import("@/components/Admin/Reports"));
 const PlacementTracking = lazy(() => import("@/components/Admin/PlacementTracking"));
 
 function Admin() {
@@ -100,11 +99,7 @@ function Admin() {
           />
           <Route
             path="/reports"
-            element={
-              <AdminProtectedRoute>
-                <ReportsDownloads />
-              </AdminProtectedRoute>
-            }
+            element={<Navigate to="/admin/dashboard#reports" replace />}
           />
           <Route
             path="/placement-tracking"

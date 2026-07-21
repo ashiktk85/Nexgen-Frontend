@@ -11,9 +11,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 import { AUTH_PANEL_EMPLOYER } from "@/constants/authPanelCopy";
-import { Autocomplete, TextField } from "@mui/material";
 import { Country, State, City } from "country-state-city";
 import { getCountryName, getStateName } from "@/utils/formatLocation";
+import SearchablePlaceSelect from "@/components/common/SearchablePlaceSelect";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -289,10 +289,9 @@ const Register = () => {
                 <label htmlFor="country" className="block text-xs text-gray-500 mb-1">
                   Country
                 </label>
-                <Autocomplete
+                <SearchablePlaceSelect
                   id="country"
                   options={countries}
-                  getOptionLabel={(o) => o.name}
                   value={selectedCountry}
                   onChange={(_, v) => {
                     formik.setFieldValue("country", v ? v.isoCode : "");
@@ -300,15 +299,8 @@ const Register = () => {
                     formik.setFieldValue("city", "");
                   }}
                   onBlur={() => formik.setFieldTouched("country", true)}
-                  disablePortal
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      size="small"
-                      placeholder="Select country"
-                      error={formik.touched.country && Boolean(formik.errors.country)}
-                    />
-                  )}
+                  placeholder="Search country..."
+                  error={formik.touched.country && Boolean(formik.errors.country)}
                 />
                 <FieldError name="country" />
               </div>
@@ -317,10 +309,9 @@ const Register = () => {
                 <label htmlFor="state" className="block text-xs text-gray-500 mb-1">
                   State / Province
                 </label>
-                <Autocomplete
+                <SearchablePlaceSelect
                   id="state"
                   options={states}
-                  getOptionLabel={(o) => o.name}
                   value={selectedState}
                   disabled={!formik.values.country}
                   onChange={(_, v) => {
@@ -328,15 +319,8 @@ const Register = () => {
                     formik.setFieldValue("city", "");
                   }}
                   onBlur={() => formik.setFieldTouched("state", true)}
-                  disablePortal
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      size="small"
-                      placeholder={formik.values.country ? "Select state" : "Select country first"}
-                      error={formik.touched.state && Boolean(formik.errors.state)}
-                    />
-                  )}
+                  placeholder={formik.values.country ? "Search state..." : "Select country first"}
+                  error={formik.touched.state && Boolean(formik.errors.state)}
                 />
                 <FieldError name="state" />
               </div>
@@ -345,7 +329,7 @@ const Register = () => {
                 <label htmlFor="city" className="block text-xs text-gray-500 mb-1">
                   City
                 </label>
-                <Autocomplete
+                <SearchablePlaceSelect
                   id="city"
                   freeSolo
                   options={cities}
@@ -360,15 +344,8 @@ const Register = () => {
                     if (reason === "input") formik.setFieldValue("city", value);
                   }}
                   onBlur={() => formik.setFieldTouched("city", true)}
-                  disablePortal
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      size="small"
-                      placeholder={formik.values.state ? "Search or type a city" : "Select state first"}
-                      error={formik.touched.city && Boolean(formik.errors.city)}
-                    />
-                  )}
+                  placeholder={formik.values.state ? "Search or type a city..." : "Select state first"}
+                  error={formik.touched.city && Boolean(formik.errors.city)}
                 />
                 <FieldError name="city" />
               </div>

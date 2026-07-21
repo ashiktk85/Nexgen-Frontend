@@ -102,7 +102,7 @@ const PLATFORMS = [
   {
     id: "copy",
     label: "Copy Link",
-    color: "#6366f1",
+    color: "#0058be",
     Icon: Link2,
     copyOnly: true,
   },
@@ -284,12 +284,13 @@ export default function JobShareButton({
   };
 
   const defaultBtnClass = prominent
-    ? "inline-flex items-center justify-center gap-1.5 min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl border-2 border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm hover:bg-indigo-100 hover:border-indigo-300 hover:shadow-md active:scale-95 transition-all touch-manipulation"
+    ? "inline-flex items-center justify-center gap-1.5 min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl border-[2.5px] border-[#0058be] bg-white text-[#0058be] shadow-sm hover:bg-[#0058be]/8 hover:shadow-md active:scale-95 transition-all touch-manipulation"
     : compact
-      ? "inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-colors"
-      : "inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors";
+      ? "inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg border-2 border-[#0058be] bg-white text-[#0058be] text-xs font-semibold hover:bg-[#0058be]/8 transition-all active:scale-95"
+      : "inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border-2 border-[#0058be] bg-white text-[#0058be] text-sm font-semibold hover:bg-[#0058be]/8 transition-all active:scale-95";
 
-  const iconSize = prominent ? 20 : compact || iconOnly ? 14 : 16;
+  const iconSize = prominent ? 20 : compact || iconOnly ? 15 : 17;
+  const iconStroke = prominent ? 2.75 : compact || iconOnly ? 2.5 : 2.5;
 
   const menu = open
     ? createPortal(
@@ -333,13 +334,13 @@ export default function JobShareButton({
               <button
                 type="button"
                 role="menuitem"
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50 transition-colors text-left border-b border-slate-100"
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[#0058be] hover:bg-[#0058be]/8 transition-colors text-left border-b border-slate-100"
                 onClick={() => {
                   setOpen(false);
                   handleNativeShare();
                 }}
               >
-                <span className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                <span className="w-9 h-9 rounded-full bg-[#0058be] text-white flex items-center justify-center shrink-0">
                   <Share2 size={18} />
                 </span>
                 Share via device…
@@ -392,7 +393,7 @@ export default function JobShareButton({
         aria-expanded={open}
         aria-haspopup="menu"
       >
-        <Share2 size={iconSize} />
+        <Share2 size={iconSize} strokeWidth={iconStroke} />
         {!iconOnly && label}
       </button>
       {menu}

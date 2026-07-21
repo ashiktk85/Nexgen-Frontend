@@ -22,15 +22,8 @@ const validateJobForm = Yup.object({
       if (!value) return true;
       return value.length >= 2;
     }),
-  salaryFrom: Yup.string()
-    .trim()
-    .test('at-least-one-salary', 'Enter a salary amount', function (value) {
-      const { salaryTo } = this.parent;
-      return Boolean(value?.trim() || salaryTo?.trim());
-    }),
-  salaryTo: Yup.string()
-    .trim()
-    .nullable(),
+  salaryFrom: Yup.string().trim().nullable().optional(),
+  salaryTo: Yup.string().trim().nullable().optional(),
   description: Yup.string()
     .nullable()
     .trim()

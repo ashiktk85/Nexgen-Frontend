@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { TextField, Autocomplete, createFilterOptions } from "@mui/material";
 import { Country, State, City } from "country-state-city";
+import SearchablePlaceSelect from "@/components/common/SearchablePlaceSelect";
 import { useFormik } from "formik";
 import validateJobForm from "@/Validations/CreateJob-validation";
 import { employerJobCreation, employerJobUpdate, getCompanyById } from "@/apiServices/userApi";
@@ -712,9 +713,8 @@ function CreateJobForm({
               {/* Country */}
               <div>
                 <FL>Country</FL>
-                <Autocomplete
+                <SearchablePlaceSelect
                   options={countries}
-                  getOptionLabel={(o) => o.name}
                   value={selectedCountry}
                   onChange={(_, v) => {
                     formik.setFieldValue("country", v ? v.isoCode : "");
@@ -722,11 +722,9 @@ function CreateJobForm({
                     formik.setFieldValue("city", null);
                   }}
                   onBlur={() => formik.setFieldTouched("country", true)}
-                  disablePortal
-                  renderInput={(params) => (
-                    <TextField {...params} variant="outlined" placeholder="Select country (optional)"
-                      error={formik.touched.country && Boolean(formik.errors.country)} />
-                  )}
+                  placeholder="Search country (optional)..."
+                  error={formik.touched.country && Boolean(formik.errors.country)}
+                  size="medium"
                 />
                 <FE msg={formik.touched.country && formik.errors.country} />
               </div>
@@ -734,17 +732,17 @@ function CreateJobForm({
               {/* State */}
               <div>
                 <FL>State / Province</FL>
-                <Autocomplete
+                <SearchablePlaceSelect
                   options={states}
-                  getOptionLabel={o => o.name}
                   value={selectedState}
                   disabled={!formik.values.country}
-                  onChange={(_, v) => { formik.setFieldValue("state", v ? v.isoCode : null); formik.setFieldValue("city", null); }}
-                  disablePortal
-                  renderInput={(params) => (
-                    <TextField {...params} variant="outlined" placeholder="Select state (optional)"
-                      error={formik.touched.state && Boolean(formik.errors.state)} />
-                  )}
+                  onChange={(_, v) => {
+                    formik.setFieldValue("state", v ? v.isoCode : null);
+                    formik.setFieldValue("city", null);
+                  }}
+                  placeholder={formik.values.country ? "Search state (optional)..." : "Select country first"}
+                  error={formik.touched.state && Boolean(formik.errors.state)}
+                  size="medium"
                 />
                 <FE msg={formik.touched.state && formik.errors.state} />
               </div>
@@ -752,7 +750,7 @@ function CreateJobForm({
               {/* City */}
               <div>
                 <FL>City</FL>
-                <Autocomplete
+                <SearchablePlaceSelect
                   freeSolo
                   options={cityOptions}
                   getOptionLabel={getCityLabel}
@@ -761,16 +759,14 @@ function CreateJobForm({
                   onChange={handleCityChange}
                   onBlur={() => formik.setFieldTouched("city", true)}
                   filterOptions={filterCityOptions}
-                  disablePortal
                   renderOption={(props, option) => (
                     <li {...props} key={option.isNew ? `new-${option.name}` : option.name}>
                       {option.isNew ? `Add "${option.name}"` : option.name}
                     </li>
                   )}
-                  renderInput={(params) => (
-                    <TextField {...params} variant="outlined" placeholder="Search or type a city (optional)"
-                      error={formik.touched.city && Boolean(formik.errors.city)} />
-                  )}
+                  placeholder={formik.values.state ? "Search or type a city (optional)..." : "Select state first"}
+                  error={formik.touched.city && Boolean(formik.errors.city)}
+                  size="medium"
                 />
                 <FE msg={formik.touched.city && formik.errors.city} />
               </div>
@@ -781,10 +777,10 @@ function CreateJobForm({
           <motion.div variants={itemVariants} className="cjf-section">
             <SH icon={<IndianRupee size={16} style={{ color: "#16a34a" }} />} title="Compensation & Experience" iconBg="#f0fdf4" />
 
-            {/* Salary */}
+            {/* Salary — optional; blank shows as Not disclosed */}
             <div className="cjf-grid-auto" style={{ marginBottom: 24 }}>
               <div>
-                <FL>Salary (optional range)</FL>
+                <FL>Salary From (optional)</FL>
                 <div className="cjf-salary-wrap">
                   <span className="cjf-salary-prefix">₹</span>
                   <input
@@ -795,6 +791,9 @@ function CreateJobForm({
                   />
                 </div>
                 <FE msg={formik.touched.salaryFrom && formik.errors.salaryFrom} />
+                <p style={{ fontSize: 11.5, color: "#64748b", marginTop: 6 }}>
+                  Leave blank to show as Not disclosed
+                </p>
               </div>
               <div>
                 <FL>Salary To (optional)</FL>
@@ -804,7 +803,7 @@ function CreateJobForm({
                     name="salaryTo" type="text"
                     value={formik.values.salaryTo} onChange={formik.handleChange} onBlur={formik.handleBlur}
                     className={`cjf-input cjf-salary-input ${formik.touched.salaryTo && formik.errors.salaryTo ? "error" : ""}`}
-                    placeholder="e.g. 20K (leave empty for single amount)"
+                    placeholder="e.g. 20K (or leave empty)"
                   />
                 </div>
                 <FE msg={formik.touched.salaryTo && formik.errors.salaryTo} />

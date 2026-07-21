@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   BarChart,
   Bar,
@@ -26,6 +27,7 @@ import { toast } from "sonner";
 import { getDashboardStats } from "@/apiServices/dashboardApi";
 import { getPlatformSettings, updatePlatformSettings } from "@/apiServices/adminApi";
 import StatCard from "@/components/ui/StatCard";
+import { ReportsSection } from "@/components/Admin/Reports";
 import { ADMIN_PAGE, ADMIN_HEADER_TITLE } from "@/components/Admin/adminPageLayout";
 
 import { displayValue } from "@/utils/tableValue";
@@ -120,7 +122,7 @@ const JobCard = ({ job, rank }) => (
         <span className="flex items-center gap-1 text-xs text-slate-500">
           <Banknote className="w-3 h-3" />
           {job.salaryRange?.[0] === 0 && job.salaryRange?.[1] === 0
-            ? "Undisclosed"
+            ? "Not disclosed"
             : `₹${fmt(job.salaryRange?.[0])} – ₹${fmt(job.salaryRange?.[1])}`}
         </span>
         <span className="flex items-center gap-1 text-xs text-slate-500">
@@ -139,6 +141,7 @@ const JobCard = ({ job, rank }) => (
 
 /* ─── main ─── */
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState("monthly");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -209,6 +212,12 @@ const Dashboard = () => {
 
   useEffect(() => { fetchData(); }, [timeRange]);
   useEffect(() => { fetchSettings(); }, []);
+  useEffect(() => {
+    if (window.location.hash === "#reports") {
+      const el = document.getElementById("reports");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [loading]);
 
   const BAR_SERIES = [
     { key: "users", name: "Users", fill: "#3b82f6" },
@@ -267,6 +276,7 @@ const Dashboard = () => {
                 label="Total Users"
                 gradient="linear-gradient(135deg,#4f46e5 0%,#6366f1 55%,#818cf8 100%)"
                 shadow="0 8px 24px rgba(99,102,241,.35)"
+                onClick={() => navigate("/admin/users")}
               />
               <StatCard
                 icon={<Building2 size={20} color="#fff" />}
@@ -274,6 +284,7 @@ const Dashboard = () => {
                 label="Total Employers"
                 gradient="linear-gradient(135deg,#059669 0%,#10b981 55%,#34d399 100%)"
                 shadow="0 8px 24px rgba(16,185,129,.32)"
+                onClick={() => navigate("/admin/employers")}
               />
               <StatCard
                 icon={<Briefcase size={20} color="#fff" />}
@@ -281,10 +292,14 @@ const Dashboard = () => {
                 label="Job Posts"
                 gradient="linear-gradient(135deg,#0369a1 0%,#0ea5e9 55%,#38bdf8 100%)"
                 shadow="0 8px 24px rgba(14,165,233,.3)"
+                onClick={() => navigate("/admin/jobs")}
               />
             </>
           )}
         </div>
+
+        {/* ── reports & downloads ── */}
+        <ReportsSection />
 
         {/* ── job visibility settings ── */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

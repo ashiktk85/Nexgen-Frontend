@@ -12,11 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import {
-  ADMIN_PAGE,
-  ADMIN_HEADER_TITLE,
-  ADMIN_SEARCH_INPUT,
-} from "@/components/Admin/adminPageLayout";
+import { ADMIN_SEARCH_INPUT } from "@/components/Admin/adminPageLayout";
 import { exportReport } from "@/apiServices/adminApi";
 
 const SEGMENTS = [
@@ -58,7 +54,8 @@ function downloadBlob(blob, filename) {
   window.URL.revokeObjectURL(url);
 }
 
-const ReportsDownloads = () => {
+/** Reports & Downloads panel — embedded on Dashboard */
+export const ReportsSection = () => {
   const [search, setSearch] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -96,22 +93,19 @@ const ReportsDownloads = () => {
   };
 
   return (
-    <div className={`${ADMIN_PAGE} flex flex-col`}>
-      <div>
-        <h1 className={ADMIN_HEADER_TITLE}>Reports & Downloads</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Export segmented reports as CSV or Excel. Date range and search are applied to the download.
+    <div id="reports" className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="px-4 pt-4 pb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <Download className="w-4 h-4 text-indigo-600" />
+          <h2 className="text-base font-semibold text-slate-900">Reports & Downloads</h2>
+        </div>
+        <p className="text-xs text-slate-500 mt-0.5">
+          Export segmented reports as CSV or Excel. Filters below apply to every download.
         </p>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Filters</CardTitle>
-          <CardDescription>
-            These filters are sent with every download below.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-3">
+      <div className="p-4 space-y-4">
+        <div className="grid gap-4 sm:grid-cols-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <div className="grid gap-1.5">
             <Label htmlFor="report-search">Search</Label>
             <input
@@ -142,51 +136,51 @@ const ReportsDownloads = () => {
               onChange={(e) => setTo(e.target.value)}
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {SEGMENTS.map((seg) => (
-          <Card key={seg.id} className="flex flex-col">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Download className="h-4 w-4 text-indigo-600" />
-                {seg.title}
-              </CardTitle>
-              <CardDescription>{seg.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="mt-auto flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={loadingKey === `${seg.id}-csv`}
-                onClick={() => handleDownload(seg.id, "csv")}
-              >
-                {loadingKey === `${seg.id}-csv` ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                ) : (
-                  <FileText className="h-4 w-4 mr-1" />
-                )}
-                CSV
-              </Button>
-              <Button
-                size="sm"
-                disabled={loadingKey === `${seg.id}-xlsx`}
-                onClick={() => handleDownload(seg.id, "xlsx")}
-              >
-                {loadingKey === `${seg.id}-xlsx` ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                ) : (
-                  <FileSpreadsheet className="h-4 w-4 mr-1" />
-                )}
-                Excel
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {SEGMENTS.map((seg) => (
+            <Card key={seg.id} className="flex flex-col shadow-none">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Download className="h-3.5 w-3.5 text-indigo-600" />
+                  {seg.title}
+                </CardTitle>
+                <CardDescription className="text-xs">{seg.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto flex flex-wrap gap-2 pt-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={loadingKey === `${seg.id}-csv`}
+                  onClick={() => handleDownload(seg.id, "csv")}
+                >
+                  {loadingKey === `${seg.id}-csv` ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  ) : (
+                    <FileText className="h-4 w-4 mr-1" />
+                  )}
+                  CSV
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={loadingKey === `${seg.id}-xlsx`}
+                  onClick={() => handleDownload(seg.id, "xlsx")}
+                >
+                  {loadingKey === `${seg.id}-xlsx` ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  ) : (
+                    <FileSpreadsheet className="h-4 w-4 mr-1" />
+                  )}
+                  Excel
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
 };
 
-export default ReportsDownloads;
+export default ReportsSection;

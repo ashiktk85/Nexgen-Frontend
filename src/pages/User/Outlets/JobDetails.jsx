@@ -685,7 +685,7 @@ const JobDetails = () => {
                 </div>
                 <div className="jd-li-meta-item">
                   <label>Salary</label>
-                  <span>{salaryText}</span>
+                  <span>{salaryText || "Not disclosed"}</span>
                 </div>
                 <div className="jd-li-meta-item">
                   <label>Job function</label>

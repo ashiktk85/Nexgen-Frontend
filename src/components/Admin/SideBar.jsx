@@ -18,7 +18,6 @@ import {
   Building2,
   Briefcase,
   ShieldCheck,
-  Download,
   ClipboardList,
   Image as ImageIcon,
   Store,
@@ -132,12 +131,6 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       label: "Placement Tracking",
       url: "/admin/placement-tracking",
       icon: <ClipboardList className="w-4 h-4" />,
-    },
-    {
-      id: "reports",
-      label: "Reports & Downloads",
-      url: "/admin/reports",
-      icon: <Download className="w-4 h-4" />,
     },
     {
       id: "job-titles",

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LocationOn, Payments, WorkOutline, ArrowForward } from "@mui/icons-material";
+import { LocationOn, Payments, ArrowForward } from "@mui/icons-material";
 import { getJobCategory } from "@/constants/options";
 import { calculateTimeAgo } from "@/utils/dateFormation";
 import { formatSalary } from "@/utils/formatSalary";
@@ -74,9 +74,9 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
           {locationText ? (
             <MetaLine icon={<LocationOn sx={{ fontSize: 15 }} />} text={locationText} bold />
           ) : null}
-          <MetaLine icon={<Payments sx={{ fontSize: 15 }} />} text={salaryText} bold accent="salary" />
+          <MetaLine icon={<Payments sx={{ fontSize: 15 }} />} text={salaryText || "Not disclosed"} bold accent="salary" />
           {experienceMeta ? (
-            <MetaLine icon={<WorkOutline sx={{ fontSize: 15 }} />} text={experienceMeta} bold accent="exp" />
+            <MetaLine label="Experience" text={experienceMeta} bold accent="exp" />
           ) : null}
         </div>
         <div onClick={stopCardClick} onKeyDown={stopCardClick}>
@@ -135,17 +135,12 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
         />
         <MetaLine
           icon={<Payments sx={{ fontSize: 13 }} />}
-          text={salaryText || "Salary not disclosed"}
+          text={salaryText || "Not disclosed"}
           bold
           accent="salary"
         />
         {experienceMeta ? (
-          <MetaLine
-            icon={<WorkOutline sx={{ fontSize: 13 }} />}
-            text={experienceMeta}
-            bold
-            accent="exp"
-          />
+          <MetaLine label="Experience" text={experienceMeta} bold accent="exp" />
         ) : null}
       </div>
 
@@ -161,7 +156,7 @@ const FeaturedJobCard = ({ job, index = 0, compact = true }) => {
   );
 };
 
-function MetaLine({ icon, text, bold = false, accent }) {
+function MetaLine({ icon, label, text, bold = false, accent }) {
   const color =
     accent === "salary"
       ? "text-emerald-800"
@@ -170,7 +165,13 @@ function MetaLine({ icon, text, bold = false, accent }) {
         : "text-[#141b2b]";
   return (
     <div className="flex items-center gap-1 min-h-[16px] min-w-0">
-      <span className="shrink-0 flex items-center text-[#64748b]">{icon}</span>
+      {label ? (
+        <span className="shrink-0 text-[10px] font-semibold text-[#64748b] uppercase tracking-wide">
+          {label}
+        </span>
+      ) : icon ? (
+        <span className="shrink-0 flex items-center text-[#64748b]">{icon}</span>
+      ) : null}
       <span className={`truncate ${bold ? `font-bold ${color}` : ""}`}>{text || "\u00A0"}</span>
     </div>
   );

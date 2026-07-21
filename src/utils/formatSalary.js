@@ -12,7 +12,7 @@ function formatAmountPart(part) {
  * Supports salaryDisplay (raw text) and legacy salaryRange [min, max].
  */
 export function formatSalary(job) {
-  const display = job?.salaryDisplay;
+  const display = typeof job?.salaryDisplay === "string" ? job.salaryDisplay.trim() : job?.salaryDisplay;
   if (display) {
     if (display.startsWith("₹")) return display;
     const parts = display.split(/\s*[–-]\s*/);

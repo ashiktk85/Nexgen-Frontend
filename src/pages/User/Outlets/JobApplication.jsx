@@ -339,7 +339,7 @@ const JobApplication = () => {
                           {option.dial_code}
                         </Box>
                       )}
-                      renderInput={(params) => <TextField {...params} label="Code" variant="outlined" size="small" />}
+                      renderInput={(params) => <TextField {...params} label="Code" variant="outlined" size="small" placeholder="Search code..." />}
                     />
                   </div>
                   <div style={{ flex: 1 }}>
@@ -371,7 +371,8 @@ const JobApplication = () => {
                   <Autocomplete
                     options={KeralaDistricts} value={selectedDistrict}
                     onChange={(_, v) => { setSelectedDistrict(v); formik.setFieldValue("district", v); }}
-                    renderInput={(params) => <TextField {...params} variant="outlined" placeholder="Select district" size="small" />}
+                    autoHighlight
+                    renderInput={(params) => <TextField {...params} variant="outlined" placeholder="Search district..." size="small" />}
                   />
                 </div>
               </div>

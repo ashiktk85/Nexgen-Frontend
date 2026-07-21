@@ -448,20 +448,37 @@ export default function Home() {
             {initialLoading ? (
               <JobsSkeleton />
             ) : (
-              <motion.div
-                variants={sectionStagger}
-                initial="hidden"
-                whileInView="visible"
-                viewport={viewportOnce}
-                className="grid gap-5 w-full min-w-0"
-                style={{ gridTemplateColumns: "repeat(auto-fill, minmax(min(300px, 100%), 1fr))" }}
-              >
-                {jobs.slice(0, 8).map((job, index) => (
-                  <motion.div key={job._id} variants={fadeUp} className="min-w-0 h-full">
-                    <FeaturedJobCard job={job} index={index} compact />
-                  </motion.div>
-                ))}
-              </motion.div>
+              <>
+                <motion.div
+                  variants={sectionStagger}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={viewportOnce}
+                  className="grid gap-5 w-full min-w-0"
+                  style={{ gridTemplateColumns: "repeat(auto-fill, minmax(min(300px, 100%), 1fr))" }}
+                >
+                  {jobs.slice(0, 8).map((job, index) => (
+                    <motion.div key={job._id} variants={fadeUp} className="min-w-0 h-full">
+                      <FeaturedJobCard job={job} index={index} compact />
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                <motion.div
+                  className="flex justify-center mt-10 sm:mt-12"
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={viewportOnce}
+                  variants={fadeUp}
+                >
+                  <Link
+                    to="/all-jobs"
+                    className="inline-flex items-center justify-center gap-2 bg-[#0058be] text-white px-8 py-3.5 rounded-lg font-semibold text-sm hover:bg-[#004a9f] hover:shadow-lg transition-all active:scale-[0.98] w-full sm:w-auto max-w-xs sm:max-w-none"
+                  >
+                    View All Jobs <ArrowForward fontSize="small" />
+                  </Link>
+                </motion.div>
+              </>
             )}
 
           </div>
