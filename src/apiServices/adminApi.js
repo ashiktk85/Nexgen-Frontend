@@ -92,6 +92,25 @@ export const exportReport = async ({
   return response;
 };
 
+export const getReportPreview = async ({
+  segment,
+  search = "",
+  page = 1,
+  limit = 10,
+  from = "",
+  to = "",
+} = {}) => {
+  const params = new URLSearchParams();
+  params.append("segment", segment);
+  if (search) params.append("search", search);
+  params.append("page", String(page));
+  params.append("limit", String(limit));
+  if (from) params.append("from", from);
+  if (to) params.append("to", to);
+  const response = await adminAxiosInstance.get(`/reports/preview?${params.toString()}`);
+  return response;
+};
+
 export const getPlacementTracking = async (filters = {}) => {
   const params = new URLSearchParams();
   if (filters.page) params.append("page", String(filters.page));
