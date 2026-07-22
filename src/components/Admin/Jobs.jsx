@@ -29,6 +29,8 @@ const defaultFilters = {
   jobType: "all",
   sortBy: "createdAt",
   sortOrder: "desc",
+  from: "",
+  to: "",
 };
 
 const Jobs = () => {
@@ -331,6 +333,45 @@ const Jobs = () => {
             { value: "employer", label: "Employer jobs" },
           ]}
         />
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Date from</label>
+          <input
+            type="date"
+            value={filters.from || ""}
+            onChange={(e) => updateFilter("from", e.target.value)}
+            className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white h-[34px]"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Date to</label>
+          <input
+            type="date"
+            value={filters.to || ""}
+            onChange={(e) => updateFilter("to", e.target.value)}
+            className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white h-[34px]"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            const todayStr = new Date().toLocaleDateString('en-CA');
+            setCurrentPage(1);
+            setFilters((prev) => ({ ...prev, from: todayStr, to: todayStr }));
+          }}
+          className="text-xs font-semibold px-2.5 py-2 border border-slate-200 rounded-md hover:bg-slate-50 bg-white h-[34px]"
+        >
+          Today
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setCurrentPage(1);
+            setFilters((prev) => ({ ...prev, from: "", to: "" }));
+          }}
+          className="text-xs font-semibold px-2.5 py-2 border border-slate-200 rounded-md hover:bg-slate-50 bg-white h-[34px]"
+        >
+          Reset
+        </button>
         <AdminFilterSelect
           label="Sort by"
           value={filters.sortBy}

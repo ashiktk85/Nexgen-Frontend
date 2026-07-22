@@ -169,6 +169,10 @@ function JobList() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("");
   const [appliedLocation, setAppliedLocation] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [appliedDateFrom, setAppliedDateFrom] = useState("");
+  const [appliedDateTo, setAppliedDateTo] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -195,6 +199,8 @@ function JobList() {
     search = appliedSearch,
     status = statusFilter,
     location = appliedLocation,
+    from = appliedDateFrom,
+    to = appliedDateTo,
   } = {}) => {
     if (!employer?.employerId) return;
     setLoading(true);
@@ -206,6 +212,8 @@ function JobList() {
           search: search?.trim() || undefined,
           status: status !== "all" ? status : undefined,
           location: location?.trim() || undefined,
+          from: from || undefined,
+          to: to || undefined,
           sortBy: "createdAt",
           sortOrder: "desc",
         },
@@ -256,11 +264,30 @@ function JobList() {
 
   useEffect(() => {
     fetchJobs({ page: currentPage });
-  }, [employer?.employerId, currentPage, statusFilter, appliedSearch, appliedLocation]);
+  }, [employer?.employerId, currentPage, statusFilter, appliedSearch, appliedLocation, appliedDateFrom, appliedDateTo]);
 
   const runSearch = () => {
     setAppliedSearch(searchTerm);
     setAppliedLocation(locationFilter);
+    setAppliedDateFrom(dateFrom);
+    setAppliedDateTo(dateTo);
+    setCurrentPage(1);
+  };
+
+  const handleToday = () => {
+    const todayStr = new Date().toLocaleDateString('en-CA');
+    setDateFrom(todayStr);
+    setDateTo(todayStr);
+    setAppliedDateFrom(todayStr);
+    setAppliedDateTo(todayStr);
+    setCurrentPage(1);
+  };
+
+  const handleReset = () => {
+    setDateFrom("");
+    setDateTo("");
+    setAppliedDateFrom("");
+    setAppliedDateTo("");
     setCurrentPage(1);
   };
   const columns = [
@@ -477,7 +504,7 @@ function JobList() {
               </button>
             </div>
             {/* Mobile-friendly filter row below search */}
-            <div className="ejl-filter-row">
+            <div className="ejl-filter-row" style={{ alignItems: "center" }}>
               <select
                 className="ejl-filter-input"
                 value={statusFilter}
@@ -495,6 +522,40 @@ function JobList() {
                 onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
                 placeholder="Filter by location…"
               />
+              <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: "bold", textTransform: "uppercase" }}>From</span>
+                <input
+                  type="date"
+                  className="ejl-filter-input"
+                  value={dateFrom}
+                  onChange={(e) => { setDateFrom(e.target.value); setAppliedDateFrom(e.target.value); setCurrentPage(1); }}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: "bold", textTransform: "uppercase" }}>To</span>
+                <input
+                  type="date"
+                  className="ejl-filter-input"
+                  value={dateTo}
+                  onChange={(e) => { setDateTo(e.target.value); setAppliedDateTo(e.target.value); setCurrentPage(1); }}
+                />
+              </div>
+              <button
+                type="button"
+                className="ejl-filter-input"
+                style={{ cursor: "pointer", fontWeight: "bold", background: "#f8fafc" }}
+                onClick={handleToday}
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                className="ejl-filter-input"
+                style={{ cursor: "pointer", fontWeight: "bold", background: "#f8fafc" }}
+                onClick={handleReset}
+              >
+                Reset
+              </button>
             </div>
           </motion.div>
 

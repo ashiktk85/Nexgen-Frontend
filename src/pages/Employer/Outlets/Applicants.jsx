@@ -184,12 +184,18 @@ function Applicants() {
   const [searchTerm, setSearchTerm] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [appliedDateFrom, setAppliedDateFrom] = useState("");
+  const [appliedDateTo, setAppliedDateTo] = useState("");
   const ROWS_PER_PAGE = 5;
 
   const fetchApplications = async ({
     page = currentPage,
     search = appliedSearch,
     status = statusFilter,
+    from = appliedDateFrom,
+    to = appliedDateTo,
   } = {}) => {
     setLoading(true);
     try {
@@ -201,6 +207,8 @@ function Applicants() {
             limit: ROWS_PER_PAGE,
             search: search?.trim() || undefined,
             status: status !== "all" ? status : undefined,
+            from: from || undefined,
+            to: to || undefined,
             sortBy: "createdAt",
             sortOrder: "desc",
           },
@@ -229,10 +237,29 @@ function Applicants() {
 
   useEffect(() => {
     fetchApplications({ page: currentPage });
-  }, [jobId, currentPage, statusFilter, appliedSearch]);
+  }, [jobId, currentPage, statusFilter, appliedSearch, appliedDateFrom, appliedDateTo]);
 
   const runSearch = () => {
     setAppliedSearch(searchTerm);
+    setAppliedDateFrom(dateFrom);
+    setAppliedDateTo(dateTo);
+    setCurrentPage(1);
+  };
+
+  const handleToday = () => {
+    const todayStr = new Date().toLocaleDateString('en-CA');
+    setDateFrom(todayStr);
+    setDateTo(todayStr);
+    setAppliedDateFrom(todayStr);
+    setAppliedDateTo(todayStr);
+    setCurrentPage(1);
+  };
+
+  const handleReset = () => {
+    setDateFrom("");
+    setDateTo("");
+    setAppliedDateFrom("");
+    setAppliedDateTo("");
     setCurrentPage(1);
   };
 
@@ -292,104 +319,188 @@ function Applicants() {
             marginBottom: 16,
           }}
         >
-          <div
-            style={{
-              width: "100%",
-              minWidth: 0,
-              display: "flex",
-              alignItems: "center",
-              background: "#fff",
-              border: "1.5px solid #e2e8f0",
-              borderRadius: 12,
-              padding: "6px 10px",
-              boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
-              gap: 8,
-            }}
-          >
-            <Search size={14} style={{ color: "#94a3b8", flexShrink: 0 }} />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
-              placeholder="Search applicants by name, email or location…"
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+            <div
               style={{
                 flex: 1,
-                border: "none",
-                outline: "none",
-                background: "transparent",
-                fontSize: 13.5,
-                color: "#0f172a",
-                fontFamily: "'DM Sans',sans-serif",
-                minWidth: 0,
+                minWidth: 260,
+                display: "flex",
+                alignItems: "center",
+                background: "#fff",
+                border: "1.5px solid #e2e8f0",
+                borderRadius: 12,
+                padding: "6px 10px",
+                boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
+                gap: 8,
               }}
-            />
+            >
+              <Search size={14} style={{ color: "#94a3b8", flexShrink: 0 }} />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
+                placeholder="Search applicants by name, email or location…"
+                style={{
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  background: "transparent",
+                  fontSize: 13.5,
+                  color: "#0f172a",
+                  fontFamily: "'DM Sans',sans-serif",
+                  minWidth: 0,
+                }}
+              />
+              <button
+                type="button"
+                onClick={runSearch}
+                style={{
+                  padding: "7px 12px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "linear-gradient(135deg,#4f46e5,#6366f1)",
+                  color: "#fff",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  fontFamily: "'Plus Jakarta Sans',sans-serif",
+                  flexShrink: 0,
+                }}
+              >
+                Search
+              </button>
+            </div>
+
+            {/* Status filter */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 10px",
+                background: "#fff",
+                border: "1.5px solid #e2e8f0",
+                borderRadius: 12,
+                boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
+                height: 38,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "#64748b",
+                  fontFamily: "'Plus Jakarta Sans',sans-serif",
+                }}
+              >
+                Status
+              </span>
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                style={{
+                  border: "none",
+                  outline: "none",
+                  background: "transparent",
+                  fontSize: 13,
+                  fontFamily: "'DM Sans',sans-serif",
+                  color: "#0f172a",
+                  padding: "4px 6px",
+                  cursor: "pointer",
+                }}
+              >
+                <option value="all">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Shortlisted">Shortlisted</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Date filters */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 10px",
+                background: "#fff",
+                border: "1.5px solid #e2e8f0",
+                borderRadius: 12,
+                boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
+                height: 38,
+              }}
+            >
+              <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: "bold", textTransform: "uppercase" }}>From</span>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => { setDateFrom(e.target.value); setAppliedDateFrom(e.target.value); setCurrentPage(1); }}
+                style={{ border: "none", outline: "none", fontSize: 12, fontFamily: "'DM Sans',sans-serif" }}
+              />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 10px",
+                background: "#fff",
+                border: "1.5px solid #e2e8f0",
+                borderRadius: 12,
+                boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
+                height: 38,
+              }}
+            >
+              <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: "bold", textTransform: "uppercase" }}>To</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => { setDateTo(e.target.value); setAppliedDateTo(e.target.value); setCurrentPage(1); }}
+                style={{ border: "none", outline: "none", fontSize: 12, fontFamily: "'DM Sans',sans-serif" }}
+              />
+            </div>
             <button
               type="button"
-              onClick={runSearch}
+              onClick={handleToday}
               style={{
-                padding: "7px 12px",
-                borderRadius: 8,
-                border: "none",
-                background: "linear-gradient(135deg,#4f46e5,#6366f1)",
-                color: "#fff",
-                fontSize: 12,
+                padding: "8px 14px",
+                borderRadius: 12,
+                border: "1.5px solid #e2e8f0",
+                background: "#fff",
+                color: "#475569",
+                fontSize: 12.5,
                 fontWeight: 700,
                 cursor: "pointer",
                 fontFamily: "'Plus Jakarta Sans',sans-serif",
-                flexShrink: 0,
+                height: 38,
               }}
             >
-              Search
+              Today
             </button>
-          </div>
-
-          {/* Status filter */}
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "6px 10px",
-              background: "#fff",
-              border: "1.5px solid #e2e8f0",
-              borderRadius: 12,
-              boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
-            }}
-          >
-            <span
+            <button
+              type="button"
+              onClick={handleReset}
               style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "#64748b",
-                fontFamily: "'Plus Jakarta Sans',sans-serif",
-              }}
-            >
-              Status
-            </span>
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              style={{
-                border: "none",
-                outline: "none",
-                background: "transparent",
-                fontSize: 13,
-                fontFamily: "'DM Sans',sans-serif",
-                color: "#0f172a",
-                padding: "4px 6px",
+                padding: "8px 14px",
+                borderRadius: 12,
+                border: "1.5px solid #e2e8f0",
+                background: "#fff",
+                color: "#475569",
+                fontSize: 12.5,
+                fontWeight: 700,
                 cursor: "pointer",
+                fontFamily: "'Plus Jakarta Sans',sans-serif",
+                height: 38,
               }}
             >
-              <option value="all">All</option>
-              <option value="Pending">Pending</option>
-              <option value="Shortlisted">Shortlisted</option>
-              <option value="Rejected">Rejected</option>
-            </select>
+              Reset
+            </button>
           </div>
         </motion.div>
 

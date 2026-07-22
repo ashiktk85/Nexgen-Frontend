@@ -156,6 +156,12 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       url: "/admin/banner",
       icon: <ImageIcon className="w-4 h-4" />,
     },
+    {
+      id: "ad-banner",
+      label: "Ad Banners",
+      url: "/admin/ad-banner",
+      icon: <ImageIcon className="w-4 h-4" />,
+    },
   ];
 
   return (

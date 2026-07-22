@@ -113,7 +113,15 @@ function Admin() {
             path="/banner"
             element={
               <AdminProtectedRoute>
-                <BannerManagement />
+                <BannerManagement placement="hero" />
+              </AdminProtectedRoute>
+            }
+          />
+          <Route
+            path="/ad-banner"
+            element={
+              <AdminProtectedRoute>
+                <BannerManagement placement="ad" />
               </AdminProtectedRoute>
             }
           />

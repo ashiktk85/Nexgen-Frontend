@@ -19,6 +19,8 @@ const AppliedStudents = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
   const [applicants, setApplicants] = useState([]);
@@ -29,13 +31,13 @@ const AppliedStudents = () => {
   const rowsPerPage = 20;
 
   useEffect(() => {
-    fetchJobs(currentPage, searchTerm);
-  }, [currentPage, searchTerm]);
+    fetchJobs(currentPage, searchTerm, { from, to });
+  }, [currentPage, searchTerm, from, to]);
 
-  async function fetchJobs(page, search) {
+  async function fetchJobs(page, search, dates = {}) {
     setLoading(true);
     try {
-      const result = await getJobApplicationsAdmin(page, rowsPerPage, search);
+      const result = await getJobApplicationsAdmin(page, rowsPerPage, search, dates);
       if (result?.data?.response) {
         const { jobs: list, totalPages: pages } = result.data.response;
         setJobs(list || []);
@@ -63,7 +65,7 @@ const AppliedStudents = () => {
         toast.success("Applicants exported successfully");
       } else {
         setExportingAll(true);
-        const result = await exportJobApplicationsXlsx({ search: searchTerm });
+        const result = await exportJobApplicationsXlsx({ search: searchTerm, from, to });
         if (!result?.data) return;
         const url = URL.createObjectURL(new Blob([result.data]));
         const link = document.createElement("a");
@@ -190,18 +192,68 @@ const AppliedStudents = () => {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex-1 min-w-[200px] max-w-sm">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => {
+      <div className="flex flex-wrap items-end justify-between gap-3 mb-3">
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="flex flex-col gap-1 min-w-[200px] max-w-sm">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Search</span>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => {
+                setCurrentPage(1);
+                setSearchTerm(e.target.value);
+              }}
+              placeholder="Search by job ID or title…"
+              className={ADMIN_SEARCH_INPUT}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Date from</span>
+            <input
+              type="date"
+              value={from}
+              onChange={(e) => {
+                setCurrentPage(1);
+                setFrom(e.target.value);
+              }}
+              className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white h-[34px]"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Date to</span>
+            <input
+              type="date"
+              value={to}
+              onChange={(e) => {
+                setCurrentPage(1);
+                setTo(e.target.value);
+              }}
+              className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white h-[34px]"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const todayStr = new Date().toLocaleDateString('en-CA');
               setCurrentPage(1);
-              setSearchTerm(e.target.value);
+              setFrom(todayStr);
+              setTo(todayStr);
             }}
-            placeholder="Search by job ID or title…"
-            className={ADMIN_SEARCH_INPUT}
-          />
+            className="text-xs font-semibold px-2.5 py-2 border border-slate-200 rounded-md hover:bg-slate-50 bg-white h-[34px]"
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setCurrentPage(1);
+              setFrom("");
+              setTo("");
+            }}
+            className="text-xs font-semibold px-2.5 py-2 border border-slate-200 rounded-md hover:bg-slate-50 bg-white h-[34px]"
+          >
+            Reset
+          </button>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -209,7 +261,7 @@ const AppliedStudents = () => {
             type="button"
             disabled={exportingAll}
             onClick={() => handleExport()}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60 h-[34px]"
           >
             <Download className="w-3.5 h-3.5" />
             {exportingAll ? "Exporting…" : "Export Excel"}

@@ -214,11 +214,83 @@ const reducedMotionFadeVariants = {
   visible: { opacity: 1, transition: { duration: 0.25 } },
 };
 
+function AdBackgroundCarousel({ slides, reduceMotion }) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
+  return (
+    <div className="relative w-full h-[320px] sm:h-[400px] md:h-[480px] lg:h-[540px] overflow-hidden bg-slate-900">
+      {slides.map((slide, idx) => {
+        const isCurrent = idx === index;
+
+        return (
+          <div
+            key={slide.id}
+            className="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out"
+            style={{
+              opacity: isCurrent ? 1 : 0,
+              zIndex: isCurrent ? 1 : 0,
+            }}
+          >
+            {slide.mediaType === "video" ? (
+              <video
+                src={slide.url}
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            ) : (
+              <img
+                src={slide.url}
+                alt={slide.altText}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent flex items-end p-4 sm:p-6">
+              <div className="text-white drop-shadow-md">
+                <span className="bg-indigo-600/95 text-[10px] font-bold tracking-widest uppercase px-2.5 py-0.5 rounded text-white shadow-sm">
+                  Sponsored Ad
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {slides.length > 1 && (
+        <div className="absolute bottom-3 right-4 z-20 flex gap-1.5">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setIndex(idx)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                idx === index ? "bg-white w-4" : "bg-white/50 hover:bg-white/80"
+              }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const [jobs, setJobs] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const user = useSelector((state) => state.user.seekerInfo);
   const [heroBanners, setHeroBanners] = useState([]);
+  const [adBanners, setAdBanners] = useState([]);
   const reduceMotion = useReducedMotion();
   const fadeUp = reduceMotion ? reducedMotionFadeVariants : scrollFadeUpVariants;
   const fadeLeft = reduceMotion ? reducedMotionFadeVariants : scrollFadeLeftVariants;
@@ -226,26 +298,41 @@ export default function Home() {
   const fadeScale = reduceMotion ? reducedMotionFadeVariants : scrollScaleVariants;
   const sectionStagger = reduceMotion ? reducedMotionFadeVariants : scrollContainerVariants;
 
-  // Active banners rotate as the homepage hero background carousel
-  const fetchHeroBanners = async () => {
+  // Fetch and sort Hero and Ad Banners by placement
+  const fetchBanners = async () => {
     try {
       const { data } = await adminAxiosInstance.get("/all-banners");
       if (data && data.data) {
-        const hero = data.data
-          .filter((banner) => banner.active)
+        const activeBanners = data.data.filter((banner) => banner.active);
+
+        const hero = activeBanners
+          .filter((banner) => (banner.placement || "hero") === "hero")
           .map((banner) => ({
             id: banner._id,
             url: banner.image || banner.url,
             mediaType: banner.mediaType || "image",
             altText: banner.fileName || "Hero banner",
           }));
-        setHeroBanners(hero);
+
+        const ads = activeBanners
+          .filter((banner) => banner.placement === "ad")
+          .map((banner) => ({
+            id: banner._id,
+            url: banner.image || banner.url,
+            mediaType: banner.mediaType || "image",
+            altText: banner.fileName || "Ad banner",
+          }));
+
+        setHeroBanners(hero.length > 0 ? hero : [{ id: "fallback", url: HERO_BANNER_SRC, mediaType: "image" }]);
+        setAdBanners(ads);
       } else {
-        setHeroBanners([]);
+        setHeroBanners([{ id: "fallback", url: HERO_BANNER_SRC, mediaType: "image" }]);
+        setAdBanners([]);
       }
     } catch (error) {
       console.error("Error fetching banners:", error);
-      setHeroBanners([]);
+      setHeroBanners([{ id: "fallback", url: HERO_BANNER_SRC, mediaType: "image" }]);
+      setAdBanners([]);
     }
   };
 
@@ -277,7 +364,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchJobs();
-    fetchHeroBanners();
+    fetchBanners();
   }, []);
 
   const JobsSkeleton = () => (
@@ -418,6 +505,13 @@ export default function Home() {
             </div>
           </motion.div>
         </section>
+
+        {/* Ad Banner Section */}
+        {adBanners.length > 0 && (
+          <section className="w-full bg-white overflow-hidden border-b border-slate-100">
+            <AdBackgroundCarousel slides={adBanners} reduceMotion={reduceMotion} />
+          </section>
+        )}
 
         {/* Featured Jobs */}
         <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#f1f3ff] overflow-x-hidden w-full">

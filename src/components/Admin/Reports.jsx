@@ -56,19 +56,36 @@ function downloadBlob(blob, filename) {
 
 /** Reports & Downloads panel — embedded on Dashboard */
 export const ReportsSection = () => {
-  const [search, setSearch] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [cardFilters, setCardFilters] = useState(
+    SEGMENTS.reduce((acc, seg) => {
+      acc[seg.id] = { from: "", to: "", getAll: false };
+      return acc;
+    }, {})
+  );
   const [loadingKey, setLoadingKey] = useState(null);
+
+  const updateCardFilter = (segId, key, value) => {
+    setCardFilters((prev) => ({
+      ...prev,
+      [segId]: {
+        ...prev[segId],
+        [key]: value,
+      },
+    }));
+  };
 
   const handleDownload = async (segment, format) => {
     const key = `${segment}-${format}`;
+    const filters = cardFilters[segment];
+    const from = filters.getAll ? "" : filters.from;
+    const to = filters.getAll ? "" : filters.to;
+
     try {
       setLoadingKey(key);
       const response = await exportReport({
         segment,
         format,
-        search,
+        search: "",
         from,
         to,
       });
@@ -92,6 +109,35 @@ export const ReportsSection = () => {
     }
   };
 
+  const handleDownloadToday = async (segment) => {
+    const key = `${segment}-today`;
+    const todayStr = new Date().toLocaleDateString('en-CA');
+    try {
+      setLoadingKey(key);
+      const response = await exportReport({
+        segment,
+        format: "xlsx",
+        search: "",
+        from: todayStr,
+        to: todayStr,
+      });
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const disposition = response.headers?.["content-disposition"] || "";
+      const match = disposition.match(/filename="?([^"]+)"?/);
+      const filename =
+        match?.[1] ||
+        `techpath-${segment}-today-${Date.now()}.xlsx`;
+      downloadBlob(blob, filename);
+      toast.success(`${SEGMENTS.find((s) => s.id === segment)?.title || "Report"} for Today downloaded`);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to download report");
+    } finally {
+      setLoadingKey(null);
+    }
+  };
+
   return (
     <div id="reports" className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="px-4 pt-4 pb-3 border-b border-slate-100">
@@ -100,83 +146,109 @@ export const ReportsSection = () => {
           <h2 className="text-base font-semibold text-slate-900">Reports & Downloads</h2>
         </div>
         <p className="text-xs text-slate-500 mt-0.5">
-          Export segmented reports as CSV or Excel. Filters below apply to every download.
+          Configure filters on each card to download reports.
         </p>
       </div>
 
       <div className="p-4 space-y-4">
-        <div className="grid gap-4 sm:grid-cols-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <div className="grid gap-1.5">
-            <Label htmlFor="report-search">Search</Label>
-            <input
-              id="report-search"
-              className={ADMIN_SEARCH_INPUT}
-              placeholder="Name, email, phone…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="grid gap-1.5">
-            <Label htmlFor="report-from">From date</Label>
-            <input
-              id="report-from"
-              type="date"
-              className={ADMIN_SEARCH_INPUT}
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-            />
-          </div>
-          <div className="grid gap-1.5">
-            <Label htmlFor="report-to">To date</Label>
-            <input
-              id="report-to"
-              type="date"
-              className={ADMIN_SEARCH_INPUT}
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-            />
-          </div>
-        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {SEGMENTS.map((seg) => {
+            const filters = cardFilters[seg.id];
+            const isButtonVisible = filters.getAll || (filters.from && filters.to);
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {SEGMENTS.map((seg) => (
-            <Card key={seg.id} className="flex flex-col shadow-none">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Download className="h-3.5 w-3.5 text-indigo-600" />
-                  {seg.title}
-                </CardTitle>
-                <CardDescription className="text-xs">{seg.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="mt-auto flex flex-wrap gap-2 pt-0">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={loadingKey === `${seg.id}-csv`}
-                  onClick={() => handleDownload(seg.id, "csv")}
-                >
-                  {loadingKey === `${seg.id}-csv` ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                  ) : (
-                    <FileText className="h-4 w-4 mr-1" />
-                  )}
-                  CSV
-                </Button>
-                <Button
-                  size="sm"
-                  disabled={loadingKey === `${seg.id}-xlsx`}
-                  onClick={() => handleDownload(seg.id, "xlsx")}
-                >
-                  {loadingKey === `${seg.id}-xlsx` ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                  ) : (
-                    <FileSpreadsheet className="h-4 w-4 mr-1" />
-                  )}
-                  Excel
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+            return (
+              <Card key={seg.id} className="flex flex-col shadow-none border border-slate-200 bg-white hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2 text-slate-800">
+                    <Download className="h-4 w-4 text-indigo-600" />
+                    {seg.title}
+                  </CardTitle>
+                  <CardDescription className="text-xs text-slate-500">{seg.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="mt-auto space-y-3 pt-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">From</label>
+                      <input
+                        type="date"
+                        disabled={filters.getAll}
+                        value={filters.from}
+                        onChange={(e) => updateCardFilter(seg.id, "from", e.target.value)}
+                        className="text-xs border border-slate-200 rounded-md px-2 py-1 bg-white disabled:opacity-50 disabled:bg-slate-50 h-[30px]"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">To</label>
+                      <input
+                        type="date"
+                        disabled={filters.getAll}
+                        value={filters.to}
+                        onChange={(e) => updateCardFilter(seg.id, "to", e.target.value)}
+                        className="text-xs border border-slate-200 rounded-md px-2 py-1 bg-white disabled:opacity-50 disabled:bg-slate-50 h-[30px]"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 py-0.5">
+                    <input
+                      type="checkbox"
+                      id={`get-all-${seg.id}`}
+                      checked={filters.getAll}
+                      onChange={(e) => updateCardFilter(seg.id, "getAll", e.target.checked)}
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5"
+                    />
+                    <label htmlFor={`get-all-${seg.id}`} className="text-xs text-slate-600 cursor-pointer select-none font-medium">
+                      Get all data (ignore date)
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-100 h-8"
+                      disabled={loadingKey === `${seg.id}-today`}
+                      onClick={() => handleDownloadToday(seg.id)}
+                    >
+                      {loadingKey === `${seg.id}-today` ? (
+                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      ) : null}
+                      Today
+                    </Button>
+                    {isButtonVisible && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8"
+                          disabled={loadingKey === `${seg.id}-csv`}
+                          onClick={() => handleDownload(seg.id, "csv")}
+                        >
+                          {loadingKey === `${seg.id}-csv` ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                          ) : (
+                            <FileText className="h-3.5 w-3.5 mr-1" />
+                          )}
+                          CSV
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="h-8"
+                          disabled={loadingKey === `${seg.id}-xlsx`}
+                          onClick={() => handleDownload(seg.id, "xlsx")}
+                        >
+                          {loadingKey === `${seg.id}-xlsx` ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                          ) : (
+                            <FileSpreadsheet className="h-3.5 w-3.5 mr-1" />
+                          )}
+                          Excel
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>

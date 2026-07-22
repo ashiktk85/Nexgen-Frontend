@@ -213,7 +213,7 @@ export const employerVerificationChangeStatus = async (employerId, decision, rea
   }
 };
 
-export const getAllEmployers = async (page, limit, search = "") => {
+export const getAllEmployers = async (page, limit, search = "", filters = {}) => {
   try {
     const params = new URLSearchParams({
       page: String(page),
@@ -223,6 +223,9 @@ export const getAllEmployers = async (page, limit, search = "") => {
     if (search) {
       params.append("search", search);
     }
+
+    if (filters.from) params.append("from", filters.from);
+    if (filters.to) params.append("to", filters.to);
 
     const response = await adminAxiosInstance.get(
       `/getEmployers?${params.toString()}`
@@ -250,6 +253,8 @@ export const getAllShops = async (page, limit, filters = {}) => {
     if (filters.listing && filters.listing !== "all") params.append("listing", filters.listing);
     if (filters.sortBy) params.append("sortBy", filters.sortBy);
     if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
+    if (filters.from) params.append("from", filters.from);
+    if (filters.to) params.append("to", filters.to);
     const response = await adminAxiosInstance.get(
       `/getShops?${params.toString()}`
     );
@@ -332,10 +337,12 @@ export const deleteShopAdmin = async (shopId) => {
   }
 };
 
-export const getJobApplicationsAdmin = async (page, limit, search = "") => {
+export const getJobApplicationsAdmin = async (page, limit, search = "", filters = {}) => {
   try {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) });
     if (search) params.append("search", search);
+    if (filters.from) params.append("from", filters.from);
+    if (filters.to) params.append("to", filters.to);
     return await adminAxiosInstance.get(`/job-applications?${params.toString()}`);
   } catch (error) {
     console.error("Error in getJobApplicationsAdmin:", error);
@@ -380,6 +387,8 @@ export const getAllJobs = async (page, limit, filters = {}) => {
     if (filters.jobType && filters.jobType !== "all") params.append("jobType", filters.jobType);
     if (filters.sortBy) params.append("sortBy", filters.sortBy);
     if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
+    if (filters.from) params.append("from", filters.from);
+    if (filters.to) params.append("to", filters.to);
 
     const response = await adminAxiosInstance.get(
       `/getJobs?${params.toString()}`
@@ -547,6 +556,8 @@ export const exportAllShopsXlsx = async (filters = {}) => {
     if (filters.listing && filters.listing !== "all") params.append("listing", filters.listing);
     if (filters.sortBy) params.append("sortBy", filters.sortBy);
     if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
+    if (filters.from) params.append("from", filters.from);
+    if (filters.to) params.append("to", filters.to);
 
     const response = await adminAxiosInstance.get(`/getShops/export?${params.toString()}`, {
       responseType: "blob",
@@ -559,10 +570,12 @@ export const exportAllShopsXlsx = async (filters = {}) => {
   }
 };
 
-export const exportAllEmployersXlsx = async (search = "") => {
+export const exportAllEmployersXlsx = async (search = "", filters = {}) => {
   try {
     const params = new URLSearchParams();
     if (search) params.append("search", search);
+    if (filters.from) params.append("from", filters.from);
+    if (filters.to) params.append("to", filters.to);
 
     const response = await adminAxiosInstance.get(`/getEmployers/export?${params.toString()}`, {
       responseType: "blob",
@@ -580,6 +593,8 @@ export const exportJobApplicationsXlsx = async (params = {}) => {
     const urlParams = new URLSearchParams();
     if (params.search) urlParams.append("search", params.search);
     if (params.jobId) urlParams.append("jobId", params.jobId);
+    if (params.from) urlParams.append("from", params.from);
+    if (params.to) urlParams.append("to", params.to);
 
     const response = await adminAxiosInstance.get(`/job-applications/export?${urlParams.toString()}`, {
       responseType: "blob",
@@ -601,6 +616,8 @@ export const exportAllJobsXlsx = async (filters = {}) => {
     if (filters.jobType && filters.jobType !== "all") params.append("jobType", filters.jobType);
     if (filters.sortBy) params.append("sortBy", filters.sortBy);
     if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
+    if (filters.from) params.append("from", filters.from);
+    if (filters.to) params.append("to", filters.to);
 
     const response = await adminAxiosInstance.get(`/getJobs/export?${params.toString()}`, {
       responseType: "blob",

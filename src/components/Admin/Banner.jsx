@@ -107,7 +107,7 @@ const deleteBanner = async (bannerId) => {
   }
 };
 
-const BannerManagement = () => {
+const BannerManagement = ({ placement = "hero" }) => {
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -121,7 +121,7 @@ const BannerManagement = () => {
 
   useEffect(() => {
     fetchBanners();
-  }, []);
+  }, [placement]);
 
   const fetchBanners = async () => {
     try {
@@ -129,15 +129,18 @@ const BannerManagement = () => {
       const response = await getBanners();
 
       if (response && response.data) {
-        // Map the backend data structure to our frontend structure
-        const mappedBanners = response.data.map((banner) => ({
-          id: banner._id,
-          fileName: banner.fileName,
-          imageUrl: banner.image || banner.url,
-          createdAt: banner.createdAt,
-          active: banner.active,
-          mediaType: banner.mediaType || "image",
-        }));
+        // Map the backend data structure to our frontend structure and filter by placement
+        const mappedBanners = response.data
+          .filter((banner) => (banner.placement || "hero") === placement)
+          .map((banner) => ({
+            id: banner._id,
+            fileName: banner.fileName,
+            imageUrl: banner.image || banner.url,
+            createdAt: banner.createdAt,
+            active: banner.active,
+            mediaType: banner.mediaType || "image",
+            placement: banner.placement || "hero",
+          }));
         setBanners(mappedBanners);
       }
     } catch (error) {
@@ -179,7 +182,7 @@ const BannerManagement = () => {
 
       const formData = new FormData();
       formData.append("banner", imageFile);
-      formData.append("placement", "hero");
+      formData.append("placement", placement);
       formData.append(
         "mediaType",
         imageFile.type.startsWith("video/") ? "video" : "image"
@@ -280,7 +283,9 @@ const BannerManagement = () => {
   return (
     <div className={`${ADMIN_PAGE} flex flex-col`}>
       <div className="flex items-center justify-between">
-        <h1 className={ADMIN_HEADER_TITLE}>Hero Banner Management</h1>
+        <h1 className={ADMIN_HEADER_TITLE}>
+          {placement === "ad" ? "Ad Banner Management" : "Hero Banner Management"}
+        </h1>
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
@@ -289,11 +294,13 @@ const BannerManagement = () => {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Add Hero Banner</DialogTitle>
+              <DialogTitle>
+                {placement === "ad" ? "Add Ad Banner" : "Add Hero Banner"}
+              </DialogTitle>
               <DialogDescription>
-                Upload an image or video for the homepage hero background.
-                Multiple active banners rotate automatically as a carousel behind
-                the hero title and CTAs. Use a full-bleed landscape image or short muted video.
+                {placement === "ad"
+                  ? "Upload an image or video for the promotional ad banner section. Multiple active banners rotate automatically as a carousel below the hero."
+                  : "Upload an image or video for the homepage hero background. Multiple active banners rotate automatically as a carousel behind the hero title and CTAs. Use a full-bleed landscape image or short muted video."}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddBanner}>
@@ -382,10 +389,11 @@ const BannerManagement = () => {
       {/* Banner List */}
       <Card>
         <CardHeader>
-          <CardTitle>Hero Banners</CardTitle>
+          <CardTitle>{placement === "ad" ? "Ad Banners" : "Hero Banners"}</CardTitle>
           <CardDescription>
-            Active banners rotate as the homepage hero background carousel.
-            Hero title, search CTAs, and register cards stay on top of the media.
+            {placement === "ad"
+              ? "Active promotional banners shown below the main hero section."
+              : "Active banners rotate as the homepage hero background carousel. Hero title, search CTAs, and register cards stay on top of the media."}
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -437,7 +437,7 @@ const Users = () => {
             type="date"
             value={filters.registeredFrom}
             onChange={(e) => updateFilter("registeredFrom", e.target.value)}
-            className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white"
+            className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white h-[34px]"
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -446,9 +446,30 @@ const Users = () => {
             type="date"
             value={filters.registeredTo}
             onChange={(e) => updateFilter("registeredTo", e.target.value)}
-            className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white"
+            className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white h-[34px]"
           />
         </div>
+        <button
+          type="button"
+          onClick={() => {
+            const todayStr = new Date().toLocaleDateString('en-CA');
+            setCurrentPage(1);
+            setFilters((prev) => ({ ...prev, registeredFrom: todayStr, registeredTo: todayStr }));
+          }}
+          className="text-xs font-semibold px-2.5 py-2 border border-slate-200 rounded-md hover:bg-slate-50 bg-white h-[34px]"
+        >
+          Today
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setCurrentPage(1);
+            setFilters((prev) => ({ ...prev, registeredFrom: "", registeredTo: "" }));
+          }}
+          className="text-xs font-semibold px-2.5 py-2 border border-slate-200 rounded-md hover:bg-slate-50 bg-white h-[34px]"
+        >
+          Reset
+        </button>
         <AdminFilterSelect
           label="Sort by"
           value={filters.sortBy}
