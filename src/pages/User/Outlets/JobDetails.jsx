@@ -6,7 +6,7 @@ import userAxiosInstance from '@/config/axiosConfig/userAxiosInstance';
 import { useSelector } from 'react-redux';
 import { formatDistanceToNow } from 'date-fns';
 import {
-  MapPin, Phone, Briefcase,
+  MapPin, Phone,
   CheckCircle2, ArrowLeft,
   ChevronRight, ExternalLink, Bookmark, ChevronDown, ChevronUp,
 } from 'lucide-react';
@@ -639,10 +639,6 @@ const JobDetails = () => {
           <motion.div variants={itemVariants} className="jd-li-main">
             {/* Header card */}
             <div className="jd-li-card">
-              <div className="jd-li-icon-box">
-                <Briefcase size={24} />
-              </div>
-
               <h1 className="jd-li-title">{job.name}</h1>
 
               <p className="jd-li-subline">
