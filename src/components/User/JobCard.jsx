@@ -109,7 +109,7 @@ const injectStyles = () => {
     }
     .ujc-row {
       display: grid;
-      grid-template-columns: minmax(88px, 38%) 1fr;
+      grid-template-columns: minmax(110px, 42%) 1fr;
       gap: 10px;
       align-items: baseline;
     }
@@ -202,27 +202,11 @@ const injectStyles = () => {
 
 injectStyles();
 
-function formatFoodAcco(job) {
-  const food = String(job?.foodAvailable || "").trim();
-  const room = String(job?.roomAvailable || "").trim();
-  const foodYes = /^yes$/i.test(food);
-  const roomYes = /^yes$/i.test(room);
-
-  if (foodYes || roomYes) {
-    const parts = [];
-    if (foodYes) parts.push("Food");
-    if (roomYes) parts.push("Acco");
-    return parts.join(" + ");
-  }
-
-  if (!food && !room) return "NO";
-  if (/^no$/i.test(food) && (!room || /^no$/i.test(room))) return "NO";
-  if (/^no$/i.test(room) && (!food || /^no$/i.test(food))) return "NO";
-
-  const bits = [];
-  if (food) bits.push(food);
-  if (room && room !== food) bits.push(room);
-  return bits.join(" / ") || "NO";
+function yesNo(value) {
+  const v = String(value || "").trim();
+  if (/^yes$/i.test(v)) return "Yes";
+  if (/^no$/i.test(v)) return "No";
+  return v || "No";
 }
 
 function displayJobId(job) {
@@ -233,14 +217,15 @@ function displayJobId(job) {
 
 /**
  * User-facing job card — title, location, job ID badge,
- * salary / experience / food & acco rows, Apply / Job Details footer.
+ * salary / experience / food / accommodation rows, Apply / Job Details footer.
  */
 const JobCard = ({ job }) => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.seekerInfo);
   const userName = [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
   const locationText = formatJobLocation(job) || "Location not specified";
-  const foodAcco = formatFoodAcco(job);
+  const foodText = yesNo(job?.foodAvailable);
+  const accommodationText = yesNo(job?.roomAvailable);
   const jobId = displayJobId(job);
   const salaryText = formatSalary(job) || "Not disclosed";
   const expText = formatExperience(job);
@@ -319,8 +304,12 @@ const JobCard = ({ job }) => {
             <span className="ujc-value">{experienceText}</span>
           </div>
           <div className="ujc-row">
-            <span className="ujc-label">Food &amp; Acco</span>
-            <span className="ujc-value">{foodAcco}</span>
+            <span className="ujc-label">Food</span>
+            <span className="ujc-value">{foodText}</span>
+          </div>
+          <div className="ujc-row">
+            <span className="ujc-label">Accommodation</span>
+            <span className="ujc-value">{accommodationText}</span>
           </div>
         </div>
 

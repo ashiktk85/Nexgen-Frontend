@@ -354,10 +354,37 @@ if (!document.getElementById('jd-li-styles')) {
       z-index: 100;
       background: #fff;
       border-top: 1px solid #e0e0e0;
-      padding: 12px 16px;
+      padding: 10px 14px;
       gap: 8px;
       align-items: center;
       box-shadow: 0 -2px 12px rgba(0,0,0,.08);
+    }
+    .jd-li-mobile-cta .jd-li-btn-icon,
+    .jd-li-mobile-cta > button.jd-share-match,
+    .jd-li-mobile-cta > .jd-li-share-slot > button {
+      width: 36px !important;
+      height: 36px !important;
+      min-width: 36px !important;
+      min-height: 36px !important;
+      padding: 0 !important;
+      border-radius: 10px !important;
+      justify-content: center;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+    .jd-li-mobile-cta .jd-li-btn-icon {
+      border-width: 2px;
+      font-size: 0;
+    }
+    .jd-li-mobile-cta .jd-li-btn-apply {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 48px;
+      padding: 0 18px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 12px;
+      justify-content: center;
     }
 
     @media (max-width: 900px) {
@@ -372,7 +399,7 @@ if (!document.getElementById('jd-li-styles')) {
     }
 
     @media (max-width: 640px) {
-      .jd-li-root { padding-bottom: 88px; }
+      .jd-li-root { padding-bottom: 80px; }
       .jd-li-hero { padding: 92px 0 48px; }
       .jd-li-title { font-size: 22px; }
       .jd-li-card { padding: 16px; }
@@ -380,7 +407,8 @@ if (!document.getElementById('jd-li-styles')) {
       .jd-li-desktop-actions { display: none !important; }
       .jd-li-mobile-cta { display: flex !important; }
       .jd-li-actions { flex-direction: column; align-items: stretch; }
-      .jd-li-btn-apply, .jd-li-btn-outline { width: 100%; justify-content: center; }
+      .jd-li-desktop-actions .jd-li-btn-apply,
+      .jd-li-desktop-actions .jd-li-btn-outline { width: 100%; justify-content: center; }
     }
   `;
   document.head.appendChild(s);
@@ -921,37 +949,37 @@ const JobDetails = () => {
       {/* Mobile sticky CTA */}
       {!loading && (
       <div className="jd-li-mobile-cta">
-        <JobShareButton
-          job={{ ...job, jobTitle: job.name, companyName: displayCompany }}
-          jobId={id}
-          compact
-          iconOnly
-        />
+        <div className="jd-li-share-slot">
+          <JobShareButton
+            job={{ ...job, jobTitle: job.name, companyName: displayCompany }}
+            jobId={id}
+            compact
+            iconOnly
+          />
+        </div>
         <button
           type="button"
-          className="jd-li-btn-outline"
-          style={{ minWidth: 44, padding: '0 12px' }}
+          className="jd-li-btn-outline jd-li-btn-icon"
           onClick={handleToggleSave}
           disabled={savingJob}
           aria-label={saved ? 'Unsave job' : 'Save job'}
           aria-pressed={saved}
         >
-          <Bookmark size={18} fill={saved ? 'currentColor' : 'none'} />
+          <Bookmark size={15} fill={saved ? 'currentColor' : 'none'} />
         </button>
         <button
           type="button"
           className="jd-li-btn-apply"
-          style={{ flex: 1, justifyContent: 'center' }}
           onClick={!job.applied ? handleApplyJob : undefined}
           disabled={job.applied}
         >
           {job.applied ? (
             <>
-              <CheckCircle2 size={16} /> Applied
+              <CheckCircle2 size={18} /> Applied
             </>
           ) : (
             <>
-              Apply <ChevronRight size={16} />
+              Apply <ChevronRight size={18} />
             </>
           )}
         </button>
