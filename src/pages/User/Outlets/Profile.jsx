@@ -21,12 +21,14 @@ import { Label } from "@/components/ui/label";
 import {
   Edit, Plus, FileText, Trash2, Check, X,
   User, GraduationCap, Briefcase, MapPin,
-  Phone, Mail, Calendar, Camera, Upload,
+  Phone, Mail, Calendar, Camera, Upload, Bookmark,
 } from "lucide-react";
 import userAxiosInstance from "../../../config/axiosConfig/userAxiosInstance";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { JOB_CATEGORIES } from "@/constants/options";
+import JobCard from "@/components/User/JobCard";
+import { useNavigate } from "react-router-dom";
 
 function getResumeCount(resume) {
   const list = Array.isArray(resume) ? resume.filter(Boolean) : resume ? [resume] : [];
@@ -435,7 +437,10 @@ export default function ProfilePage() {
   const [currentExperience, setCurrentExperience] = useState(null);
   const [educationIndex, setEducationIndex] = useState(null);
   const [experienceIndex, setExperienceIndex] = useState(null);
+  const [savedJobs, setSavedJobs] = useState([]);
+  const [savedJobsLoading, setSavedJobsLoading] = useState(false);
   const userId = useSelector((state) => state.user.seekerInfo.userId);
+  const navigate = useNavigate();
 
   const fetchUserData = async () => {
     try {
@@ -446,6 +451,34 @@ export default function ProfilePage() {
     finally { setLoading(false); }
   };
   useEffect(() => { fetchUserData(); }, [userId]);
+
+  const fetchSavedJobs = async () => {
+    if (!userId) return;
+    try {
+      setSavedJobsLoading(true);
+      const res = await userAxiosInstance.get(`/saved-jobs/${userId}`);
+      setSavedJobs(res.data?.jobs || []);
+    } catch {
+      toast.error("Failed to load saved jobs");
+      setSavedJobs([]);
+    } finally {
+      setSavedJobsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "saved" && userId) fetchSavedJobs();
+  }, [activeTab, userId]);
+
+  const handleUnsaveJob = async (jobId) => {
+    try {
+      await userAxiosInstance.delete(`/saved-jobs/${userId}/${jobId}`);
+      setSavedJobs((prev) => prev.filter((j) => j._id !== jobId));
+      toast.success("Removed from saved jobs");
+    } catch {
+      toast.error("Could not remove saved job");
+    }
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -578,6 +611,7 @@ export default function ProfilePage() {
 
   const TABS = [
     { value: "about", label: "About", icon: <User size={13} /> },
+    { value: "saved", label: "Saved Jobs", icon: <Bookmark size={13} /> },
     { value: "resume", label: "Resume", icon: <FileText size={13} /> },
     { value: "education", label: "Education", icon: <GraduationCap size={13} /> },
     { value: "experience", label: "Experience", icon: <Briefcase size={13} /> },
@@ -671,7 +705,8 @@ export default function ProfilePage() {
                 {/* Quick stats */}
                 <div className="pp-header-stats" style={{ display: "flex", gap: 12, paddingBottom: 4, flexWrap: "wrap" }}>
                   {[
-                    { label: "Education", val: user.education?.length || 0, color: "#6366f1" },
+                    { label: "Saved", val: user.savedJobs?.length || savedJobs.length || 0, color: "#0058be" },
+                    { label: "Education", val: user.education?.length || 0, color: "#0058be" },
                     { label: "Experience", val: user.experience?.length || 0, color: "#16a34a" },
                     { label: "Resumes", val: getResumeCount(user.resume), color: "#f59e0b" },
                   ].map(({ label, val, color }) => (
@@ -734,6 +769,72 @@ export default function ProfilePage() {
                         ))}
                       </div>
                     </TabsContent>
+
+                      {/* ── SAVED JOBS ── */}
+                      <TabsContent value="saved" className="mt-0">
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, gap: 12, flexWrap: "wrap" }}>
+                          <SectionHeader title="Saved Jobs" />
+                          <button
+                            type="button"
+                            className="pp-btn pp-btn-outline"
+                            style={{ fontSize: 12 }}
+                            onClick={() => navigate("/all-jobs")}
+                          >
+                            Browse Jobs
+                          </button>
+                        </div>
+                        {savedJobsLoading ? (
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 12 }}>
+                            {[1, 2, 3].map((i) => (
+                              <div key={i} style={{ height: 220, borderRadius: 12, background: "#f1f5f9", animation: "pulse 1.2s ease-in-out infinite" }} />
+                            ))}
+                          </div>
+                        ) : savedJobs.length > 0 ? (
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 12 }}>
+                            {savedJobs.map((job) => (
+                              <div key={job._id} style={{ position: "relative" }}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleUnsaveJob(job._id);
+                                  }}
+                                  title="Remove from saved"
+                                  aria-label="Remove from saved"
+                                  style={{
+                                    position: "absolute",
+                                    top: 10,
+                                    left: 10,
+                                    zIndex: 3,
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 8,
+                                    border: "1.5px solid #fecaca",
+                                    background: "#fff",
+                                    color: "#ef4444",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                                <JobCard job={job} />
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="pp-empty">
+                            <Bookmark size={40} style={{ color: "#bfdbfe", margin: "0 auto 12px" }} />
+                            <p style={{ fontSize: 15, fontWeight: 600, color: "#1e293b", margin: "0 0 6px" }}>No saved jobs yet</p>
+                            <p style={{ fontSize: 13, color: "#94a3b8", margin: "0 0 18px" }}>Tap Save on a job details page to bookmark it here</p>
+                            <button type="button" className="pp-btn pp-btn-primary" onClick={() => navigate("/all-jobs")}>
+                              Browse Jobs
+                            </button>
+                          </div>
+                        )}
+                      </TabsContent>
 
                       {/* ── RESUME ── */}
                       <TabsContent value="resume" className="mt-0">

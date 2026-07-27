@@ -5,7 +5,7 @@ import { buildWhatsAppHref } from "@/utils/phone";
 
 /**
  * Opens WhatsApp chat with the shop owner / job contact phone.
- * Hidden / locked until the seeker is registered and logged in.
+ * Locked until the seeker is registered and logged in.
  */
 export default function JobWhatsAppButton({
   phone,
@@ -17,7 +17,7 @@ export default function JobWhatsAppButton({
   contactLocked = false,
 }) {
   const user = useSelector((state) => state.user.seekerInfo);
-  const isLoggedIn = Boolean(user?.userId);
+  const isLoggedIn = Boolean(user?.userId || user?.id || user?._id);
 
   const href = useMemo(() => {
     const text = [

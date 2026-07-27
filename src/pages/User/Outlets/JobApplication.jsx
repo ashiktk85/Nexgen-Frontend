@@ -123,7 +123,7 @@ const FL = ({ children, required }) => (
 const JobApplication = () => {
   const { id: jobId } = useParams();
   const location = useLocation();
-  const { jobTitle, companyName, phone, companyLocation, employerId } = location.state || {};
+  const { jobTitle, companyName, companyLocation, employerId, userName } = location.state || {};
   const navigate = useNavigate();
   const userData = useSelector((state) => state.user.seekerInfo || {});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -172,9 +172,12 @@ const JobApplication = () => {
     applyCheck();
   }, [jobId, userData?.userId, navigate]);
 
+  const defaultUserFullName = `${userData.firstName || ""} ${userData.lastName || ""}`.trim();
+  const initialName = (userName || defaultUserFullName).trim();
+
   const formik = useFormik({
     initialValues: {
-      name: `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
+      name: initialName,
       email: userData.email || "",
       phone: userData.phone || "",
       countryCode: "+91",
@@ -186,6 +189,7 @@ const JobApplication = () => {
       coverLetter: "",
       employerId,
     },
+    enableReinitialize: true,
     validate: (values) => {
       const errors = {};
       if (!values.name) errors.name = "Name is required";

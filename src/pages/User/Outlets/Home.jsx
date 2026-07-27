@@ -258,7 +258,7 @@ function AdBackgroundCarousel({ slides, reduceMotion }) {
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent flex items-end p-4 sm:p-6">
               <div className="text-white drop-shadow-md">
-                <span className="bg-indigo-600/95 text-[10px] font-bold tracking-widest uppercase px-2.5 py-0.5 rounded text-white shadow-sm">
+                <span className="bg-[#0058be]/95 text-[10px] font-bold tracking-widest uppercase px-2.5 py-0.5 rounded text-white shadow-sm">
                   Sponsored Ad
                 </span>
               </div>
@@ -368,9 +368,9 @@ export default function Home() {
   }, []);
 
   const JobsSkeleton = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="h-72 rounded-2xl bg-white border border-[#E2E8F0] animate-pulse" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {Array.from({ length: 9 }).map((_, i) => (
+        <div key={i} className="h-64 rounded-xl bg-white border border-[#E2E8F0] animate-pulse" />
       ))}
     </div>
   );
@@ -514,26 +514,26 @@ export default function Home() {
         )}
 
         {/* Featured Jobs */}
-        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#f1f3ff] overflow-x-hidden w-full">
-          <div className="max-w-[1280px] mx-auto">
+        <section className="py-8 md:py-10 px-3 sm:px-4 lg:px-3 bg-[#eef5fc] overflow-x-hidden w-full">
+          <div className="max-w-[1440px] mx-auto">
             <motion.div
-              className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6"
+              className="flex flex-col md:flex-row justify-between items-end mb-6 gap-3"
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
               variants={fadeUp}
             >
               <div>
-                <h2 className="text-2xl sm:text-3xl font-semibold text-[#141b2b] mb-2">
+                <h2 className="text-2xl sm:text-3xl font-semibold text-[#141b2b] mb-1">
                   Featured Mobile Repair &amp; Service Jobs in Kerala
                 </h2>
-                <p className="text-[#424752] max-w-xl">
+                <p className="text-[#424752] max-w-xl text-sm sm:text-base">
                   Discover chip-level, Android, iPhone, and management roles perfectly matched to your skills
                 </p>
               </div>
               <Link
                 to="/all-jobs"
-                className="text-[#003f87] font-semibold flex items-center gap-2 group hover:gap-4 transition-all whitespace-nowrap"
+                className="text-[#003f87] font-semibold flex items-center gap-2 group hover:gap-4 transition-all whitespace-nowrap text-sm"
               >
                 View All Jobs <ArrowForward fontSize="small" />
               </Link>
@@ -548,10 +548,9 @@ export default function Home() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={viewportOnce}
-                  className="grid gap-5 w-full min-w-0"
-                  style={{ gridTemplateColumns: "repeat(auto-fill, minmax(min(300px, 100%), 1fr))" }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full min-w-0"
                 >
-                  {jobs.slice(0, 8).map((job, index) => (
+                  {jobs.slice(0, 9).map((job, index) => (
                     <motion.div key={job._id} variants={fadeUp} className="min-w-0 h-full">
                       <FeaturedJobCard job={job} index={index} compact />
                     </motion.div>
@@ -559,7 +558,7 @@ export default function Home() {
                 </motion.div>
 
                 <motion.div
-                  className="flex justify-center mt-10 sm:mt-12"
+                  className="flex justify-center mt-6 sm:mt-8"
                   initial="hidden"
                   whileInView="visible"
                   viewport={viewportOnce}

@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import StatCard from "@/components/ui/StatCard";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Briefcase, CheckCircle2, ListChecks, XCircle, Plus, Download } from "lucide-react";
+import { Briefcase, CheckCircle2, ListChecks, XCircle, Plus, Download, Clock, CalendarX } from "lucide-react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 import ConfirmModal from "@/components/Admin/ConfirmModal";
 import { AdminFilterBar, AdminFilterSelect } from "@/components/Admin/AdminListFilters";
-import { getAllJobs, jobListUnList, deleteJobAdmin, exportAllJobsXlsx } from "@/apiServices/adminApi";
+import { getAllJobs, jobListUnList, deleteJobAdmin, exportAllJobsXlsx, updateJobExpiry } from "@/apiServices/adminApi";
 import { toast } from "sonner";
 import moment from "moment";
 import { formatSalary } from "@/utils/formatSalary";
@@ -51,6 +51,9 @@ const Jobs = () => {
   const [pendingId, setPendingId] = useState(null);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  // Expiry management state
+  const [expiryInput, setExpiryInput] = useState("");
+  const [expiryLoading, setExpiryLoading] = useState(false);
   const rowsPerPage = 20;
 
   useEffect(() => {
@@ -145,12 +148,36 @@ const Jobs = () => {
     }
   };
 
+  const now = new Date();
   const totalJobs = jobs.length;
   const listedJobs = jobs.filter((j) => !j.isBlocked).length;
   const unlistedJobs = jobs.filter((j) => j.isBlocked).length;
   const openJobs = jobs.filter((j) => j.status === "open").length;
+  const expiredJobs = jobs.filter((j) => j.expiresAt && new Date(j.expiresAt) <= now).length;
   const pendingJob = jobs.find((j) => j._id === pendingId);
   const pendingDeleteJob = jobs.find((j) => j._id === pendingDeleteId);
+
+  /** Admin Expiry Control — update expiresAt for a job */
+  const handleUpdateExpiry = async (jobId, expiresAt) => {
+    setExpiryLoading(true);
+    try {
+      const result = await updateJobExpiry(jobId, expiresAt);
+      if (result?.data?.response) {
+        const updated = result.data.response;
+        setJobs((prev) =>
+          prev.map((item) => (item._id === jobId ? { ...item, ...updated } : item))
+        );
+        setSelectedJob((prev) => (prev?._id === jobId ? { ...prev, ...updated } : prev));
+        toast.success(expiresAt ? "Job expiry set successfully" : "Job expiry removed");
+        setExpiryInput("");
+      }
+    } catch {
+      /* error toasted inside API */
+    } finally {
+      setExpiryLoading(false);
+    }
+  };
+
   const handleEdit = (row) => {
     setEditingJob(row);
     setOpenEditSheet(true);
@@ -182,6 +209,25 @@ const Jobs = () => {
       header: "Posted on",
       accessor: (row) =>
         row.createdAt ? moment(row.createdAt).format("DD/MM/YYYY") : "—",
+    },
+    {
+      id: "expiresAt",
+      header: "Expires",
+      accessor: (row) => row.expiresAt || "—",
+      cell: (row) => {
+        if (!row.expiresAt) return <span className="text-[10px] text-slate-400">No expiry</span>;
+        const isExpired = new Date(row.expiresAt) <= new Date();
+        return (
+          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${
+            isExpired
+              ? "bg-red-100 text-red-700 border-red-200"
+              : "bg-amber-50 text-amber-700 border-amber-200"
+          }`}>
+            <CalendarX className="w-2.5 h-2.5" />
+            {moment(row.expiresAt).format("DD/MM/YY")}
+          </span>
+        );
+      },
     },
     {
       id: "listing",
@@ -271,6 +317,13 @@ const Jobs = () => {
             label="Unlisted"
             gradient="linear-gradient(135deg,#b91c1c 0%,#ef4444 55%,#f97373 100%)"
             shadow="0 8px 24px rgba(239,68,68,.32)"
+          />
+          <StatCard
+            icon={<CalendarX size={20} color="#fff" />}
+            value={expiredJobs}
+            label="Expired"
+            gradient="linear-gradient(135deg,#78350f 0%,#d97706 55%,#fbbf24 100%)"
+            shadow="0 8px 24px rgba(217,119,6,.32)"
           />
         </div>
 
@@ -543,7 +596,60 @@ const Jobs = () => {
                       {selectedJob.isBlocked ? "Unlisted" : "Listed"}
                     </p>
                   </div>
+                  <div>
+                    <p className="text-[11px] font-medium text-slate-500 uppercase">Expires At</p>
+                    <p className={`text-xs font-semibold ${
+                      !selectedJob.expiresAt
+                        ? "text-slate-400"
+                        : new Date(selectedJob.expiresAt) <= new Date()
+                          ? "text-red-600"
+                          : "text-amber-600"
+                    }`}>
+                      {selectedJob.expiresAt
+                        ? new Date(selectedJob.expiresAt).toLocaleString()
+                        : "No expiry"}
+                    </p>
+                  </div>
                 </div>
+                {/* ── Admin Job Expiry Control ── */}
+                <div className="px-3 pb-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2">Expiry Control</p>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="datetime-local"
+                      value={expiryInput}
+                      onChange={(e) => setExpiryInput(e.target.value)}
+                      className="flex-1 text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                    />
+                    <button
+                      type="button"
+                      disabled={!expiryInput || expiryLoading}
+                      onClick={() => handleUpdateExpiry(selectedJob._id, expiryInput)}
+                      className="px-3 py-1.5 rounded-md text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                    >
+                      Set
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      disabled={expiryLoading}
+                      onClick={() => handleUpdateExpiry(selectedJob._id, new Date().toISOString())}
+                      className="flex-1 px-2 py-1.5 rounded-md text-[11px] font-semibold bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 transition-colors border border-red-200"
+                    >
+                      Expire Now
+                    </button>
+                    <button
+                      type="button"
+                      disabled={expiryLoading || !selectedJob.expiresAt}
+                      onClick={() => handleUpdateExpiry(selectedJob._id, null)}
+                      className="flex-1 px-2 py-1.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-40 transition-colors border border-slate-200"
+                    >
+                      Remove Expiry
+                    </button>
+                  </div>
+                </div>
+
                 <div className="px-3 pb-3 space-y-2">
                   <button
                     type="button"

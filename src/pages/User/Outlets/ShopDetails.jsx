@@ -43,7 +43,7 @@ const ShopDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const user = useSelector((state) => state.user.seekerInfo);
-    const isLoggedIn = Boolean(user?.userId);
+    const isLoggedIn = Boolean(user?.userId || user?.id || user?._id);
     const [shop, setShop] = useState(null);
     const [employer, setEmployer] = useState(null);
     const [loading, setLoading] = useState(true);

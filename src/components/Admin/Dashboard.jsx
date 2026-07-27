@@ -22,10 +22,14 @@ import {
   GraduationCap,
   Globe,
   Save,
+  Download,
+  UserCheck,
+  CalendarX,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getDashboardStats } from "@/apiServices/dashboardApi";
-import { getPlatformSettings, updatePlatformSettings } from "@/apiServices/adminApi";
+import { getPlatformSettings, updatePlatformSettings, exportReport } from "@/apiServices/adminApi";
 import StatCard from "@/components/ui/StatCard";
 import { ReportsSection } from "@/components/Admin/Reports";
 import { ADMIN_PAGE, ADMIN_HEADER_TITLE } from "@/components/Admin/adminPageLayout";
@@ -154,6 +158,26 @@ const Dashboard = () => {
   const [savedDelayMinutes, setSavedDelayMinutes] = useState(60);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [exportingReport, setExportingReport] = useState(false);
+
+  const handleDownloadReport = async (segment) => {
+    setExportingReport(true);
+    try {
+      const res = await exportReport({ segment, format: "xlsx" });
+      if (!res?.data) return;
+      const url = URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `techpath-${segment}-${Date.now()}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success(`${segment} report downloaded`);
+    } catch {
+      toast.error("Failed to download report");
+    } finally {
+      setExportingReport(false);
+    }
+  };
 
   const fetchSettings = async () => {
     setSettingsLoading(true);
@@ -296,6 +320,105 @@ const Dashboard = () => {
               />
             </>
           )}
+        </div>
+
+        {/* ── Website Analytics — extended stat section ── */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-4 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Website Analytics</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Registrations, technicians, and job status overview</p>
+            </div>
+            {/* Quick download buttons */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                disabled={exportingReport}
+                onClick={() => handleDownloadReport("users")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download Users
+              </button>
+              <button
+                type="button"
+                disabled={exportingReport}
+                onClick={() => handleDownloadReport("jobs")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download Jobs
+              </button>
+            </div>
+          </div>
+
+          <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {loading ? (
+              [...Array(6)].map((_, i) => <Skeleton key={i} className="h-24" />)
+            ) : (
+              <>
+                <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-3 flex flex-col gap-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
+                      <Users className="w-3.5 h-3.5 text-indigo-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-extrabold text-indigo-700 leading-none">{fmt(data.stats.todayRegistrations ?? 0)}</p>
+                  <p className="text-[10px] font-semibold text-indigo-500 uppercase tracking-wide">Today's Reg.</p>
+                </div>
+
+                <div className="rounded-xl border border-violet-100 bg-violet-50 p-3 flex flex-col gap-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
+                      <Activity className="w-3.5 h-3.5 text-violet-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-extrabold text-violet-700 leading-none">{fmt(data.stats.weekRegistrations ?? 0)}</p>
+                  <p className="text-[10px] font-semibold text-violet-500 uppercase tracking-wide">This Week Reg.</p>
+                </div>
+
+                <div className="rounded-xl border border-sky-100 bg-sky-50 p-3 flex flex-col gap-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-7 h-7 rounded-lg bg-sky-100 flex items-center justify-center">
+                      <GraduationCap className="w-3.5 h-3.5 text-sky-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-extrabold text-sky-700 leading-none">{fmt(data.stats.technicianCount ?? 0)}</p>
+                  <p className="text-[10px] font-semibold text-sky-500 uppercase tracking-wide">Technicians</p>
+                </div>
+
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-3 flex flex-col gap-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <Building2 className="w-3.5 h-3.5 text-emerald-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-extrabold text-emerald-700 leading-none">{fmt(data.stats.totalEmployers ?? 0)}</p>
+                  <p className="text-[10px] font-semibold text-emerald-500 uppercase tracking-wide">Employers</p>
+                </div>
+
+                <div className="rounded-xl border border-teal-100 bg-teal-50 p-3 flex flex-col gap-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-7 h-7 rounded-lg bg-teal-100 flex items-center justify-center">
+                      <Briefcase className="w-3.5 h-3.5 text-teal-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-extrabold text-teal-700 leading-none">{fmt(data.stats.activeJobsCount ?? 0)}</p>
+                  <p className="text-[10px] font-semibold text-teal-500 uppercase tracking-wide">Active Jobs</p>
+                </div>
+
+                <div className="rounded-xl border border-rose-100 bg-rose-50 p-3 flex flex-col gap-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center">
+                      <CalendarX className="w-3.5 h-3.5 text-rose-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-extrabold text-rose-700 leading-none">{fmt(data.stats.expiredJobsCount ?? 0)}</p>
+                  <p className="text-[10px] font-semibold text-rose-500 uppercase tracking-wide">Expired Jobs</p>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* ── reports & downloads ── */}

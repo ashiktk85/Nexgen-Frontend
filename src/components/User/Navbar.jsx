@@ -31,10 +31,10 @@ const globalStyle = `
   }
   .nav-link:hover { background: rgba(255,255,255,0.12); }
   .nav-link.on-hero:hover { background: rgba(255,255,255,0.12); }
-  .nav-link.on-white:hover { background: #f1f5f9; color: #4f46e5 !important; }
+  .nav-link.on-white:hover { background: #f1f5f9; color: #0058be !important; }
   .nav-link.active-light {
-    background: #eef2ff;
-    color: #4f46e5 !important;
+    background: #eef5fc;
+    color: #0058be !important;
     font-weight: 600;
   }
 
@@ -78,8 +78,8 @@ const globalStyle = `
     border: 1px solid transparent;
   }
   .notif-item:hover { background: #f8fafc; border-color: #e2e8f0; }
-  .notif-item.unread { background: #eef2ff; border-color: #e0e7ff; }
-  .notif-item.unread:hover { background: #e0e7ff; }
+  .notif-item.unread { background: #eef5fc; border-color: #d4e6f7; }
+  .notif-item.unread:hover { background: #d4e6f7; }
 
   .mobile-link {
     display: flex;
@@ -93,7 +93,7 @@ const globalStyle = `
     transition: all 0.15s;
     color: #1e293b;
   }
-  .mobile-link:hover { background: #f1f5f9; color: #4f46e5; }
+  .mobile-link:hover { background: #f1f5f9; color: #0058be; }
   .mobile-link.mobile-logout:hover { background: #fef2f2; color: #ef4444; }
 
   @keyframes slideDown {
@@ -320,7 +320,7 @@ const Navbar = () => {
               <span
                 key={path}
                 className={`nav-link ${solidNav ? "on-white" : "on-hero"} ${solidNav && isActive(path) ? "active-light" : ""}`}
-                style={{ color: isActive(path) && solidNav ? "#4f46e5" : !solidNav && isActive(path) ? "#ffffff" : linkColor }}
+                style={{ color: isActive(path) && solidNav ? "#0058be" : !solidNav && isActive(path) ? "#ffffff" : linkColor }}
                 onClick={() => navigate(path)}
               >
                 {icon}
@@ -446,7 +446,7 @@ const Navbar = () => {
               background: "#fff",
               borderRadius: 16,
               boxShadow: "0 12px 48px rgba(0,0,0,0.14)",
-              border: "1.5px solid #e0e7ff",
+              border: "1.5px solid #d4e6f7",
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
@@ -461,7 +461,7 @@ const Navbar = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                background: "linear-gradient(135deg, #312e81, #4f46e5)",
+                background: "linear-gradient(135deg, #003f87, #0058be)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -539,7 +539,7 @@ const Navbar = () => {
                         width: 8,
                         height: 8,
                         borderRadius: "50%",
-                        background: n.read ? "#cbd5e1" : "#6366f1",
+                        background: n.read ? "#cbd5e1" : "#0058be",
                         flexShrink: 0,
                         marginTop: 5,
                       }}
@@ -644,7 +644,7 @@ const Navbar = () => {
               <div
                 key={path}
                 className="mobile-link"
-                style={isActive(path) ? { background: "#eef2ff", color: "#4f46e5" } : {}}
+                style={isActive(path) ? { background: "#eef5fc", color: "#0058be" } : {}}
                 onClick={() => { setMobileMenuOpen(false); navigate(path); }}
               >
                 {icon}

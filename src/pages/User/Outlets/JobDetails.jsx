@@ -32,7 +32,7 @@ if (!document.getElementById('jd-li-styles')) {
     }
 
     .jd-li-hero {
-      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+      background: linear-gradient(135deg, #002d61 0%, #0058be 55%, #2170e4 100%);
       padding: 110px 0 72px;
       position: relative;
       overflow: hidden;
@@ -316,26 +316,6 @@ if (!document.getElementById('jd-li-styles')) {
       color: rgba(0,0,0,.9);
       margin: 0;
     }
-
-    .jd-li-company-row {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      margin-bottom: 12px;
-    }
-    .jd-li-company-logo {
-      width: 48px;
-      height: 48px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      font-weight: 800;
-      color: #fff;
-      flex-shrink: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
     .jd-li-company-name {
       font-size: 16px;
       font-weight: 600;
@@ -406,16 +386,6 @@ if (!document.getElementById('jd-li-styles')) {
   document.head.appendChild(s);
 }
 
-const getGrad = (ch = 'A') => {
-  const gs = [
-    'linear-gradient(135deg,#0a66c2,#378fe9)',
-    'linear-gradient(135deg,#057642,#10b981)',
-    'linear-gradient(135deg,#915907,#f59e0b)',
-    'linear-gradient(135deg,#5f3dc4,#818cf8)',
-  ];
-  return gs[((ch.toUpperCase().charCodeAt(0) - 65) % gs.length + gs.length) % gs.length];
-};
-
 const DESC_PREVIEW_LEN = 380;
 
 const containerVariants = {
@@ -482,9 +452,13 @@ const JobDetails = () => {
   const [shopName, setShopName] = useState('');
   const [descExpanded, setDescExpanded] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [savingJob, setSavingJob] = useState(false);
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
   const user = useSelector((state) => state.user.seekerInfo);
+  const userId = user?.userId || user?.id || user?._id;
+  const isLoggedIn = Boolean(userId);
+  const userName = [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -493,11 +467,13 @@ const JobDetails = () => {
       setCompany(null);
       setShopName('');
       try {
+        const seekerId = user?.userId || user?.id || user?._id;
         const { data } = await userAxiosInstance.get(`/job-details/${id}`, {
-          params: { userId: user?.userId },
+          params: seekerId ? { userId: seekerId } : {},
         });
         setJob(data.jobDetails);
         setCompany(data.employerDetails);
+        setSaved(Boolean(data.jobDetails?.saved));
 
         if (data.jobDetails.companyId) {
           try {
@@ -517,18 +493,45 @@ const JobDetails = () => {
       }
     };
     fetchData();
-  }, [id, navigate, user?.userId]);
+  }, [id, navigate, user?.userId, user?.id, user?._id]);
 
   const handleApplyJob = () => {
     navigate(`/job-application/${id}`, {
       state: {
         jobTitle: job?.name,
         companyName: company?.name,
-        phone: job?.phone,
         companyLocation: `${job?.state}, ${job?.city}`,
         employerId: company?.employerId,
+        userName,
       },
     });
+  };
+
+  const handleToggleSave = async () => {
+    if (!isLoggedIn) {
+      toast.info("Please log in to save jobs");
+      navigate("/login", { state: { from: `/job-details/${id}` } });
+      return;
+    }
+    if (savingJob) return;
+
+    const next = !saved;
+    setSaved(next);
+    setSavingJob(true);
+    try {
+      if (next) {
+        await userAxiosInstance.post(`/saved-jobs/${userId}/${id}`);
+        toast.success("Job saved — view it in your Profile");
+      } else {
+        await userAxiosInstance.delete(`/saved-jobs/${userId}/${id}`);
+        toast.success("Removed from saved jobs");
+      }
+    } catch (error) {
+      setSaved(!next);
+      toast.error(error?.response?.data?.message || "Could not update saved job");
+    } finally {
+      setSavingJob(false);
+    }
   };
 
   const displayCompany = shopName || company?.name;
@@ -656,10 +659,12 @@ const JobDetails = () => {
                 <button
                   type="button"
                   className="jd-li-btn-outline"
-                  onClick={() => setSaved((s) => !s)}
+                  onClick={handleToggleSave}
+                  disabled={savingJob}
+                  aria-pressed={saved}
                 >
                   <Bookmark size={16} fill={saved ? 'currentColor' : 'none'} />
-                  {saved ? 'Saved' : 'Save'}
+                  {savingJob ? 'Saving…' : saved ? 'Saved' : 'Save'}
                 </button>
                 <JobShareButton
                   job={{ ...job, jobTitle: job.name, companyName: displayCompany }}
@@ -807,14 +812,14 @@ const JobDetails = () => {
               </div>
             )}
 
-            {/* Contact phone + WhatsApp — gated until seeker registers */}
+            {/* Contact phone + WhatsApp — gated until seeker is logged in */}
             <div className="jd-li-card">
               <h2 className="jd-li-section-title">Contact</h2>
-              {user?.userId && job.phone && buildTelHref(job.phone, job.countryCode) ? (
+              {isLoggedIn && job.phone && buildTelHref(job.phone, job.countryCode) ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
                   <a
                     href={buildTelHref(job.phone, job.countryCode)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#0a66c2', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#0058be', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}
                   >
                     <Phone size={16} />
                     {formatPhoneDisplay(job.phone, job.countryCode)}
@@ -827,6 +832,10 @@ const JobDetails = () => {
                     size={38}
                   />
                 </div>
+              ) : isLoggedIn ? (
+                <p style={{ margin: 0, fontSize: 14, color: '#64748b', lineHeight: 1.5 }}>
+                  Employer contact is not available for this listing.
+                </p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <p style={{ margin: 0, fontSize: 14, color: '#475569', lineHeight: 1.5 }}>
@@ -834,23 +843,21 @@ const JobDetails = () => {
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
                     <JobWhatsAppButton
-                      phone={job.phone}
+                      phone={null}
                       countryCode={job.countryCode}
                       jobTitle={job.name}
                       companyName={displayCompany}
                       size={38}
-                      contactLocked={!user?.userId}
+                      contactLocked
                     />
-                    {!user?.userId && (
-                      <button
-                        type="button"
-                        className="jd-li-btn-outline"
-                        style={{ fontSize: 13, padding: '8px 14px' }}
-                        onClick={() => navigate('/register')}
-                      >
-                        Register to view WhatsApp
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      className="jd-li-btn-outline"
+                      style={{ fontSize: 13, padding: '8px 14px' }}
+                      onClick={() => navigate('/register')}
+                    >
+                      Register to view WhatsApp
+                    </button>
                   </div>
                 </div>
               )}
@@ -864,22 +871,12 @@ const JobDetails = () => {
                 <h3>About the company</h3>
               </div>
 
-              <div className="jd-li-company-row">
-                <div
-                  className="jd-li-company-logo"
-                  style={{ background: getGrad(companyInitial) }}
-                >
-                  {companyInitial}
-                </div>
-                <div>
-                  <p className="jd-li-company-name">{displayCompany}</p>
-                  <p className="jd-li-company-meta">
-                    Mobile Repair &amp; Service
-                    <br />
-                    {locationLine}
-                  </p>
-                </div>
-              </div>
+              <p className="jd-li-company-name" style={{ marginBottom: 4 }}>{displayCompany}</p>
+              <p className="jd-li-company-meta" style={{ marginBottom: 12 }}>
+                Mobile Repair &amp; Service
+                <br />
+                {locationLine}
+              </p>
 
               <p className="jd-li-company-bio">
                 {displayCompany} is hiring for this role in {job.city || 'your area'}.
@@ -888,20 +885,20 @@ const JobDetails = () => {
                   : ''}
               </p>
 
-              {user?.userId && company.phone && buildTelHref(company.phone, job.countryCode) && (
+              {isLoggedIn && company.phone && buildTelHref(company.phone, job.countryCode) && (
                 <p className="jd-li-company-meta" style={{ marginBottom: 12 }}>
                   <Phone size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
                   <a
                     href={buildTelHref(company.phone, job.countryCode)}
-                    style={{ color: '#0a66c2', textDecoration: 'none', fontWeight: 600 }}
+                    style={{ color: '#0058be', textDecoration: 'none', fontWeight: 600 }}
                   >
                     {formatPhoneDisplay(company.phone, job.countryCode)}
                   </a>
                 </p>
               )}
-              {!user?.userId && (
+              {!isLoggedIn && (
                 <p className="jd-li-company-meta" style={{ marginBottom: 12, color: '#64748b' }}>
-                  You must register first to view the employer&apos;s WhatsApp number.
+                  Register to view full employer contact details.
                 </p>
               )}
 
@@ -930,6 +927,17 @@ const JobDetails = () => {
           compact
           iconOnly
         />
+        <button
+          type="button"
+          className="jd-li-btn-outline"
+          style={{ minWidth: 44, padding: '0 12px' }}
+          onClick={handleToggleSave}
+          disabled={savingJob}
+          aria-label={saved ? 'Unsave job' : 'Save job'}
+          aria-pressed={saved}
+        >
+          <Bookmark size={18} fill={saved ? 'currentColor' : 'none'} />
+        </button>
         <button
           type="button"
           className="jd-li-btn-apply"

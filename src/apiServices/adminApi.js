@@ -471,6 +471,21 @@ export const updateJobPostAdmin = async (jobId, data) => {
   }
 };
 
+/**
+ * Admin Job Expiry Control — set or clear the expiresAt date for any job.
+ * @param {string} jobId
+ * @param {string|null} expiresAt  ISO date string, or null to remove expiry
+ */
+export const updateJobExpiry = async (jobId, expiresAt) => {
+  try {
+    return await adminAxiosInstance.patch(`/jobs/${jobId}/expiry`, { expiresAt });
+  } catch (error) {
+    console.error("Error updating job expiry:", error);
+    toast.error(error.response?.data?.message || "Failed to update job expiry");
+    throw error;
+  }
+};
+
 export const getActiveJobTitlesAdmin = async () => {
   try {
     const response = await adminAxiosInstance.get("/job-titles/active");

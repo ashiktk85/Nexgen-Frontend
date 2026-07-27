@@ -55,8 +55,8 @@ const globalStyle = `
   .page-btn { transition:all 0.18s ease; }
   .page-btn:hover:not(:disabled) { transform:scale(1.05); }
   .search-container { transition:border-color 0.2s, box-shadow 0.2s; }
-  .search-container:focus-within { border-color:#6366f1 !important; box-shadow:0 0 0 3px rgba(99,102,241,0.12) !important; }
-  .filter-chip { display:inline-flex; align-items:center; gap:5px; background:#eef2ff; color:#4f46e5; border-radius:999px; padding:3px 10px 3px 12px; font-size:12px; font-weight:500; }
+  .search-container:focus-within { border-color:#0058be !important; box-shadow:0 0 0 3px rgba(0,88,190,0.12) !important; }
+  .filter-chip { display:inline-flex; align-items:center; gap:5px; background:#eef5fc; color:#0058be; border-radius:999px; padding:3px 10px 3px 12px; font-size:12px; font-weight:500; }
   .filter-chip button { display:flex; align-items:center; }
 
   /* Technical Filters */
@@ -75,27 +75,27 @@ const globalStyle = `
   .tf-option { display:flex; align-items:flex-start; gap:10px; padding:5px 0; cursor:pointer; user-select:none; }
   .tf-option-label { font-size:13.5px; color:#334155; line-height:1.35; font-family:'DM Sans',sans-serif; }
   .tf-box { width:15px; height:15px; border:1.5px solid #c5d0dc; border-radius:3px; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; background:#fff; transition:all 0.15s ease; }
-  .tf-box.checked { background:#0950a0; border-color:#0950a0; }
+  .tf-box.checked { background:#0058be; border-color:#0058be; }
   .tf-box.checked::after { content:''; width:7px; height:4px; border-left:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(-45deg) translateY(-1px); }
   .tf-radio { width:15px; height:15px; border:1.5px solid #c5d0dc; border-radius:50%; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; background:#fff; transition:all 0.15s ease; }
-  .tf-radio.checked { border-color:#0950a0; }
-  .tf-radio.checked::after { content:''; width:7px; height:7px; border-radius:50%; background:#0950a0; }
+  .tf-radio.checked { border-color:#0058be; }
+  .tf-radio.checked::after { content:''; width:7px; height:7px; border-radius:50%; background:#0058be; }
   .tf-clear-btn { width:100%; margin-top:22px; padding:11px 14px; border:1.5px solid #c5d0dc; background:transparent; color:#121A2D; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; font-family:'DM Sans',monospace,sans-serif; transition:all 0.15s ease; }
-  .tf-clear-btn:hover { border-color:#0950a0; color:#0950a0; background:#fff; }
-  .tf-apply-btn { width:100%; margin-top:10px; padding:12px 14px; border:1.5px solid #0950a0; background:#0950a0; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:'DM Sans',monospace,sans-serif; transition:all 0.15s ease; text-align:center; border-radius:8px; min-height:44px; }
-  .tf-apply-btn:hover { background:#073d7a; border-color:#073d7a; }
+  .tf-clear-btn:hover { border-color:#0058be; color:#0058be; background:#fff; }
+  .tf-apply-btn { width:100%; margin-top:10px; padding:12px 14px; border:1.5px solid #0058be; background:#0058be; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:'DM Sans',monospace,sans-serif; transition:all 0.15s ease; text-align:center; border-radius:8px; min-height:44px; }
+  .tf-apply-btn:hover { background:#003f87; border-color:#003f87; }
   .tf-close-btn {
     background:#fff; border:1.5px solid #c5d0dc; color:#121A2D; cursor:pointer;
     display:inline-flex; align-items:center; justify-content:center;
     width:36px; height:36px; padding:0; border-radius:10px; flex-shrink:0;
     box-shadow:0 1px 3px rgba(15,23,42,0.08);
   }
-  .tf-close-btn:hover { background:#dde6f0; border-color:#0950a0; color:#0950a0; }
+  .tf-close-btn:hover { background:#dde6f0; border-color:#0058be; color:#0058be; }
   .tf-header.sticky-close { position:sticky; top:0; z-index:2; background:#eef3f8; }
-  .tf-count { background:#0950a0; color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px; min-width:18px; text-align:center; }
+  .tf-count { background:#0058be; color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px; min-width:18px; text-align:center; }
   .tf-field-label { display:block; font-size:11px; font-weight:600; color:#64748b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.06em; }
   .tf-select { width:100%; padding:8px 10px; border:1.5px solid #c5d0dc; border-radius:8px; font-size:13px; background:#fff; margin-bottom:10px; font-family:'DM Sans',sans-serif; color:#334155; }
-  .tf-select:focus { outline:none; border-color:#0950a0; box-shadow:0 0 0 2px rgba(9,80,160,0.12); }
+  .tf-select:focus { outline:none; border-color:#0058be; box-shadow:0 0 0 2px rgba(0,88,190,0.12); }
   .tf-select:disabled { opacity:0.55; cursor:not-allowed; }
 
   /* Drawer — above fixed navbar (z-index 100) */
@@ -127,7 +127,7 @@ const globalStyle = `
 
   /* Controls */
   .ajp-filter-toggle { display:none; align-items:center; gap:7px; padding:10px 16px; background:#fff; color:#121A2D; border:1.5px solid #d8e0ea; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:0.04em; text-transform:uppercase; white-space:nowrap; flex-shrink:0; }
-  .ajp-filter-toggle:hover { border-color:#0950a0; color:#0950a0; }
+  .ajp-filter-toggle:hover { border-color:#0058be; color:#0058be; }
   .ajp-results-badge { display:flex; align-items:center; background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:10px 16px; gap:6px; white-space:nowrap; box-shadow:0 2px 8px rgba(0,0,0,0.04); flex-shrink:0; }
   .ajp-view-toggle { display:flex; background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.04); flex-shrink:0; }
 
@@ -153,7 +153,7 @@ const globalStyle = `
   /* Mobile */
   @media (max-width:640px) {
     .ajp-hero { padding:80px 0 52px !important; }
-    .ajp-main { padding:0 12px 36px !important; margin-top:-24px !important; }
+    .ajp-main { padding:0 2px 36px !important; margin-top:-24px !important; }
 
     /* Row 1: Filters | badge | view-toggle  (order 1)
        Row 2: search bar full-width          (order 2) */
@@ -266,8 +266,8 @@ const LocationFilter = ({
       fontSize: 13,
       backgroundColor: "#fff",
       "& fieldset": { borderColor: "#c5d0dc", borderWidth: "1.5px" },
-      "&:hover fieldset": { borderColor: "#0950a0" },
-      "&.Mui-focused fieldset": { borderColor: "#0950a0", borderWidth: "1.5px" },
+      "&:hover fieldset": { borderColor: "#0058be" },
+      "&.Mui-focused fieldset": { borderColor: "#0058be", borderWidth: "1.5px" },
     },
   };
 
@@ -683,16 +683,16 @@ const AllJobsPage = () => {
         style={{ background:"#f1f5f9", minHeight:"100vh" }}>
 
         {/* Hero */}
-        <div className="ajp-hero" style={{ background:"linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4338ca 100%)", padding:"110px 0 60px", position:"relative", overflow:"hidden", maxWidth:"100vw" }}>
-          <div style={{ position:"absolute", top:-40, right:0, width:180, height:180, borderRadius:"50%", background:"rgba(99,102,241,0.25)", filter:"blur(50px)", transform:"translateX(40%)" }} />
-          <div style={{ position:"absolute", bottom:-20, left:"30%", width:150, height:150, borderRadius:"50%", background:"rgba(167,139,250,0.15)", filter:"blur(40px)" }} />
-          <div style={{ maxWidth:1280, margin:"0 auto", padding:"0 20px", position:"relative", zIndex:1 }}>
+        <div className="ajp-hero" style={{ background:"linear-gradient(135deg,#002d61 0%,#0058be 55%,#2170e4 100%)", padding:"110px 0 60px", position:"relative", overflow:"hidden", maxWidth:"100vw" }}>
+          <div style={{ position:"absolute", top:-40, right:0, width:180, height:180, borderRadius:"50%", background:"rgba(0,88,190,0.28)", filter:"blur(50px)", transform:"translateX(40%)" }} />
+          <div style={{ position:"absolute", bottom:-20, left:"30%", width:150, height:150, borderRadius:"50%", background:"rgba(33,112,228,0.18)", filter:"blur(40px)" }} />
+          <div style={{ maxWidth:1440, margin:"0 auto", padding:"0 3px", position:"relative", zIndex:1 }}>
             <motion.div initial={{ opacity:0,y:-10 }} animate={{ opacity:1,y:0 }} transition={{ duration:0.5 }}>
-              <p style={{ color:"#a5b4fc", fontSize:13, fontWeight:500, marginBottom:6, letterSpacing:"0.05em", textTransform:"uppercase" }}>Discover opportunities</p>
+              <p style={{ color:"#8ec5f0", fontSize:13, fontWeight:500, marginBottom:6, letterSpacing:"0.05em", textTransform:"uppercase" }}>Discover opportunities</p>
               <h1 style={{ color:"#fff", fontSize:"clamp(20px,4vw,32px)", fontWeight:800, margin:0, letterSpacing:"-0.02em" }}>
                 Mobile Repair Jobs{locationLabel ? ` in ${locationLabel}` : " Worldwide"}
               </h1>
-              <p style={{ color:"#c7d2fe", fontSize:14, marginTop:8, fontWeight:400 }}>
+              <p style={{ color:"#b6d4f0", fontSize:14, marginTop:8, fontWeight:400 }}>
                 {totalCount} positions available — Chip-level, Android, iPhone, &amp; Management Roles
               </p>
             </motion.div>
@@ -700,7 +700,7 @@ const AllJobsPage = () => {
         </div>
 
         {/* Main */}
-        <div className="ajp-main" style={{ maxWidth:1280, margin:"0 auto", padding:"0 20px 48px", marginTop:-32, position:"relative", zIndex:2 }}>
+        <div className="ajp-main" style={{ maxWidth:1440, margin:"0 auto", padding:"0 3px 48px", marginTop:-32, position:"relative", zIndex:2 }}>
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="ajp-layout">
 
             {/* Desktop sidebar */}
@@ -723,7 +723,7 @@ const AllJobsPage = () => {
 
                 {/* Row 1 on mobile: Results badge */}
                 <div className="ajp-results-badge">
-                  <span style={{ fontSize:18, fontWeight:800, color:"#4f46e5", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>{totalCount}</span>
+                  <span style={{ fontSize:18, fontWeight:800, color:"#0058be", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>{totalCount}</span>
                   <span style={{ fontSize:13, color:"#64748b" }}>jobs found</span>
                 </div>
 
@@ -738,7 +738,7 @@ const AllJobsPage = () => {
                       style={{
                         padding: "10px 14px",
                         border: "none",
-                        background: viewMode === mode ? "linear-gradient(135deg,#4f46e5,#6366f1)" : "transparent",
+                        background: viewMode === mode ? "linear-gradient(135deg,#003f87,#0058be)" : "transparent",
                         color: viewMode === mode ? "#fff" : "#94a3b8",
                         cursor: "pointer",
                         fontSize: 14,
@@ -768,7 +768,7 @@ const AllJobsPage = () => {
                       </button>
                     )}
                     <button type="button" onClick={runSearch}
-                      style={{ padding:"8px 14px", background:"linear-gradient(135deg,#4f46e5,#6366f1)", color:"#fff", border:"none", borderRadius:8, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", boxShadow:"0 2px 6px rgba(99,102,241,0.3)", transition:"all 0.1s ease", flexShrink:0, display:"flex", alignItems:"center", gap:6 }}
+                      style={{ padding:"8px 14px", background:"linear-gradient(135deg,#003f87,#0058be)", color:"#fff", border:"none", borderRadius:8, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", boxShadow:"0 2px 6px rgba(0,88,190,0.3)", transition:"all 0.1s ease", flexShrink:0, display:"flex", alignItems:"center", gap:6 }}
                       onMouseOver={(e) => e.currentTarget.style.transform="scale(1.02)"}
                       onMouseOut={(e) => e.currentTarget.style.transform="scale(1)"}>
                       <FaSearch size={11} />
@@ -782,7 +782,7 @@ const AllJobsPage = () => {
               {/* Listings */}
               {loading ? (
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:280, background:"#fff", borderRadius:16, border:"1.5px solid #e2e8f0" }}>
-                  <div style={{ width:40, height:40, borderRadius:"50%", border:"3px solid #e0e7ff", borderTopColor:"#6366f1", animation:"spin 0.8s linear infinite", marginBottom:14 }} />
+                  <div style={{ width:40, height:40, borderRadius:"50%", border:"3px solid #d4e6f7", borderTopColor:"#0058be", animation:"spin 0.8s linear infinite", marginBottom:14 }} />
                   <p style={{ color:"#64748b", fontSize:14, fontWeight:500 }}>Fetching opportunities…</p>
                 </div>
               ) : jobs.length > 0 ? (
@@ -828,7 +828,7 @@ const AllJobsPage = () => {
                     <li>Check back soon — new jobs posted daily</li>
                   </ul>
                   <a href="/employer/register"
-                    style={{ marginTop:8, padding:"10px 20px", background:"linear-gradient(135deg,#4f46e5,#6366f1)", color:"#fff", borderRadius:8, fontSize:13, fontWeight:600, textDecoration:"none", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+                    style={{ marginTop:8, padding:"10px 20px", background:"linear-gradient(135deg,#003f87,#0058be)", color:"#fff", borderRadius:8, fontSize:13, fontWeight:600, textDecoration:"none", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
                     Post a Mobile Repair Job Now
                   </a>
                 </motion.div>
