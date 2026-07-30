@@ -9,9 +9,13 @@ const validateJobForm = Yup.object({
   email: Yup.string()
     .email('Enter a valid email')
     .required('Email is required'),
+  countryCode: Yup.string()
+    .trim()
+    .required('Country code is required')
+    .matches(/^\+\d{1,4}$/, 'Enter a valid country dial code'),
   phone: Yup.string()
-    .matches(/^[0-9]{10}$/, 'Mobile number must be 10 digits')
-    .required('Mobile number is required'),
+    .required('Mobile number is required')
+    .matches(/^[0-9]{6,15}$/, 'Enter a valid phone number (6–15 digits)'),
   country: Yup.string().nullable().trim().optional(),
   state: Yup.string().nullable().trim().optional(),
   city: Yup.string()
@@ -22,8 +26,12 @@ const validateJobForm = Yup.object({
       if (!value) return true;
       return value.length >= 2;
     }),
+  salaryCurrency: Yup.string().trim().optional(),
   salaryFrom: Yup.string().trim().nullable().optional(),
   salaryTo: Yup.string().trim().nullable().optional(),
+  salaryInrFrom: Yup.string().trim().nullable().optional(),
+  salaryInrTo: Yup.string().trim().nullable().optional(),
+  shopName: Yup.string().trim().nullable().optional(),
   description: Yup.string()
     .nullable()
     .trim()

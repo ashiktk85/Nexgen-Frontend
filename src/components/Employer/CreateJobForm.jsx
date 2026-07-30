@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { TextField, Autocomplete, createFilterOptions } from "@mui/material";
+import { TextField, Autocomplete, createFilterOptions, Box } from "@mui/material";
 import { Country, State, City } from "country-state-city";
 import SearchablePlaceSelect from "@/components/common/SearchablePlaceSelect";
 import { useFormik } from "formik";
@@ -22,6 +22,8 @@ import {
   Briefcase, Mail, Phone, MapPin, IndianRupee,
   TrendingUp, FileText, CheckCircle2, Plus, X, Send, Pencil
 } from "lucide-react";
+import Countries_Dataset from "@/data/Countries_Dataset.json";
+import { parseSalaryFromJob, SALARY_CURRENCY_OPTIONS } from "@/utils/formatSalary";
 
 /* ─── Inject styles once ─── */
 if (!document.getElementById("cjf-styles")) {
@@ -95,8 +97,8 @@ if (!document.getElementById("cjf-styles")) {
 
     /* Salary input with rupee prefix */
     .cjf-salary-wrap { position:relative; }
-    .cjf-salary-prefix { position:absolute; left:13px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:13px; pointer-events:none; }
-    .cjf-salary-input { padding-left:28px !important; }
+    .cjf-salary-prefix { position:absolute; left:13px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:12px; font-weight:700; pointer-events:none; white-space:nowrap; }
+    .cjf-salary-input { padding-left:42px !important; }
 
     /* MUI overrides */
     .cjf-root .MuiOutlinedInput-root { border-radius:10px !important; font-family:'DM Sans',sans-serif !important; font-size:13.5px !important; background:#f8fafc; }
@@ -104,6 +106,13 @@ if (!document.getElementById("cjf-styles")) {
     .cjf-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline { border-color:#6366f1 !important; border-width:1.5px !important; }
     .cjf-root .MuiInputLabel-root.Mui-focused { color:#6366f1 !important; }
     .cjf-root .MuiInputBase-input { padding:11px 14px !important; }
+    .cjf-phone-row { display:flex; gap:10px; align-items:stretch; width:100%; min-width:0; }
+    .cjf-phone-code { width: 160px; flex-shrink: 0; }
+    .cjf-phone-code .MuiAutocomplete-root,
+    .cjf-phone-code .MuiFormControl-root { width:100%; }
+    .cjf-phone-code .MuiOutlinedInput-root { min-height:44px; height:44px; }
+    .cjf-phone-number { flex:1 1 auto; min-width:0; }
+    .cjf-phone-number .cjf-input { height:44px; min-height:44px; }
     .cjf-grid-2 { display:grid; grid-template-columns:1fr; gap:24px; }
     @media (min-width:768px) { .cjf-grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     .cjf-grid-auto { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr)); gap:16px; }
@@ -196,7 +205,6 @@ const CustomOptionField = ({ label, name, options, formik, placeholder }) => {
   );
 };
 
-import { parseSalaryFromJob } from "@/utils/formatSalary";
 import { parseExperienceFromJob, buildExperienceRequired } from "@/utils/formatExperience";
 
 const cityFilter = createFilterOptions({ stringify: (option) => (typeof option === "string" ? option : option?.name || "") });
@@ -286,11 +294,17 @@ function CreateJobForm({
       jobTitle: selectedData?.jobTitle || "",
       email: selectedData?.email || "",
       phone: selectedData?.phone || "",
-      countryCode: "+91",
+      countryCode: selectedData?.countryCode || "+91",
       country: selectedData?.country || "",
       ...(() => {
-        const { from, to } = parseSalaryFromJob(selectedData);
-        return { salaryFrom: from, salaryTo: to };
+        const { from, to, currency, inrFrom, inrTo } = parseSalaryFromJob(selectedData);
+        return {
+          salaryFrom: from,
+          salaryTo: to,
+          salaryCurrency: currency || "INR",
+          salaryInrFrom: inrFrom,
+          salaryInrTo: inrTo,
+        };
       })(),
       state: selectedData?.state || null,
       city: selectedData?.city || null,
@@ -557,8 +571,7 @@ function CreateJobForm({
 
             <div className="cjf-grid-2">
               <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-                {isAdminMode && (
-                  <div>
+                <div>
                     <FL>Shop Name <span style={{ fontWeight: 400, color: "#94a3b8" }}>(optional)</span></FL>
                     <input
                       name="shopName"
@@ -570,10 +583,9 @@ function CreateJobForm({
                       className="cjf-input"
                     />
                     <p style={{ fontSize: 11.5, color: "#64748b", marginTop: 6 }}>
-                      Optional — shown on the job listing if provided. Not linked to any employer account.
+                      Shown on the job card and listing. {isAdminMode ? "Optional for admin jobs." : "Defaults from selected shop if left blank."}
                     </p>
                   </div>
-                )}
 
                 {/* Job Title */}
                 <div>
@@ -611,6 +623,9 @@ function CreateJobForm({
                       value={companies.find(c => (c._id?.toString() || c._id) === (formik.values.companyId?.toString() || formik.values.companyId)) || null}
                       onChange={(_, newValue) => {
                         formik.setFieldValue("companyId", newValue ? (newValue._id?.toString() || newValue._id) : "");
+                        if (newValue?.companyName) {
+                          formik.setFieldValue("shopName", newValue.companyName);
+                        }
                       }}
                       disablePortal
                       renderInput={(params) => (
@@ -673,7 +688,7 @@ function CreateJobForm({
           <motion.div variants={itemVariants} className="cjf-section">
             <SH icon={<Mail size={16} style={{ color: "#0ea5e9" }} />} title="Contact Information" iconBg="#f0f9ff" />
 
-            <div className="cjf-grid-auto">
+            <div className="cjf-grid-2">
               {/* Email */}
               <div>
                 <FL required>Contact Email</FL>
@@ -689,9 +704,50 @@ function CreateJobForm({
               {/* Phone */}
               <div>
                 <FL required>Phone</FL>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <input value="+91" readOnly className="cjf-input" style={{ width: 60, flexShrink: 0, textAlign: "center", color: "#64748b" }} />
-                  <div style={{ flex: 1 }}>
+                <div className="cjf-phone-row">
+                  <div className="cjf-phone-code">
+                    <Autocomplete
+                      options={Countries_Dataset}
+                      autoHighlight
+                      value={Countries_Dataset.find((o) => o.dial_code === formik.values.countryCode) || null}
+                      onChange={(_, v) => formik.setFieldValue("countryCode", v ? v.dial_code : "+91")}
+                      getOptionLabel={(o) => (o?.dial_code ? `${o.dial_code} ${o.code || ""}`.trim() : "")}
+                      filterOptions={(options, { inputValue }) => {
+                        const q = inputValue.trim().toLowerCase();
+                        if (!q) return options;
+                        return options.filter(
+                          (o) =>
+                            o.dial_code.toLowerCase().includes(q) ||
+                            o.name.toLowerCase().includes(q) ||
+                            o.code.toLowerCase().includes(q)
+                        );
+                      }}
+                      isOptionEqualToValue={(a, b) => a?.dial_code === b?.dial_code}
+                      renderOption={(props, option) => (
+                        <Box component="li" sx={{ "& > img": { mr: 1.5, flexShrink: 0 } }} {...props}>
+                          <img
+                            loading="lazy"
+                            width="18"
+                            src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
+                            alt=""
+                          />
+                          {option.dial_code} {option.name}
+                        </Box>
+                      )}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          placeholder="+91"
+                          inputProps={{
+                            ...params.inputProps,
+                            "aria-label": "Country dial code",
+                          }}
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="cjf-phone-number">
                     <input
                       name="phone" type="tel"
                       value={formik.values.phone} onChange={formik.handleChange} onBlur={formik.handleBlur}
@@ -700,7 +756,7 @@ function CreateJobForm({
                     />
                   </div>
                 </div>
-                <FE msg={formik.touched.phone && formik.errors.phone} />
+                <FE msg={(formik.touched.phone && formik.errors.phone) || (formik.touched.countryCode && formik.errors.countryCode)} />
               </div>
             </div>
           </motion.div>
@@ -720,6 +776,11 @@ function CreateJobForm({
                     formik.setFieldValue("country", v ? v.isoCode : "");
                     formik.setFieldValue("state", null);
                     formik.setFieldValue("city", null);
+                    if (v?.phonecode) {
+                      const dial = `+${String(v.phonecode).replace(/^\+/, "")}`;
+                      const match = Countries_Dataset.find((c) => c.dial_code === dial);
+                      if (match) formik.setFieldValue("countryCode", match.dial_code);
+                    }
                   }}
                   onBlur={() => formik.setFieldTouched("country", true)}
                   placeholder="Search country (optional)..."
@@ -778,11 +839,29 @@ function CreateJobForm({
             <SH icon={<IndianRupee size={16} style={{ color: "#16a34a" }} />} title="Compensation & Experience" iconBg="#f0fdf4" />
 
             {/* Salary — optional; blank shows as Not disclosed */}
-            <div className="cjf-grid-auto" style={{ marginBottom: 24 }}>
+            <div className="cjf-grid-auto" style={{ marginBottom: 16 }}>
+              <div>
+                <FL>Salary currency</FL>
+                <Autocomplete
+                  options={SALARY_CURRENCY_OPTIONS}
+                  getOptionLabel={(o) => o.label}
+                  value={SALARY_CURRENCY_OPTIONS.find((c) => c.code === formik.values.salaryCurrency) || SALARY_CURRENCY_OPTIONS[0]}
+                  onChange={(_, v) => formik.setFieldValue("salaryCurrency", v?.code || "INR")}
+                  disableClearable
+                  renderInput={(params) => (
+                    <TextField {...params} variant="outlined" size="small" placeholder="Select currency" />
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="cjf-grid-auto" style={{ marginBottom: formik.values.salaryCurrency !== "INR" ? 16 : 24 }}>
               <div>
                 <FL>Salary From (optional)</FL>
                 <div className="cjf-salary-wrap">
-                  <span className="cjf-salary-prefix">₹</span>
+                  <span className="cjf-salary-prefix">
+                    {SALARY_CURRENCY_OPTIONS.find((c) => c.code === formik.values.salaryCurrency)?.symbol?.trim() || "₹"}
+                  </span>
                   <input
                     name="salaryFrom" type="text"
                     value={formik.values.salaryFrom} onChange={formik.handleChange} onBlur={formik.handleBlur}
@@ -798,7 +877,9 @@ function CreateJobForm({
               <div>
                 <FL>Salary To (optional)</FL>
                 <div className="cjf-salary-wrap">
-                  <span className="cjf-salary-prefix">₹</span>
+                  <span className="cjf-salary-prefix">
+                    {SALARY_CURRENCY_OPTIONS.find((c) => c.code === formik.values.salaryCurrency)?.symbol?.trim() || "₹"}
+                  </span>
                   <input
                     name="salaryTo" type="text"
                     value={formik.values.salaryTo} onChange={formik.handleChange} onBlur={formik.handleBlur}
@@ -809,6 +890,38 @@ function CreateJobForm({
                 <FE msg={formik.touched.salaryTo && formik.errors.salaryTo} />
               </div>
             </div>
+
+            {formik.values.salaryCurrency !== "INR" && (
+              <div className="cjf-grid-auto" style={{ marginBottom: 24 }}>
+                <div>
+                  <FL>INR equivalent From (optional)</FL>
+                  <div className="cjf-salary-wrap">
+                    <span className="cjf-salary-prefix">₹</span>
+                    <input
+                      name="salaryInrFrom" type="text"
+                      value={formik.values.salaryInrFrom} onChange={formik.handleChange} onBlur={formik.handleBlur}
+                      className="cjf-input cjf-salary-input"
+                      placeholder="e.g. 45000"
+                    />
+                  </div>
+                  <p style={{ fontSize: 11.5, color: "#64748b", marginTop: 6 }}>
+                    Shown next to local salary as ≈ ₹ amount
+                  </p>
+                </div>
+                <div>
+                  <FL>INR equivalent To (optional)</FL>
+                  <div className="cjf-salary-wrap">
+                    <span className="cjf-salary-prefix">₹</span>
+                    <input
+                      name="salaryInrTo" type="text"
+                      value={formik.values.salaryInrTo} onChange={formik.handleChange} onBlur={formik.handleBlur}
+                      className="cjf-input cjf-salary-input"
+                      placeholder="e.g. 55000"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Experience — single year or optional range (like salary) */}
             <div className="cjf-grid-auto" style={{ marginBottom: 8 }}>

@@ -16,6 +16,7 @@ import {
   UserMinus2,
   Upload,
   Download,
+  UserPlus,
 } from "lucide-react";
 import {
   Dialog,
@@ -33,6 +34,7 @@ import {
   employerListUnList,
   changeUserRoleService,
   bulkCreateStudentsService,
+  createStudentService,
 } from "@/apiServices/adminApi";
 import UserTypePill from "@/components/Admin/UserTypePill";
 import { AdminFilterBar, AdminFilterSelect } from "@/components/Admin/AdminListFilters";
@@ -93,6 +95,14 @@ const Users = () => {
   // PRIORITY VISIBILITY FEATURE — CSV upload + role update loading
   const [csvUploading, setCsvUploading] = useState(false);
   const [csvUploadModalOpen, setCsvUploadModalOpen] = useState(false);
+  const [addStudentModalOpen, setAddStudentModalOpen] = useState(false);
+  const [addStudentSubmitting, setAddStudentSubmitting] = useState(false);
+  const [addStudentForm, setAddStudentForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    fieldOfStudy: "",
+  });
   const [roleUpdating, setRoleUpdating] = useState(false);
   const fileInputRef = useRef(null);
   const rowsPerPage = 20;
@@ -268,6 +278,57 @@ const Users = () => {
     fileInputRef.current?.click();
   };
 
+  const resetAddStudentForm = () => {
+    setAddStudentForm({
+      name: "",
+      email: "",
+      password: "",
+      fieldOfStudy: "",
+    });
+  };
+
+  const openAddStudentModal = () => {
+    resetAddStudentForm();
+    setAddStudentModalOpen(true);
+  };
+
+  const updateAddStudentField = (key, value) => {
+    setAddStudentForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleAddStudentSubmit = async (event) => {
+    event.preventDefault();
+    const name = addStudentForm.name.trim();
+    const email = addStudentForm.email.trim();
+    const password = addStudentForm.password.trim();
+    const fieldOfStudy = addStudentForm.fieldOfStudy.trim();
+
+    if (!name || !email) {
+      toast.error("Name and email are required");
+      return;
+    }
+
+    setAddStudentSubmitting(true);
+    try {
+      const result = await createStudentService({
+        name,
+        email,
+        password: password || undefined,
+        fieldOfStudy: fieldOfStudy || undefined,
+      });
+      if (result?.data?.status) {
+        toast.success(result.data.message || "Student created successfully");
+        setAddStudentModalOpen(false);
+        resetAddStudentForm();
+        fetchUsers(currentPage, searchTerm, filters);
+      }
+    } catch {
+      // toast handled in createStudentService
+    } finally {
+      setAddStudentSubmitting(false);
+    }
+  };
+
   const activeUsers = users.filter((u) => u.status === "active").length;
   const blockedUsers = users.filter((u) => u.status === "blocked").length;
   const noPhoneUsers = users.filter((u) => !u.phone).length;
@@ -395,6 +456,15 @@ const Users = () => {
               className="hidden"
               onChange={handleStudentCsvUpload}
             />
+            <button
+              type="button"
+              disabled={csvUploading || addStudentSubmitting}
+              onClick={openAddStudentModal}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              Add student
+            </button>
             <button
               type="button"
               disabled={csvUploading}
@@ -633,6 +703,102 @@ const Users = () => {
               {csvUploading ? "Uploading..." : "Choose CSV file"}
             </button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={addStudentModalOpen}
+        onOpenChange={(open) => {
+          setAddStudentModalOpen(open);
+          if (!open) resetAddStudentForm();
+        }}
+      >
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-white">
+          <DialogHeader>
+            <DialogTitle>Add institute student</DialogTitle>
+            <DialogDescription>
+              Create a single student account. Same fields as the CSV upload.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleAddStudentSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Name <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="text"
+                value={addStudentForm.name}
+                onChange={(e) => updateAddStudentField("name", e.target.value)}
+                placeholder="Student full name"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                required
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Email <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="email"
+                value={addStudentForm.email}
+                onChange={(e) => updateAddStudentField("email", e.target.value)}
+                placeholder="student@example.com"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Password <span className="text-slate-400 font-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={addStudentForm.password}
+                onChange={(e) => updateAddStudentField("password", e.target.value)}
+                placeholder="Default: changeme123"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Field of study <span className="text-slate-400 font-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={addStudentForm.fieldOfStudy}
+                onChange={(e) => updateAddStudentField("fieldOfStudy", e.target.value)}
+                placeholder="e.g. Android Repair, iPhone Repair"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+              <p className="mt-1.5 text-[11px] text-slate-500 leading-relaxed">
+                Used for job email alerts. Leave blank to receive alerts for all new jobs.
+              </p>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0 pt-1">
+              <button
+                type="button"
+                onClick={() => setAddStudentModalOpen(false)}
+                disabled={addStudentSubmitting}
+                className="inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={addStudentSubmitting}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                {addStudentSubmitting ? "Creating..." : "Create student"}
+              </button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

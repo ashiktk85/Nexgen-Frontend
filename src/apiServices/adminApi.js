@@ -286,6 +286,27 @@ export const getAllShops = async (page, limit, filters = {}) => {
   }
 };
 
+// PRIORITY VISIBILITY FEATURE — create a single institute student
+export const createStudentService = async (payload) => {
+  try {
+    const response = await adminAxiosInstance.post("/students", payload);
+    return response;
+  } catch (error) {
+    console.error(
+      "Error in createStudentService at admin Api service: ",
+      error
+    );
+    let errorMessage = "An unexpected error occurred";
+    if (error.response) {
+      errorMessage =
+        error.response.data.message ||
+        `Error ${error.response.status}: ${error.response.statusText}`;
+    }
+    toast.error(errorMessage);
+    throw error;
+  }
+};
+
 // PRIORITY VISIBILITY FEATURE — bulk-create institute students
 export const bulkCreateStudentsService = async (students) => {
   try {

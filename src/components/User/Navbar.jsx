@@ -412,6 +412,7 @@ const Navbar = () => {
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               style={{
                 background: solidNav ? "#f1f5f9" : "rgba(255,255,255,0.1)",
                 border: "none",
@@ -603,39 +604,6 @@ const Navbar = () => {
               gap: 2,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "4px 8px 8px",
-                borderBottom: "1px solid #f1f5f9",
-                marginBottom: 4,
-              }}
-            >
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#64748b", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                Menu
-              </span>
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label="Close menu"
-                style={{
-                  background: "#f1f5f9",
-                  border: "none",
-                  borderRadius: 8,
-                  width: 32,
-                  height: 32,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  color: "#475569",
-                }}
-              >
-                <X size={18} />
-              </button>
-            </div>
             {[
               { label: "Home", path: "/", icon: <Home size={16} /> },
               { label: "Browse Jobs", path: "/all-jobs", icon: <Briefcase size={16} /> },

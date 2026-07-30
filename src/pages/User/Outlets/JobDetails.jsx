@@ -359,32 +359,45 @@ if (!document.getElementById('jd-li-styles')) {
       align-items: center;
       box-shadow: 0 -2px 12px rgba(0,0,0,.08);
     }
+    .jd-li-mobile-cta .jd-li-share-slot,
+    .jd-li-mobile-cta .jd-li-share-slot > div {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      height: 40px;
+    }
     .jd-li-mobile-cta .jd-li-btn-icon,
     .jd-li-mobile-cta > button.jd-share-match,
-    .jd-li-mobile-cta > .jd-li-share-slot > button {
-      width: 36px !important;
-      height: 36px !important;
-      min-width: 36px !important;
-      min-height: 36px !important;
+    .jd-li-mobile-cta .jd-li-share-slot button {
+      width: 40px !important;
+      height: 40px !important;
+      min-width: 40px !important;
+      min-height: 40px !important;
       padding: 0 !important;
       border-radius: 10px !important;
+      border-width: 2px !important;
       justify-content: center;
+      align-items: center;
       flex-shrink: 0;
       box-sizing: border-box;
+      line-height: 1;
     }
     .jd-li-mobile-cta .jd-li-btn-icon {
-      border-width: 2px;
       font-size: 0;
     }
     .jd-li-mobile-cta .jd-li-btn-apply {
       flex: 1 1 auto;
       min-width: 0;
-      height: 48px;
-      padding: 0 18px;
-      font-size: 16px;
+      height: 40px;
+      min-height: 40px;
+      padding: 0 16px;
+      font-size: 14px;
       font-weight: 700;
-      border-radius: 12px;
+      border-radius: 10px;
       justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+      line-height: 1;
     }
 
     @media (max-width: 900px) {
@@ -570,7 +583,14 @@ const JobDetails = () => {
 
   if (!loading && (!job || !company)) return null;
 
-  const salaryText = !job ? '' : formatSalary({ salary: job.salary, salaryDisplay: job.salaryDisplay, salaryRange: job.salary });
+  const salaryText = !job ? '' : formatSalary({
+    salary: job.salary,
+    salaryDisplay: job.salaryDisplay,
+    salaryRange: job.salary,
+    salaryCurrency: job.salaryCurrency,
+    salaryInrDisplay: job.salaryInrDisplay,
+    salaryInrRange: job.salaryInrRange,
+  }, { includeInr: true });
 
   const companyInitial = (shopName || company?.name)?.charAt(0) || 'C';
   const postedAgo = job?.postedAt
@@ -971,11 +991,11 @@ const JobDetails = () => {
         >
           {job.applied ? (
             <>
-              <CheckCircle2 size={18} /> Applied
+              <CheckCircle2 size={16} /> Applied
             </>
           ) : (
             <>
-              Apply <ChevronRight size={18} />
+              Apply <ChevronRight size={16} />
             </>
           )}
         </button>
