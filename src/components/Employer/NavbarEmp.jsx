@@ -168,20 +168,10 @@ const NavbarEmp = ({ isCollapsed, setIsCollapsed }) => {
           <ul className="space-y-2">
             {[
               {
-                id: "dashboard",
-                label: "Dashboard",
-                url: "/employer/dashboard",
-                icon: (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-                    <path d="M19.56 23.253H4.44a4.051 4.051 0 0 1-4.05-4.05v-9.115c0-1.317.648-2.56 1.728-3.315l7.56-5.292a4.062 4.062 0 0 1 4.644 0l7.56 5.292a4.056 4.056 0 0 1 1.728 3.315v9.115a4.051 4.051 0 0 1-4.05 4.05zM12 2.366a2.45 2.45 0 0 0-1.393.443l-7.56 5.292a2.433 2.433 0 0 0-1.037 1.987v9.115c0 1.34 1.09 2.43 2.43 2.43h15.12c1.34 0 2.43-1.09 2.43-2.43v-9.115c0-.788-.389-1.533-1.037-1.987l-7.56-5.292A2.438 2.438 0 0 0 12 2.377z"></path>
-                  </svg>
-                )
-              },
-              {
                 id: "jobs",
                 label: "Job Listing",
                 url: "/employer/job_list",
-                matchUrls: ["/employer/job_list", "/employer/applicants"],
+                matchUrls: ["/employer/job_list", "/employer/applicants", "/employer/dashboard"],
                 icon: (
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />

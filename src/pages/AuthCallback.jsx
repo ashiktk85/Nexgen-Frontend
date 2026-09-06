@@ -25,6 +25,10 @@ const AuthCallback = () => {
         const meRes = await authService.me();
         applyAuth(token, meRes.user);
         toast.success("Login successful!");
+        if (!meRes.user?.phone) {
+          navigate("/complete-profile", { replace: true });
+          return;
+        }
         navigate("/", { replace: true });
       } catch (e) {
         localStorage.removeItem("token");
@@ -47,4 +51,3 @@ const AuthCallback = () => {
 };
 
 export default AuthCallback;
-

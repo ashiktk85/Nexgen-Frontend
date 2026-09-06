@@ -22,10 +22,9 @@ if (!document.getElementById("ejc-styles")) {
       border-radius:14px;
       transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease;
       overflow:hidden;
-      width:100%;
-      width:100%;
-      min-height:280px;
-      height:auto;
+      width:fit-content;
+      max-width:100%;
+      min-height:0;
       display:flex;
       flex-direction:column;
     }
@@ -47,17 +46,13 @@ if (!document.getElementById("ejc-styles")) {
 
     .ejc-action-btn {
       display:inline-flex; align-items:center; gap:5px;
-      padding:8px 10px; border-radius:8px; border:1.5px solid #e2e8f0;
+      padding:6px 10px; border-radius:8px; border:1.5px solid #e2e8f0;
       font-size:11.5px; font-weight:600; cursor:pointer;
       font-family:'Plus Jakarta Sans',sans-serif;
       background:#fff; color:#475569;
       transition:all .18s ease; white-space:nowrap;
-      flex:1 1 calc(50% - 4px);
+      flex:0 0 auto;
       justify-content:center;
-      min-width:0;
-    }
-    @media (min-width:480px) {
-      .ejc-action-btn { flex:0 1 auto; padding:6px 12px; font-size:12px; }
     }
     .ejc-action-btn:hover { background:#f8fafc; border-color:#c7d2fe; color:#4f46e5; }
     .ejc-action-btn.danger:hover { background:#fef2f2; border-color:#fecaca; color:#ef4444; }
@@ -71,17 +66,17 @@ if (!document.getElementById("ejc-styles")) {
       display:flex;
       flex-direction:column;
       min-height:0;
-      padding:16px 18px;
+      padding:14px 14px 12px;
+      width:fit-content;
+      max-width:100%;
     }
-    @media (min-width:640px) {
-      .ejc-card-body { padding:22px 24px; }
-    }
-    .ejc-card-header { flex-shrink:0; margin-bottom:12px; }
+    .ejc-card-header { flex-shrink:0; margin-bottom:10px; max-width:100%; }
     .ejc-card-meta {
       flex-shrink:0;
       display:flex;
       flex-direction:column;
       gap:6px;
+      max-width:100%;
     }
     .ejc-meta-row {
       display:flex;
@@ -90,21 +85,32 @@ if (!document.getElementById("ejc-styles")) {
       gap:6px;
       min-height:18px;
     }
-    .ejc-card-spacer { flex:1; min-height:12px; }
-    .ejc-card-bottom { flex-shrink:0; }
-    .ejc-card-applicants { width:100%; margin-bottom:12px; }
+    .ejc-card-spacer { flex:0; min-height:10px; }
+    .ejc-card-bottom { flex-shrink:0; width:fit-content; max-width:100%; }
+    .ejc-card-applicants { width:100%; margin-bottom:10px; }
+    .ejc-actions-row {
+      display:flex;
+      gap:6px;
+      flex-wrap:nowrap;
+      width:fit-content;
+      max-width:100%;
+    }
+    @media (max-width: 380px) {
+      .ejc-actions-row { flex-wrap:wrap; }
+      .ejc-title { max-width:140px; }
+    }
     .ejc-title {
-      font-size:14.5px;
+      font-size:13.5px;
       font-weight:700;
       color:#0f172a;
       margin:0;
       letter-spacing:-0.01em;
-      line-height:1.35;
+      line-height:1.3;
       display:-webkit-box;
       -webkit-line-clamp:2;
       -webkit-box-orient:vertical;
       overflow:hidden;
-      min-height:2.7em;
+      max-width:180px;
     }
   `;
   document.head.appendChild(s);
@@ -192,14 +198,14 @@ const JobCard = ({ job, handleEdit, handleDelete, handleStatus, handleView }) =>
             {job?.applicantsCount ?? 0} Applicant{(job?.applicantsCount ?? 0) !== 1 ? "s" : ""}
           </button>
 
-          <div style={{ height:1, background:"#f1f5f9", margin:"0 0 12px" }} />
-          <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+          <div style={{ height:1, background:"#f1f5f9", margin:"0 0 10px" }} />
+          <div className="ejc-actions-row">
             {handleView && (
               <button className="ejc-action-btn" onClick={() => handleView(job)}>
                 <EyeOutlined style={{ fontSize:11 }} /> View
               </button>
             )}
-            <button className="ejc-action-btn" onClick={() => handleEdit(job)}>
+            <button className="ejc-action-btn primary" onClick={() => handleEdit(job)}>
               <EditOutlined style={{ fontSize:11 }} /> Edit
             </button>
             <button className="ejc-action-btn" onClick={() => handleStatus(job)}>

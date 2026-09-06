@@ -2,11 +2,13 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { MdPlace } from "react-icons/md";
+import { formatDistanceToNow } from "date-fns";
 import { formatJobLocation } from "@/utils/formatLocation";
 import { formatSalary } from "@/utils/formatSalary";
 import { formatExperience, isFresherJob } from "@/utils/formatExperience";
 import JobShareButton from "@/components/common/JobShareButton";
 import { buildWhatsAppHref } from "@/utils/phone";
+import { buildTechPathEnquiryMessage } from "@/utils/techpathMessaging";
 
 const injectStyles = () => {
   const css = `
@@ -40,21 +42,82 @@ const injectStyles = () => {
     }
 
     .ujc-body {
-      padding: 18px 48px 12px 18px;
+      padding: 16px 48px 14px 16px;
       flex: 1;
       min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 10px;
+      position: relative;
     }
 
-    .ujc-header {
+    .ujc-header-block {
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+      padding-right: 4px;
     }
-    .ujc-header-main { flex: 1; min-width: 0; }
+
+    .ujc-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    .ujc-id-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.2;
+      letter-spacing: 0.01em;
+      flex-shrink: 1;
+      min-width: 0;
+    }
+
+    .ujc-id-pill-label {
+      color: #94a3b8;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      flex-shrink: 0;
+    }
+
+    .ujc-id-pill-value {
+      color: #0058be;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 140px;
+    }
+
+    .ujc-posted {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      line-height: 1.3;
+      text-align: right;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
     .ujc-title {
       margin: 0;
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -87,14 +150,6 @@ const injectStyles = () => {
     }
     .ujc-location svg { flex-shrink: 0; margin-top: 1px; color: #ef4444; }
 
-    .ujc-value-row {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 8px;
-      min-width: 0;
-    }
-
     .ujc-divider {
       height: 1px;
       background: #e5e7eb;
@@ -104,23 +159,22 @@ const injectStyles = () => {
     .ujc-rows {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       padding-top: 2px;
     }
     .ujc-row {
       display: grid;
-      grid-template-columns: minmax(110px, 42%) 1fr;
-      gap: 10px;
+      grid-template-columns: minmax(90px, 38%) 1fr;
+      gap: 8px;
       align-items: baseline;
     }
     .ujc-label {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
       color: #111827;
-      letter-spacing: 0.01em;
     }
     .ujc-value {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 500;
       color: #6b7280;
       min-width: 0;
@@ -138,7 +192,7 @@ const injectStyles = () => {
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 46px;
+      min-height: 44px;
       padding: 12px 10px;
       border: none;
       background: transparent;
@@ -152,13 +206,8 @@ const injectStyles = () => {
       transition: background 0.15s ease;
     }
     .ujc-footer-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
-    .ujc-footer-btn:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-    .ujc-footer-btn + .ujc-footer-btn {
-      border-left: 1px solid rgba(255,255,255,0.35);
-    }
+    .ujc-footer-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+    .ujc-footer-btn + .ujc-footer-btn { border-left: 1px solid rgba(255,255,255,0.35); }
 
     .ujc-acco-value {
       display: flex;
@@ -166,20 +215,14 @@ const injectStyles = () => {
       justify-content: space-between;
       gap: 10px;
       min-width: 0;
-    }
-    .ujc-job-id {
-      font-size: 12px;
-      font-weight: 700;
-      color: #0058be;
-      line-height: 1.3;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      padding-right: 0;
     }
     .ujc-wa-link {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       border-radius: 8px;
       background: #25D366;
       color: #fff;
@@ -187,14 +230,16 @@ const injectStyles = () => {
       box-shadow: 0 1px 4px rgba(37,211,102,0.3);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
-    .ujc-wa-link:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(37,211,102,0.4);
+    .ujc-body--wa {
+      padding-bottom: 14px;
     }
 
     @media (max-width: 380px) {
       .ujc-row { grid-template-columns: 1fr; gap: 2px; }
-      .ujc-footer-btn { font-size: 11px; letter-spacing: 0.05em; }
+      .ujc-footer { grid-template-columns: 1fr; }
+      .ujc-footer-btn + .ujc-footer-btn { border-left: none; border-top: 1px solid rgba(255,255,255,0.35); }
+      .ujc-id-pill-value { max-width: 110px; }
+      .ujc-body { padding-right: 44px; }
     }
   `;
 
@@ -222,10 +267,16 @@ function displayJobId(job) {
   return "—";
 }
 
-/**
- * User-facing job card — title, location, job ID badge,
- * salary / experience / food / accommodation rows, Apply / Job Details footer.
- */
+function formatPostedAgo(job) {
+  const date = job?.createdAt || job?.postedAt;
+  if (!date) return null;
+  try {
+    return formatDistanceToNow(new Date(date), { addSuffix: true });
+  } catch {
+    return null;
+  }
+}
+
 const JobCard = ({ job }) => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.seekerInfo);
@@ -234,18 +285,18 @@ const JobCard = ({ job }) => {
   const foodText = yesNo(job?.foodAvailable);
   const accommodationText = yesNo(job?.roomAvailable);
   const jobId = displayJobId(job);
+  const postedAgo = formatPostedAgo(job);
   const salaryText = formatSalary(job) || "Not disclosed";
   const expText = formatExperience(job);
   const fresher = isFresherJob(job);
   const experienceText = [expText, fresher ? "Fresher" : null].filter(Boolean).join(" · ") || "—";
 
-  const waText = [
-    "Hi,",
-    job.jobTitle ? `I'm interested in the ${job.jobTitle} role` : "I'm interested in this job",
-    job.companyName ? `at ${job.companyName}` : null,
-    jobId !== "—" ? `(Job ID: ${jobId}).` : ".",
-    "Could you share more details?",
-  ].filter(Boolean).join(" ");
+  const waText = buildTechPathEnquiryMessage({
+    jobTitle: job.jobTitle,
+    companyName: job.companyName,
+    jobId,
+    jobDetailsId: job._id,
+  });
 
   const waHref = job.phone ? buildWhatsAppHref(job.phone, job.countryCode, { text: waText }) : null;
 
@@ -283,27 +334,32 @@ const JobCard = ({ job }) => {
         <JobShareButton job={job} compact iconOnly />
       </div>
 
-      <div className="ujc-body">
-        <div className="ujc-header">
-          <div className="ujc-header-main">
-            <h2 className="ujc-title">{job.jobTitle}</h2>
-            {job.companyName ? <p className="ujc-shop">{job.companyName}</p> : null}
-            <div className="ujc-location">
-              <MdPlace size={15} />
-              <span>{locationText}</span>
-            </div>
+      <div className={`ujc-body${waHref ? " ujc-body--wa" : ""}`}>
+        <div className="ujc-header-block">
+          <h2 className="ujc-title">{job.jobTitle}</h2>
+          {job.companyName ? <p className="ujc-shop">{job.companyName}</p> : null}
+          <div className="ujc-location">
+            <MdPlace size={15} />
+            <span>{locationText}</span>
+          </div>
+          <div className="ujc-meta-row">
+            {jobId !== "—" ? (
+              <span className="ujc-id-pill" title={`Job ID: ${jobId}`}>
+                <span className="ujc-id-pill-label">ID</span>
+                <span className="ujc-id-pill-value">{jobId}</span>
+              </span>
+            ) : (
+              <span />
+            )}
+            {postedAgo && (
+              <span className="ujc-posted">Posted {postedAgo}</span>
+            )}
           </div>
         </div>
 
         <div className="ujc-divider" />
 
         <div className="ujc-rows">
-          <div className="ujc-row">
-            <span className="ujc-label">Job ID</span>
-            <span className="ujc-job-id" title={`Job ID: ${jobId}`}>
-              {jobId}
-            </span>
-          </div>
           <div className="ujc-row">
             <span className="ujc-label">Salary</span>
             <span className="ujc-value">{salaryText}</span>
@@ -351,12 +407,7 @@ const JobCard = ({ job }) => {
         >
           {job.alreadyApplied ? "Applied" : "Apply Now"}
         </button>
-        <button
-          type="button"
-          className="ujc-footer-btn"
-          onClick={goToDetails}
-          aria-label="View job details"
-        >
+        <button type="button" className="ujc-footer-btn" onClick={goToDetails} aria-label="View job details">
           Job Details
         </button>
       </div>

@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { buildWhatsAppHref } from "@/utils/phone";
+import { buildTechPathEnquiryMessage } from "@/utils/techpathMessaging";
 
 /**
  * Opens WhatsApp chat with the shop owner / job contact phone.
@@ -12,6 +13,8 @@ export default function JobWhatsAppButton({
   countryCode = "+91",
   jobTitle = "",
   companyName = "",
+  jobId = "",
+  jobDetailsId = "",
   size = 34,
   className = "",
   contactLocked = false,
@@ -20,17 +23,9 @@ export default function JobWhatsAppButton({
   const isLoggedIn = Boolean(user?.userId || user?.id || user?._id);
 
   const href = useMemo(() => {
-    const text = [
-      "Hi,",
-      jobTitle ? `I'm interested in the ${jobTitle} role` : "I'm interested in this job",
-      companyName ? `at ${companyName}` : null,
-      "Could you share more details?",
-    ]
-      .filter(Boolean)
-      .join(" ");
-
+    const text = buildTechPathEnquiryMessage({ jobTitle, companyName, jobId, jobDetailsId });
     return buildWhatsAppHref(phone, countryCode, { text });
-  }, [phone, countryCode, jobTitle, companyName]);
+  }, [phone, countryCode, jobTitle, companyName, jobId, jobDetailsId]);
 
   const locked = contactLocked || !isLoggedIn || !href;
   const dim = size;

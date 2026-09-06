@@ -216,6 +216,7 @@ function CreateJobForm({
   selectedData = null,
   page = "create",
   onClose = null,
+  onSuccess = null,
   mode = "employer",
 }) {
   const Employer = useSelector((state) => state.employer.employer);
@@ -377,10 +378,11 @@ function CreateJobForm({
             ? await updateJobPostAdmin(selectedData?._id, payload)
             : await employerJobUpdate(payload, activeEmployerId);
         }
-        const success = isAdminMode ? status?.data?.status : status;
+        const success = isAdminMode ? status?.data?.status : (status?.status ?? status);
         if (success) {
           toast.success(page === "create" ? "Job created!" : "Job updated!");
-          if (onClose) onClose();
+          if (onSuccess) onSuccess();
+          else if (onClose) onClose();
           else navigate(isAdminMode ? "/admin/jobs" : "/employer/job_list");
           return;
         }
@@ -556,7 +558,7 @@ function CreateJobForm({
         {/* ── Page heading ── */}
         <motion.div variants={itemVariants} style={{ marginBottom: 28 }}>
           <p style={{ fontSize: 11.5, fontWeight: 700, color: "#94a3b8", letterSpacing: ".09em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-            {isAdminMode ? "Admin job listing" : activeEmployerName?.toUpperCase()}
+            {isAdminMode ? "Admin job listing" : "TechPath"}
           </p>
           <h1 style={{ fontSize: "clamp(20px,3vw,26px)", fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-0.02em" }}>
             {isEdit ? "Edit Job Listing" : isAdminMode ? "Post Admin Job" : "Post a New Job"}
@@ -579,7 +581,7 @@ function CreateJobForm({
                       value={formik.values.shopName}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      placeholder="e.g. NexGen Mobile Service, Ernakulam"
+                      placeholder="e.g. TechPath Mobile Service, Ernakulam"
                       className="cjf-input"
                     />
                     <p style={{ fontSize: 11.5, color: "#64748b", marginTop: 6 }}>
@@ -1057,7 +1059,8 @@ function CreateJobForm({
             </div>
           </motion.div>
 
-          {/* ── Job scheduling (optional) ── */}
+          {/* ── Job scheduling (admin only) ── */}
+          {isAdminMode && (
           <motion.div variants={itemVariants} className="cjf-section">
             <SH icon={<Send size={16} style={{ color: "#6366f1" }} />} title="Job Live Schedule" iconBg="#eef2ff" />
             <p style={{ fontSize: 12, color: "#64748b", margin: "0 0 16px" }}>
@@ -1086,6 +1089,7 @@ function CreateJobForm({
               </div>
             </div>
           </motion.div>
+          )}
 
           {/* ── Submit ── */}
           <motion.div variants={itemVariants} className="cjf-form-actions">

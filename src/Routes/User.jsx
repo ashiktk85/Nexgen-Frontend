@@ -4,7 +4,7 @@ import RouteFallback from "@/components/RouteFallback";
 import { UserProtectedRoute } from "@/services/userProtector";
 import Home from "../pages/User/Outlets/Home";
 import HomeLayout from "@/pages/User/Layout/HomeLayout";
-import PrivacyPolicy from "../pages/PrivacyPolicy";
+import LegalPrivacyPage from "../pages/LegalPrivacyPage";
 import TermsOfService from "../pages/TermsOfService";
 
 const LoginPage = lazy(() => import("./../pages/Login"));
@@ -13,6 +13,7 @@ const ForgotPasswordOtp = lazy(() => import("./../pages/ForgotPasswordOtp"));
 const RegisterOtp = lazy(() => import("./../pages/RegisterOtp"));
 const Register = lazy(() => import("../pages/Register"));
 const AuthCallback = lazy(() => import("../pages/AuthCallback"));
+const CompleteProfile = lazy(() => import("../pages/CompleteProfile"));
 const Profile = lazy(() => import("../pages/User/Outlets/Profile"));
 const JobApplication = lazy(() => import("../pages/User/Outlets/JobApplication"));
 const ApplicationSubmitted = lazy(() => import("../pages/User/Outlets/ApplicationSubmitted"));
@@ -29,6 +30,7 @@ function User() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/complete-profile" element={<CompleteProfile />} />
         <Route path="/otp-verification" element={<RegisterOtp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/forgot-password-otp" element={<ForgotPasswordOtp />} />
@@ -43,7 +45,7 @@ function User() {
           <Route path="/application-submitted" element={<UserProtectedRoute><ApplicationSubmitted /></UserProtectedRoute>} />
           <Route path="/job-application-history" element={<UserProtectedRoute><JobApplicationHistory /></UserProtectedRoute>} />
           <Route path="/profile" element={<UserProtectedRoute><Profile /></UserProtectedRoute>} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/privacy" element={<LegalPrivacyPage />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="*" element={<NotFound />} />
         </Route>

@@ -108,14 +108,10 @@ const PLATFORMS = [
   },
 ];
 
+import { buildTechPathShareText, buildTechPathShareUrl } from "@/utils/techpathMessaging";
+
 function buildShareContent(job) {
-  const title = job?.jobTitle || job?.name || "Job opportunity";
-  const company = job?.companyName || "";
-  const location = [job?.city, job?.state].filter(Boolean).join(", ");
-  const parts = [title];
-  if (company) parts.push(`at ${company}`);
-  if (location) parts.push(`in ${location}`);
-  return parts.join(" ");
+  return buildTechPathShareText(job);
 }
 
 function isMobileLike() {
@@ -221,7 +217,7 @@ export default function JobShareButton({
 
   if (!id) return null;
 
-  const url = `${window.location.origin}/job-details/${id}`;
+  const url = buildTechPathShareUrl(id) || `${window.location.origin}/job-details/${id}`;
   const text = buildShareContent(job);
   const shareTitle = job?.jobTitle || job?.name || "Job opportunity";
   const preferNative = canUseNativeShare() && isMobileLike();
@@ -284,12 +280,12 @@ export default function JobShareButton({
   };
 
   const defaultBtnClass = prominent
-    ? "inline-flex items-center justify-center gap-1.5 min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl border-[2.5px] border-[#0058be] bg-white text-[#0058be] shadow-sm hover:bg-[#0058be]/8 hover:shadow-md active:scale-95 transition-all touch-manipulation"
+    ? "inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-xl border-[2.5px] border-[#0058be] bg-white text-[#0058be] text-sm font-semibold shadow-sm hover:bg-[#0058be]/8 hover:shadow-md active:scale-95 transition-all touch-manipulation whitespace-nowrap"
     : compact
       ? "inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg border-2 border-[#0058be] bg-white text-[#0058be] text-xs font-semibold hover:bg-[#0058be]/8 transition-all active:scale-95"
       : "inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border-2 border-[#0058be] bg-white text-[#0058be] text-sm font-semibold hover:bg-[#0058be]/8 transition-all active:scale-95";
 
-  const iconSize = prominent ? 20 : compact || iconOnly ? 15 : 17;
+  const iconSize = prominent ? 18 : compact || iconOnly ? 15 : 17;
   const iconStroke = prominent ? 2.75 : compact || iconOnly ? 2.5 : 2.5;
 
   const menu = open

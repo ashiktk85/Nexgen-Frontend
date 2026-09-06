@@ -122,7 +122,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     },
     {
       id: "applied-students",
-      label: "Applied Students",
+      label: "Applied Candidates",
       url: "/admin/applied-students",
       icon: <Users className="w-4 h-4" />,
     },

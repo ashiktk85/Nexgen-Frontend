@@ -16,6 +16,8 @@ import { formatSalary } from '@/utils/formatSalary';
 import { formatExperience, isFresherJob } from '@/utils/formatExperience';
 import { formatJobLocation } from '@/utils/formatLocation';
 import JobShareButton from '@/components/common/JobShareButton';
+import { Helmet } from 'react-helmet-async';
+import { buildTechPathShareText } from '@/utils/techpathMessaging';
 
 if (!document.getElementById('jd-li-styles')) {
   const s = document.createElement('style');
@@ -52,6 +54,7 @@ if (!document.getElementById('jd-li-styles')) {
     .jd-li-hero-inner {
       max-width: 1128px; margin: 0 auto; padding: 0 16px;
       position: relative; z-index: 1;
+      min-width: 0;
     }
     .jd-li-hero-back {
       display: inline-flex; align-items: center; gap: 6px;
@@ -65,13 +68,30 @@ if (!document.getElementById('jd-li-styles')) {
       color: #a5b4fc; font-size: 13px; font-weight: 500;
       margin: 0 0 6px; letter-spacing: 0.05em; text-transform: uppercase;
     }
+    .jd-li-hero-brand {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px;
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+      color: #fff; font-size: 12px; font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin-bottom: 10px;
+    }
     .jd-li-hero-title {
       color: #fff; font-size: clamp(20px, 4vw, 32px);
       font-weight: 800; margin: 0; letter-spacing: -0.02em;
       line-height: 1.25;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      max-width: 100%;
     }
     .jd-li-hero-sub {
       color: #c7d2fe; font-size: 14px; margin: 8px 0 0; font-weight: 400;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .jd-li-hero-actions {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+      margin-top: 16px;
     }
 
     .jd-li-main-wrap {
@@ -610,6 +630,16 @@ const JobDetails = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
+      {!loading && job && (
+        <Helmet>
+          <title>{job.name} | TechPath</title>
+          <meta name="description" content={buildTechPathShareText({ jobTitle: job.name, companyName: displayCompany, city: job.city, state: job.state })} />
+          <meta property="og:title" content={`${job.name} | TechPath`} />
+          <meta property="og:description" content={buildTechPathShareText({ jobTitle: job.name, companyName: displayCompany, city: job.city, state: job.state })} />
+          <meta property="og:url" content={`${typeof window !== 'undefined' ? window.location.origin : ''}/job-details/${id}`} />
+          <meta property="og:type" content="website" />
+        </Helmet>
+      )}
       {/* Hero banner — matches All Jobs page */}
       <div className="jd-li-hero">
         <div className="jd-li-hero-glow-1" />
@@ -623,7 +653,8 @@ const JobDetails = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <p className="jd-li-hero-label">Job opportunity</p>
+            <p className="jd-li-hero-label">Job opportunity on TechPath</p>
+            <span className="jd-li-hero-brand">TechPath</span>
             {loading ? (
               <>
                 <div className="jd-li-skeleton" style={{ width: 'min(480px, 85%)', height: 32, marginBottom: 10, opacity: 0.35 }} />
@@ -633,6 +664,26 @@ const JobDetails = () => {
               <>
                 <h1 className="jd-li-hero-title">{job.name}</h1>
                 <p className="jd-li-hero-sub">{heroSubtitle}</p>
+                <div className="jd-li-hero-actions">
+                  <JobShareButton
+                    job={{ ...job, jobTitle: job.name, companyName: displayCompany }}
+                    jobId={id}
+                    label="Share"
+                    prominent
+                  />
+                  {job.phone && (
+                    <JobWhatsAppButton
+                      phone={isLoggedIn ? job.phone : null}
+                      countryCode={job.countryCode}
+                      jobTitle={job.name}
+                      companyName={displayCompany}
+                      jobId={job.jobCode || id}
+                      jobDetailsId={id}
+                      size={40}
+                      contactLocked={!isLoggedIn}
+                    />
+                  )}
+                </div>
               </>
             )}
           </motion.div>
@@ -714,6 +765,7 @@ const JobDetails = () => {
                   job={{ ...job, jobTitle: job.name, companyName: displayCompany }}
                   jobId={id}
                   label="Share"
+                  prominent
                 />
               </div>
             </div>
@@ -873,6 +925,8 @@ const JobDetails = () => {
                     countryCode={job.countryCode}
                     jobTitle={job.name}
                     companyName={displayCompany}
+                    jobId={job.jobCode || id}
+                    jobDetailsId={id}
                     size={38}
                   />
                 </div>
@@ -891,6 +945,8 @@ const JobDetails = () => {
                       countryCode={job.countryCode}
                       jobTitle={job.name}
                       companyName={displayCompany}
+                      jobId={job.jobCode || id}
+                      jobDetailsId={id}
                       size={38}
                       contactLocked
                     />

@@ -141,7 +141,8 @@ const globalStyle = `
   }
 
   /* Pagination */
-  .ajp-pagination { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:28px; flex-wrap:wrap; }
+  .ajp-pagination { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:28px; margin-bottom:16px; flex-wrap:wrap; }
+  .ajp-pagination-top { margin-top:0; margin-bottom:20px; }
 
   /* Tablet */
   @media (max-width:900px) {
@@ -787,6 +788,17 @@ const AllJobsPage = () => {
                 </div>
               ) : jobs.length > 0 ? (
                 <>
+                  {totalPages > 1 && (
+                    <motion.div initial={{opacity:0}} animate={{opacity:1}} className="ajp-pagination ajp-pagination-top">
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        prevLabel="← Prev"
+                        nextLabel="Next →"
+                      />
+                    </motion.div>
+                  )}
                   <motion.div
                     variants={containerVariants}
                     initial="hidden"

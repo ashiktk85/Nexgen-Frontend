@@ -469,6 +469,15 @@ const ShopDetails = () => {
                             </p>
                         ) : (
                             <>
+                                {shopJobs.length > JOBS_PER_PAGE && (
+                                    <div className="mb-4">
+                                        <Pagination
+                                            currentPage={safeJobsPage}
+                                            totalPages={totalJobPages}
+                                            onPageChange={setJobsPage}
+                                        />
+                                    </div>
+                                )}
                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                                     {visibleShopJobs.map((job) => (
                                         <JobCard key={job._id} job={job} layout="grid" />

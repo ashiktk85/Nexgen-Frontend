@@ -227,9 +227,14 @@ export default function CompanyDetails() {
               </div>
               Employer Profile
             </h3>
-            <motion.button className="cd-edit-btn" onClick={() => openModal("editProfile")} whileHover={{ scale: 1.02 }} whileTap={{ scale: .97 }}>
-              <Pencil size={12} /> Edit Profile
-            </motion.button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <Link to="/employer/create_job" className="cd-primary-btn">
+                <Plus size={14} /> Post Job
+              </Link>
+              <motion.button className="cd-edit-btn" onClick={() => openModal("editProfile")} whileHover={{ scale: 1.02 }} whileTap={{ scale: .97 }}>
+                <Pencil size={12} /> Edit Profile
+              </motion.button>
+            </div>
           </div>
 
           {/* Body */}

@@ -93,7 +93,7 @@ const ForgotPasswordOtp = () => {
     validationSchema: Yup.object({
       password: Yup.string()
         .trim()
-        .min(8, "Password must be at least 8 characters")
+        .min(6, "Password must be at least 6 characters")
         .required("Password is required"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password"), null], "Passwords must match")

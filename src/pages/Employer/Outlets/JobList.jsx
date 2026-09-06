@@ -97,20 +97,38 @@ if (!document.getElementById("ejl-styles")) {
 
     .ejl-jobs-grid {
       display:grid;
-      grid-template-columns:repeat(1, minmax(0, 1fr));
+      grid-template-columns:repeat(auto-fill, minmax(min(100%, 280px), max-content));
       gap:14px;
-      align-items:stretch;
+      align-items:start;
+      justify-content:start;
     }
     @media (min-width:640px) {
-      .ejl-jobs-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+      .ejl-jobs-grid { grid-template-columns:repeat(auto-fill, minmax(280px, max-content)); }
     }
     @media (min-width:960px) {
-      .ejl-jobs-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+      .ejl-jobs-grid { grid-template-columns:repeat(auto-fill, minmax(280px, max-content)); }
     }
 
     .ejl-view-toggle { display:none; }
     @media (min-width:768px) {
       .ejl-view-toggle { display:flex; }
+    }
+
+    .ejl-stat-grid-compact {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 24px;
+    }
+    @media (max-width: 767px) {
+      .ejl-stat-grid-compact {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 379px) {
+      .ejl-stat-grid-compact {
+        grid-template-columns: 1fr;
+      }
     }
   `;
   document.head.appendChild(s);
@@ -401,28 +419,6 @@ function JobList() {
             </button>
           </motion.div>
 
-          {/* ── Gradient stat cards ── */}
-          <motion.div
-            variants={itemVariants}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill,minmax(min(100%,140px),1fr))",
-              gap: 14,
-              marginBottom: 24,
-            }}
-          >
-            {getStats(stats).map(({ label, value, icon, gradient, shadow }) => (
-              <StatCard
-                key={label}
-                icon={icon}
-                value={value}
-                label={label}
-                gradient={gradient}
-                shadow={shadow}
-              />
-            ))}
-          </motion.div>
-
           {/* ── Section header ── */}
           <motion.div
             variants={itemVariants}
@@ -559,6 +555,17 @@ function JobList() {
             </div>
           </motion.div>
 
+          {/* ── Pagination (top) ── */}
+          {!loading && totalCount > JOBS_PER_PAGE && viewMode === "grid" && (
+            <motion.div variants={itemVariants} style={{ marginBottom: 16 }}>
+              <Pagination
+                currentPage={safePage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </motion.div>
+          )}
+
           {/* ── Job grid / list ── */}
           {loading ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: 240, background: "#fff", borderRadius: 16, border: "1.5px solid #e2e8f0", gap: 14 }}>
@@ -573,7 +580,7 @@ function JobList() {
               >
                 <AnimatePresence>
                   {jobs.map((job, index) => (
-                    <motion.div key={job._id} custom={index} variants={cardVariants} initial="hidden" animate="visible" exit="exit" style={{ height: "100%" }}>
+                    <motion.div key={job._id} custom={index} variants={cardVariants} initial="hidden" animate="visible" exit="exit" style={{ width: "fit-content", maxWidth: "100%" }}>
                       <JobCard job={job} handleEdit={handleEdit} handleStatus={handleStatus} handleDelete={handleDelete} handleView={handleView} />
                     </motion.div>
                   ))}
@@ -625,7 +632,7 @@ function JobList() {
             </motion.div>
           )}
 
-          {/* ── Pagination (grid view) ── */}
+          {/* ── Pagination (bottom) ── */}
           {!loading && totalCount > JOBS_PER_PAGE && viewMode === "grid" && (
             <motion.div variants={itemVariants} style={{ marginTop: 22 }}>
               <Pagination
@@ -635,6 +642,21 @@ function JobList() {
               />
             </motion.div>
           )}
+
+          {/* ── Details cards below job list — 4 in one row ── */}
+          <motion.div variants={itemVariants} className="ejl-stat-grid-compact">
+            {getStats(stats).map(({ label, value, icon, gradient, shadow }) => (
+              <StatCard
+                key={label}
+                icon={icon}
+                value={value}
+                label={label}
+                gradient={gradient}
+                shadow={shadow}
+                compact
+              />
+            ))}
+          </motion.div>
 
         </motion.div>
       </div>
@@ -791,7 +813,15 @@ function JobList() {
       <Sheet open={!!editingJob} onOpenChange={(open) => { if (!open) setEditingJob(null); }}>
         <SheetContent className="sm:max-w-none" style={{ width: "95vw", maxWidth: "900px", padding: 0, overflowY: "auto", background: "#f1f5f9" }} side="right">
           {editingJob && (
-            <CreateJobForm selectedData={editingJob} page="update" onClose={() => setEditingJob(null)} />
+            <CreateJobForm
+              selectedData={editingJob}
+              page="update"
+              onClose={() => setEditingJob(null)}
+              onSuccess={() => {
+                setEditingJob(null);
+                fetchJobs({ page: currentPage });
+              }}
+            />
           )}
         </SheetContent>
       </Sheet>

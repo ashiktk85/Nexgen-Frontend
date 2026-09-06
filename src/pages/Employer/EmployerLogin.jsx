@@ -12,6 +12,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
 import { AUTH_PANEL_EMPLOYER } from "@/constants/authPanelCopy";
 
+const LAST_EMPLOYER_EMAIL_KEY = "techpath-last-employer-email";
+
 const EmployerLogin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -30,7 +32,7 @@ const EmployerLogin = () => {
 
   const formik = useFormik({
     initialValues: {
-      email: "",
+      email: typeof window !== "undefined" ? localStorage.getItem(LAST_EMPLOYER_EMAIL_KEY) || "" : "",
       password: "",
     },
     validationSchema: Yup.object({
@@ -40,16 +42,17 @@ const EmployerLogin = () => {
         .required("Email is required"),
       password: Yup.string()
         .trim()
-        .min(8, "Password must be at least 8 characters")
+        .min(6, "Password must be at least 6 characters")
         .required("Password is required"),
     }),
     onSubmit: async (values) => {
       try {
         const loginResult = await dispatch(employerLogin(values)).unwrap();
         if (loginResult.status === 200) {
+          localStorage.setItem(LAST_EMPLOYER_EMAIL_KEY, values.email.trim());
           toast.success("Login successful");
           setTimeout(() => {
-            navigate("/employer/dashboard");
+            navigate("/employer/job_list");
           }, 1000);
         } else {
           toast.error("Login failed");

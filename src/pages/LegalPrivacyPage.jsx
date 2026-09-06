@@ -5,7 +5,7 @@ import LegalFooter from "@/components/LegalFooter";
 const APP_NAME = "Techpath";
 const SUPPORT_EMAIL = "techpath786@gmail.com";
 
-function PrivacyPolicy() {
+function LegalPrivacyPage() {
   useEffect(() => {
     document.title = `${APP_NAME} | Privacy Policy`;
   }, []);
@@ -154,4 +154,4 @@ function PrivacyPolicy() {
   );
 }
 
-export default PrivacyPolicy;
+export default LegalPrivacyPage;

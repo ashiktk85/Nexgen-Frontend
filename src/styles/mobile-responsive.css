@@ -133,10 +133,16 @@
     min-height: 44px;
   }
 
-  /* Share action icons spacing */
-  .jc-posted-time {
-    text-align: left;
-  }
+  /* User job card id pill */
+  .ujc-id-pill { max-width: 100%; }
+  .ujc-header-block { min-width: 0; }
+
+  /* Employer job list stat grid */
+  .ejl-stat-grid-compact { min-width: 0; }
+
+  /* Job details hero actions */
+  .jd-li-hero-actions .job-share-btn,
+  .jd-li-hero-actions a { min-height: 44px; }
 }
 
 @media (max-width: 480px) {

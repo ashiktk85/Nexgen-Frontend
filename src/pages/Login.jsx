@@ -28,6 +28,8 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
+const LAST_EMAIL_KEY = "techpath-last-email";
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -50,7 +52,7 @@ const LoginPage = () => {
 
   const formik = useFormik({
     initialValues: {
-      email: "",
+      email: typeof window !== "undefined" ? localStorage.getItem(LAST_EMAIL_KEY) || "" : "",
       password: "",
     },
     validationSchema: Yup.object({
@@ -60,12 +62,13 @@ const LoginPage = () => {
         .required("Email is required"),
       password: Yup.string()
         .trim()
-        .min(8, "Password must be at least 8 characters")
+        .min(6, "Password must be at least 6 characters")
         .required("Password is required"),
     }),
     onSubmit: async (values) => {
       try {
         await login(values.email, values.password);
+        localStorage.setItem(LAST_EMAIL_KEY, values.email.trim());
         toast.success("Login successful!");
         navigate("/");
       } catch (err) {

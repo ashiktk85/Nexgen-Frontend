@@ -24,6 +24,7 @@ import { useSelector } from "react-redux";
 import adminAxiosInstance from "@/config/axiosConfig/adminAxiosInstance";
 import { Helmet } from "react-helmet-async";
 import TechpathBrand, { BRAND_SIZES } from "@/components/TechpathBrand";
+import { TECHPATH_CONTACT_PHONE_DISPLAY, TECHPATH_WHATSAPP_URL } from "@/constants/contact";
 
 const HERO_BANNER_SRC = "/Images/bannerImg.jpg";
 const HERO_ROTATE_MS = 6500;
@@ -883,6 +884,16 @@ export default function Home() {
                   <Mail sx={{ fontSize: 16 }} className="text-[#0058be] flex-shrink-0" />
                   <a href="mailto:techpath786@gmail.com" className="hover:text-[#0058be] transition-colors">
                     techpath786@gmail.com
+                  </a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <a
+                    href={TECHPATH_WHATSAPP_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#0058be] transition-colors font-medium"
+                  >
+                    WhatsApp: {TECHPATH_CONTACT_PHONE_DISPLAY}
                   </a>
                 </li>
               </ul>

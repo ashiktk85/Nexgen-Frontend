@@ -60,5 +60,9 @@ export const authService = {
   loginWithGoogleRedirect() {
     window.location.href = `${API_URL}/api/auth/google`;
   },
+  async completeProfile({ phone, location }) {
+    const { data } = await api.post("/api/auth/complete-profile", { phone, location });
+    return data;
+  },
 };
 

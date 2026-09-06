@@ -13,6 +13,7 @@ import {
   ADMIN_SEARCH_INPUT,
 } from "@/components/Admin/adminPageLayout";
 import { displayValue } from "@/utils/tableValue";
+import Pagination from "@/components/ui/Pagination";
 
 const AppliedStudents = () => {
   const [jobs, setJobs] = useState([]);
@@ -136,7 +137,7 @@ const AppliedStudents = () => {
           className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100"
         >
           <Users size={12} />
-          {row.applicantCount || 0} students
+          {row.applicantCount || 0} applicants
           <ChevronRight size={12} />
         </button>
       ),
@@ -149,8 +150,23 @@ const AppliedStudents = () => {
     },
   ];
 
+  const typePillClass = (type) => {
+    if (type === "Employer") return "bg-amber-50 text-amber-800 border-amber-200";
+    if (type === "Student") return "bg-indigo-50 text-indigo-700 border-indigo-100";
+    return "bg-slate-100 text-slate-700 border-slate-200";
+  };
+
   const applicantColumns = [
     { id: "name", header: "Name", accessor: "name" },
+    {
+      id: "type",
+      header: "Type",
+      cell: (row) => (
+        <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold border ${typePillClass(row.candidateType)}`}>
+          {row.candidateType || "New Candidate"}
+        </span>
+      ),
+    },
     { id: "email", header: "Email", accessor: "email" },
     { id: "phone", header: "Mobile", accessor: (row) => displayValue(row.phone) },
     {
@@ -188,7 +204,7 @@ const AppliedStudents = () => {
       <div className="flex items-end justify-between flex-wrap gap-2">
         <div>
           <p className={ADMIN_HEADER_EYEBROW}>Recruitment</p>
-          <h1 className={ADMIN_HEADER_TITLE}>Applied Students</h1>
+          <h1 className={ADMIN_HEADER_TITLE}>Applied Candidates</h1>
         </div>
       </div>
 
@@ -268,6 +284,16 @@ const AppliedStudents = () => {
           </button>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="mb-3 flex justify-center">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
 
       <div className={ADMIN_TABLE_WRAP}>
         <DataTable
