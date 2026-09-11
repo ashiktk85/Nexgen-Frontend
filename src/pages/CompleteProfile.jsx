@@ -24,7 +24,7 @@ const CompleteProfile = () => {
     onSubmit: async (values) => {
       setSubmitting(true);
       try {
-        const { data } = await authService.completeProfile({
+        const data = await authService.completeProfile({
           phone: values.phone.trim(),
           location: values.location.trim() || undefined,
         });

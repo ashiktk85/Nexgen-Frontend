@@ -522,6 +522,12 @@ const JobDetails = () => {
   const userName = [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [id]);
+
+  useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setJob(null);
@@ -551,6 +557,11 @@ const JobDetails = () => {
         navigate('/home');
       } finally {
         setLoading(false);
+        requestAnimationFrame(() => {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        });
       }
     };
     fetchData();

@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import RouteFallback from "@/components/RouteFallback";
+import ScrollToTop from "@/components/ScrollToTop";
 import User from "./Routes/User";
 
 const Employer = lazy(() => import("./Routes/Employer"));
@@ -11,6 +12,7 @@ function App() {
   return (
     <>
       <Router>
+        <ScrollToTop />
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/*" element={<User />} />
