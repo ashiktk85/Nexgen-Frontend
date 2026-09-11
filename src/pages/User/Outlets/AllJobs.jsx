@@ -816,17 +816,6 @@ const AllJobsPage = () => {
                       </motion.div>
                     ))}
                   </motion.div>
-                  {totalPages > 1 && (
-                    <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.3}} className="ajp-pagination">
-                      <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={setCurrentPage}
-                        prevLabel="← Prev"
-                        nextLabel="Next →"
-                      />
-                    </motion.div>
-                  )}
                 </>
               ) : (
                 <motion.div initial={{opacity:0,scale:0.97}} animate={{opacity:1,scale:1}}
