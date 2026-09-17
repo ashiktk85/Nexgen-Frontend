@@ -534,6 +534,23 @@ export const saveCustomCityAdmin = async ({ name, state, country = "IN" }) => {
   return response?.data?.response;
 };
 
+export const getCustomStatesAdmin = async ({ country = "IN", search = "" }) => {
+  try {
+    const params = new URLSearchParams({ country });
+    if (search) params.append("search", search);
+    const response = await adminAxiosInstance.get(`/states?${params.toString()}`);
+    return response?.data?.response || [];
+  } catch (error) {
+    console.error("Error fetching custom states:", error);
+    return [];
+  }
+};
+
+export const saveCustomStateAdmin = async ({ name, country = "IN" }) => {
+  const response = await adminAxiosInstance.post("/states", { name, country });
+  return response?.data?.response;
+};
+
 export const getEmployerVerificationDetails = async (id) => {
   try {
     const response = await adminAxiosInstance.get(

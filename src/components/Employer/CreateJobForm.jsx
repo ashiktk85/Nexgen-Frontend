@@ -5,13 +5,15 @@ import SearchablePlaceSelect from "@/components/common/SearchablePlaceSelect";
 import { useFormik } from "formik";
 import validateJobForm from "@/Validations/CreateJob-validation";
 import { employerJobCreation, employerJobUpdate, getCompanyById } from "@/apiServices/userApi";
-import { getActiveJobTitles, getCustomCities, saveCustomCity } from "@/apiServices/employerApi";
+import { getActiveJobTitles, getCustomCities, saveCustomCity, getCustomStates, saveCustomState } from "@/apiServices/employerApi";
 import {
   createJobPostAdmin,
   updateJobPostAdmin,
   getActiveJobTitlesAdmin,
   getCustomCitiesAdmin,
   saveCustomCityAdmin,
+  getCustomStatesAdmin,
+  saveCustomStateAdmin,
 } from "@/apiServices/adminApi";
 import employerAxiosInstance from "@/config/axiosConfig/employerAxiosInstance";
 import { toast } from "sonner";
@@ -208,8 +210,18 @@ const CustomOptionField = ({ label, name, options, formik, placeholder }) => {
 import { parseExperienceFromJob, buildExperienceRequired } from "@/utils/formatExperience";
 
 const cityFilter = createFilterOptions({ stringify: (option) => (typeof option === "string" ? option : option?.name || "") });
+const stateFilter = createFilterOptions({ stringify: (option) => (typeof option === "string" ? option : option?.name || "") });
 
 const getCityLabel = (option) => (typeof option === "string" ? option : option?.name || "");
+const getStateLabel = (option) => (typeof option === "string" ? option : option?.name || "");
+
+/** Package states use isoCode; custom/free-text states use the display name as the stored value. */
+const getStateValue = (option) => {
+  if (!option) return null;
+  if (typeof option === "string") return option.trim() || null;
+  if (option.isCustom || option.isNew) return option.name?.trim() || null;
+  return option.isoCode || option.name || null;
+};
 
 /* ══════════════════════════════════════════════ */
 function CreateJobForm({
@@ -227,6 +239,7 @@ function CreateJobForm({
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [customCities, setCustomCities] = useState([]);
+  const [customStates, setCustomStates] = useState([]);
   const [selectedRequirements, setSelectedRequirements] = useState(selectedData?.requirements || []);
   const [availableRequirements, setAvailableRequirements] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -407,8 +420,25 @@ function CreateJobForm({
   }, [formik.values.country]);
 
   useEffect(() => {
+    const loadCustomStates = async () => {
+      if (!formik.values.country) {
+        setCustomStates([]);
+        return;
+      }
+      try {
+        const fetchFn = isAdminMode ? getCustomStatesAdmin : getCustomStates;
+        const list = await fetchFn({ country: formik.values.country });
+        setCustomStates(list || []);
+      } catch (err) {
+        console.error("Error fetching custom states:", err);
+      }
+    };
+    loadCustomStates();
+  }, [formik.values.country, isAdminMode]);
+
+  useEffect(() => {
     if (formik.values.state && formik.values.country)
-      setCities(City.getCitiesOfState(formik.values.country, formik.values.state));
+      setCities(City.getCitiesOfState(formik.values.country, formik.values.state) || []);
     else setCities([]);
   }, [formik.values.state, formik.values.country]);
 
@@ -432,6 +462,27 @@ function CreateJobForm({
     loadCustomCities();
   }, [formik.values.state, formik.values.country, isAdminMode]);
 
+  const stateOptions = useMemo(() => {
+    const seen = new Set();
+    const merged = [];
+    const addState = (name, isoCode, isCustom = false) => {
+      const key = (isoCode || name || "").toLowerCase();
+      const nameKey = (name || "").toLowerCase();
+      if (!name || seen.has(key) || seen.has(nameKey)) return;
+      seen.add(key);
+      seen.add(nameKey);
+      merged.push({ name, isoCode: isoCode || name, isCustom });
+    };
+    states.forEach((s) => addState(s.name, s.isoCode, false));
+    customStates.forEach((s) => addState(s.name, s.isoCode || s.name, true));
+    if (formik.values.state) {
+      const existing = states.find((s) => s.isoCode === formik.values.state);
+      if (existing) addState(existing.name, existing.isoCode, false);
+      else addState(formik.values.state, formik.values.state, true);
+    }
+    return merged.sort((a, b) => a.name.localeCompare(b.name));
+  }, [states, customStates, formik.values.state]);
+
   const cityOptions = useMemo(() => {
     const seen = new Set();
     const merged = [];
@@ -446,6 +497,35 @@ function CreateJobForm({
     if (formik.values.city) addCity(formik.values.city.trim(), true);
     return merged.sort((a, b) => a.name.localeCompare(b.name));
   }, [cities, customCities, formik.values.city]);
+
+  const persistCustomState = useCallback(async (stateName) => {
+    const trimmed = stateName?.trim();
+    if (!trimmed || !formik.values.country) return null;
+
+    const inPackage = states.some((s) => s.name.toLowerCase() === trimmed.toLowerCase());
+    if (inPackage) return null;
+
+    const existingCustom = customStates.find((s) => s.name.toLowerCase() === trimmed.toLowerCase());
+    if (existingCustom) return existingCustom;
+
+    try {
+      const saveFn = isAdminMode ? saveCustomStateAdmin : saveCustomState;
+      const saved = await saveFn({
+        name: trimmed,
+        country: formik.values.country,
+      });
+      if (saved) {
+        setCustomStates((prev) => {
+          if (prev.some((s) => s.name.toLowerCase() === trimmed.toLowerCase())) return prev;
+          return [...prev, saved];
+        });
+      }
+      return saved;
+    } catch (err) {
+      console.error("Failed to save custom state:", err);
+      return null;
+    }
+  }, [states, customStates, formik.values.country, isAdminMode]);
 
   const persistCustomCity = useCallback(async (cityName) => {
     const trimmed = cityName?.trim();
@@ -487,11 +567,36 @@ function CreateJobForm({
     }
   };
 
+  const handleStateChange = async (_, value) => {
+    const next = getStateValue(value);
+    formik.setFieldValue("state", next);
+    formik.setFieldValue("city", null);
+    formik.setFieldTouched("state", true, false);
+    if (next && (typeof value === "string" || value?.isNew || value?.isCustom)) {
+      const saved = await persistCustomState(typeof value === "string" ? value : value?.name || next);
+      if (saved?.name && saved.name !== next) {
+        formik.setFieldValue("state", saved.name);
+      }
+    }
+  };
+
   const handleCityChange = async (_, value) => {
     const cityName = typeof value === "string" ? value.trim() : value?.name?.trim() || "";
     formik.setFieldValue("city", cityName || null);
     formik.setFieldTouched("city", true, false);
     if (cityName) await persistCustomCity(cityName);
+  };
+
+  const filterStateOptions = (options, params) => {
+    const filtered = stateFilter(options, params);
+    const input = params.inputValue.trim();
+    if (
+      input &&
+      !options.some((o) => getStateLabel(o).toLowerCase() === input.toLowerCase())
+    ) {
+      filtered.push({ name: input, isoCode: input, isCustom: true, isNew: true });
+    }
+    return filtered;
   };
 
   const filterCityOptions = (options, params) => {
@@ -545,7 +650,13 @@ function CreateJobForm({
   const selectedJob = jobTitleOptions.find((j) => j.title === formik.values.jobTitle) || null;
   const countries = useMemo(() => Country.getAllCountries(), []);
   const selectedCountry = countries.find((c) => c.isoCode === formik.values.country) || null;
-  const selectedState = states.find(s => s.isoCode === formik.values.state) || null;
+  const selectedState = formik.values.state
+    ? (
+        stateOptions.find((s) => s.isoCode === formik.values.state) ||
+        stateOptions.find((s) => s.name.toLowerCase() === String(formik.values.state).toLowerCase()) ||
+        { name: formik.values.state, isoCode: formik.values.state, isCustom: true }
+      )
+    : null;
   const selectedCity = formik.values.city
     ? (cityOptions.find((c) => c.name.toLowerCase() === formik.values.city.toLowerCase()) || formik.values.city)
     : null;
@@ -796,14 +907,20 @@ function CreateJobForm({
               <div>
                 <FL>State / Province</FL>
                 <SearchablePlaceSelect
-                  options={states}
+                  freeSolo
+                  options={stateOptions}
+                  getOptionLabel={getStateLabel}
                   value={selectedState}
                   disabled={!formik.values.country}
-                  onChange={(_, v) => {
-                    formik.setFieldValue("state", v ? v.isoCode : null);
-                    formik.setFieldValue("city", null);
-                  }}
-                  placeholder={formik.values.country ? "Search state (optional)..." : "Select country first"}
+                  onChange={handleStateChange}
+                  onBlur={() => formik.setFieldTouched("state", true)}
+                  filterOptions={filterStateOptions}
+                  renderOption={(props, option) => (
+                    <li {...props} key={option.isNew ? `new-state-${option.name}` : `${option.isoCode}-${option.name}`}>
+                      {option.isNew ? `Add "${option.name}"` : option.name}
+                    </li>
+                  )}
+                  placeholder={formik.values.country ? "Search or type a state (optional)..." : "Select country first"}
                   error={formik.touched.state && Boolean(formik.errors.state)}
                   size="medium"
                 />

@@ -27,6 +27,23 @@ export const saveCustomCity = async ({ name, state, country = "IN" }) => {
   return response?.data?.response;
 };
 
+export const getCustomStates = async ({ country = "IN", search = "" }) => {
+  try {
+    const params = new URLSearchParams({ country });
+    if (search) params.append("search", search);
+    const response = await employerAxiosInstance.get(`/states?${params.toString()}`);
+    return response?.data?.response || [];
+  } catch (error) {
+    console.error("Error fetching custom states:", error);
+    return [];
+  }
+};
+
+export const saveCustomState = async ({ name, country = "IN" }) => {
+  const response = await employerAxiosInstance.post("/states", { name, country });
+  return response?.data?.response;
+};
+
 export const employerAnalyticsData = async (employerId) => {
     try {
         const response = await employerAxiosInstance.get(`/analytics/${employerId}`)

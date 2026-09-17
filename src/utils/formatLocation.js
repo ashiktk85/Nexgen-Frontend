@@ -8,9 +8,12 @@ export function getCountryName(code) {
 
 export function getStateName(countryCode, stateCode) {
   if (!stateCode) return "";
-  if (stateCode.length > 2) return stateCode;
-  if (!countryCode) return stateCode;
-  return State.getStateByCodeAndCountry(stateCode, countryCode)?.name || stateCode;
+  if (countryCode) {
+    const found = State.getStateByCodeAndCountry(stateCode, countryCode);
+    if (found?.name) return found.name;
+  }
+  // Custom / free-text states are stored by name (or longer codes)
+  return stateCode;
 }
 
 export function formatJobLocation(job, { includeCountry = true } = {}) {
