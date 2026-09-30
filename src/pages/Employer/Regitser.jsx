@@ -190,11 +190,12 @@ const Register = () => {
       transition={{ duration: 0.5 }}
     >
       <Helmet>
-        <title>Post Mobile Repair Jobs | Register as Employer on TechPath</title>
+        <title>Post Mobile Repair Job Vacancies | Hire Technicians | TechPath</title>
         <meta
           name="description"
-          content="Register as an employer on TechPath. Post mobile repair job vacancies, find qualified technicians, and hire chip-level, Android, iPhone experts worldwide. Quick & easy setup."
+          content="Register as an employer on TechPath. Post mobile repairing vacancies and hire mobile phone technicians, chip level, iPhone, Samsung and Android technicians. Quick and easy setup."
         />
+        <meta name="keywords" content="mobile repairing vacancy, mobile repair job vacancy, hire mobile phone technician, vacancy for mobile phone technician, chip level technician, cell phone technician" />
       </Helmet>
       {/* Left Section */}
       <motion.div

@@ -379,10 +379,14 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>TechPath - Mobile Phone Repair Jobs in Kerala | Technician Careers</title>
+        <title>Mobile Repair Technician Jobs & Vacancies in Kerala | TechPath</title>
         <meta
           name="description"
-          content="Find mobile repair jobs in Kerala. Connect with top employers hiring chip-level technicians, iPhone/Android experts, and service managers. Register as job seeker or employer."
+          content="Find mobile repair technician jobs and vacancies in Kerala. Chip level, iPhone, Samsung and Android technician jobs near you. Apply free on TechPath."
+        />
+        <meta
+          name="keywords"
+          content="mobile repair technician job, mobile repairing vacancy, mobile repairing jobs, cell phone repair technician jobs, mobile phone technician vacancy, mobile phone technician job vacancy, mobile repair job vacancy, chip level technician job, iphone technician jobs, samsung technician job, android technician job, mobile technician near me, phone technician near me, cell phone technician"
         />
       </Helmet>
       <style>{`

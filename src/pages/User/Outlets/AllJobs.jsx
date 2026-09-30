@@ -599,11 +599,11 @@ const AllJobsPage = () => {
     .join(", ");
 
   const pageTitle = locationLabel
-    ? `Mobile Repair Jobs in ${locationLabel} | TechPath`
-    : "Mobile Phone Repair Jobs Worldwide | TechPath Job Board";
+    ? `Mobile Repair Technician Jobs in ${locationLabel} | TechPath`
+    : "Mobile Repair Technician Jobs & Vacancies | TechPath";
   const pageDescription = locationLabel
-    ? `Browse mobile repair jobs in ${locationLabel}. Find chip-level technician, Android repair, iPhone repair, software, and management positions on TechPath.`
-    : "Browse mobile repair jobs worldwide. Find chip-level technician, Android repair, iPhone repair, software, and management positions. Filter by country, state, city, job type, and experience level.";
+    ? `Mobile repairing jobs and vacancies in ${locationLabel}. Find mobile phone technician, chip level technician, iPhone, Samsung and Android technician jobs on TechPath.`
+    : "Browse mobile repairing jobs and vacancies. Find mobile phone technician, cell phone repair technician, chip level, iPhone, Samsung and Android technician jobs. Filter by location and experience.";
   const pageCanonical = locationLabel
     ? `https://www.techpath.in/all-jobs?${new URLSearchParams({ ...(filterCountry && { country: filterCountry }), ...(filterState && { state: filterState }), ...(filterCity && { city: filterCity }) }).toString()}`
     : "https://www.techpath.in/all-jobs";
@@ -662,6 +662,7 @@ const AllJobsPage = () => {
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
+        <meta name="keywords" content="mobile repair job vacancy, mobile repairing jobs, mobile phone technician job vacancy, cell phone repair technician jobs, job for mobile phone repair technician, chip level technician job, iphone technician jobs, samsung technician job, android technician job, mobile technician near me" />
         <link rel="canonical" href={pageCanonical} />
       </Helmet>
       <style>{globalStyle}</style>

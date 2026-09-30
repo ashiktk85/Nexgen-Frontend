@@ -194,11 +194,12 @@ const Register = () => {
       className="flex flex-col lg:flex-row min-h-[100dvh] lg:h-screen lg:overflow-hidden"
     >
       <Helmet>
-        <title>Register as Mobile Technician | TechPath Job Platform</title>
+        <title>Register as Mobile Phone Technician | Find Repair Jobs | TechPath</title>
         <meta
           name="description"
-          content="Register as a mobile phone technician on TechPath. Create your profile, get matched with repair jobs worldwide, and grow your career. Chip-level, Android, iPhone experts welcome."
+          content="Register as a mobile phone technician on TechPath. Create your profile and apply for mobile repair technician jobs and vacancies. Chip level, iPhone, Samsung and Android technicians welcome."
         />
+        <meta name="keywords" content="mobile phone technician vacancy, mobile repair technician job, chip level technician job, iphone technician jobs, samsung technician job, android technician job, cell phone repair technician jobs" />
       </Helmet>
       <motion.div
         variants={containerVariants}
