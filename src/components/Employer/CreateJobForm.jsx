@@ -108,13 +108,16 @@ if (!document.getElementById("cjf-styles")) {
     .cjf-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline { border-color:#6366f1 !important; border-width:1.5px !important; }
     .cjf-root .MuiInputLabel-root.Mui-focused { color:#6366f1 !important; }
     .cjf-root .MuiInputBase-input { padding:11px 14px !important; }
-    .cjf-phone-row { display:flex; gap:10px; align-items:stretch; width:100%; min-width:0; }
-    .cjf-phone-code { width: 160px; flex-shrink: 0; }
+    .cjf-phone-row { display:flex; gap:10px; align-items:stretch; width:100%; min-width:0; flex-direction:column; }
+    @media (min-width:520px) { .cjf-phone-row { flex-direction:row; } }
+    .cjf-phone-code { width:100%; flex-shrink:0; }
+    @media (min-width:520px) { .cjf-phone-code { width:160px; } }
     .cjf-phone-code .MuiAutocomplete-root,
     .cjf-phone-code .MuiFormControl-root { width:100%; }
     .cjf-phone-code .MuiOutlinedInput-root { min-height:44px; height:44px; }
-    .cjf-phone-number { flex:1 1 auto; min-width:0; }
-    .cjf-phone-number .cjf-input { height:44px; min-height:44px; }
+    .cjf-phone-number { flex:1 1 auto; min-width:0; width:100%; }
+    @media (min-width:520px) { .cjf-phone-number { width:auto; } }
+    .cjf-phone-number .cjf-input { height:44px; min-height:44px; width:100%; }
     .cjf-grid-2 { display:grid; grid-template-columns:1fr; gap:24px; }
     @media (min-width:768px) { .cjf-grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     .cjf-grid-auto { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr)); gap:16px; }
